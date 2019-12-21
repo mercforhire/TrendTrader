@@ -2,18 +2,24 @@
 //  PriceBar.swift
 //  AbletrendTrader
 //
-//  Created by Leon Chen on 2019-12-19.
+//  Created by Leon Chen on 2019-12-20.
 //  Copyright © 2019 LeonChen. All rights reserved.
 //
 
 import Foundation
 
 struct PriceBar {
-    var identifier: Int
-    var time: Date
-    var open: Float
-    var high: Float
-    var low: Float
-    var close: Float
-    var volume: Int
+    var identifier: String
+    var candleStick: CandleStick
+    var signals: [Signal]
+    
+    func getOneMinSignal() -> Signal? {
+        for signal in signals {
+            if signal.inteval == .oneMin {
+                return signal
+            }
+        }
+        
+        return nil
+    }
 }

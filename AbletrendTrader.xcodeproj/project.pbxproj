@@ -12,8 +12,16 @@
 		8592432E23AC3EB0004CE61F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8592432D23AC3EB0004CE61F /* Assets.xcassets */; };
 		8592433123AC3EB0004CE61F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8592432F23AC3EB0004CE61F /* Main.storyboard */; };
 		8592433A23AC41C8004CE61F /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592433923AC41C8004CE61F /* Parser.swift */; };
-		8592433D23AC689E004CE61F /* PriceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592433C23AC689E004CE61F /* PriceBar.swift */; };
+		8592433D23AC689E004CE61F /* CandleStick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592433C23AC689E004CE61F /* CandleStick.swift */; };
 		8592434023AC7A19004CE61F /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592433F23AC7A19004CE61F /* String+Extensions.swift */; };
+		8592434223AD403E004CE61F /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434123AD403E004CE61F /* Signal.swift */; };
+		8592434423AD9A97004CE61F /* PriceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434323AD9A97004CE61F /* PriceBar.swift */; };
+		8592434623AD9CBB004CE61F /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434523AD9CBB004CE61F /* Chart.swift */; };
+		8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434723AD9DA0004CE61F /* Date+Extensions.swift */; };
+		8592434A23ADA036004CE61F /* ChartBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434923ADA036004CE61F /* ChartBuilder.swift */; };
+		8592434D23ADABA7004CE61F /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434C23ADABA7004CE61F /* Indicators.swift */; };
+		8592434F23ADE06E004CE61F /* Trade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434E23ADE06E004CE61F /* Trade.swift */; };
+		8592435223ADE182004CE61F /* Trader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435123ADE182004CE61F /* Trader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,8 +33,16 @@
 		8592433223AC3EB0004CE61F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8592433323AC3EB0004CE61F /* AbletrendTrader.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AbletrendTrader.entitlements; sourceTree = "<group>"; };
 		8592433923AC41C8004CE61F /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
-		8592433C23AC689E004CE61F /* PriceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceBar.swift; sourceTree = "<group>"; };
+		8592433C23AC689E004CE61F /* CandleStick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandleStick.swift; sourceTree = "<group>"; };
 		8592433F23AC7A19004CE61F /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
+		8592434123AD403E004CE61F /* Signal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
+		8592434323AD9A97004CE61F /* PriceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceBar.swift; sourceTree = "<group>"; };
+		8592434523AD9CBB004CE61F /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
+		8592434723AD9DA0004CE61F /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
+		8592434923ADA036004CE61F /* ChartBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartBuilder.swift; sourceTree = "<group>"; };
+		8592434C23ADABA7004CE61F /* Indicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicators.swift; sourceTree = "<group>"; };
+		8592434E23ADE06E004CE61F /* Trade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trade.swift; sourceTree = "<group>"; };
+		8592435123ADE182004CE61F /* Trader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,9 +77,10 @@
 			children = (
 				8592433E23AC7A08004CE61F /* Extension */,
 				8592433B23AC688F004CE61F /* Models */,
+				8592434B23ADA041004CE61F /* Builders */,
+				8592435023ADE168004CE61F /* Logic */,
 				8592432923AC3EAF004CE61F /* AppDelegate.swift */,
 				8592432B23AC3EAF004CE61F /* ViewController.swift */,
-				8592433923AC41C8004CE61F /* Parser.swift */,
 				8592432D23AC3EB0004CE61F /* Assets.xcassets */,
 				8592432F23AC3EB0004CE61F /* Main.storyboard */,
 				8592433223AC3EB0004CE61F /* Info.plist */,
@@ -75,7 +92,12 @@
 		8592433B23AC688F004CE61F /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				8592433C23AC689E004CE61F /* PriceBar.swift */,
+				8592433C23AC689E004CE61F /* CandleStick.swift */,
+				8592434123AD403E004CE61F /* Signal.swift */,
+				8592434323AD9A97004CE61F /* PriceBar.swift */,
+				8592434523AD9CBB004CE61F /* Chart.swift */,
+				8592434C23ADABA7004CE61F /* Indicators.swift */,
+				8592434E23ADE06E004CE61F /* Trade.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -84,8 +106,26 @@
 			isa = PBXGroup;
 			children = (
 				8592433F23AC7A19004CE61F /* String+Extensions.swift */,
+				8592434723AD9DA0004CE61F /* Date+Extensions.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		8592434B23ADA041004CE61F /* Builders */ = {
+			isa = PBXGroup;
+			children = (
+				8592433923AC41C8004CE61F /* Parser.swift */,
+				8592434923ADA036004CE61F /* ChartBuilder.swift */,
+			);
+			path = Builders;
+			sourceTree = "<group>";
+		};
+		8592435023ADE168004CE61F /* Logic */ = {
+			isa = PBXGroup;
+			children = (
+				8592435123ADE182004CE61F /* Trader.swift */,
+			);
+			path = Logic;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -158,10 +198,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,
 				8592434023AC7A19004CE61F /* String+Extensions.swift in Sources */,
+				8592434F23ADE06E004CE61F /* Trade.swift in Sources */,
+				8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */,
+				8592434223AD403E004CE61F /* Signal.swift in Sources */,
+				8592434A23ADA036004CE61F /* ChartBuilder.swift in Sources */,
+				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
 				8592432C23AC3EAF004CE61F /* ViewController.swift in Sources */,
-				8592433D23AC689E004CE61F /* PriceBar.swift in Sources */,
+				8592433D23AC689E004CE61F /* CandleStick.swift in Sources */,
+				8592434D23ADABA7004CE61F /* Indicators.swift in Sources */,
 				8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */,
+				8592435223ADE182004CE61F /* Trader.swift in Sources */,
 				8592433A23AC41C8004CE61F /* Parser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

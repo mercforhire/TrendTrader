@@ -40,10 +40,6 @@ class Parser {
         var startRecording: Bool = false // when startRecording is true, append the next 'line' in loop to 'priceDateLines'
         var count: Int = 0
         for line in lines {
-            if count >= 30 {
-                break
-            }
-            
             if line == PriceDataHeader {
                 startRecording = true
             } else if startRecording, line == PriceAndSignalDivider {

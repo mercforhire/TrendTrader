@@ -27,6 +27,14 @@ extension Date {
         return calendar.component(.hour, from: self) - (zeroIndex ? 1 : 0)
     }
     
+    func day(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
+        var calendar = Calendar.current
+        if let timezone = timeZone {
+            calendar.timeZone = timezone
+        }
+        return calendar.component(.day, from: self) - (zeroIndex ? 1 : 0)
+    }
+    
     func month(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
         var calendar = Calendar.current
         if let timezone = timeZone {

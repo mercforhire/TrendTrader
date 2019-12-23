@@ -59,4 +59,13 @@ extension Date {
         let response = dateFormatter.string(from: self)
         return response
     }
+    
+    func isInSameDay(date: Date, timeZone: TimeZone? = Date.DefaultTimeZone) -> Bool {
+        if let timeZone = timeZone {
+            var calender = Calendar.current
+            calender.timeZone = timeZone
+            return calender.isDate(self, equalTo: date, toGranularity: .day)
+        }
+        return Calendar.current.isDate(self, equalTo: date, toGranularity: .day)
+    }
 }

@@ -9,9 +9,9 @@
 import Foundation
 
 class Parser {
-    static let fileName1 = "NQ 1m.txt"
-    static let fileName2 = "NQ 2m.txt"
-    static let fileName3 = "NQ 3m.txt"
+    static let fileName1 = "NQ #F 1m.txt"
+    static let fileName2 = "NQ #F 2m.txt"
+    static let fileName3 = "NQ #F 3m.txt"
     
     static let PriceDataHeader = "StartDate\tStartTime\t        Open\t        High\t         Low\t       Close\tVolume\tBid\tAsk"
     static let PriceAndSignalDivider = "Indicator AbleTrendTS Data"

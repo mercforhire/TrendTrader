@@ -10,14 +10,14 @@ import Foundation
 
 enum EntryType {
     // for all 3 entries, the price must be above 1 min support or under 1 min resistance
-    case aggressive // enter on any blue/red bar
+    case initial // enter on the first signal of a new triple confirmation
     case pullBack // enter on any blue/red bar followed by one or more green bars
     case sweetSpot // enter on pullback that bounced/almost bounced off the S/R level
 }
 
 class Trader {
     private let MaxRisk: Double = 10.0 // in Points
-    private let SweetSpotMinDistance = 1
+    private let SweetSpotMinDistance: Double  = 2.0
     // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
     
     private let TimeIntervalForHighRiskEntry: DateInterval!
@@ -43,83 +43,65 @@ class Trader {
     }
     
     // return a Position object if the given bar presents a entry signal
-//    func findEntrySignal(direction: TradeDirection, bar: PriceBar, entryType: EntryType = .pullBack) -> Position? {
-//        guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
-//            return nil
-//        }
-//
-//        // Strategy: From startIndex, look back and find the last bar where all 3 timeframes' signal align
-//
-//        var entryTimes: [String] = []
-//
-//        var lastOneMinSupportTime: String?
-//        var lastTwoMinSupportTime: String?
-//        var lastThreeMinSupportTime: String?
-//
-//        var currentlyInATrade: Bool = false
-//        for i in 0..<chart.timeKeys.count {
-//            let timeKey = chart.timeKeys[i]
-//            guard let priceBar: PriceBar = chart.priceBars[timeKey] else { continue }
-//
-//
-//
-//            for signal in priceBar.signals {
-//                // if detect a opposite signal, we invalidate all last know support times and exit any ongoing long position
-//                if let signalDirection = signal.direction, signalDirection != direction {
-//                    switch signal.inteval {
-//                    case .oneMin:
-//                        lastOneMinSupportTime = nil
-//                    case .twoMin:
-//                        lastTwoMinSupportTime = nil
-//                    case .threeMin:
-//                        lastThreeMinSupportTime = nil
-//                    }
-//                    currentlyInATrade = false
-//                    break
-//                }
-//
-//                if signal.direction == direction {
-//                    switch signal.inteval {
-//                    case .oneMin:
-//                        lastOneMinSupportTime = timeKey
-//                    case .twoMin:
-//                        lastTwoMinSupportTime = timeKey
-//                    case .threeMin:
-//                        lastThreeMinSupportTime = timeKey
-//                    }
-//                }
-//            }
-//
-//            // if not in an existing position, all support on all 3 timeframes are detected, and the color of the bar is correct, we have a signal
-//            if !currentlyInATrade,
-//                let _ = lastOneMinSupportTime,
-//                let _ = lastTwoMinSupportTime,
-//                let _ =  lastThreeMinSupportTime,
-//                startIndex <= i {
-//
-//                switch direction {
-//                case .long:
-//                    if priceBar.getBarColor() == .blue {
-//                        entryTimes.append(timeKey)
-//                        currentlyInATrade = true
-//                    }
-//                default:
-//                    if priceBar.getBarColor() == .red {
-//                        entryTimes.append(timeKey)
-//                        currentlyInATrade = true
-//                    }
-//                }
-//            }
-//        }
-//
-//        for entryTime in entryTimes {
-//            guard let priceBar = chart.priceBars[entryTime] else { continue }
-//
-//            entryBars.append(priceBar)
-//        }
-//
-//        return entryBars
-//    }
+    func checkForEntrySignal(direction: TradeDirection, bar: PriceBar, entryType: EntryType = .pullBack) -> Position? {
+        let color: SignalColor = direction == .long ? .blue : .red
+        
+        guard bar.getBarColor() == color,
+            checkForSignalConfirmation(direction: direction, bar: bar),
+            let oneMinStop = bar.getOneMinSignal()?.stop else {
+            return nil
+        }
+        
+        let stopLoss: Double = calculateStopLoss(direction: direction, entryBar: bar)
+        let risk: Double = abs(bar.candleStick.close - stopLoss)
+        
+        switch entryType {
+        case .pullBack:
+            guard let pullBack = checkForPullback(direction: direction, start: bar), !pullBack.greenBars.isEmpty,
+                pullBack.coloredBars.count == 1 else {
+                return nil
+            }
+        case .sweetSpot:
+            guard let pullBack = checkForPullback(direction: direction, start: bar), !pullBack.greenBars.isEmpty,
+                pullBack.coloredBars.count == 1 else {
+                return nil
+            }
+            
+            // check for SweetSpot bounce
+            switch direction {
+            case .long:
+                guard let pullbackLow = pullBack.getLowestPoint(),
+                    pullbackLow - oneMinStop <= SweetSpotMinDistance else {
+                    return nil
+                }
+            default:
+                guard let pullbackHigh = pullBack.getHighestPoint(),
+                    oneMinStop - pullbackHigh <= SweetSpotMinDistance else {
+                    return nil
+                }
+            }
+        default:
+            break
+        }
+        
+        if risk > MaxRisk && TimeIntervalForHighRiskEntry.contains(bar.candleStick.time) {
+            let position = Position(direction: direction,
+                                    entry: bar,
+                                    entryPrice: bar.candleStick.close,
+                                    currentBar: bar,
+                                    stopLoss: direction == .long ? bar.candleStick.close - 10 : bar.candleStick.close + 10)
+            return position
+        } else if risk <= MaxRisk {
+            let position = Position(direction: direction,
+                                    entry: bar,
+                                    entryPrice: bar.candleStick.close,
+                                    currentBar: bar,
+                                    stopLoss: stopLoss)
+            return position
+        }
+
+        return nil
+    }
     
     // given an entry Position and direction of the trade, find when the trade should end
     func findExitPoint(direction: TradeDirection, entryBar: PriceBar, entryPrice: Double) -> Trade? {
@@ -137,10 +119,19 @@ class Trader {
         outerLoop: for i in startIndex..<chart.timeKeys.count {
             guard let currentPriceBar = chart.priceBars[chart.timeKeys[i]] else { continue }
             
-            // if we reached the end of the file, set the exitBar to the last priceBar
-            if i == chart.timeKeys.count - 1 {
+            // if the next bar is at a different day, set the exitBar to the current priceBar
+            if i < chart.timeKeys.count - 1,
+                let nextPriceBar = chart.priceBars[chart.timeKeys[i + 1]],
+                !nextPriceBar.candleStick.time.isInSameDay(date: entryBar.candleStick.time) {
                 position.currentBar = currentPriceBar
                 exitPrice = currentPriceBar.candleStick.close
+                break
+            }
+            // if we reached the end of the file, set the exitBar to the last priceBar
+            else if i == chart.timeKeys.count - 1 {
+                position.currentBar = currentPriceBar
+                exitPrice = currentPriceBar.candleStick.close
+                break
             }
             
             // Rule 1: exit when the the low of the price hit the current stop loss
@@ -177,39 +168,63 @@ class Trader {
             
             position.currentBar = currentPriceBar
             
-            // If the rules are not broken, update the stop loss using rules:
-            // Rule 1: update to the low/high of current 2 green bars
-            var rule1SL: Double
+            // If we are still in the trade, update the stop loss:
+            
+            var twoGreenBarsSL: Double
             switch direction {
             case .long:
-                rule1SL = 0
+                twoGreenBarsSL = 0
             default:
-                rule1SL = Double.greatestFiniteMagnitude
+                twoGreenBarsSL = Double.greatestFiniteMagnitude
             }
-            
-            
-            if position.profit < ProfitRequiredAbandonTwoGreenBarsExit,
+            // if 2 green bars are detected and the green bars have not breached the 1 min S/R:
+            if position.securedProfit < ProfitRequiredAbandonTwoGreenBarsExit,
                 i > 0,
                 let previousPriceBar = chart.priceBars[chart.timeKeys[i - 1]],
                 previousPriceBar.getBarColor() == .green,
-                currentPriceBar.getBarColor() == .green {
+                currentPriceBar.getBarColor() == .green,
+                let currentStop = currentPriceBar.getOneMinSignal()?.stop {
                 
                 switch direction {
                 case .long:
-                    rule1SL = min(previousPriceBar.candleStick.low, currentPriceBar.candleStick.low)
+                    let stopLossFromGreenBars = min(previousPriceBar.candleStick.low, currentPriceBar.candleStick.low) - 1
+                    
+                    if stopLossFromGreenBars - entryPrice >= MinProfitToUseTwoGreenBarsExit,
+                        previousPriceBar.candleStick.close >= currentStop,
+                        currentPriceBar.candleStick.close >= currentStop {
+                        
+                        // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
+                        if stopLossFromGreenBars - currentStop > 1 {
+                            twoGreenBarsSL = stopLossFromGreenBars
+                        } else {
+                            twoGreenBarsSL = currentStop - 1
+                        }
+                    }
                 default:
-                    rule1SL = max(previousPriceBar.candleStick.high, currentPriceBar.candleStick.high)
+                    let stopLossFromGreenBars = max(previousPriceBar.candleStick.high, currentPriceBar.candleStick.high) + 1
+                    
+                    if entryPrice - stopLossFromGreenBars >= MinProfitToUseTwoGreenBarsExit,
+                        previousPriceBar.candleStick.close <= currentStop,
+                        currentPriceBar.candleStick.close <= currentStop {
+                        
+                        // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
+                        if currentStop - stopLossFromGreenBars > 1 {
+                            twoGreenBarsSL = stopLossFromGreenBars
+                        } else {
+                            twoGreenBarsSL = currentStop + 1
+                        }
+                    }
                 }
             }
             
             // Rule 2: update to previous S/R level
-            let rule2SL: Double = findPreviousLevel(direction: direction, entryBar: currentPriceBar)
+            let previousLevelSL: Double = findPreviousLevel(direction: direction, entryBar: currentPriceBar)
             
             switch direction {
             case .long:
-                position.stopLoss = max(rule1SL, rule2SL)
+                position.stopLoss = max(twoGreenBarsSL, previousLevelSL)
             default:
-                position.stopLoss = min(rule1SL, rule2SL)
+                position.stopLoss = min(twoGreenBarsSL, previousLevelSL)
             }
         }
         
@@ -220,7 +235,6 @@ class Trader {
         
         return nil
     }
-    
     
     func calculateStopLoss(direction: TradeDirection, entryBar: PriceBar) -> Double {
         // Go with the methods in order. If the stoploss is > MaxRisk, go to the next method
@@ -354,7 +368,7 @@ class Trader {
         var coloredBarsIsComplete: Bool = false
         
         for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
-            guard let priceBar = chart.priceBars[timeKey] else { return nil }
+            guard let priceBar = chart.priceBars[timeKey], priceBar.getOneMinSignal()?.direction == direction else { return nil }
             
             // if the current bar is green or an opposite color, it's not a sweetspot
             if coloredBars.isEmpty, priceBar.getBarColor() != color {
@@ -386,45 +400,47 @@ class Trader {
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)
     func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
         guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier),
-        bar.getOneMinSignal()?.stop != nil else {
+            bar.getOneMinSignal()?.stop != nil,
+            bar.getOneMinSignal()?.direction == direction else {
             return false
         }
         
         let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
         
-        var oneMinBarConfirmation = false
-        var twoMinBarConfirmation = false
-        var threeMinBarConfirmation = false
+        var earliest2MinBarConfirmationBar: PriceBar?
+        var finishedScanningFor2MinConfirmation = false
         
-        var finishedScanning = false
+        var earliest3MinBarConfirmationBar: PriceBar?
+        var finishedScanningFor3MinConfirmation = false
+        
         for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
-            guard let priceBar = chart.priceBars[timeKey], !finishedScanning else { break }
+            guard let priceBar = chart.priceBars[timeKey], !finishedScanningFor2MinConfirmation && !finishedScanningFor3MinConfirmation else { break }
             
-            for signal in priceBar.signals {
+            for signal in priceBar.signals where signal.inteval != .oneMin {
                 if let signalDirection = signal.direction, signalDirection != direction {
-                    finishedScanning = true
-                    break
+                    switch signal.inteval {
+                    case .twoMin:
+                        finishedScanningFor2MinConfirmation = true
+                    case .threeMin:
+                        finishedScanningFor3MinConfirmation = true
+                    default:
+                        break
+                    }
                 } else if let signalDirection = signal.direction, signalDirection == direction {
                     switch signal.inteval {
-                    case .oneMin:
-                        oneMinBarConfirmation = true
                     case .twoMin:
-                        twoMinBarConfirmation = true
+                        earliest2MinBarConfirmationBar = priceBar
                     case .threeMin:
-                        threeMinBarConfirmation = true
+                        earliest3MinBarConfirmationBar = priceBar
+                    default:
+                        break
                     }
                 }
             }
-            
-            if oneMinBarConfirmation && twoMinBarConfirmation && threeMinBarConfirmation {
-                return true
-            }
         }
         
-        return false
+        return earliest2MinBarConfirmationBar != nil && earliest3MinBarConfirmationBar != nil
     }
-    
-    
     
     // NOT USED:
     

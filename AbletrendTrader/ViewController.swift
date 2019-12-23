@@ -32,33 +32,33 @@ class ViewController: NSViewController {
             if let chart = chartBuilder.generateChart(ticker: "NQ", candleSticks: candleSticks, indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators]) {
                 let trader = Trader(chart: chart)
                 
+                var pAndL: Double = 0
+                var lastTrade: Trade?
                 for timeKey in chart.timeKeys {
-                    guard let bar = chart.priceBars[timeKey] else { continue }
+                    guard let bar = chart.priceBars[timeKey],
+                        chart.timeKeys.firstIndex(of: timeKey) ?? 0 >= 0 else { continue }
                     
-                    if let sweetSpot = trader.checkForPullback(direction: .long, start: bar) {
-                        print(String(format: "%@ is a long sweet spot", sweetSpot.end))
+                    if let lastTrade = lastTrade, bar.candleStick.time <= lastTrade.exit.candleStick.time {
+                        continue
                     }
                     
-                    if let sweetSpot = trader.checkForPullback(direction: .short, start: bar) {
-                        print(String(format: "%@ is a short sweet spot", sweetSpot.end))
+                    var onGoingTrade: Position?
+                    if let position = trader.checkForEntrySignal(direction: .long, bar: bar, entryType: .initial) {
+                        print(String(format: "Initial buy at %@ - %.2f", position.entry.identifier, position.entryPrice), terminator: "")
+                        onGoingTrade = position
+                    }
+                    else if let position = trader.checkForEntrySignal(direction: .short, bar: bar, entryType: .initial) {
+                        print(String(format: "Initial short at %@ - %.2f", position.entry.identifier, position.entryPrice), terminator: "")
+                        onGoingTrade = position
                     }
                     
-                    if trader.checkForSignalConfirmation(direction: .long, bar: bar) {
-                        print(String(format: "%@ has buy confirmation", bar.identifier))
-                    }
-                    
-                    if trader.checkForSignalConfirmation(direction: .short, bar: bar) {
-                        print(String(format: "%@ has short confirmation", bar.identifier))
+                    if let onGoingTrade = onGoingTrade, let trade = trader.findExitPoint(direction: onGoingTrade.direction, entryBar: onGoingTrade.entry, entryPrice: onGoingTrade.entryPrice) {
+                        lastTrade = trade
+                        print(String(format: " closed at %@ - %.2f with P/L %.2f", trade.exit.identifier, trade.exitPrice, trade.profit ?? 0))
+                        pAndL = pAndL + (trade.profit ?? 0)
                     }
                 }
-                
-                let barNumber1 = 124
-                let previousLevel: Double = trader.findPreviousLevel(direction: .long, entryBar: chart.priceBars[chart.timeKeys[barNumber1]]!)
-                print(String(format: "Previous level support for bar %d is %.2f", barNumber1, previousLevel))
-                
-                let barNumber2 = 47
-                let previousLevel2: Double = trader.findPreviousLevel(direction: .short, entryBar: chart.priceBars[chart.timeKeys[barNumber2]]!)
-                print(String(format: "Previous level resistance for bar %d is %.2f", barNumber2, previousLevel2))
+                print(String(format: "Total P/L is %.2f", pAndL))
             }
         }
     }

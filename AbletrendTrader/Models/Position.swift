@@ -15,12 +15,12 @@ struct Position {
     var currentBar: PriceBar
     var stopLoss: Double
     
-    var profit: Double {
+    var securedProfit: Double {
         switch direction {
         case .long:
-            return currentBar.candleStick.close - entryPrice
+            return stopLoss - entryPrice
         default:
-            return entryPrice - currentBar.candleStick.close
+            return entryPrice - stopLoss
         }
     }
 }

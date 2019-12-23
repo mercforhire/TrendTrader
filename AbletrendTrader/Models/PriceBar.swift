@@ -22,4 +22,8 @@ struct PriceBar {
         
         return nil
     }
+    
+    func getBarColor() -> SignalColor {
+        return getOneMinSignal()?.color ?? .green
+    }
 }

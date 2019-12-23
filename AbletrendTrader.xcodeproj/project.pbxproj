@@ -22,7 +22,7 @@
 		8592434D23ADABA7004CE61F /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434C23ADABA7004CE61F /* Indicators.swift */; };
 		8592434F23ADE06E004CE61F /* Trade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434E23ADE06E004CE61F /* Trade.swift */; };
 		8592435223ADE182004CE61F /* Trader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435123ADE182004CE61F /* Trader.swift */; };
-		8592435423AF1AE4004CE61F /* SweetSpot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435323AF1AE4004CE61F /* SweetSpot.swift */; };
+		8592435423AF1AE4004CE61F /* Pullback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435323AF1AE4004CE61F /* Pullback.swift */; };
 		8592435623B00CC6004CE61F /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435523B00CC6004CE61F /* Position.swift */; };
 /* End PBXBuildFile section */
 
@@ -45,7 +45,7 @@
 		8592434C23ADABA7004CE61F /* Indicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicators.swift; sourceTree = "<group>"; };
 		8592434E23ADE06E004CE61F /* Trade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trade.swift; sourceTree = "<group>"; };
 		8592435123ADE182004CE61F /* Trader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trader.swift; sourceTree = "<group>"; };
-		8592435323AF1AE4004CE61F /* SweetSpot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SweetSpot.swift; sourceTree = "<group>"; };
+		8592435323AF1AE4004CE61F /* Pullback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pullback.swift; sourceTree = "<group>"; };
 		8592435523B00CC6004CE61F /* Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -103,7 +103,7 @@
 				8592434C23ADABA7004CE61F /* Indicators.swift */,
 				8592434E23ADE06E004CE61F /* Trade.swift */,
 				8592435523B00CC6004CE61F /* Position.swift */,
-				8592435323AF1AE4004CE61F /* SweetSpot.swift */,
+				8592435323AF1AE4004CE61F /* Pullback.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -213,7 +213,7 @@
 				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
 				8592432C23AC3EAF004CE61F /* ViewController.swift in Sources */,
 				8592435623B00CC6004CE61F /* Position.swift in Sources */,
-				8592435423AF1AE4004CE61F /* SweetSpot.swift in Sources */,
+				8592435423AF1AE4004CE61F /* Pullback.swift in Sources */,
 				8592433D23AC689E004CE61F /* CandleStick.swift in Sources */,
 				8592434D23ADABA7004CE61F /* Indicators.swift in Sources */,
 				8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */,

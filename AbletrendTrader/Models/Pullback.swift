@@ -8,27 +8,27 @@
 
 import Foundation
 
-// A "SweetSpot" is
+// A "Pullback" is
 // A: one or more green bars followed by a blue bar
 // B: one or more green bars followed by a red bar
 
-struct SweetSpot {
+struct Pullback {
     var direction: TradeDirection
-    var greenBars: [PriceBar]
-    var coloredBar: PriceBar
+    var greenBars: [PriceBar] // can be empty
+    var coloredBars: [PriceBar] // cannot be empty
     
     var start: String {
-        return greenBars.first!.identifier
+        return greenBars.first?.identifier ?? coloredBars.first!.identifier
     }
     
     var end: String {
-        return coloredBar.identifier
+        return coloredBars.last!.identifier
     }
     
     func getHighestPoint() -> Double? {
         var allBars: [PriceBar] = []
         allBars.append(contentsOf: greenBars)
-        allBars.append(coloredBar)
+        allBars.append(contentsOf: coloredBars)
         let highestBar: PriceBar? = allBars.max { a, b in a.candleStick.high < b.candleStick.high }
         return highestBar?.candleStick.high
     }
@@ -36,7 +36,7 @@ struct SweetSpot {
     func getLowestPoint() -> Double? {
         var allBars: [PriceBar] = []
         allBars.append(contentsOf: greenBars)
-        allBars.append(coloredBar)
+        allBars.append(contentsOf: coloredBars)
         let lowestBar: PriceBar? = allBars.max { a, b in a.candleStick.low > b.candleStick.low }
         return lowestBar?.candleStick.low
     }

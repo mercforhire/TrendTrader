@@ -20,8 +20,41 @@ class Trader {
     private let SweetSpotMinDistance: Double  = 2.0
     // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
     
-    private let TimeIntervalForHighRiskEntry: DateInterval!
+    private var TimeIntervalForHighRiskEntry: DateInterval {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(abbreviation: "EST")!
+        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 9, minute: 30)
+        let startDate: Date = calendar.date(from: components)!
+        return DateInterval(start: startDate, duration: 30 * 60) // 30 minutes
+    }
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
+    
+    private var TradingTimeInterval: DateInterval {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(abbreviation: "EST")!
+        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 9, minute: 20)
+        let startDate: Date = calendar.date(from: components)!
+        return DateInterval(start: startDate, duration: 6 * 60 * 60 + 35) // 395 minutes = 6 hours 35 min, from 9:20 am to 3:55 pm
+    }
+    // the time interval allowed to enter trades, default 9:20 am to 3:55 pm
+    
+    private var ClearPositionTime: Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(abbreviation: "EST")!
+        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 16, minute: 0)
+        let date: Date = calendar.date(from: components)!
+        return date
+    }
+    // after this time, aim to sell at the close of any blue/red bar that's in favor of our ongoing trade
+    
+    private var FlatPositionsTime: Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(abbreviation: "EST")!
+        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 16, minute: 10)
+        let date: Date = calendar.date(from: components)!
+        return date
+    }
+    // after this time, clear all positions immediately
     
     private let MinProfitToUseTwoGreenBarsExit: Double = 5.0
     // the min profit the trade must in to use the 2 green bars exit rule
@@ -39,11 +72,6 @@ class Trader {
     init(chart: Chart) {
         self.fullChart = chart
         self.simChart = Chart(ticker: fullChart.ticker)
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(abbreviation: "EST")!
-        let components = DateComponents(year: chart.startDate?.year(), month: chart.startDate?.month(), day: chart.startDate?.day(), hour: 9, minute: 30)
-        let startDate: Date = calendar.date(from: components)!
-        self.TimeIntervalForHighRiskEntry = DateInterval(start: startDate, duration: 30 * 60) // 30 minutes
     }
     
     // Public:
@@ -65,14 +93,21 @@ class Trader {
                 continue
             }
             
-//            if simChart.timeKeys.count == 413 {
+//            if simChart.timeKeys.count == 496 {
 //                print("break")
 //            }
             
             // no current position, check if we should enter on the current bar
             if session!.currentPosition == nil {
+                // close the session after time moves passes the cutOffTime
                 if session!.cutOffTime <= currentBar.candleStick.time {
                     return session
+                }
+                
+                // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
+                if !TradingTimeInterval.contains(currentBar.candleStick.time) {
+                    _ = simulateOneMinutePassed()
+                    continue
                 }
                 
                 // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
@@ -107,12 +142,29 @@ class Trader {
                 var exitMethod: ExitMethod?
                 var exitSession = false
                 
-                // if we reached cut off time, set the exitBar to current
-                if session!.cutOffTime <= currentBar.candleStick.time {
+                // if we reached FlatPositionsTime, set the exitBar to current
+                if FlatPositionsTime <= currentBar.candleStick.time {
                     session!.currentPosition!.bars.append(currentBar)
                     exitPrice = currentBar.candleStick.close
                     exitMethod = .endOfDay
                     exitSession = true
+                }
+                // if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
+                else if ClearPositionTime <= currentBar.candleStick.time {
+                    switch session!.currentPosition!.direction {
+                    case .long:
+                        if currentBar.getBarColor() == .blue {
+                            exitPrice = currentBar.candleStick.close
+                            exitMethod = .endOfDay
+                            exitSession = true
+                        }
+                    default:
+                        if currentBar.getBarColor() == .red {
+                            exitPrice = currentBar.candleStick.close
+                            exitMethod = .endOfDay
+                            exitSession = true
+                        }
+                    }
                 }
                 else {
                     // Rule 1: exit when the the low of the price hit the current stop loss
@@ -225,13 +277,10 @@ class Trader {
                 }
             }
             
-            if !simulateOneMinutePassed() {
-                print("Error with simulating chart moved one minute.")
-                break
-            }
+            _ = simulateOneMinutePassed()
         }
         
-        return nil
+        return session
     }
 
     
@@ -483,6 +532,48 @@ class Trader {
     
     // NOT USED:
     
+    // given a starting and end price bar, find the 2 consecutive bars with the highest "low"
+    func findPairOfGreenBarsWithHighestLow(start: PriceBar, end: PriceBar) -> (PriceBar, PriceBar)? {
+        guard let startIndex = simChart.timeKeys.firstIndex(of: start.identifier),
+            let endIndex = simChart.timeKeys.firstIndex(of: end.identifier),
+            startIndex < endIndex else {
+            return nil
+        }
+        
+        var indexOfTheFirstBar: Int?
+        var highestLow: Double?
+        
+        for i in startIndex..<endIndex {
+            // skip any pair bars that are not green
+            guard let leftBar = simChart.priceBars[simChart.timeKeys[i]],
+                let rightBar = simChart.priceBars[simChart.timeKeys[i + 1]],
+                leftBar.getBarColor() == .green,
+                rightBar.getBarColor() == .green else {
+                continue
+            }
+            
+            // found a pair of green bars:
+            
+            // if no green pair have been found yet, save this pair as the default
+            if indexOfTheFirstBar == nil && highestLow == nil {
+                indexOfTheFirstBar = i
+                highestLow = max(leftBar.candleStick.low, rightBar.candleStick.low)
+            }
+            // if the highestLow found so far is lower than this new pair's highest "low", update the data
+            else if let highestLowSoFar = highestLow, max(leftBar.candleStick.low, rightBar.candleStick.low) > highestLowSoFar {
+                indexOfTheFirstBar = i
+                highestLow = max(leftBar.candleStick.low, rightBar.candleStick.low)
+            }
+        }
+        
+        if let indexOfTheFirstBar = indexOfTheFirstBar,
+            let leftBar: PriceBar = simChart.priceBars[simChart.timeKeys[indexOfTheFirstBar]],
+            let rightBar = simChart.priceBars[simChart.timeKeys[indexOfTheFirstBar + 1]] {
+            return (leftBar, rightBar)
+        }
+        
+        return nil
+    }
     // given a starting and end price bar, find the 2 consecutive bars with the lowest "high"
     private func findPairOfGreenBarsWithLowestHigh(start: PriceBar, end: PriceBar) -> (PriceBar, PriceBar)? {
         guard let startIndex = simChart.timeKeys.firstIndex(of: start.identifier),

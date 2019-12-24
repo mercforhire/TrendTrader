@@ -23,6 +23,10 @@ struct Chart {
         return startBar?.candleStick.time
     }
     
+    var lastDate: Date? {
+        return lastBar?.candleStick.time
+    }
+    
     var secondLastBar: PriceBar? {
         guard timeKeys.count > 1 else { return nil }
         

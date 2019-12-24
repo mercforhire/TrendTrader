@@ -10,17 +10,24 @@ import Foundation
 
 struct Position {
     var direction: TradeDirection
-    var entry: PriceBar
     var entryPrice: Double
-    var currentBar: PriceBar
-    var stopLoss: Double
+    
+    var bars: [PriceBar]
+    var stopLoss: StopLoss
+    
+    var entry: PriceBar {
+        return bars.first!
+    }
+    var currentBar: PriceBar {
+        return bars.last!
+    }
     
     var securedProfit: Double {
         switch direction {
         case .long:
-            return stopLoss - entryPrice
+            return stopLoss.stop - entryPrice
         default:
-            return entryPrice - stopLoss
+            return entryPrice - stopLoss.stop
         }
     }
 }

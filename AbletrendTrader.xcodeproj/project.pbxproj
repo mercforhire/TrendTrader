@@ -24,6 +24,8 @@
 		8592435223ADE182004CE61F /* Trader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435123ADE182004CE61F /* Trader.swift */; };
 		8592435423AF1AE4004CE61F /* Pullback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435323AF1AE4004CE61F /* Pullback.swift */; };
 		8592435623B00CC6004CE61F /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435523B00CC6004CE61F /* Position.swift */; };
+		8592435823B14DD5004CE61F /* StopLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435723B14DD5004CE61F /* StopLoss.swift */; };
+		8592435D23B15643004CE61F /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435C23B15643004CE61F /* Session.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +49,8 @@
 		8592435123ADE182004CE61F /* Trader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trader.swift; sourceTree = "<group>"; };
 		8592435323AF1AE4004CE61F /* Pullback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pullback.swift; sourceTree = "<group>"; };
 		8592435523B00CC6004CE61F /* Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
+		8592435723B14DD5004CE61F /* StopLoss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopLoss.swift; sourceTree = "<group>"; };
+		8592435C23B15643004CE61F /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,14 +100,9 @@
 		8592433B23AC688F004CE61F /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				8592433C23AC689E004CE61F /* CandleStick.swift */,
-				8592434123AD403E004CE61F /* Signal.swift */,
-				8592434323AD9A97004CE61F /* PriceBar.swift */,
-				8592434523AD9CBB004CE61F /* Chart.swift */,
-				8592434C23ADABA7004CE61F /* Indicators.swift */,
-				8592434E23ADE06E004CE61F /* Trade.swift */,
-				8592435523B00CC6004CE61F /* Position.swift */,
-				8592435323AF1AE4004CE61F /* Pullback.swift */,
+				8592435B23B155CC004CE61F /* Logic */,
+				8592435A23B1559E004CE61F /* Trade */,
+				8592435923B15571004CE61F /* Chart */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -130,6 +129,37 @@
 			isa = PBXGroup;
 			children = (
 				8592435123ADE182004CE61F /* Trader.swift */,
+			);
+			path = Logic;
+			sourceTree = "<group>";
+		};
+		8592435923B15571004CE61F /* Chart */ = {
+			isa = PBXGroup;
+			children = (
+				8592433C23AC689E004CE61F /* CandleStick.swift */,
+				8592434123AD403E004CE61F /* Signal.swift */,
+				8592434323AD9A97004CE61F /* PriceBar.swift */,
+				8592434523AD9CBB004CE61F /* Chart.swift */,
+				8592434C23ADABA7004CE61F /* Indicators.swift */,
+			);
+			path = Chart;
+			sourceTree = "<group>";
+		};
+		8592435A23B1559E004CE61F /* Trade */ = {
+			isa = PBXGroup;
+			children = (
+				8592434E23ADE06E004CE61F /* Trade.swift */,
+				8592435523B00CC6004CE61F /* Position.swift */,
+				8592435723B14DD5004CE61F /* StopLoss.swift */,
+			);
+			path = Trade;
+			sourceTree = "<group>";
+		};
+		8592435B23B155CC004CE61F /* Logic */ = {
+			isa = PBXGroup;
+			children = (
+				8592435323AF1AE4004CE61F /* Pullback.swift */,
+				8592435C23B15643004CE61F /* Session.swift */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -204,6 +234,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8592435823B14DD5004CE61F /* StopLoss.swift in Sources */,
+				8592435D23B15643004CE61F /* Session.swift in Sources */,
 				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,
 				8592434023AC7A19004CE61F /* String+Extensions.swift in Sources */,
 				8592434F23ADE06E004CE61F /* Trade.swift in Sources */,

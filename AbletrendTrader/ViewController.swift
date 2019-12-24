@@ -31,34 +31,13 @@ class ViewController: NSViewController {
             
             if let chart = chartBuilder.generateChart(ticker: "NQ", candleSticks: candleSticks, indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators]) {
                 let trader = Trader(chart: chart)
-                
-                var pAndL: Double = 0
-                var lastTrade: Trade?
-                for timeKey in chart.timeKeys {
-                    guard let bar = chart.priceBars[timeKey],
-                        chart.timeKeys.firstIndex(of: timeKey) ?? 0 >= 0 else { continue }
-                    
-                    if let lastTrade = lastTrade, bar.candleStick.time <= lastTrade.exit.candleStick.time {
-                        continue
+                trader.newSession(startTime: chart.priceBars[chart.timeKeys[20]]!.candleStick.time, cutOffTime: chart.priceBars[chart.timeKeys[426]]!.candleStick.time)
+                if let session: Session = trader.generateSession() {
+                    for trade in session.trades {
+                        print(trade.summary())
                     }
-                    
-                    var onGoingTrade: Position?
-                    if let position = trader.checkForEntrySignal(direction: .long, bar: bar, entryType: .initial) {
-                        print(String(format: "Initial buy at %@ - %.2f", position.entry.identifier, position.entryPrice), terminator: "")
-                        onGoingTrade = position
-                    }
-                    else if let position = trader.checkForEntrySignal(direction: .short, bar: bar, entryType: .initial) {
-                        print(String(format: "Initial short at %@ - %.2f", position.entry.identifier, position.entryPrice), terminator: "")
-                        onGoingTrade = position
-                    }
-                    
-                    if let onGoingTrade = onGoingTrade, let trade = trader.findExitPoint(direction: onGoingTrade.direction, entryBar: onGoingTrade.entry, entryPrice: onGoingTrade.entryPrice) {
-                        lastTrade = trade
-                        print(String(format: " closed at %@ - %.2f with P/L %.2f", trade.exit.identifier, trade.exitPrice, trade.profit ?? 0))
-                        pAndL = pAndL + (trade.profit ?? 0)
-                    }
+                    print(String(format: "Total P/L is %.2f", session.getTotalPAndL()))
                 }
-                print(String(format: "Total P/L is %.2f", pAndL))
             }
         }
     }
@@ -68,6 +47,5 @@ class ViewController: NSViewController {
         // Update the view, if already loaded.
         }
     }
-
 }
 

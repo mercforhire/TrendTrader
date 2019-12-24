@@ -26,6 +26,7 @@
 		8592435623B00CC6004CE61F /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435523B00CC6004CE61F /* Position.swift */; };
 		8592435823B14DD5004CE61F /* StopLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435723B14DD5004CE61F /* StopLoss.swift */; };
 		8592435D23B15643004CE61F /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435C23B15643004CE61F /* Session.swift */; };
+		8592435F23B1E59E004CE61F /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435E23B1E59E004CE61F /* Config.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +52,7 @@
 		8592435523B00CC6004CE61F /* Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
 		8592435723B14DD5004CE61F /* StopLoss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopLoss.swift; sourceTree = "<group>"; };
 		8592435C23B15643004CE61F /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		8592435E23B1E59E004CE61F /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				8592435123ADE182004CE61F /* Trader.swift */,
+				8592435E23B1E59E004CE61F /* Config.swift */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -245,6 +248,7 @@
 				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
 				8592432C23AC3EAF004CE61F /* ViewController.swift in Sources */,
 				8592435623B00CC6004CE61F /* Position.swift in Sources */,
+				8592435F23B1E59E004CE61F /* Config.swift in Sources */,
 				8592435423AF1AE4004CE61F /* Pullback.swift in Sources */,
 				8592433D23AC689E004CE61F /* CandleStick.swift in Sources */,
 				8592434D23ADABA7004CE61F /* Indicators.swift in Sources */,

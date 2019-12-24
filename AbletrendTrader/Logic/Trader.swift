@@ -16,32 +16,52 @@ enum EntryType {
 }
 
 class Trader {
-    private let MaxRisk: Double = 10.0 // in Points
-    private let SweetSpotMinDistance: Double  = 2.0
-    // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
-    
     private var TimeIntervalForHighRiskEntry: DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(abbreviation: "EST")!
-        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 9, minute: 30)
-        let startDate: Date = calendar.date(from: components)!
-        return DateInterval(start: startDate, duration: 30 * 60) // 30 minutes
+        let components1 = DateComponents(year: simChart.lastDate?.year(),
+                                         month: simChart.lastDate?.month(),
+                                         day: simChart.lastDate?.day(),
+                                         hour: Config.HighRiskEntryStartTime.0,
+                                         minute: Config.HighRiskEntryStartTime.1)
+        let startDate: Date = calendar.date(from: components1)!
+        let components2 = DateComponents(year: simChart.lastDate?.year(),
+                                         month: simChart.lastDate?.month(),
+                                         day: simChart.lastDate?.day(),
+                                         hour: Config.HighRiskEntryEndTime.0,
+                                         minute: Config.HighRiskEntryEndTime.1)
+        let endDate: Date = calendar.date(from: components2)!
+        return DateInterval(start: startDate, end: endDate)
     }
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
     
     private var TradingTimeInterval: DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(abbreviation: "EST")!
-        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 9, minute: 20)
-        let startDate: Date = calendar.date(from: components)!
-        return DateInterval(start: startDate, duration: 6 * 60 * 60 + 35) // 395 minutes = 6 hours 35 min, from 9:20 am to 3:55 pm
+        let components1 = DateComponents(year: simChart.lastDate?.year(),
+                                         month: simChart.lastDate?.month(),
+                                         day: simChart.lastDate?.day(),
+                                         hour: Config.TradingSessionStartTime.0,
+                                         minute: Config.TradingSessionStartTime.1)
+        let startDate: Date = calendar.date(from: components1)!
+        let components2 = DateComponents(year: simChart.lastDate?.year(),
+                                         month: simChart.lastDate?.month(),
+                                         day: simChart.lastDate?.day(),
+                                         hour: Config.TradingSessionEndTime.0,
+                                         minute: Config.TradingSessionEndTime.1)
+        let endDate: Date = calendar.date(from: components2)!
+        return DateInterval(start: startDate, end: endDate)
     }
     // the time interval allowed to enter trades, default 9:20 am to 3:55 pm
     
     private var ClearPositionTime: Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(abbreviation: "EST")!
-        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 16, minute: 0)
+        let components = DateComponents(year: simChart.lastDate?.year(),
+                                        month: simChart.lastDate?.month(),
+                                        day: simChart.lastDate?.day(),
+                                        hour: Config.ClearPositionTime.0,
+                                        minute: Config.ClearPositionTime.1)
         let date: Date = calendar.date(from: components)!
         return date
     }
@@ -50,20 +70,15 @@ class Trader {
     private var FlatPositionsTime: Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(abbreviation: "EST")!
-        let components = DateComponents(year: simChart.lastDate?.year(), month: simChart.lastDate?.month(), day: simChart.lastDate?.day(), hour: 16, minute: 10)
+        let components = DateComponents(year: simChart.lastDate?.year(),
+                                        month: simChart.lastDate?.month(),
+                                        day: simChart.lastDate?.day(),
+                                        hour: Config.FlatPositionsTime.0,
+                                        minute: Config.FlatPositionsTime.1)
         let date: Date = calendar.date(from: components)!
         return date
     }
     // after this time, clear all positions immediately
-    
-    private let MinProfitToUseTwoGreenBarsExit: Double = 5.0
-    // the min profit the trade must in to use the 2 green bars exit rule
-    
-    private let ProfitRequiredAbandonTwoGreenBarsExit: Double = 20.0
-    // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
-    
-    private let ProfitRequiredToReenterTradeonPullback: Double = 20.0
-    // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
 
     private var fullChart: Chart
     private var simChart: Chart
@@ -93,7 +108,7 @@ class Trader {
                 continue
             }
             
-//            if simChart.timeKeys.count == 496 {
+//            if simChart.timeKeys.count == 435 {
 //                print("break")
 //            }
             
@@ -123,7 +138,7 @@ class Trader {
                     if simChart.checkAllSameDirection(direction: currentBarDirection, fromKey: lastTrade.exit.identifier, toKey: currentBar.identifier) {
                         // If the previous trade profit is higher than ProfitRequiredToReenterTradeonPullback,
                         // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-                        if (lastTrade.profit ?? 0) > ProfitRequiredToReenterTradeonPullback {
+                        if (lastTrade.profit ?? 0) > Config.ProfitRequiredToReenterTradeonPullback {
                             openNewPositionInSessionIfNeeded(bar: currentBar, entryType: .pullBack)
                         } else {
                             openNewPositionInSessionIfNeeded(bar: currentBar, entryType: .sweetSpot)
@@ -148,23 +163,6 @@ class Trader {
                     exitPrice = currentBar.candleStick.close
                     exitMethod = .endOfDay
                     exitSession = true
-                }
-                // if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
-                else if ClearPositionTime <= currentBar.candleStick.time {
-                    switch session!.currentPosition!.direction {
-                    case .long:
-                        if currentBar.getBarColor() == .blue {
-                            exitPrice = currentBar.candleStick.close
-                            exitMethod = .endOfDay
-                            exitSession = true
-                        }
-                    default:
-                        if currentBar.getBarColor() == .red {
-                            exitPrice = currentBar.candleStick.close
-                            exitMethod = .endOfDay
-                            exitSession = true
-                        }
-                    }
                 }
                 else {
                     // Rule 1: exit when the the low of the price hit the current stop loss
@@ -199,9 +197,27 @@ class Trader {
                         }
                     }
                     
+                    // Rule 3: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
+                    if ClearPositionTime <= currentBar.candleStick.time {
+                        switch session!.currentPosition!.direction {
+                        case .long:
+                            if currentBar.getBarColor() == .blue {
+                                exitPrice = currentBar.candleStick.close
+                                exitMethod = .endOfDay
+                                exitSession = true
+                            }
+                        default:
+                            if currentBar.getBarColor() == .red {
+                                exitPrice = currentBar.candleStick.close
+                                exitMethod = .endOfDay
+                                exitSession = true
+                            }
+                        }
+                    }
+                    
                     session!.currentPosition!.bars.append(currentBar)
                     
-                    // If we are still in the trade, update the stop loss:
+                    // Update the stop loss:
                     
                     var twoGreenBarsSL: Double
                     switch session!.currentPosition!.direction {
@@ -211,7 +227,7 @@ class Trader {
                         twoGreenBarsSL = Double.greatestFiniteMagnitude
                     }
                     // if 2 green bars are detected and the green bars have not breached the 1 min S/R:
-                    if session!.currentPosition!.securedProfit < ProfitRequiredAbandonTwoGreenBarsExit,
+                    if session!.currentPosition!.securedProfit < Config.ProfitRequiredAbandonTwoGreenBarsExit,
                         let previousBar = simChart.secondLastBar,
                         previousBar.getBarColor() == .green,
                         currentBar.getBarColor() == .green,
@@ -221,7 +237,7 @@ class Trader {
                         case .long:
                             let stopLossFromGreenBars = min(previousBar.candleStick.low, currentBar.candleStick.low) - 1
                             
-                            if stopLossFromGreenBars - session!.currentPosition!.entryPrice >= MinProfitToUseTwoGreenBarsExit,
+                            if stopLossFromGreenBars - session!.currentPosition!.entryPrice >= Config.MinProfitToUseTwoGreenBarsExit,
                                 previousBar.candleStick.close >= currentStop,
                                 currentBar.candleStick.close >= currentStop {
                                 
@@ -235,7 +251,7 @@ class Trader {
                         default:
                             let stopLossFromGreenBars = max(previousBar.candleStick.high, currentBar.candleStick.high) + 1
                             
-                            if session!.currentPosition!.entryPrice - stopLossFromGreenBars >= MinProfitToUseTwoGreenBarsExit,
+                            if session!.currentPosition!.entryPrice - stopLossFromGreenBars >= Config.MinProfitToUseTwoGreenBarsExit,
                                 previousBar.candleStick.close <= currentStop,
                                 currentBar.candleStick.close <= currentStop {
                                 
@@ -249,18 +265,28 @@ class Trader {
                         }
                     }
                     
-                    // Rule 2: update to previous S/R level
-                    let previousLevelSL: Double = findPreviousLevel(direction: session!.currentPosition!.direction, entryBar: currentBar)
-                    
-                    switch session!.currentPosition!.direction {
-                    case .long:
-                        session!.currentPosition!.stopLoss.stop = max(twoGreenBarsSL, previousLevelSL)
-                        session!.currentPosition!.stopLoss.source = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
-                    default:
-                        session!.currentPosition!.stopLoss.stop = min(twoGreenBarsSL, previousLevelSL)
-                        session!.currentPosition!.stopLoss.source = twoGreenBarsSL < previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                    // update to previous S/R level
+                    if let previousLevelSL: Double = findPreviousLevel(direction: session!.currentPosition!.direction, entryBar: currentBar) {
+                        switch session!.currentPosition!.direction {
+                        case .long:
+                            session!.currentPosition!.stopLoss.stop = max(twoGreenBarsSL, previousLevelSL)
+                            session!.currentPosition!.stopLoss.source = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                        default:
+                            session!.currentPosition!.stopLoss.stop = min(twoGreenBarsSL, previousLevelSL)
+                            session!.currentPosition!.stopLoss.source = twoGreenBarsSL < previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                        }
+                    } else {
+                        switch session!.currentPosition!.direction {
+                        case .long:
+                            session!.currentPosition!.stopLoss.stop = twoGreenBarsSL
+                            session!.currentPosition!.stopLoss.source = .twoGreenBars
+                        default:
+                            session!.currentPosition!.stopLoss.stop = twoGreenBarsSL
+                            session!.currentPosition!.stopLoss.source = .twoGreenBars
+                        }
                     }
                 }
+                
                 
                 if let exitPrice = exitPrice, let exitMethod = exitMethod {
                     let trade = Trade(direction: session!.currentPosition!.direction,
@@ -319,11 +345,11 @@ class Trader {
         
         guard bar.getBarColor() == color,
             checkForSignalConfirmation(direction: direction, bar: bar),
-            let oneMinStop = bar.getOneMinSignal()?.stop else {
+            let oneMinStop = bar.getOneMinSignal()?.stop,
+            var stopLoss = calculateStopLoss(direction: direction, entryBar: bar) else {
             return nil
         }
         
-        var stopLoss = calculateStopLoss(direction: direction, entryBar: bar)
         let risk: Double = abs(bar.candleStick.close - stopLoss.stop)
         
         switch entryType {
@@ -342,12 +368,12 @@ class Trader {
             switch direction {
             case .long:
                 guard let pullbackLow = pullBack.getLowestPoint(),
-                    pullbackLow - oneMinStop <= SweetSpotMinDistance else {
+                    pullbackLow - oneMinStop <= Config.SweetSpotMinDistance else {
                     return nil
                 }
             default:
                 guard let pullbackHigh = pullBack.getHighestPoint(),
-                    oneMinStop - pullbackHigh <= SweetSpotMinDistance else {
+                    oneMinStop - pullbackHigh <= Config.SweetSpotMinDistance else {
                     return nil
                 }
             }
@@ -355,11 +381,11 @@ class Trader {
             break
         }
         
-        if risk > MaxRisk && TimeIntervalForHighRiskEntry.contains(bar.candleStick.time) {
+        if risk > Config.MaxRisk && TimeIntervalForHighRiskEntry.contains(bar.candleStick.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - 10 : bar.candleStick.close + 10
             let position = Position(direction: direction, entryPrice: bar.candleStick.close, bars: [bar], stopLoss: stopLoss)
             return position
-        } else if risk <= MaxRisk {
+        } else if risk <= Config.MaxRisk {
             let position = Position(direction: direction, entryPrice: bar.candleStick.close, bars: [bar], stopLoss: stopLoss)
             return position
         }
@@ -367,7 +393,7 @@ class Trader {
         return nil
     }
     
-    private func calculateStopLoss(direction: TradeDirection, entryBar: PriceBar) -> StopLoss {
+    private func calculateStopLoss(direction: TradeDirection, entryBar: PriceBar) -> StopLoss? {
         // Go with the methods in order. If the stoploss is > MaxRisk, go to the next method
         // Worst case would be method 3 and still having stoploss > MaxRisk, either skip the trade or apply a hard stop at the MaxRisk
         
@@ -376,14 +402,14 @@ class Trader {
         // Method 3: current bar's high plus 1 or low, minus 1 depending on direction(min 5 points)
         
         // Method 1 and 2:
-        let previousLevel: Double = findPreviousLevel(direction: direction, entryBar: entryBar)
+        guard let previousLevel: Double = findPreviousLevel(direction: direction, entryBar: entryBar) else { return nil }
         switch direction {
         case .long:
-            if entryBar.candleStick.close - previousLevel <= MaxRisk {
+            if entryBar.candleStick.close - previousLevel <= Config.MaxRisk {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             }
         default:
-            if previousLevel - entryBar.candleStick.close <= MaxRisk {
+            if previousLevel - entryBar.candleStick.close <= Config.MaxRisk {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             }
         }
@@ -391,18 +417,18 @@ class Trader {
         // Method 3:
         switch direction {
         case .long:
-            return StopLoss(stop: min(entryBar.candleStick.low - 1, entryBar.candleStick.close - 5), source: .currentBar)
+            return StopLoss(stop: min(entryBar.candleStick.low - 1, entryBar.candleStick.close - Config.MinBarStop), source: .currentBar)
         default:
-            return StopLoss(stop: max(entryBar.candleStick.high + 1, entryBar.candleStick.close + 5), source: .currentBar)
+            return StopLoss(stop: max(entryBar.candleStick.high + 1, entryBar.candleStick.close + Config.MinBarStop), source: .currentBar)
         }
     }
     
     // given an entry bar and direction of the trade, find the previous resistence/support level, if none exists, use the current one +-1
-    private func findPreviousLevel(direction: TradeDirection, entryBar: PriceBar, minimalDistance: Double = 1) -> Double {
+    private func findPreviousLevel(direction: TradeDirection, entryBar: PriceBar, minimalDistance: Double = 1) -> Double? {
         guard let startIndex = simChart.timeKeys.firstIndex(of: entryBar.identifier),
             let initialBarStop = entryBar.getOneMinSignal()?.stop,
             entryBar.getOneMinSignal()?.direction == direction else {
-            return -1
+            return nil
         }
         
         var previousLevel: Double = initialBarStop

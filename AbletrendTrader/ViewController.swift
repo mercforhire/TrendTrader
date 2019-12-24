@@ -31,7 +31,7 @@ class ViewController: NSViewController {
             
             if let chart = chartBuilder.generateChart(ticker: "NQ", candleSticks: candleSticks, indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators]) {
                 let trader = Trader(chart: chart)
-                trader.newSession(startTime: chart.priceBars[chart.timeKeys[455]]!.candleStick.time, cutOffTime: chart.priceBars[chart.timeKeys[869]]!.candleStick.time)
+                trader.newSession(startTime: chart.startDate!, cutOffTime: chart.lastDate!)
                 if let session: Session = trader.generateSession() {
                     for trade in session.trades {
                         print(trade.summary())

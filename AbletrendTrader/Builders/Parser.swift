@@ -111,6 +111,9 @@ class Parser {
         // generate the time from [0] and [1]
         let dateComponent: String = components[0]
         let timeComponent: String = components[1]
+        
+        guard !dateComponent.isEmpty && !timeComponent.isEmpty else { return nil }
+        
         let date = makeDate(dateComponent: dateComponent, timeComponent: timeComponent)
         
         // generate the on1 from [6]

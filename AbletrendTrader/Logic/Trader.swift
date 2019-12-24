@@ -181,108 +181,114 @@ class Trader {
                         }
                     }
                     
-                    // Rule 2: exit when bar of opposite color bar appears
-                    switch session!.currentPosition!.direction {
-                    case .long:
-                        if currentBar.getBarColor() == .red {
-                            session!.currentPosition!.bars.append(currentBar)
-                            exitPrice = currentBar.candleStick.close
-                            exitMethod = .signalReversed
-                        }
-                    default:
-                        if currentBar.getBarColor() == .blue {
-                            session!.currentPosition!.bars.append(currentBar)
-                            exitPrice = currentBar.candleStick.close
-                            exitMethod = .signalReversed
+                    if exitPrice == nil && exitMethod == nil {
+                        // Rule 2: exit when bar of opposite color bar appears
+                        switch session!.currentPosition!.direction {
+                        case .long:
+                            if currentBar.getBarColor() == .red {
+                                session!.currentPosition!.bars.append(currentBar)
+                                exitPrice = currentBar.candleStick.close
+                                exitMethod = .signalReversed
+                            }
+                        default:
+                            if currentBar.getBarColor() == .blue {
+                                session!.currentPosition!.bars.append(currentBar)
+                                exitPrice = currentBar.candleStick.close
+                                exitMethod = .signalReversed
+                            }
                         }
                     }
                     
-                    // Rule 3: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
-                    if ClearPositionTime <= currentBar.candleStick.time {
-                        switch session!.currentPosition!.direction {
-                        case .long:
-                            if currentBar.getBarColor() == .blue {
-                                exitPrice = currentBar.candleStick.close
-                                exitMethod = .endOfDay
-                                exitSession = true
-                            }
-                        default:
-                            if currentBar.getBarColor() == .red {
-                                exitPrice = currentBar.candleStick.close
-                                exitMethod = .endOfDay
-                                exitSession = true
+                    if exitPrice == nil && exitMethod == nil {
+                        // Rule 3: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
+                        if ClearPositionTime <= currentBar.candleStick.time {
+                            switch session!.currentPosition!.direction {
+                            case .long:
+                                if currentBar.getBarColor() == .blue {
+                                    exitPrice = currentBar.candleStick.close
+                                    exitMethod = .endOfDay
+                                    exitSession = true
+                                }
+                            default:
+                                if currentBar.getBarColor() == .red {
+                                    exitPrice = currentBar.candleStick.close
+                                    exitMethod = .endOfDay
+                                    exitSession = true
+                                }
                             }
                         }
                     }
                     
                     session!.currentPosition!.bars.append(currentBar)
                     
-                    // Update the stop loss:
-                    
-                    var twoGreenBarsSL: Double
-                    switch session!.currentPosition!.direction {
-                    case .long:
-                        twoGreenBarsSL = 0
-                    default:
-                        twoGreenBarsSL = Double.greatestFiniteMagnitude
-                    }
-                    // if 2 green bars are detected and the green bars have not breached the 1 min S/R:
-                    if session!.currentPosition!.securedProfit < Config.ProfitRequiredAbandonTwoGreenBarsExit,
-                        let previousBar = simChart.secondLastBar,
-                        previousBar.getBarColor() == .green,
-                        currentBar.getBarColor() == .green,
-                        let currentStop = currentBar.getOneMinSignal()?.stop {
+                    if exitPrice == nil && exitMethod == nil {
+                        // Update the stop loss:
                         
+                        var twoGreenBarsSL: Double
                         switch session!.currentPosition!.direction {
                         case .long:
-                            let stopLossFromGreenBars = min(previousBar.candleStick.low, currentBar.candleStick.low) - 1
-                            
-                            if stopLossFromGreenBars - session!.currentPosition!.entryPrice >= Config.MinProfitToUseTwoGreenBarsExit,
-                                previousBar.candleStick.close >= currentStop,
-                                currentBar.candleStick.close >= currentStop {
-                                
-                                // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
-                                if stopLossFromGreenBars - currentStop > 1 {
-                                    twoGreenBarsSL = stopLossFromGreenBars
-                                } else {
-                                    twoGreenBarsSL = currentStop - 1
-                                }
-                            }
+                            twoGreenBarsSL = 0
                         default:
-                            let stopLossFromGreenBars = max(previousBar.candleStick.high, currentBar.candleStick.high) + 1
+                            twoGreenBarsSL = Double.greatestFiniteMagnitude
+                        }
+                        // if 2 green bars are detected and the green bars have not breached the 1 min S/R:
+                        if session!.currentPosition!.securedProfit < Config.ProfitRequiredAbandonTwoGreenBarsExit,
+                            let previousBar = simChart.secondLastBar,
+                            previousBar.getBarColor() == .green,
+                            currentBar.getBarColor() == .green,
+                            let currentStop = currentBar.getOneMinSignal()?.stop {
                             
-                            if session!.currentPosition!.entryPrice - stopLossFromGreenBars >= Config.MinProfitToUseTwoGreenBarsExit,
-                                previousBar.candleStick.close <= currentStop,
-                                currentBar.candleStick.close <= currentStop {
+                            switch session!.currentPosition!.direction {
+                            case .long:
+                                let stopLossFromGreenBars = min(previousBar.candleStick.low, currentBar.candleStick.low) - 1
                                 
-                                // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
-                                if currentStop - stopLossFromGreenBars > 1 {
-                                    twoGreenBarsSL = stopLossFromGreenBars
-                                } else {
-                                    twoGreenBarsSL = currentStop + 1
+                                if stopLossFromGreenBars - session!.currentPosition!.entryPrice >= Config.MinProfitToUseTwoGreenBarsExit,
+                                    previousBar.candleStick.close >= currentStop,
+                                    currentBar.candleStick.close >= currentStop {
+                                    
+                                    // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
+                                    if stopLossFromGreenBars - currentStop > 1 {
+                                        twoGreenBarsSL = stopLossFromGreenBars
+                                    } else {
+                                        twoGreenBarsSL = currentStop - 1
+                                    }
+                                }
+                            default:
+                                let stopLossFromGreenBars = max(previousBar.candleStick.high, currentBar.candleStick.high) + 1
+                                
+                                if session!.currentPosition!.entryPrice - stopLossFromGreenBars >= Config.MinProfitToUseTwoGreenBarsExit,
+                                    previousBar.candleStick.close <= currentStop,
+                                    currentBar.candleStick.close <= currentStop {
+                                    
+                                    // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
+                                    if currentStop - stopLossFromGreenBars > 1 {
+                                        twoGreenBarsSL = stopLossFromGreenBars
+                                    } else {
+                                        twoGreenBarsSL = currentStop + 1
+                                    }
                                 }
                             }
                         }
-                    }
-                    
-                    // update to previous S/R level
-                    if let previousLevelSL: Double = findPreviousLevel(direction: session!.currentPosition!.direction, entryBar: currentBar) {
-                        switch session!.currentPosition!.direction {
-                        case .long:
-                            session!.currentPosition!.stopLoss.stop = max(twoGreenBarsSL, previousLevelSL)
-                            session!.currentPosition!.stopLoss.source = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
-                        default:
-                            session!.currentPosition!.stopLoss.stop = min(twoGreenBarsSL, previousLevelSL)
-                            session!.currentPosition!.stopLoss.source = twoGreenBarsSL < previousLevelSL ? .twoGreenBars : .supportResistanceLevel
-                        }
-                    } else {
-                        switch session!.currentPosition!.direction {
-                        case .long:
-                            session!.currentPosition!.stopLoss.stop = twoGreenBarsSL
-                            session!.currentPosition!.stopLoss.source = .twoGreenBars
-                        default:
-                            session!.currentPosition!.stopLoss.stop = twoGreenBarsSL
-                            session!.currentPosition!.stopLoss.source = .twoGreenBars
+                        
+                        // update to previous S/R level
+                        if let previousLevelSL: Double = findPreviousLevel(direction: session!.currentPosition!.direction, entryBar: currentBar) {
+                            switch session!.currentPosition!.direction {
+                            case .long:
+                                session!.currentPosition!.stopLoss.stop = max(twoGreenBarsSL, previousLevelSL)
+                                session!.currentPosition!.stopLoss.source = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                            default:
+                                session!.currentPosition!.stopLoss.stop = min(twoGreenBarsSL, previousLevelSL)
+                                session!.currentPosition!.stopLoss.source = twoGreenBarsSL < previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                            }
+                        } else {
+                            switch session!.currentPosition!.direction {
+                            case .long:
+                                session!.currentPosition!.stopLoss.stop = twoGreenBarsSL
+                                session!.currentPosition!.stopLoss.source = .twoGreenBars
+                            default:
+                                session!.currentPosition!.stopLoss.stop = twoGreenBarsSL
+                                session!.currentPosition!.stopLoss.source = .twoGreenBars
+                            }
                         }
                     }
                 }

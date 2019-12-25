@@ -101,14 +101,14 @@ class Trader {
             return nil
         }
         
-        while simChart.lastTimeStamp != fullChart.lastTimeStamp {
+        while simChart.timeKeys.count <= fullChart.timeKeys.count {
             guard let currentBar = simChart.lastBar,
             session!.startTime <= currentBar.candleStick.time else {
                 _ = simulateOneMinutePassed()
                 continue
             }
             
-//            if simChart.timeKeys.count == 435 {
+//            if simChart.timeKeys.count == 304 {
 //                print("break")
 //            }
             
@@ -157,8 +157,9 @@ class Trader {
                 var exitMethod: ExitMethod?
                 var exitSession = false
                 
+                // if we reached end of time, set the exitBar to current
                 // if we reached FlatPositionsTime, set the exitBar to current
-                if FlatPositionsTime <= currentBar.candleStick.time {
+                if simChart.timeKeys.count == fullChart.timeKeys.count || FlatPositionsTime <= currentBar.candleStick.time {
                     session!.currentPosition!.bars.append(currentBar)
                     exitPrice = currentBar.candleStick.close
                     exitMethod = .endOfDay

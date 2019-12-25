@@ -91,8 +91,8 @@
 				8592435023ADE168004CE61F /* Logic */,
 				8592432923AC3EAF004CE61F /* AppDelegate.swift */,
 				8592432B23AC3EAF004CE61F /* ViewController.swift */,
-				8592432D23AC3EB0004CE61F /* Assets.xcassets */,
 				8592432F23AC3EB0004CE61F /* Main.storyboard */,
+				8592432D23AC3EB0004CE61F /* Assets.xcassets */,
 				8592433223AC3EB0004CE61F /* Info.plist */,
 				8592433323AC3EB0004CE61F /* AbletrendTrader.entitlements */,
 			);

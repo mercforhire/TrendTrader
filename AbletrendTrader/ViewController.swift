@@ -9,6 +9,33 @@
 import Cocoa
 
 class ViewController: NSViewController {
+    
+    @IBOutlet weak var systemTimeLabel: NSTextField!
+    @IBOutlet weak var refreshDataButton: NSButton!
+    @IBOutlet weak var latestDataTimeLabel: NSTextField!
+    @IBOutlet weak var simTimeLabel: NSTextField!
+    @IBOutlet weak var beginningButton: NSButton!
+    @IBOutlet weak var backButton: NSButton!
+    @IBOutlet weak var startButton: NSButton!
+    @IBOutlet weak var pauseButton: NSButton!
+    @IBOutlet weak var nextButton: NSButton!
+    @IBOutlet weak var endButton: NSButton!
+    @IBOutlet weak var totalPLLabel: NSTextField!
+    
+    
+    // Configuration:
+    @IBOutlet weak var maxSLField: NSTextField!
+    @IBOutlet weak var minSTPField: NSTextField!
+    @IBOutlet weak var sweetspotDistanceField: NSTextField!
+    @IBOutlet weak var minProfitGreenBarField: NSTextField!
+    @IBOutlet weak var minProfitPullbackField: NSTextField!
+    @IBOutlet weak var highRiskEntryStartPicker: NSDatePicker!
+    @IBOutlet weak var highRiskEntryEndPicker: NSDatePicker!
+    @IBOutlet weak var sessionStartTimePIcker: NSDatePicker!
+    @IBOutlet weak var liquidateTimePicker: NSDatePicker!
+    @IBOutlet weak var flatTimePicker: NSDatePicker!
+    @IBOutlet weak var dailyLossLimitPicker: NSTextField!
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,4 +75,3 @@ class ViewController: NSViewController {
         }
     }
 }
-

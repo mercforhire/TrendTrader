@@ -13,8 +13,12 @@ struct Chart {
     var timeKeys: [String] = []
     var priceBars: [String : PriceBar] = [:] // Key is an identifier generated from time of the bar
     
+    var startTimeKey: String? {
+        return timeKeys.first
+    }
+    
     var startBar: PriceBar? {
-        guard let firstKey = timeKeys.first, let firstBar = priceBars[firstKey] else { return nil }
+        guard let startTimeKey = startTimeKey, let firstBar = priceBars[startTimeKey] else { return nil }
         
         return firstBar
     }
@@ -23,26 +27,33 @@ struct Chart {
         return startBar?.candleStick.time
     }
     
+    // The last bar is always the second last bar in timeKeys, because the last bar signals are not finalized.
+    // Trading decisions must be made from the second last bar
     var lastDate: Date? {
         return lastBar?.candleStick.time
     }
     
     var secondLastBar: PriceBar? {
-        guard timeKeys.count > 1 else { return nil }
+        guard timeKeys.count > 2 else { return nil }
         
-        let secondLastBarKey = timeKeys[timeKeys.count - 2]
+        let secondLastBarKey = timeKeys[timeKeys.count - 3]
         let secondLastBar = priceBars[secondLastBarKey]
         return secondLastBar
     }
     
     var lastBar: PriceBar? {
-        guard let lastBarKey = timeKeys.last, let lastBar = priceBars[lastBarKey] else { return nil }
+        guard timeKeys.count > 1 else { return nil }
         
+        let lastBarKey = timeKeys[timeKeys.count - 2]
+        let lastBar = priceBars[lastBarKey]
         return lastBar
     }
     
-    var lastTimeStamp: String? {
-        return timeKeys.last
+    var lastTimeKey: String? {
+        guard timeKeys.count > 1 else { return nil }
+        
+        let lastBarKey = timeKeys[timeKeys.count - 2]
+        return lastBarKey
     }
     
     func checkAllSameDirection(direction: TradeDirection, fromKey: String, toKey: String) -> Bool {

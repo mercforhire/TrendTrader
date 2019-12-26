@@ -186,7 +186,7 @@ class Parser {
         minute = minuteString.int ?? 0
         
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(abbreviation: "EST")!
+        calendar.timeZone = Date.DefaultTimeZone
         let components = DateComponents(year: year, month: month, day: day, hour: hour, minute: minute)
         return calendar.date(from: components)!
     }

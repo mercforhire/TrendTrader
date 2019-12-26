@@ -9,12 +9,19 @@
 import Foundation
 
 class ChartBuilder {
-    func generateChart(ticker: String, candleSticks: [CandleStick], indicatorsSet: [Indicators]) -> Chart? {
+    func generateChart(ticker: String, candleSticks: [CandleStick], indicatorsSet: [Indicators], startTime: Date? = nil, cutOffTime: Date? = nil) -> Chart? {
         var keys: [String] = []
         
         var timeVsCandleSticks: [String: CandleStick] = [:]
         
         for candleStick in candleSticks {
+            if let startTime = startTime, candleStick.time < startTime {
+                continue
+            }
+            if let cutOffTime = cutOffTime, candleStick.time > cutOffTime {
+                continue
+            }
+            
             let key = candleStick.time.generateDateIdentifier()
             timeVsCandleSticks[key] = candleStick
             keys.append(key)
@@ -24,6 +31,13 @@ class ChartBuilder {
         
         for indicators in indicatorsSet {
             for signal in indicators.signals {
+                if let startTime = startTime, signal.time < startTime {
+                    continue
+                }
+                if let cutOffTime = cutOffTime, signal.time > cutOffTime {
+                    continue
+                }
+                
                 let key = signal.time.generateDateIdentifier()
                 if var existingSignals = timeVsSignals[key] {
                     existingSignals.append(signal)

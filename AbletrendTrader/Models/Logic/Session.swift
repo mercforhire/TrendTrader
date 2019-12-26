@@ -12,10 +12,9 @@ import Foundation
 // The Trader will use the saved info here to decide the next trade
 
 struct Session {
-    var startTime: Date
-    var cutOffTime: Date
     var trades: [Trade] = []
     var currentPosition: Position?
+    var latestPriceBar: PriceBar?
     
     func getTotalPAndL() -> Double {
         var pAndL: Double = 0

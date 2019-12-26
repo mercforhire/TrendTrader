@@ -68,4 +68,16 @@ extension Date {
         }
         return Calendar.current.isDate(self, equalTo: date, toGranularity: .day)
     }
+    
+    func getNewDateFromTime(hour: Int, min: Int) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components1 = DateComponents(year: self.year(),
+                                         month: self.month(),
+                                         day: self.day(),
+                                         hour: hour,
+                                         minute: min)
+        let startDate: Date = calendar.date(from: components1)!
+        return startDate
+    }
 }

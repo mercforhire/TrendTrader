@@ -9,17 +9,17 @@
 import Foundation
 
 class Parser {
-    static let fileName1 = "NQ #F 1m.txt"
-    static let fileName2 = "NQ #F 2m.txt"
-    static let fileName3 = "NQ #F 3m.txt"
+    static let fileName1 = "NQ #F 1min.txt"
+    static let fileName2 = "NQ #F 2min.txt"
+    static let fileName3 = "NQ #F 3min.txt"
     
     static let PriceDataHeader = "StartDate\tStartTime\t        Open\t        High\t         Low\t       Close\tVolume\tBid\tAsk"
     static let PriceAndSignalDivider = "Indicator AbleTrendTS Data"
     static let SignalHeader = "Date\tTime\t       BarUp\t       BarDn\t     BuyStop\t    SellStop\tOn1\tOn2\tOn3\tOn4\t         Buy\t        Sell\t        Exit\tOn5\tOn6\tOn7"
     
-    static func readFile(fileNane: String) -> String? {
+    static func readFile(fileName: String) -> String? {
         let dir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-        let fileURL = dir.appendingPathComponent(fileNane)
+        let fileURL = dir.appendingPathComponent(fileName)
         do {
             let text = try String(contentsOf: fileURL, encoding: .utf8)
             return text

@@ -26,15 +26,15 @@ class Trader {
     private var TimeIntervalForHighRiskEntry: DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: chart.lastDate?.year(),
-                                         month: chart.lastDate?.month(),
-                                         day: chart.lastDate?.day(),
+        let components1 = DateComponents(year: chart.absLateBarData?.year(),
+                                         month: chart.absLateBarData?.month(),
+                                         day: chart.absLateBarData?.day(),
                                          hour: config.HighRiskEntryStartTime.0,
                                          minute: config.HighRiskEntryStartTime.1)
         let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: chart.lastDate?.year(),
-                                         month: chart.lastDate?.month(),
-                                         day: chart.lastDate?.day(),
+        let components2 = DateComponents(year: chart.absLateBarData?.year(),
+                                         month: chart.absLateBarData?.month(),
+                                         day: chart.absLateBarData?.day(),
                                          hour: config.HighRiskEntryEndTime.0,
                                          minute: config.HighRiskEntryEndTime.1)
         let endDate: Date = calendar.date(from: components2)!
@@ -45,15 +45,15 @@ class Trader {
     private var TradingTimeInterval: DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: chart.lastDate?.year(),
-                                         month: chart.lastDate?.month(),
-                                         day: chart.lastDate?.day(),
+        let components1 = DateComponents(year: chart.absLateBarData?.year(),
+                                         month: chart.absLateBarData?.month(),
+                                         day: chart.absLateBarData?.day(),
                                          hour: config.TradingSessionStartTime.0,
                                          minute: config.TradingSessionStartTime.1)
         let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: chart.lastDate?.year(),
-                                         month: chart.lastDate?.month(),
-                                         day: chart.lastDate?.day(),
+        let components2 = DateComponents(year: chart.absLateBarData?.year(),
+                                         month: chart.absLateBarData?.month(),
+                                         day: chart.absLateBarData?.day(),
                                          hour: config.TradingSessionEndTime.0,
                                          minute: config.TradingSessionEndTime.1)
         let endDate: Date = calendar.date(from: components2)!
@@ -64,9 +64,9 @@ class Trader {
     private var ClearPositionTime: Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: chart.lastDate?.year(),
-                                        month: chart.lastDate?.month(),
-                                        day: chart.lastDate?.day(),
+        let components = DateComponents(year: chart.absLateBarData?.year(),
+                                        month: chart.absLateBarData?.month(),
+                                        day: chart.absLateBarData?.day(),
                                         hour: config.ClearPositionTime.0,
                                         minute: config.ClearPositionTime.1)
         let date: Date = calendar.date(from: components)!
@@ -77,9 +77,9 @@ class Trader {
     private var FlatPositionsTime: Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: chart.lastDate?.year(),
-                                        month: chart.lastDate?.month(),
-                                        day: chart.lastDate?.day(),
+        let components = DateComponents(year: chart.absLateBarData?.year(),
+                                        month: chart.absLateBarData?.month(),
+                                        day: chart.absLateBarData?.day(),
                                         hour: config.FlatPositionsTime.0,
                                         minute: config.FlatPositionsTime.1)
         let date: Date = calendar.date(from: components)!
@@ -88,9 +88,9 @@ class Trader {
     // after this time, clear all positions immediately
 
     private let config: Config
-    private var session: Session!
-    
+    var session: Session
     var chart: Chart
+    
     init(chart: Chart, config: Config) {
         self.config = config
         self.chart = chart
@@ -98,47 +98,78 @@ class Trader {
     }
     
     // Public:
-    func addPriceBar(timeKey: String, priceBar: PriceBar) {
-        guard !chart.timeKeys.contains(timeKey) && chart.priceBars[timeKey] == nil else { return }
+    func generateSession(upToPriceBar: PriceBar? = nil) {
+        guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.lastBar else {
+            return
+        }
         
-        chart.timeKeys.append(timeKey)
-        chart.priceBars[timeKey] = priceBar
+        session = Session()
+        
+        for timeKey in chart.timeKeys {
+            if timeKey == lastBar.identifier {
+                break
+            }
+            
+            guard let currentBar = chart.priceBars[timeKey] else { continue }
+            
+            let actions = process(priceBar: currentBar)
+            for action in actions {
+                switch action {
+                case .noAction:
+                    break
+                    print(String(format: "No action on %@", timeKey))
+                case .openedPosition(let position):
+                    let type: String = position.direction == .long ? "Long" : "Short"
+                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
+                case .closedPosition(let trade):
+                    let type: String = trade.direction == .long ? "Long" : "Short"
+                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entry.identifier, trade.exit.identifier, trade.profit ?? 0, trade.exitMethod.reason()))
+                case .updatedStop(let position):
+                    print(String(format: "%@ updated stop loss to %.2f reason: %@", position.currentBar.identifier, position.stopLoss.stop, position.stopLoss.source.reason()))
+                }
+            }
+        }
     }
     
-    // update the trading session based on current chart object
-    // return true if an action was performed, false otherwise
-    func updateSession() -> [TradeActionType] {
+    
+    // Decide trade actions at the given PriceBar object
+    // Return true if an action was performed, false otherwise
+    func process(priceBar: PriceBar? = nil) -> [TradeActionType] {
         guard chart.timeKeys.count > 1,
-            let currentTimeKey = chart.lastTimeKey,
-            let currentBar = chart.priceBars[currentTimeKey] else {
+            let priceBar = priceBar ?? chart.lastBar,
+            chart.timeKeys.contains(priceBar.identifier),
+            let priceBarIndex = chart.timeKeys.firstIndex(of: priceBar.identifier),
+            priceBarIndex > 0,
+            let previousPriceBar = chart.priceBars[chart.timeKeys[priceBarIndex - 1]]
+            else {
                 return [.noAction]
         }
         
-        session.latestPriceBar = currentBar
+        session.latestPriceBar = priceBar
         
         // no current position, check if we should enter on the current bar
         if session.currentPosition == nil {
-            return [handleNoPosition(currentBar: currentBar)]
+            return [handleNoPosition(currentBar: priceBar)]
         }
         // already have current position, update it or close it if needed
         else {
-            session.currentPosition!.bars.append(currentBar)
+            session.currentPosition!.currentBar = priceBar
             
             // Rule 0: If we reached FlatPositionsTime, exit the trade immediately
-            if FlatPositionsTime <= currentBar.candleStick.time {
-                return [exitPosition(currentBar: currentBar, exitPrice: currentBar.candleStick.close, exitMethod: .endOfDay)]
+            if FlatPositionsTime <= priceBar.candleStick.time {
+                return [exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .endOfDay)]
             }
             
             // Rule 3: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
-            if ClearPositionTime <= currentBar.candleStick.time {
+            if ClearPositionTime <= priceBar.candleStick.time {
                 switch session.currentPosition!.direction {
                 case .long:
-                    if currentBar.getBarColor() == .blue {
-                        return [exitPosition(currentBar: currentBar, exitPrice: currentBar.candleStick.close, exitMethod: .endOfDay)]
+                    if priceBar.getBarColor() == .blue {
+                        return [exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .endOfDay)]
                     }
                 default:
-                    if currentBar.getBarColor() == .red {
-                        return [exitPosition(currentBar: currentBar, exitPrice: currentBar.candleStick.close, exitMethod: .endOfDay)]
+                    if priceBar.getBarColor() == .red {
+                        return [exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .endOfDay)]
                     }
                 }
             }
@@ -146,12 +177,12 @@ class Trader {
             // Rule 1: exit when the the low of the price hit the current stop loss
             switch session.currentPosition!.direction {
             case .long:
-                if currentBar.candleStick.low <= session.currentPosition!.stopLoss.stop {
+                if priceBar.candleStick.low <= session.currentPosition!.stopLoss.stop {
                     let exitMethod: ExitMethod = session.currentPosition!.stopLoss.source == .supportResistanceLevel ||
                         session.currentPosition!.stopLoss.source == .currentBar ? .brokeSupportResistence : .twoGreenBars
-                    let exitAction = exitPosition(currentBar: currentBar, exitPrice: session.currentPosition!.stopLoss.stop, exitMethod: exitMethod)
+                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: session.currentPosition!.stopLoss.stop, exitMethod: exitMethod)
                     
-                    switch handleNoPosition(currentBar: currentBar) {
+                    switch handleNoPosition(currentBar: priceBar) {
                     case .openedPosition(let position):
                         return [exitAction, .openedPosition(position: position)]
                     default:
@@ -159,11 +190,11 @@ class Trader {
                     }
                 }
             default:
-                if currentBar.candleStick.high >= session.currentPosition!.stopLoss.stop {
+                if priceBar.candleStick.high >= session.currentPosition!.stopLoss.stop {
                     let exitMethod: ExitMethod = session.currentPosition!.stopLoss.source == .supportResistanceLevel || session.currentPosition!.stopLoss.source == .currentBar ? .brokeSupportResistence : .twoGreenBars
-                    let exitAction = exitPosition(currentBar: currentBar, exitPrice: session.currentPosition!.stopLoss.stop, exitMethod: exitMethod)
+                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: session.currentPosition!.stopLoss.stop, exitMethod: exitMethod)
                     
-                    switch handleNoPosition(currentBar: currentBar) {
+                    switch handleNoPosition(currentBar: priceBar) {
                     case .openedPosition(let position):
                         return [exitAction, .openedPosition(position: position)]
                     default:
@@ -175,10 +206,10 @@ class Trader {
             // Rule 2: exit when bar of opposite color bar appears
             switch session.currentPosition!.direction {
             case .long:
-                if currentBar.getBarColor() == .red {
-                    let exitAction = exitPosition(currentBar: currentBar, exitPrice: currentBar.candleStick.close, exitMethod: .signalReversed)
+                if priceBar.getBarColor() == .red {
+                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .signalReversed)
                     
-                    switch handleNoPosition(currentBar: currentBar) {
+                    switch handleNoPosition(currentBar: priceBar) {
                     case .openedPosition(let position):
                         return [exitAction, .openedPosition(position: position)]
                     default:
@@ -186,10 +217,10 @@ class Trader {
                     }
                 }
             default:
-                if currentBar.getBarColor() == .blue {
-                    let exitAction = exitPosition(currentBar: currentBar, exitPrice: currentBar.candleStick.close, exitMethod: .signalReversed)
+                if priceBar.getBarColor() == .blue {
+                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .signalReversed)
                     
-                    switch handleNoPosition(currentBar: currentBar) {
+                    switch handleNoPosition(currentBar: priceBar) {
                     case .openedPosition(let position):
                         return [exitAction, .openedPosition(position: position)]
                     default:
@@ -204,18 +235,18 @@ class Trader {
 
             // if 2 green bars are detected and the green bars have not breached the 1 min S/R:
             if session.currentPosition!.securedProfit < config.ProfitRequiredAbandonTwoGreenBarsExit,
-                let previousBar = chart.secondLastBar,
-                previousBar.getBarColor() == .green,
-                currentBar.getBarColor() == .green,
-                let currentStop = currentBar.getOneMinSignal()?.stop {
+                previousPriceBar.getBarColor() == .green,
+                priceBar.getBarColor() == .green,
+                let currentStop = priceBar.getOneMinSignal()?.stop {
                 
                 switch session.currentPosition!.direction {
                 case .long:
-                    let stopLossFromGreenBars = min(previousBar.candleStick.low, currentBar.candleStick.low).flooring(toNearest: 0.5) - 1
+                    let stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
                     
-                    if stopLossFromGreenBars - session.currentPosition!.entryPrice >= config.MinProfitToUseTwoGreenBarsExit,
-                        previousBar.candleStick.close >= currentStop,
-                        currentBar.candleStick.close >= currentStop {
+                    if stopLossFromGreenBars > currentStop,
+                        stopLossFromGreenBars - session.currentPosition!.entryPrice >= config.MinProfitToUseTwoGreenBarsExit,
+                        previousPriceBar.candleStick.close >= currentStop,
+                        priceBar.candleStick.close >= currentStop {
                         
                         // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
                         if stopLossFromGreenBars - currentStop > 1 {
@@ -225,11 +256,12 @@ class Trader {
                         }
                     }
                 default:
-                    let stopLossFromGreenBars = max(previousBar.candleStick.high, currentBar.candleStick.high).ceiling(toNearest: 0.5) + 1
+                    let stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
                     
-                    if session.currentPosition!.entryPrice - stopLossFromGreenBars >= config.MinProfitToUseTwoGreenBarsExit,
-                        previousBar.candleStick.close <= currentStop,
-                        currentBar.candleStick.close <= currentStop {
+                    if stopLossFromGreenBars < currentStop,
+                        session.currentPosition!.entryPrice - stopLossFromGreenBars >= config.MinProfitToUseTwoGreenBarsExit,
+                        previousPriceBar.candleStick.close <= currentStop,
+                        priceBar.candleStick.close <= currentStop {
                         
                         // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
                         if currentStop - stopLossFromGreenBars > 1 {
@@ -245,7 +277,7 @@ class Trader {
             var newStop: Double = session.currentPosition!.stopLoss.stop
             var newStopSource: StopLossSource = session.currentPosition!.stopLoss.source
             
-            if let previousLevelSL: Double = findPreviousLevel(direction: session.currentPosition!.direction, entryBar: currentBar) {
+            if let previousLevelSL: Double = findPreviousLevel(direction: session.currentPosition!.direction, entryBar: priceBar) {
                 switch session.currentPosition!.direction {
                 case .long:
                     newStop = max(twoGreenBarsSL, previousLevelSL)
@@ -307,7 +339,7 @@ class Trader {
                 return nil
             }
         case .sweetSpot:
-            guard let pullBack = checkForPullback(direction: direction, start: bar), !pullBack.greenBars.isEmpty,
+            guard let pullBack = checkForPullback(direction: direction, start: bar),
                 pullBack.coloredBars.count == 1 else {
                 return nil
             }
@@ -331,10 +363,10 @@ class Trader {
         
         if risk > config.MaxRisk && TimeIntervalForHighRiskEntry.contains(bar.candleStick.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - 10 : bar.candleStick.close + 10
-            let position = Position(direction: direction, entryPrice: bar.candleStick.close, bars: [bar], stopLoss: stopLoss)
+            let position = Position(direction: direction, entryPrice: bar.candleStick.close, stopLoss: stopLoss, entry: bar, currentBar: bar)
             return position
         } else if risk <= config.MaxRisk {
-            let position = Position(direction: direction, entryPrice: bar.candleStick.close, bars: [bar], stopLoss: stopLoss)
+            let position = Position(direction: direction, entryPrice: bar.candleStick.close, stopLoss: stopLoss, entry: bar, currentBar: bar)
             return position
         }
 
@@ -381,8 +413,9 @@ class Trader {
         let trade = Trade(direction: session.currentPosition!.direction,
                           entryPrice: session.currentPosition!.entryPrice,
                           exitPrice: exitPrice,
-                          bars: session.currentPosition!.bars,
-                          exitMethod: exitMethod)
+                          exitMethod: exitMethod,
+                          entry: session.currentPosition!.entry,
+                          exit: currentBar)
         session.trades.append(trade)
         session.currentPosition = nil
         return .closedPosition(trade: trade)

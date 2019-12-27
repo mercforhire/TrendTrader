@@ -32,15 +32,9 @@ struct Trade {
     var direction: TradeDirection
     var entryPrice: Double // enter at the close of the bar
     var exitPrice: Double
-    var bars: [PriceBar]
     var exitMethod: ExitMethod
-    
-    var entry: PriceBar {
-        return bars.first!
-    }
-    var exit: PriceBar {
-        return bars.last!
-    }
+    var entry: PriceBar
+    var exit: PriceBar
     
     var profit: Double? {
         switch direction {

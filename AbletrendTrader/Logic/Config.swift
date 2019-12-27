@@ -9,6 +9,11 @@
 import Foundation
 
 class Config {
+    var dataServerURL = "http://192.168.0.121/"
+    var fileName1 = "NQ #F 1min.txt"
+    var fileName2 = "NQ #F 2min.txt"
+    var fileName3 = "NQ #F 3min.txt"
+    
     var MaxRisk: Double = 10.0 // in Points
     
     var MinBarStop: Double  = 5.0
@@ -32,10 +37,10 @@ class Config {
     var SessionChartEndTime: (Int, Int) = (17, 0)
     
     var TradingSessionStartTime: (Int, Int) = (9, 20)
-    var TradingSessionEndTime: (Int, Int) = (16, 16)
+    var TradingSessionEndTime: (Int, Int) = (15, 55)
     
     var ClearPositionTime: (Int, Int) = (15, 59)
-    var FlatPositionsTime: (Int, Int) = (16, 10)
+    var FlatPositionsTime: (Int, Int) = (16, 5)
     
     var MaxDailyLoss: Double = 50.0 // stop trading when P/L goes under this number
 }

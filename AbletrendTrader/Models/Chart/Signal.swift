@@ -17,6 +17,15 @@ enum SignalColor {
 enum TradeDirection {
     case long
     case short
+    
+    func description() -> String {
+        switch self {
+        case .long:
+            return "Long"
+        case .short:
+            return "Short"
+        }
+    }
 }
 
 enum SignalInteval {

@@ -27,10 +27,20 @@ struct Chart {
         return startBar?.candleStick.time
     }
     
+    var absLateBarData: Date? {
+        guard let absLastTimeKey = timeKeys.last, let absLastBar = priceBars[absLastTimeKey] else { return nil }
+        
+        return absLastBar.candleStick.time
+    }
+    
     // The last bar is always the second last bar in timeKeys, because the last bar signals are not finalized.
     // Trading decisions must be made from the second last bar
-    var lastDate: Date? {
-        return lastBar?.candleStick.time
+    var lastBar: PriceBar? {
+        guard timeKeys.count > 1 else { return nil }
+        
+        let lastBarKey = timeKeys[timeKeys.count - 2]
+        let lastBar = priceBars[lastBarKey]
+        return lastBar
     }
     
     var secondLastBar: PriceBar? {
@@ -39,14 +49,6 @@ struct Chart {
         let secondLastBarKey = timeKeys[timeKeys.count - 3]
         let secondLastBar = priceBars[secondLastBarKey]
         return secondLastBar
-    }
-    
-    var lastBar: PriceBar? {
-        guard timeKeys.count > 1 else { return nil }
-        
-        let lastBarKey = timeKeys[timeKeys.count - 2]
-        let lastBar = priceBars[lastBarKey]
-        return lastBar
     }
     
     var lastTimeKey: String? {
@@ -73,5 +75,56 @@ struct Chart {
         }
         
         return true
+    }
+    
+    static func generateChart(ticker: String, candleSticks: [CandleStick], indicatorsSet: [Indicators], startTime: Date? = nil, cutOffTime: Date? = nil) -> Chart? {
+        var keys: [String] = []
+        
+        var timeVsCandleSticks: [String: CandleStick] = [:]
+        
+        for candleStick in candleSticks {
+            if let startTime = startTime, candleStick.time < startTime {
+                continue
+            }
+            if let cutOffTime = cutOffTime, candleStick.time > cutOffTime {
+                continue
+            }
+            
+            let key = candleStick.time.generateDateIdentifier()
+            timeVsCandleSticks[key] = candleStick
+            keys.append(key)
+        }
+        
+        var timeVsSignals: [String: [Signal]] = [:]
+        
+        for indicators in indicatorsSet {
+            for signal in indicators.signals {
+                if let startTime = startTime, signal.time < startTime {
+                    continue
+                }
+                if let cutOffTime = cutOffTime, signal.time > cutOffTime {
+                    continue
+                }
+                
+                let key = signal.time.generateDateIdentifier()
+                if var existingSignals = timeVsSignals[key] {
+                    existingSignals.append(signal)
+                    timeVsSignals[key] = existingSignals
+                } else {
+                    timeVsSignals[key] = [signal]
+                }
+            }
+        }
+        
+        var timeVsPriceBars: [String: PriceBar] = [:]
+        
+        for (key, candleStick) in timeVsCandleSticks {
+            let signals: [Signal] = timeVsSignals[key] ?? []
+            let priceBar = PriceBar(identifier: key, candleStick: candleStick, signals: signals)
+            timeVsPriceBars[key] = priceBar
+        }
+        
+        let chart = Chart(ticker: ticker, timeKeys: keys, priceBars: timeVsPriceBars)
+        return chart
     }
 }

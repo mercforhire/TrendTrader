@@ -8,8 +8,11 @@
 
 import Cocoa
 
+class ChartNotifications {
+    static let ChartUpdated: Notification.Name = Notification.Name("ChartNotifications")
+}
+
 class ViewController: NSViewController {
-    
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -19,44 +22,24 @@ class ViewController: NSViewController {
     @IBOutlet weak var endButton: NSButton!
     @IBOutlet weak var totalPLLabel: NSTextField!
     @IBOutlet weak var tableView: NSTableView!
-    @IBOutlet weak var divider: NSView!
     
-    // Configuration:
-    @IBOutlet weak var maxSLField: NSTextField!
-    @IBOutlet weak var minSTPField: NSTextField!
-    @IBOutlet weak var sweetspotDistanceField: NSTextField!
-    @IBOutlet weak var minProfitGreenBarField: NSTextField!
-    @IBOutlet weak var minProfitByPass: NSTextField!
-    @IBOutlet weak var minProfitPullbackField: NSTextField!
-    @IBOutlet weak var highRiskEntryStartPicker: NSDatePicker!
-    @IBOutlet weak var highRiskEntryEndPicker: NSDatePicker!
-    @IBOutlet weak var sessionStartTimePicker: NSDatePicker!
-    @IBOutlet weak var liquidateTimePicker: NSDatePicker!
-    @IBOutlet weak var flatTimePicker: NSDatePicker!
-    @IBOutlet weak var dailyLossLimitPicker: NSTextField!
-    
-    private var config = Config()
     private var dataManager: DataManager?
     private let dateFormatter = DateFormatter()
     private var timer: Timer!
     private var trader: Trader?
     private var listOfTrades: [TradeDisplayable]?
-    
     private var realTimeChart: Chart? {
         didSet {
             if let chart = realTimeChart, let lastDate = chart.absLateBarData {
                 latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
-                startButton.isEnabled = true
-                endButton.isEnabled = true
             } else {
                 latestDataTimeLabel.stringValue = "Latest data time: --:--"
-                startButton.isEnabled = false
-                beginningButton.isEnabled = false
-                endButton.isEnabled = false
             }
         }
     }
     // all or subset of the full chart, simulating a particular moment during the session and used by the Trader algo
+    
+    weak var delegate: DataManagerDelegate?
     
     func setupUI() {
         dateFormatter.timeStyle = .medium
@@ -65,41 +48,12 @@ class ViewController: NSViewController {
         latestDataTimeLabel.stringValue = "Latest data time: --:--"
         simTimeLabel.stringValue = "--:--"
         
-        maxSLField.isEditable = false
-        minSTPField.isEditable = false
-        sweetspotDistanceField.isEditable = false
-        minProfitGreenBarField.isEditable = false
-        minProfitByPass.isEditable = false
-        minProfitPullbackField.isEditable = false
-        
-        highRiskEntryStartPicker.isEnabled = false
-        highRiskEntryEndPicker.isEnabled = false
-        sessionStartTimePicker.isEnabled = false
-        liquidateTimePicker.isEnabled = false
-        flatTimePicker.isEnabled = false
-        dailyLossLimitPicker.isEditable = false
-        
         beginningButton.isEnabled = false
         startButton.isEnabled = false
         endButton.isEnabled = false
         
         tableView.delegate = self
         tableView.dataSource = self
-    }
-    
-    func loadConfig() {
-        maxSLField.stringValue = String(format: "%.2f", config.MaxRisk)
-        minSTPField.stringValue = String(format: "%.2f", config.MinBarStop)
-        sweetspotDistanceField.stringValue = String(format: "%.2f", config.SweetSpotMinDistance)
-        minProfitGreenBarField.stringValue = String(format: "%.2f", config.MinProfitToUseTwoGreenBarsExit)
-        minProfitByPass.stringValue = String(format: "%.2f", config.ProfitRequiredAbandonTwoGreenBarsExit)
-        minProfitPullbackField.stringValue = String(format: "%.2f", config.ProfitRequiredToReenterTradeonPullback)
-        highRiskEntryStartPicker.dateValue = Date().getNewDateFromTime(hour: config.HighRiskEntryStartTime.0, min: config.HighRiskEntryStartTime.1)
-        highRiskEntryEndPicker.dateValue = Date().getNewDateFromTime(hour: config.HighRiskEntryEndTime.0, min: config.HighRiskEntryEndTime.1)
-        sessionStartTimePicker.dateValue = Date().getNewDateFromTime(hour: config.TradingSessionStartTime.0, min: config.TradingSessionStartTime.1)
-        liquidateTimePicker.dateValue = Date().getNewDateFromTime(hour: config.ClearPositionTime.0, min: config.ClearPositionTime.1)
-        flatTimePicker.dateValue = Date().getNewDateFromTime(hour: config.FlatPositionsTime.0, min: config.FlatPositionsTime.1)
-        dailyLossLimitPicker.stringValue = String(format: "%.2f", config.MaxDailyLoss)
     }
 
     override func viewWillAppear() {
@@ -113,9 +67,8 @@ class ViewController: NSViewController {
         // Do any additional setup after loading the view.
         setupUI()
         timer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: self, repeats: true)
-        dataManager = DataManager(config: config)
+        dataManager = DataManager()
         dataManager?.delegate = self
-        loadConfig()
     }
     
     @objc func updateSystemTimeLabel() {
@@ -131,7 +84,9 @@ class ViewController: NSViewController {
             
             if let chart = chart {
                 self.realTimeChart = chart
-                self.trader = Trader(chart: chart, config: self.config)
+                self.trader = Trader(chart: chart)
+                self.startButton.isEnabled = true
+                self.endButton.isEnabled = true
             }
         })
     }
@@ -140,6 +95,7 @@ class ViewController: NSViewController {
         guard trader != nil, let realTimeChart = realTimeChart, !realTimeChart.timeKeys.isEmpty
         else { return }
         
+        beginningButton.isEnabled = true
         startButton.isEnabled = false
         trader?.generateSession()
         updateTradesList()
@@ -150,7 +106,7 @@ class ViewController: NSViewController {
         guard let chart = realTimeChart else { return }
         
         dataManager?.stopMonitoring()
-        trader = Trader(chart: chart, config: self.config)
+        trader = Trader(chart: chart)
         listOfTrades?.removeAll()
         
         simTimeLabel.stringValue = "--:--"
@@ -162,14 +118,19 @@ class ViewController: NSViewController {
     }
     
     @IBAction func goToEndOfDay(_ sender: Any) {
-        guard trader != nil, let realTimeChart = realTimeChart, !realTimeChart.timeKeys.isEmpty
+        guard trader != nil, let completedChart = dataManager?.chart, !completedChart.timeKeys.isEmpty
         else { return }
         
-        dataManager?.stopMonitoring()
-        trader?.generateSession()
+        beginningButton.isEnabled = true
         endButton.isEnabled = false
         startButton.isEnabled = true
+        
+        dataManager?.stopMonitoring()
+        realTimeChart = completedChart
+        trader?.chart = completedChart
+        trader?.generateSession()
         updateTradesList()
+        delegate?.chartUpdated(chart: completedChart)
     }
     
     private func updateTradesList() {
@@ -187,11 +148,19 @@ class ViewController: NSViewController {
         // Update the view, if already loaded.
         }
     }
+    
+    override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
+        if let chartVC = segue.destinationController as? ChartViewController {
+            chartVC.chart = realTimeChart
+            delegate = chartVC
+        }
+    }
 }
 
 extension ViewController: DataManagerDelegate {
     func chartUpdated(chart: Chart) {
-        self.realTimeChart = chart
+        realTimeChart = chart
+        delegate?.chartUpdated(chart: chart)
         
         guard let realTimeChart = realTimeChart,
             !realTimeChart.timeKeys.isEmpty,
@@ -205,7 +174,6 @@ extension ViewController: DataManagerDelegate {
             for action in actions {
                 switch action {
                 case .noAction:
-                    break
                     print(String(format: "No action on %@", timeKey))
                 case .openedPosition(let position):
                     let type: String = position.direction == .long ? "Long" : "Short"

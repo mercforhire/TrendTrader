@@ -9,12 +9,15 @@
 import Foundation
 
 class Config {
+    static let shared = Config()
+    
     var dataServerURL = "http://192.168.0.121/"
+    
     var fileName1 = "NQ #F 1min.txt"
     var fileName2 = "NQ #F 2min.txt"
     var fileName3 = "NQ #F 3min.txt"
     
-    var MaxRisk: Double = 10.0 // in Points
+    var MaxRisk: Double = 10.0
     
     var MinBarStop: Double  = 5.0
     
@@ -22,7 +25,7 @@ class Config {
     // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
     
     var MinProfitToUseTwoGreenBarsExit: Double = 5.0
-       // the min profit the trade must in to use the 2 green bars exit rule
+    // the min profit the trade must in to use the 2 green bars exit rule
        
     var ProfitRequiredAbandonTwoGreenBarsExit: Double = 20.0
     // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
@@ -43,4 +46,6 @@ class Config {
     var FlatPositionsTime: (Int, Int) = (16, 5)
     
     var MaxDailyLoss: Double = 50.0 // stop trading when P/L goes under this number
+    
+    let ByPassTradingTimeRestrictions = false
 }

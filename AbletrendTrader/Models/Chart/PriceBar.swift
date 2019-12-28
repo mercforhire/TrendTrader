@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Charts
 
 struct PriceBar {
     var identifier: String
@@ -25,5 +26,9 @@ struct PriceBar {
     
     func getBarColor() -> SignalColor {
         return getOneMinSignal()?.color ?? .green
+    }
+    
+    func getCandleStickData(x: Double) -> CandleChartDataEntry {
+        return CandleChartDataEntry(x: x, shadowH: candleStick.high, shadowL: candleStick.low, open: candleStick.open, close: candleStick.close)
     }
 }

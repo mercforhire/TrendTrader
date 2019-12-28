@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Charts
 
 struct Chart {
     var ticker: String
@@ -75,6 +76,22 @@ struct Chart {
         }
         
         return true
+    }
+    
+    func generateCandleStickData() -> [CandleChartDataEntry] {
+        var candleSticks: [CandleChartDataEntry] = []
+        
+        var x: Double = 0.0
+        for timeKey in timeKeys {
+            guard let bar = priceBars[timeKey] else { continue }
+            
+            let candleStick: CandleChartDataEntry = bar.getCandleStickData(x: x)
+            candleSticks.append(candleStick)
+            
+            x += 1
+        }
+        
+        return candleSticks
     }
     
     static func generateChart(ticker: String, candleSticks: [CandleStick], indicatorsSet: [Indicators], startTime: Date? = nil, cutOffTime: Date? = nil) -> Chart? {

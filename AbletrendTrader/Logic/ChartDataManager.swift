@@ -12,7 +12,7 @@ protocol DataManagerDelegate: class {
     func chartUpdated(chart: Chart)
 }
 
-class DataManager {
+class ChartDataManager {
     private let readFromServer = false
     private let simulateMinByMinData = true
     

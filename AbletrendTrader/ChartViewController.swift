@@ -25,21 +25,19 @@ class ChartViewController: NSViewController {
         chartView.setScaleEnabled(true)
         chartView.pinchZoomEnabled = true
         
-        chartView.legend.horizontalAlignment = .right
-        chartView.legend.verticalAlignment = .top
-        chartView.legend.orientation = .vertical
-        chartView.legend.drawInside = false
-        chartView.legend.font = NSFont(name: "HelveticaNeue-Light", size: 10)!
+        chartView.legend.form = .none
         
         chartView.leftAxis.labelFont = NSFont(name: "HelveticaNeue-Light", size: 10)!
         chartView.leftAxis.spaceTop = 0.3
         chartView.leftAxis.spaceBottom = 0.3
         chartView.leftAxis.axisMinimum = 0
+        chartView.leftAxis.drawGridLinesEnabled = false
         
         chartView.rightAxis.enabled = false
         
         chartView.xAxis.labelPosition = .bottom
         chartView.xAxis.labelFont = NSFont(name: "HelveticaNeue-Light", size: 10)!
+        chartView.xAxis.drawGridLinesEnabled = false
         
     }
     
@@ -50,6 +48,7 @@ class ChartViewController: NSViewController {
         set1.axisDependency = .left
         set1.setColor(NSColor(white: 80/255, alpha: 1))
         set1.drawIconsEnabled = false
+        set1.drawValuesEnabled = false
         set1.shadowColor = .darkGray
         set1.shadowWidth = 0.7
         set1.decreasingColor = .red

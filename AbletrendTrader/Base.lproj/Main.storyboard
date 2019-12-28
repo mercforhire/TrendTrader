@@ -223,13 +223,13 @@
         <!--Chart-->
         <scene sceneID="Nw5-bD-icl">
             <objects>
-                <viewController title="Chart" id="cu5-OY-MBx" customClass="ChartViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Chart" showSeguePresentationStyle="single" id="cu5-OY-MBx" customClass="ChartViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="4RC-Xv-0Gp">
-                        <rect key="frame" x="0.0" y="0.0" width="648" height="324"/>
+                        <rect key="frame" x="0.0" y="0.0" width="804" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="pbT-5f-IWY" customClass="CandleStickChartView" customModule="Charts">
-                                <rect key="frame" x="0.0" y="0.0" width="648" height="324"/>
+                                <rect key="frame" x="0.0" y="0.0" width="804" height="480"/>
                             </customView>
                         </subviews>
                         <constraints>
@@ -245,7 +245,7 @@
                 </viewController>
                 <customObject id="O5U-D5-IU2" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="606" y="758"/>
+            <point key="canvasLocation" x="684" y="836"/>
         </scene>
         <!--Configuration-->
         <scene sceneID="8lg-qv-ddx">
@@ -947,6 +947,7 @@
                     </view>
                     <connections>
                         <outlet property="beginningButton" destination="cdn-R7-STd" id="7Gy-iX-rlX"/>
+                        <outlet property="chartButton" destination="V8s-XO-eS9" id="Mn4-MN-viU"/>
                         <outlet property="endButton" destination="HA1-vz-Vdk" id="gt0-iA-dMb"/>
                         <outlet property="latestDataTimeLabel" destination="h4k-pK-kei" id="rwd-TM-E4w"/>
                         <outlet property="refreshDataButton" destination="Yql-Nh-nK8" id="52R-wx-5ec"/>

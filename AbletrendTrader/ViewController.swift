@@ -22,8 +22,9 @@ class ViewController: NSViewController {
     @IBOutlet weak var endButton: NSButton!
     @IBOutlet weak var totalPLLabel: NSTextField!
     @IBOutlet weak var tableView: NSTableView!
+    @IBOutlet weak var chartButton: NSButton!
     
-    private var dataManager: DataManager?
+    private var dataManager: ChartDataManager?
     private let dateFormatter = DateFormatter()
     private var timer: Timer!
     private var trader: Trader?
@@ -67,7 +68,7 @@ class ViewController: NSViewController {
         // Do any additional setup after loading the view.
         setupUI()
         timer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: self, repeats: true)
-        dataManager = DataManager()
+        dataManager = ChartDataManager()
         dataManager?.delegate = self
     }
     

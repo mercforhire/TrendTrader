@@ -10,6 +10,12 @@
 		711AC8F5D49C3C0C53B19B09 /* Pods_AbletrendTrader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */; };
 		85582AB323B5E97800DC16AC /* ChartDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85582AB223B5E97800DC16AC /* ChartDataManager.swift */; };
 		856D957C23B73B04004A4385 /* IBNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957B23B73B04004A4385 /* IBNetworkManager.swift */; };
+		856D957F23B7FE32004A4385 /* SSOToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957E23B7FE32004A4385 /* SSOToken.swift */; };
+		856D958123B7FED3004A4385 /* AuthStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958023B7FED3004A4385 /* AuthStatus.swift */; };
+		856D958323B8518A004A4385 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958223B8518A004A4385 /* Account.swift */; };
+		856D958523B85D88004A4385 /* IBTrade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958423B85D88004A4385 /* IBTrade.swift */; };
+		856D958723B86039004A4385 /* IBOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958623B86039004A4385 /* IBOrder.swift */; };
+		856D958923B866F1004A4385 /* PlacedOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958823B866F1004A4385 /* PlacedOrder.swift */; };
 		8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432923AC3EAF004CE61F /* AppDelegate.swift */; };
 		8592432C23AC3EAF004CE61F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432B23AC3EAF004CE61F /* ViewController.swift */; };
 		8592432E23AC3EB0004CE61F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8592432D23AC3EB0004CE61F /* Assets.xcassets */; };
@@ -39,6 +45,12 @@
 		7987637B8B2780B3C1E7F8FD /* Pods-AbletrendTrader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.debug.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.debug.xcconfig"; sourceTree = "<group>"; };
 		85582AB223B5E97800DC16AC /* ChartDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDataManager.swift; sourceTree = "<group>"; };
 		856D957B23B73B04004A4385 /* IBNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBNetworkManager.swift; sourceTree = "<group>"; };
+		856D957E23B7FE32004A4385 /* SSOToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSOToken.swift; sourceTree = "<group>"; };
+		856D958023B7FED3004A4385 /* AuthStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStatus.swift; sourceTree = "<group>"; };
+		856D958223B8518A004A4385 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+		856D958423B85D88004A4385 /* IBTrade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBTrade.swift; sourceTree = "<group>"; };
+		856D958623B86039004A4385 /* IBOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBOrder.swift; sourceTree = "<group>"; };
+		856D958823B866F1004A4385 /* PlacedOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrder.swift; sourceTree = "<group>"; };
 		8592432623AC3EAF004CE61F /* AbletrendTrader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AbletrendTrader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8592432923AC3EAF004CE61F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8592432B23AC3EAF004CE61F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -87,6 +99,19 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		856D957D23B7FE19004A4385 /* IB */ = {
+			isa = PBXGroup;
+			children = (
+				856D957E23B7FE32004A4385 /* SSOToken.swift */,
+				856D958023B7FED3004A4385 /* AuthStatus.swift */,
+				856D958223B8518A004A4385 /* Account.swift */,
+				856D958423B85D88004A4385 /* IBTrade.swift */,
+				856D958623B86039004A4385 /* IBOrder.swift */,
+				856D958823B866F1004A4385 /* PlacedOrder.swift */,
+			);
+			path = IB;
+			sourceTree = "<group>";
+		};
 		8592431D23AC3EAF004CE61F = {
 			isa = PBXGroup;
 			children = (
@@ -127,6 +152,7 @@
 		8592433B23AC688F004CE61F /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				856D957D23B7FE19004A4385 /* IB */,
 				8592435B23B155CC004CE61F /* Pattern */,
 				8592435A23B1559E004CE61F /* Trade */,
 				8592435923B15571004CE61F /* Chart */,
@@ -318,9 +344,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				8592435823B14DD5004CE61F /* StopLoss.swift in Sources */,
+				856D958123B7FED3004A4385 /* AuthStatus.swift in Sources */,
 				8592435D23B15643004CE61F /* Session.swift in Sources */,
 				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,
 				8592434023AC7A19004CE61F /* String+Extensions.swift in Sources */,
+				856D957F23B7FE32004A4385 /* SSOToken.swift in Sources */,
 				8592434F23ADE06E004CE61F /* Trade.swift in Sources */,
 				8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */,
 				8592434223AD403E004CE61F /* Signal.swift in Sources */,
@@ -330,13 +358,17 @@
 				8592435623B00CC6004CE61F /* Position.swift in Sources */,
 				8592435F23B1E59E004CE61F /* Config.swift in Sources */,
 				8592435423AF1AE4004CE61F /* Pullback.swift in Sources */,
+				856D958723B86039004A4385 /* IBOrder.swift in Sources */,
+				856D958523B85D88004A4385 /* IBTrade.swift in Sources */,
 				8592436123B55270004CE61F /* Double+Extensions.swift in Sources */,
 				8592433D23AC689E004CE61F /* CandleStick.swift in Sources */,
 				856D957C23B73B04004A4385 /* IBNetworkManager.swift in Sources */,
 				85582AB323B5E97800DC16AC /* ChartDataManager.swift in Sources */,
 				8592434D23ADABA7004CE61F /* Indicators.swift in Sources */,
+				856D958323B8518A004A4385 /* Account.swift in Sources */,
 				8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */,
 				8592435223ADE182004CE61F /* Trader.swift in Sources */,
+				856D958923B866F1004A4385 /* PlacedOrder.swift in Sources */,
 				85C8CED823B7130B00E75F76 /* ConfigViewController.swift in Sources */,
 				8592433A23AC41C8004CE61F /* Parser.swift in Sources */,
 			);

@@ -70,6 +70,10 @@ class ViewController: NSViewController {
         timer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: self, repeats: true)
         dataManager = ChartDataManager()
         dataManager?.delegate = self
+        
+        let networkManager = IBNetworkManager()
+        networkManager.validateSSO()
+        networkManager.authenticationStatus()
     }
     
     @objc func updateSystemTimeLabel() {

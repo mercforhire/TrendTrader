@@ -38,15 +38,15 @@ class ChartDataManager {
         let components1 = DateComponents(year: now.year(),
                                         month: now.month(),
                                         day: now.day(),
-                                        hour: Config.shared.SessionChartStartTime.0,
-                                        minute: Config.shared.SessionChartStartTime.1)
+                                        hour: Config.shared.ChartStart.0,
+                                        minute: Config.shared.ChartStart.1)
         self.chartStartTime = calendar.date(from: components1)!
         
         let components2 = DateComponents(year: now.year(),
                                         month: now.month(),
                                         day: now.day(),
-                                        hour: Config.shared.SessionChartEndTime.0,
-                                        minute: Config.shared.SessionChartEndTime.1)
+                                        hour: Config.shared.ChartEnd.0,
+                                        minute: Config.shared.ChartEnd.1)
         self.chartEndTime = calendar.date(from: components2)!
         self.updateFrequency = updateFrequency
         
@@ -68,15 +68,15 @@ class ChartDataManager {
                 let components1 = DateComponents(year: chartDate.year(),
                                                 month: chartDate.month(),
                                                 day: chartDate.day(),
-                                                hour: Config.shared.SessionChartStartTime.0,
-                                                minute: Config.shared.SessionChartStartTime.1)
+                                                hour: Config.shared.ChartStart.0,
+                                                minute: Config.shared.ChartStart.1)
                 self.chartStartTime = calendar.date(from: components1)!
                 
                 let components2 = DateComponents(year: chartDate.year(),
                                                 month: chartDate.month(),
                                                 day: chartDate.day(),
-                                                hour: Config.shared.SessionChartEndTime.0,
-                                                minute: Config.shared.SessionChartEndTime.1)
+                                                hour: Config.shared.ChartEnd.0,
+                                                minute: Config.shared.ChartEnd.1)
                 self.chartEndTime = calendar.date(from: components2)!
                 
                 self.chart = Chart.generateChart(ticker: "NQ",
@@ -212,6 +212,9 @@ class ChartDataManager {
     
     @objc
     private func updateChart() {
+        // only fetch data 3 seconds after a new minute has started, and keep fetching every 2 seconds
+        // until the last modified date for all 3 minute files are past the the start of the current minute
+        
         fetchChart { [weak self] chart in
             guard let self = self else { return }
             

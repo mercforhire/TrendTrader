@@ -11,7 +11,7 @@ import Charts
 
 class ChartViewController: NSViewController {
     
-    @IBOutlet weak var chartView: CandleStickChartView!
+    @IBOutlet private weak var chartView: CandleStickChartView!
     
     var chart: Chart?
     

@@ -26,6 +26,15 @@ enum TradeDirection {
             return "Short"
         }
     }
+    
+    func ibTradeString() -> String {
+        switch self {
+        case .long:
+            return "BUY"
+        case .short:
+            return "SELL"
+        }
+    }
 }
 
 enum SignalInteval {

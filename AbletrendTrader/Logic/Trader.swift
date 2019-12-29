@@ -29,14 +29,14 @@ class Trader {
         let components1 = DateComponents(year: chart.absLateBarData?.year(),
                                          month: chart.absLateBarData?.month(),
                                          day: chart.absLateBarData?.day(),
-                                         hour: Config.shared.HighRiskEntryStartTime.0,
-                                         minute: Config.shared.HighRiskEntryStartTime.1)
+                                         hour: Config.shared.HighRiskStart.0,
+                                         minute: Config.shared.HighRiskStart.1)
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: chart.absLateBarData?.year(),
                                          month: chart.absLateBarData?.month(),
                                          day: chart.absLateBarData?.day(),
-                                         hour: Config.shared.HighRiskEntryEndTime.0,
-                                         minute: Config.shared.HighRiskEntryEndTime.1)
+                                         hour: Config.shared.HighRiskEnd.0,
+                                         minute: Config.shared.HighRiskEnd.1)
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
@@ -48,14 +48,14 @@ class Trader {
         let components1 = DateComponents(year: chart.absLateBarData?.year(),
                                          month: chart.absLateBarData?.month(),
                                          day: chart.absLateBarData?.day(),
-                                         hour: Config.shared.TradingSessionStartTime.0,
-                                         minute: Config.shared.TradingSessionStartTime.1)
+                                         hour: Config.shared.TradingStart.0,
+                                         minute: Config.shared.TradingStart.1)
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: chart.absLateBarData?.year(),
                                          month: chart.absLateBarData?.month(),
                                          day: chart.absLateBarData?.day(),
-                                         hour: Config.shared.TradingSessionEndTime.0,
-                                         minute: Config.shared.TradingSessionEndTime.1)
+                                         hour: Config.shared.TradingEnd.0,
+                                         minute: Config.shared.TradingEnd.1)
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
@@ -67,8 +67,8 @@ class Trader {
         let components = DateComponents(year: chart.absLateBarData?.year(),
                                         month: chart.absLateBarData?.month(),
                                         day: chart.absLateBarData?.day(),
-                                        hour: Config.shared.ClearPositionTime.0,
-                                        minute: Config.shared.ClearPositionTime.1)
+                                        hour: Config.shared.ClearTime.0,
+                                        minute: Config.shared.ClearTime.1)
         let date: Date = calendar.date(from: components)!
         return date
     }
@@ -80,8 +80,8 @@ class Trader {
         let components = DateComponents(year: chart.absLateBarData?.year(),
                                         month: chart.absLateBarData?.month(),
                                         day: chart.absLateBarData?.day(),
-                                        hour: Config.shared.FlatPositionsTime.0,
-                                        minute: Config.shared.FlatPositionsTime.1)
+                                        hour: Config.shared.FlatTime.0,
+                                        minute: Config.shared.FlatTime.1)
         let date: Date = calendar.date(from: components)!
         return date
     }
@@ -231,7 +231,7 @@ class Trader {
             // Calculate the SL based on the 2 green bars(if applicable)
             var twoGreenBarsSL: Double = session.currentPosition!.direction == .long ? 0 : Double.greatestFiniteMagnitude
 
-            if session.currentPosition!.securedProfit < Config.shared.ProfitRequiredAbandonTwoGreenBarsExit,
+            if session.currentPosition!.securedProfit < Config.shared.SkipGreenBarsExit,
                 previousPriceBar.getBarColor() == .green,
                 priceBar.getBarColor() == .green,
                 let currentStop = priceBar.getOneMinSignal()?.stop {
@@ -241,7 +241,7 @@ class Trader {
                     let stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
                     
                     if stopLossFromGreenBars > currentStop,
-                        stopLossFromGreenBars - session.currentPosition!.entryPrice >= Config.shared.MinProfitToUseTwoGreenBarsExit,
+                        stopLossFromGreenBars - session.currentPosition!.entryPrice >= Config.shared.GreenBarsExit,
                         previousPriceBar.candleStick.close >= currentStop,
                         priceBar.candleStick.close >= currentStop {
                         
@@ -256,7 +256,7 @@ class Trader {
                     let stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
                     
                     if stopLossFromGreenBars < currentStop,
-                        session.currentPosition!.entryPrice - stopLossFromGreenBars >= Config.shared.MinProfitToUseTwoGreenBarsExit,
+                        session.currentPosition!.entryPrice - stopLossFromGreenBars >= Config.shared.GreenBarsExit,
                         previousPriceBar.candleStick.close <= currentStop,
                         priceBar.candleStick.close <= currentStop {
                         
@@ -371,6 +371,11 @@ class Trader {
     }
     
     private func handleOpeningNewTrade(currentBar: PriceBar) -> TradeActionType {
+        // stop trading if P&L <= MaxDailyLoss
+        if session.getTotalPAndL() <= Config.shared.MaxDailyLoss {
+            return .noAction
+        }
+        
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
         if !TradingTimeInterval.contains(currentBar.candleStick.time) && !Config.shared.ByPassTradingTimeRestrictions {
             return .noAction
@@ -392,7 +397,7 @@ class Trader {
             else if chart.checkAllSameDirection(direction: currentBarDirection, fromKey: lastTrade.exit.identifier, toKey: currentBar.identifier) {
                 // If the previous trade profit is higher than ProfitRequiredToReenterTradeonPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-                if (lastTrade.profit ?? 0) > Config.shared.ProfitRequiredToReenterTradeonPullback {
+                if (lastTrade.profit ?? 0) > Config.shared.EnterOnPullback {
                     return seekToOpenPosition(bar: currentBar, entryType: .pullBack)
                 } else {
                     return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
@@ -589,164 +594,4 @@ class Trader {
         
         return earliest2MinBarConfirmationBar != nil && earliest3MinBarConfirmationBar != nil
     }
-    
-    // NOT USED:
-    
-//    // given a starting and end price bar, find the 2 consecutive bars with the highest "low"
-//    func findPairOfGreenBarsWithHighestLow(start: PriceBar, end: PriceBar) -> (PriceBar, PriceBar)? {
-//        guard let startIndex = simChart.timeKeys.firstIndex(of: start.identifier),
-//            let endIndex = simChart.timeKeys.firstIndex(of: end.identifier),
-//            startIndex < endIndex else {
-//            return nil
-//        }
-//
-//        var indexOfTheFirstBar: Int?
-//        var highestLow: Double?
-//
-//        for i in startIndex..<endIndex {
-//            // skip any pair bars that are not green
-//            guard let leftBar = simChart.priceBars[simChart.timeKeys[i]],
-//                let rightBar = simChart.priceBars[simChart.timeKeys[i + 1]],
-//                leftBar.getBarColor() == .green,
-//                rightBar.getBarColor() == .green else {
-//                continue
-//            }
-//
-//            // found a pair of green bars:
-//
-//            // if no green pair have been found yet, save this pair as the default
-//            if indexOfTheFirstBar == nil && highestLow == nil {
-//                indexOfTheFirstBar = i
-//                highestLow = max(leftBar.candleStick.low, rightBar.candleStick.low)
-//            }
-//            // if the highestLow found so far is lower than this new pair's highest "low", update the data
-//            else if let highestLowSoFar = highestLow, max(leftBar.candleStick.low, rightBar.candleStick.low) > highestLowSoFar {
-//                indexOfTheFirstBar = i
-//                highestLow = max(leftBar.candleStick.low, rightBar.candleStick.low)
-//            }
-//        }
-//
-//        if let indexOfTheFirstBar = indexOfTheFirstBar,
-//            let leftBar: PriceBar = simChart.priceBars[simChart.timeKeys[indexOfTheFirstBar]],
-//            let rightBar = simChart.priceBars[simChart.timeKeys[indexOfTheFirstBar + 1]] {
-//            return (leftBar, rightBar)
-//        }
-//
-//        return nil
-//    }
-//    // given a starting and end price bar, find the 2 consecutive bars with the lowest "high"
-//    private func findPairOfGreenBarsWithLowestHigh(start: PriceBar, end: PriceBar) -> (PriceBar, PriceBar)? {
-//        guard let startIndex = simChart.timeKeys.firstIndex(of: start.identifier),
-//            let endIndex = simChart.timeKeys.firstIndex(of: end.identifier),
-//            startIndex < endIndex else {
-//            return nil
-//        }
-//
-//        var indexOfTheFirstBar: Int?
-//        var lowestHigh: Double?
-//
-//        for i in startIndex..<endIndex {
-//            // skip any pair bars that are not green
-//            guard let leftBar = simChart.priceBars[simChart.timeKeys[i]],
-//                let rightBar = simChart.priceBars[simChart.timeKeys[i + 1]],
-//                leftBar.getBarColor() == .green,
-//                rightBar.getBarColor() == .green else {
-//                continue
-//            }
-//
-//            // found a pair of green bars:
-//
-//            // if no green pair have been found yet, save this pair as the default
-//            if indexOfTheFirstBar == nil && lowestHigh == nil {
-//                indexOfTheFirstBar = i
-//                lowestHigh = max(leftBar.candleStick.low, rightBar.candleStick.low)
-//            }
-//            // if the lowest high found so far is higher than this new pair's lowest "high", update the data
-//            else if let lowestHighSoFar = lowestHigh, min(leftBar.candleStick.high, rightBar.candleStick.high) < lowestHighSoFar {
-//                indexOfTheFirstBar = i
-//                lowestHigh = min(leftBar.candleStick.high, rightBar.candleStick.high)
-//            }
-//        }
-//
-//        if let indexOfTheFirstBar = indexOfTheFirstBar,
-//            let leftBar: PriceBar = simChart.priceBars[simChart.timeKeys[indexOfTheFirstBar]],
-//            let rightBar = simChart.priceBars[simChart.timeKeys[indexOfTheFirstBar + 1]] {
-//            return (leftBar, rightBar)
-//        }
-//
-//        return nil
-//    }
-//
-//
-//    // find series of descending green bars with the lowest low
-//    // IE: 5,6,4,3,2,1,2,4,5
-//    // the lowest series of descending numbers is 6,4,3,2,1
-//    private func findLowestSeriesOfDescendingGreenBars(priceBars: [PriceBar]) -> [PriceBar] {
-//        // find the lowest bar first and move left from there
-//
-//        let priceBarsSorted = priceBars.sorted { (left, right) -> Bool in
-//            return left.candleStick.low < right.candleStick.low
-//        }
-//
-//        guard let lowestBar: PriceBar = priceBarsSorted.first else {
-//            return []
-//        }
-//
-//        var lowestSeriesOfDescendingGreenBars: [PriceBar] = []
-//        var lowestBarIndex: Int = priceBars.firstIndex { (priceBar) -> Bool in
-//            return priceBar.identifier == lowestBar.identifier
-//            } ?? 0
-//
-//        while lowestBarIndex >= 0 {
-//            if lowestSeriesOfDescendingGreenBars.isEmpty {
-//                lowestSeriesOfDescendingGreenBars.append(priceBars[lowestBarIndex])
-//            } else if let firstDescendingBar = lowestSeriesOfDescendingGreenBars.first,
-//                priceBars[lowestBarIndex].candleStick.low > firstDescendingBar.candleStick.low {
-//                lowestSeriesOfDescendingGreenBars.insert(priceBars[lowestBarIndex], at: 0)
-//            } else if let firstDescendingBar = lowestSeriesOfDescendingGreenBars.first,
-//                priceBars[lowestBarIndex].candleStick.low < firstDescendingBar.candleStick.low {
-//                break
-//            }
-//
-//            lowestBarIndex -= 1
-//        }
-//
-//        return lowestSeriesOfDescendingGreenBars
-//    }
-//
-//    // find series of ascending green bars with the highest high
-//    // IE: 5,6,4,3,2,1,2,4,5
-//    // the highest series of ascending numbers is 1,2,4,5
-//    private func findHighestSeriesOfAscendingGreenBars(priceBars: [PriceBar]) -> [PriceBar] {
-//        // find the highest bar first and move left from there
-//
-//        let priceBarsSorted = priceBars.sorted { (left, right) -> Bool in
-//            return left.candleStick.high > right.candleStick.high
-//        }
-//
-//        guard let highestBar: PriceBar = priceBarsSorted.first else {
-//            return []
-//        }
-//
-//        var highestSeriesOfAscendingGreenBars: [PriceBar] = []
-//        var highestBarIndex: Int = priceBars.firstIndex { (priceBar) -> Bool in
-//            return priceBar.identifier == highestBar.identifier
-//            } ?? 0
-//
-//        while highestBarIndex >= 0 {
-//            if highestSeriesOfAscendingGreenBars.isEmpty {
-//                highestSeriesOfAscendingGreenBars.append(priceBars[highestBarIndex])
-//            } else if let firstAscendingBar = highestSeriesOfAscendingGreenBars.first,
-//                priceBars[highestBarIndex].candleStick.high < firstAscendingBar.candleStick.high {
-//                highestSeriesOfAscendingGreenBars.insert(priceBars[highestBarIndex], at: 0)
-//            } else if let firstAscendingBar = highestSeriesOfAscendingGreenBars.first,
-//                priceBars[highestBarIndex].candleStick.high > firstAscendingBar.candleStick.high {
-//                break
-//            }
-//
-//            highestBarIndex -= 1
-//        }
-//
-//        return highestSeriesOfAscendingGreenBars
-//    }
 }

@@ -6,6 +6,6 @@ target 'AbletrendTrader' do
   use_frameworks!
 
   # Pods for AbletrendTrader
-  pod 'Alamofire', '~> 5.0.0-rc.3'
+  pod 'Alamofire', '~> 4.9.1'
   pod 'Charts'
 end

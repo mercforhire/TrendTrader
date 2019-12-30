@@ -81,6 +81,8 @@ class Parser {
     static func generatePriceBar(priceBarString: String, number: Int) -> CandleStick? {
         let components = priceBarString.components(separatedBy: "\t")
         
+        guard components.count >= 7 else { return nil }
+        
         // generate the time from [0] and [1]
         let dateComponent: String = components[0]
         let timeComponent: String = components[1]
@@ -107,6 +109,8 @@ class Parser {
     
     static func generateSignal(signalString: String, inteval: SignalInteval) -> Signal? {
         let components = signalString.components(separatedBy: "\t")
+        
+        guard components.count >= 10 else { return nil }
         
         // generate the time from [0] and [1]
         let dateComponent: String = components[0]

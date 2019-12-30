@@ -26,15 +26,15 @@ class Trader {
     private var TimeIntervalForHighRiskEntry: DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: chart.absLateBarData?.year(),
-                                         month: chart.absLateBarData?.month(),
-                                         day: chart.absLateBarData?.day(),
+        let components1 = DateComponents(year: chart.absLastBarDate?.year(),
+                                         month: chart.absLastBarDate?.month(),
+                                         day: chart.absLastBarDate?.day(),
                                          hour: Config.shared.HighRiskStart.0,
                                          minute: Config.shared.HighRiskStart.1)
         let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: chart.absLateBarData?.year(),
-                                         month: chart.absLateBarData?.month(),
-                                         day: chart.absLateBarData?.day(),
+        let components2 = DateComponents(year: chart.absLastBarDate?.year(),
+                                         month: chart.absLastBarDate?.month(),
+                                         day: chart.absLastBarDate?.day(),
                                          hour: Config.shared.HighRiskEnd.0,
                                          minute: Config.shared.HighRiskEnd.1)
         let endDate: Date = calendar.date(from: components2)!
@@ -45,15 +45,15 @@ class Trader {
     private var TradingTimeInterval: DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: chart.absLateBarData?.year(),
-                                         month: chart.absLateBarData?.month(),
-                                         day: chart.absLateBarData?.day(),
+        let components1 = DateComponents(year: chart.absLastBarDate?.year(),
+                                         month: chart.absLastBarDate?.month(),
+                                         day: chart.absLastBarDate?.day(),
                                          hour: Config.shared.TradingStart.0,
                                          minute: Config.shared.TradingStart.1)
         let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: chart.absLateBarData?.year(),
-                                         month: chart.absLateBarData?.month(),
-                                         day: chart.absLateBarData?.day(),
+        let components2 = DateComponents(year: chart.absLastBarDate?.year(),
+                                         month: chart.absLastBarDate?.month(),
+                                         day: chart.absLastBarDate?.day(),
                                          hour: Config.shared.TradingEnd.0,
                                          minute: Config.shared.TradingEnd.1)
         let endDate: Date = calendar.date(from: components2)!
@@ -64,9 +64,9 @@ class Trader {
     private var ClearPositionTime: Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: chart.absLateBarData?.year(),
-                                        month: chart.absLateBarData?.month(),
-                                        day: chart.absLateBarData?.day(),
+        let components = DateComponents(year: chart.absLastBarDate?.year(),
+                                        month: chart.absLastBarDate?.month(),
+                                        day: chart.absLastBarDate?.day(),
                                         hour: Config.shared.ClearTime.0,
                                         minute: Config.shared.ClearTime.1)
         let date: Date = calendar.date(from: components)!
@@ -77,9 +77,9 @@ class Trader {
     private var FlatPositionsTime: Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: chart.absLateBarData?.year(),
-                                        month: chart.absLateBarData?.month(),
-                                        day: chart.absLateBarData?.day(),
+        let components = DateComponents(year: chart.absLastBarDate?.year(),
+                                        month: chart.absLastBarDate?.month(),
+                                        day: chart.absLastBarDate?.day(),
                                         hour: Config.shared.FlatTime.0,
                                         minute: Config.shared.FlatTime.1)
         let date: Date = calendar.date(from: components)!

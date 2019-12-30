@@ -11,6 +11,14 @@ import Foundation
 extension Date {
     static let DefaultTimeZone: TimeZone = TimeZone(abbreviation: "EST")!
     
+    func second(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
+        var calendar = Calendar.current
+        if let timezone = timeZone {
+            calendar.timeZone = timezone
+        }
+        return calendar.component(.second, from: self) - (zeroIndex ? 1 : 0)
+    }
+    
     func minute(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
         var calendar = Calendar.current
         if let timezone = timeZone {

@@ -16,11 +16,11 @@ enum StopLossSource {
     func reason() -> String {
         switch self {
         case .supportResistanceLevel:
-            return "Support Resistance Level"
+            return "Prev S/R"
         case .twoGreenBars:
-            return "Two Green Bars"
+            return "Green bars"
         case .currentBar:
-            return "Current bar"
+            return "Cur S/R"
         }
     }
 }

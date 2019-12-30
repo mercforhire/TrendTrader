@@ -26,8 +26,32 @@ enum OrderType {
     }
 }
 
+enum NetworkError: Error {
+    case ssoAuthenticationFailed
+    case fetchAuthStatusFailed
+    case tickleFailed
+    case logoffFailed
+    case fetchAccountsFailed
+    case fetchTradesFailed
+    case fetchLiveOrdersFailed
+    case orderReplyFailed
+    case placeOrderFailed
+    case modifyOrderFailed
+    case deleteOrderFailed
+}
+
 class IBNetworkManager {
+    static let shared = IBNetworkManager()
+    
     private let afManager: Alamofire.SessionManager
+    private let ssoTokenBuilder: SSOTokenBuilder = SSOTokenBuilder()
+    private let authStatusBuilder: AuthStatusBuilder = AuthStatusBuilder()
+    private let accountsBuilder: AccountsBuilder = AccountsBuilder()
+    private let ibTradesBuilder: IBTradesBuilder = IBTradesBuilder()
+    private let liveOrdersResponseBuilder: LiveOrdersResponseBuilder = LiveOrdersResponseBuilder()
+    private let placedOrderResponseBuilder: PlacedOrderResponseBuilder = PlacedOrderResponseBuilder()
+    
+    var selectedAccount: Account?
     
     init() {
         afManager = Alamofire.SessionManager.default
@@ -56,137 +80,114 @@ class IBNetworkManager {
     
     // Validate SSO
     // https://localhost:5000/v1/portal/sso/validate
-//    {
-//    "USER_ID": 43778794,
-//    "USER_NAME": "feiyan598",
-//    "RESULT": true,
-//    "SF_ENABLED": false,
-//    "IS_FREE_TRIAL": false,
-//    "IP": "70.52.163.235",
-//    "EXPIRES": 230411,
-//    "lastAccessed": 1577567825252,
-//    "loginType": 2,
-//    "PAPER_USER_NAME": "feiyan598"
-//    }
-    func validateSSO() {
-        afManager.request("https://localhost:5000/v1/portal/sso/validate").responseJSON { response in
-            debugPrint("Response: \(response)")
+    func validateSSO(completionHandler: @escaping (Swift.Result<SSOToken, NetworkError>) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/sso/validate").responseData { [weak self] response in
+            guard let self = self else { return }
+            
+            if let data = response.data, let ssoToken = self.ssoTokenBuilder.buildSSOTokenFrom(data) {
+                completionHandler(.success(ssoToken))
+            } else {
+                completionHandler(.failure(.ssoAuthenticationFailed))
+            }
         }
     }
     
     // Authentication Status
     // https://localhost:5000/v1/portal/iserver/auth/status
-//    {
-//    "authenticated": true,
-//    "competing": false,
-//    "connected": true,
-//    "message": "",
-//    "MAC": "98:F2:B3:23:2E:68",
-//    "fail": ""
-//    }
-    func authenticationStatus() {
-        afManager.request("https://localhost:5000/v1/portal/iserver/auth/status", method: .post).responseJSON { response in
-            debugPrint("Response: \(response)")
+    func fetchAuthenticationStatus(completionHandler: @escaping (Swift.Result<AuthStatus, NetworkError>) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/iserver/auth/status", method: .post).responseData { [weak self] response in
+            guard let self = self else { return }
+            
+            if let data = response.data, let authStatus = self.authStatusBuilder.buildAuthStatusFrom(data) {
+                completionHandler(.success(authStatus))
+            } else {
+                completionHandler(.failure(.fetchAuthStatusFailed))
+            }
         }
     }
     
     // Tries to re-authenticate to Brokerage
     // https://localhost:5000/v1/portal/iserver/reauthenticate
-    func reauthenticate() {
-        afManager.request("https://localhost:5000/v1/portal/iserver/reauthenticate", method: .post).responseJSON { response in
-            debugPrint("Response: \(response)")
+    func reauthenticate(completionHandler: @escaping (Swift.Result<AuthStatus, NetworkError>) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/iserver/reauthenticate", method: .post).responseData { [weak self] response in
+            guard let self = self else { return }
+            
+            if let data = response.data, let authStatus = self.authStatusBuilder.buildAuthStatusFrom(data) {
+                completionHandler(.success(authStatus))
+            } else {
+                completionHandler(.failure(.fetchAuthStatusFailed))
+            }
         }
     }
     
     // Ping the server to keep the session open
     // https://localhost:5000/v1/portal/tickle
-    func pingServer() {
+    func pingServer(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/tickle", method: .post).responseJSON { response in
-            debugPrint("Response: \(response)")
+            if response.response?.statusCode == 200 {
+                completionHandler(.success(true))
+            } else {
+                completionHandler(.failure(.tickleFailed))
+            }
         }
     }
     
     // Ends the current session
     // https://localhost:5000/v1/portal/logout
-    func logOut() {
+    func logOut(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/logout", method: .post).responseJSON { response in
-            debugPrint("Response: \(response)")
+            if response.response?.statusCode == 200 {
+                completionHandler(.success(true))
+            } else {
+                completionHandler(.failure(.logoffFailed))
+            }
         }
     }
     
     // Portfolio Accounts
     // https://localhost:5000/v1/portal/portfolio/accounts
-//    [
-//      {
-//        "id": "string",
-//        "accountId": "string",
-//        "accountVan": "string",
-//        "accountTitle": "string",
-//        "displayName": "string",
-//        "accountAlias": "string",
-//        "accountStatus": 0,
-//        "currency": "string",
-//        "type": "string",
-//        "tradingType": "string",
-//        "faclient": true,
-//        "parent": "string",
-//        "desc": "string",
-//        "covestor": true,
-//        "master": {
-//          "title": "string",
-//          "officialTitle": "string"
-//        }
-//      }
-//    ]
-    func fetchAccounts() {
-        afManager.request("https://localhost:5000/v1/portal/portfolio/accounts").responseJSON { response in
-            debugPrint("Response: \(response)")
+    func fetchAccounts(completionHandler: @escaping (Swift.Result<[Account], NetworkError>) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/portfolio/accounts").responseData { [weak self] response in
+            guard let self = self else { return }
+            
+            if let data = response.data, let accounts = self.accountsBuilder.buildAccountsFrom(data) {
+                completionHandler(.success(accounts))
+            } else {
+                completionHandler(.failure(.fetchAccountsFailed))
+            }
         }
     }
     
     // List of Trades
     // https://localhost:5000/v1/portal/iserver/account/trades
-//    [
-//      {
-//        "execution_id": "string",
-//        "symbol": "string",
-//        "side": "string",
-//        "order_description": "string",
-//        "trade_time": "string",
-//        "trade_time_r": 0,
-//        "size": "string",
-//        "price": "string",
-//        "submitter": "string",
-//        "exchange": "string",
-//        "comission": 0,
-//        "net_amount": 0,
-//        "account": "string",
-//        "company_name": "string",
-//        "contract_description_1": "string",
-//        "sec_type": "string",
-//        "conidex": "string",
-//        "position": "string",
-//        "clearing_id": "string",
-//        "clearing_name": "string",
-//        "order_ref": "string"
-//      }
-//    ]
-    func fetchTrades() {
-        afManager.request("https://localhost:5000/v1/portal/iserver/account/trades").responseJSON { response in
-            debugPrint("Response: \(response)")
+    func fetchTrades(completionHandler: @escaping (Swift.Result<[IBTrade], NetworkError>) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/iserver/account/trades").responseData { [weak self] response in
+            guard let self = self else { return }
+            
+            if let data = response.data, let ibTrades = self.ibTradesBuilder.buildIBTradesFrom(data) {
+                completionHandler(.success(ibTrades))
+            } else {
+                completionHandler(.failure(.fetchTradesFailed))
+            }
         }
     }
     
     // Live Orders
     // https://localhost:5000/v1/portal/iserver/account/orders
-    func fetchLiveOrders() {
-        afManager.request("https://localhost:5000/v1/portal/iserver/account/orders").responseJSON { response in
-            debugPrint("Response: \(response)")
+    func fetchLiveOrders(completionHandler: @escaping (Swift.Result<LiveOrdersResponse, NetworkError>) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/iserver/account/orders").responseData { [weak self] response in
+            guard let self = self else { return }
+            
+            if let data = response.data, let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data) {
+                completionHandler(.success(liveOrdersResponse))
+            } else {
+                completionHandler(.failure(.fetchLiveOrdersFailed))
+            }
         }
     }
     
     // Place Order
-    func replaceOrder(accountId: String, orderType: OrderType, direction: TradeDirection, price: Double? = nil, orderId: String) {
+    func placeOrder(accountId: String, orderType: OrderType, direction: TradeDirection, price: Double? = nil, orderId: String, completionHandler: @escaping (Swift.Result<PlacedOrderResponse, NetworkError>) -> Void) {
         let parameters: [String : Any] = ["conid": Config.shared.ConId,
                                           "secType": "FUT",
                                           "orderType": orderType.typeString(),
@@ -200,17 +201,41 @@ class IBNetworkManager {
         
         afManager.request("https://localhost:5000/v1/portal/iserver/account/" + accountId + "/order",
                           method: .post,
-                          parameters: parameters).responseJSON { response in
-            debugPrint("Response: \(response)")
+                          parameters: parameters).responseData { [weak self] response in
+                            guard let self = self else { return }
+                            
+                            if let data = response.data, let orderResponse = self.placedOrderResponseBuilder.buildAccountsFrom(data) {
+                                completionHandler(.success(orderResponse))
+                            } else {
+                                completionHandler(.failure(.placeOrderFailed))
+                            }
         }
     }
     
     
     // Place Order Reply
-    
+    // https://localhost:5000/v1/portal/iserver/reply/{replyid}
+    func placeOrderReply(replyId: String, answer: Bool, completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+        let parameters: [String : Any] = ["confirmed": answer]
+        
+        afManager.request("https://localhost:5000/v1/portal/iserver/reply/" + replyId,
+                          method: .post,
+                          parameters: parameters).responseJSON { response in
+                            if response.response?.statusCode == 200 {
+                                completionHandler(.success(true))
+                            } else {
+                                completionHandler(.failure(.orderReplyFailed))
+                            }
+        }
+    }
     
     // Modify Order
-    func modifyOrder(accountId: String, orderType: OrderType, direction: TradeDirection, price: Double, orderId: String) {
+    func modifyOrder(accountId: String,
+                     orderType: OrderType,
+                     direction: TradeDirection,
+                     price: Double,
+                     orderId: String,
+                     completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         let parameters: [String : Any] = [
             "acctId": accountId,
             "conid": Config.shared.ConId,
@@ -226,15 +251,25 @@ class IBNetworkManager {
         afManager.request("https://localhost:5000/v1/portal/iserver/account/" + accountId + "/order/" + orderId,
                           method: .post,
                           parameters: parameters).responseJSON { response in
-            debugPrint("Response: \(response)")
+                            if response.response?.statusCode == 200 {
+                                completionHandler(.success(true))
+                            } else {
+                                completionHandler(.failure(.modifyOrderFailed))
+                            }
         }
     }
     
     // Delete Order
-    func deleteOrder(accountId: String, orderId: String) {
+    func deleteOrder(accountId: String,
+                     orderId: String,
+                     completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/account/" + accountId + "/order/" + orderId,
                           method: .delete).responseJSON { response in
-            debugPrint("Response: \(response)")
+                            if response.response?.statusCode == 200 {
+                                completionHandler(.success(true))
+                            } else {
+                                completionHandler(.failure(.deleteOrderFailed))
+                            }
         }
     }
 }

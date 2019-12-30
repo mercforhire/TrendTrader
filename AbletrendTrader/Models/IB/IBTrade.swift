@@ -8,24 +8,34 @@
 
 import Foundation
 
-struct IBTrade {
+struct IBTrade: Codable {
     var executionId: String
     var symbol: String
     var side: String
-    var orderDescription: String
     var tradeTime: String
     var tradeTime_r: Int
     var size: String
     var price: String
-    var submitter: String
-    var exchange: String
     var comission: Int
     var netAmount: Int
     var account: String
     var secType: String
     var conidex: String
     var position: String
-    var clearingId: String
-    var clearingName: String
-    var orderRef: String
+    
+    enum CodingKeys: String, CodingKey {
+        case executionId = "execution_id"
+        case symbol = "symbol"
+        case side = "side"
+        case tradeTime = "trade_time"
+        case tradeTime_r = "trade_time_r"
+        case size = "size"
+        case price = "price"
+        case comission = "comission"
+        case netAmount = "net_amount"
+        case account = "account"
+        case secType = "sec_type"
+        case conidex = "conidex"
+        case position = "position"
+    }
 }

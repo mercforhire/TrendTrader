@@ -8,7 +8,12 @@
 
 import Foundation
 
-struct SSOToken {
-    var userID: Int // USER_ID
-    var userName: String // USER_NAME
+struct SSOToken: Codable {
+    var userId: Int
+    var userName: String
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "USER_ID"
+        case userName = "USER_NAME"
+    }
 }

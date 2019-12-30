@@ -9,6 +9,20 @@
 import Cocoa
 import Charts
 
+class DateValueFormatter: NSObject, IAxisValueFormatter {
+    private let dateFormatter = DateFormatter()
+    var startDate: Date?
+    
+    override init() {
+        dateFormatter.dateFormat = "HH:mm"
+        super.init()
+    }
+    
+    public func stringForValue(_ value: Double, axis: AxisBase?) -> String {
+        return dateFormatter.string(from: (startDate ?? Date()).addingTimeInterval(TimeInterval(value * 60)))
+    }
+}
+
 class ChartViewController: NSViewController {
     
     @IBOutlet private weak var chartView: CandleStickChartView!
@@ -38,11 +52,10 @@ class ChartViewController: NSViewController {
         chartView.xAxis.labelPosition = .bottom
         chartView.xAxis.labelFont = NSFont(name: "HelveticaNeue-Light", size: 10)!
         chartView.xAxis.drawGridLinesEnabled = false
-        
     }
     
     func generateCandleStickChartDate() {
-        guard let chart = chart else { return }
+        guard let chart = chart, let startDate = chart.startDate else { return }
         
         let set1 = CandleChartDataSet(entries: chart.generateCandleStickData(), label: "NQ futures")
         set1.axisDependency = .left
@@ -59,6 +72,10 @@ class ChartViewController: NSViewController {
         
         chartView.leftAxis.axisMaximum = set1.yMax
         chartView.leftAxis.axisMinimum = set1.yMin
+        
+        let dateValueFormatter = DateValueFormatter()
+        dateValueFormatter.startDate = chart.startDate
+        chartView.xAxis.valueFormatter = dateValueFormatter
         
         let data = CandleChartData(dataSet: set1)
         chartView.data = data

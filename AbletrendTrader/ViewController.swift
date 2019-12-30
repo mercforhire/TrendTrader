@@ -31,22 +31,23 @@ class ViewController: NSViewController {
     private var listOfTrades: [TradeDisplayable]?
     private var realTimeChart: Chart? {
         didSet {
-            if let chart = realTimeChart, let lastDate = chart.absLateBarData {
+            if let chart = realTimeChart, let lastDate = chart.absLastBarDate {
                 latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
             } else {
                 latestDataTimeLabel.stringValue = "Latest data time: --:--"
             }
         }
-    }
-    // all or subset of the full chart, simulating a particular moment during the session and used by the Trader algo
+    } // all or subset of the full chart, simulating a particular moment during the session and used by the Trader algo
     
     weak var delegate: DataManagerDelegate?
+    private var latestProcessedTimeKey: String?
     
     func setupUI() {
         dateFormatter.timeStyle = .medium
         dateFormatter.timeZone = Date.DefaultTimeZone
         
         latestDataTimeLabel.stringValue = "Latest data time: --:--"
+        systemTimeLabel.stringValue = "--:--"
         simTimeLabel.stringValue = "--:--"
         
         beginningButton.isEnabled = false
@@ -67,13 +68,10 @@ class ViewController: NSViewController {
 
         // Do any additional setup after loading the view.
         setupUI()
-        timer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: self, repeats: true)
+        
+        timer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
         dataManager = ChartDataManager()
         dataManager?.delegate = self
-        
-        let networkManager = IBNetworkManager()
-        networkManager.validateSSO()
-        networkManager.authenticationStatus()
     }
     
     @objc func updateSystemTimeLabel() {
@@ -175,7 +173,7 @@ extension ViewController: DataManagerDelegate {
         
         trader?.chart = realTimeChart
         
-        if let actions = trader?.process() {
+        if let actions = trader?.process(), latestProcessedTimeKey != realTimeChart.lastTimeKey {
             for action in actions {
                 switch action {
                 case .noAction:
@@ -191,6 +189,7 @@ extension ViewController: DataManagerDelegate {
                 }
             }
             updateTradesList()
+            latestProcessedTimeKey = realTimeChart.lastTimeKey
         }
     }
 }

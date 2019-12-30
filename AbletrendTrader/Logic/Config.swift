@@ -11,11 +11,11 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    var dataServerURL = "http://192.168.0.121/"
+    var dataServerURL: String = "http://192.168.0.121/"
     
-    var fileName1 = "NQ #F 1min.txt"
-    var fileName2 = "NQ #F 2min.txt"
-    var fileName3 = "NQ #F 3min.txt"
+    var fileName1: String = "1m.txt"
+    var fileName2: String = "2m.txt"
+    var fileName3: String = "3m.txt"
     
     var MaxRisk: Double = 10.0
     
@@ -36,8 +36,8 @@ class Config {
     var HighRiskStart: (Int, Int) = (9, 30) // Hour/Minute
     var HighRiskEnd: (Int, Int) = (10, 0) // Hour/Minute
     
-    var ChartStart: (Int, Int) = (8, 30)
-    var ChartEnd: (Int, Int) = (17, 0)
+    var ChartStart: (Int, Int) = (0, 0)
+    var ChartEnd: (Int, Int) = (23, 59)
     
     var TradingStart: (Int, Int) = (9, 20)
     var TradingEnd: (Int, Int) = (15, 55)
@@ -51,5 +51,5 @@ class Config {
     var ConId = 11004958
     var PositionSize: Int = 1
     
-    let ByPassTradingTimeRestrictions = false
+    let ByPassTradingTimeRestrictions = true
 }

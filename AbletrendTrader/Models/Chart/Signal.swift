@@ -41,6 +41,17 @@ enum SignalInteval {
     case oneMin
     case twoMin
     case threeMin
+    
+    func text() -> String {
+        switch self {
+        case .oneMin:
+            return "1"
+        case .twoMin:
+            return "2"
+        case .threeMin:
+            return "3"
+        }
+    }
 }
 
 struct Signal {

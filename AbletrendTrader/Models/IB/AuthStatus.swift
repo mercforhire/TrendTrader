@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct AuthStatus {
+struct AuthStatus: Codable {
     var authenticated: Bool // authenticated
     var connected: Bool  // connected
     var message: String // message

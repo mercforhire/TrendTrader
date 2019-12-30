@@ -28,7 +28,7 @@ struct Chart {
         return startBar?.candleStick.time
     }
     
-    var absLateBarData: Date? {
+    var absLastBarDate: Date? {
         guard let absLastTimeKey = timeKeys.last, let absLastBar = priceBars[absLastTimeKey] else { return nil }
         
         return absLastBar.candleStick.time

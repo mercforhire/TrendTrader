@@ -7,14 +7,14 @@
 //
 
 import Foundation
+import Alamofire
 
 protocol DataManagerDelegate: class {
     func chartUpdated(chart: Chart)
 }
 
 class ChartDataManager {
-    private let readFromServer = false
-    private let simulateMinByMinData = true
+    private let readFromServer = true
     
     private var oneMinText: String?
     private var twoMinText: String?
@@ -30,8 +30,9 @@ class ChartDataManager {
     private var timer: Timer?
     
     weak var delegate: DataManagerDelegate?
+    var fetching = false
     
-    init(updateFrequency: TimeInterval = 10) {
+    init(updateFrequency: TimeInterval = 5) {
         let now = Date()
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
@@ -82,89 +83,121 @@ class ChartDataManager {
                 self.chart = Chart.generateChart(ticker: "NQ",
                                                  candleSticks: candleSticks,
                                                  indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],
-                                                 startTime: Config.shared.ByPassTradingTimeRestrictions ? nil : self.chartStartTime,
-                                                 cutOffTime: Config.shared.ByPassTradingTimeRestrictions ? nil : self.chartEndTime)
+                                                 startTime: self.chartStartTime,
+                                                 cutOffTime: self.chartEndTime)
                 
-                if simulateMinByMinData {
-                    _ = simulateMinPassed()
-                }
+                _ = simulateMinPassed()
             }
         }
     }
     
     func fetchChart(completion: @escaping (_ chart: Chart?) -> Void) {
         if readFromServer {
-            let url = URL(string: Config.shared.dataServerURL)
-            let dispatchGroup = DispatchGroup()
-            var hasError: Bool = false
+            var oneMinUrl: String?
+            var twoMinUrl: String?
+            var threeMinUrl: String?
             
-            dispatchGroup.enter()
-            print("Fetching chart data...")
-            getData(from: (url?.appendingPathComponent(Config.shared.fileName1))!) { data, response, error in
-                DispatchQueue.main.async() {
-                    if let data = data {
-                        self.oneMinText = String(decoding: data, as: UTF8.self)
-                    } else if error != nil {
-                        hasError = true
-                    }
-                    dispatchGroup.leave()
+            let dispatchGroup1 = DispatchGroup()
+            
+            print("Fetching urls...")
+            dispatchGroup1.enter()
+            fetchLatestAvailableUrl(interval: .oneMin, completion: { url in
+                oneMinUrl = url
+                dispatchGroup1.leave()
+            })
+            
+            dispatchGroup1.enter()
+            fetchLatestAvailableUrl(interval: .twoMin, completion: { url in
+                twoMinUrl = url
+                dispatchGroup1.leave()
+            })
+            
+            dispatchGroup1.enter()
+            fetchLatestAvailableUrl(interval: .threeMin, completion: { url in
+                threeMinUrl = url
+                dispatchGroup1.leave()
+            })
+            
+            dispatchGroup1.notify(queue: DispatchQueue.main) { [weak self] in
+                guard let self = self,
+                    let oneMinUrl = oneMinUrl,
+                    let twoMinUrl = twoMinUrl,
+                    let threeMinUrl = threeMinUrl else {
+                    return
                 }
-            }
-            
-            dispatchGroup.enter()
-            getData(from: (url?.appendingPathComponent(Config.shared.fileName2))!) { data, response, error in
-                DispatchQueue.main.async() {
-                    if let data = data {
-                        self.twoMinText = String(decoding: data, as: UTF8.self)
-                    } else if error != nil {
-                        hasError = true
-                    }
-                    dispatchGroup.leave()
-                }
-            }
-            
-            dispatchGroup.enter()
-            getData(from: (url?.appendingPathComponent(Config.shared.fileName3))!) { data, response, error in
-                DispatchQueue.main.async() {
-                    if let data = data {
-                        self.threeMinText = String(decoding: data, as: UTF8.self)
-                    } else if error != nil {
-                        hasError = true
-                    }
-                    dispatchGroup.leave()
-                }
-            }
-            
-            dispatchGroup.notify(queue: DispatchQueue.main) { [weak self] in
-                guard let self = self else { return }
                 
-                if hasError {
-                    print("Chart data fetching failed")
-                    completion(nil)
-                } else if let oneMinText = self.oneMinText,
-                            let twoMinText = self.twoMinText,
-                            let threeMinText = self.threeMinText {
-                    print("Chart data fetched")
-                    let candleSticks = Parser.getPriceData(rawFileInput: oneMinText)
-                    let oneMinSignals = Parser.getSignalData(rawFileInput: oneMinText, inteval: .oneMin)
-                    let twoMinSignals = Parser.getSignalData(rawFileInput: twoMinText, inteval: .twoMin)
-                    let threeMinSignals = Parser.getSignalData(rawFileInput: threeMinText, inteval: .threeMin)
-                    let oneMinIndicators = Indicators(interval: .oneMin, signals: oneMinSignals)
-                    let twoMinIndicators = Indicators(interval: .twoMin, signals: twoMinSignals)
-                    let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
+                print("Fetched urls:", terminator:" ")
+                print(oneMinUrl, terminator:" ")
+                print(twoMinUrl, terminator:" ")
+                print(threeMinUrl)
+                
+                let dispatchGroup2 = DispatchGroup()
+                var hasError: Bool = false
+                
+                print("Fetching data...")
+                dispatchGroup2.enter()
+                self.downloadData(from: oneMinUrl) { data, response, error in
+                    DispatchQueue.main.async() {
+                        if let data = data {
+                            self.oneMinText = String(decoding: data, as: UTF8.self)
+                        } else if error != nil {
+                            hasError = true
+                        }
+                        dispatchGroup2.leave()
+                    }
+                }
+                
+                dispatchGroup2.enter()
+                self.downloadData(from: twoMinUrl) { data, response, error in
+                    DispatchQueue.main.async() {
+                        if let data = data {
+                            self.twoMinText = String(decoding: data, as: UTF8.self)
+                        } else if error != nil {
+                            hasError = true
+                        }
+                        dispatchGroup2.leave()
+                    }
+                }
+                
+                dispatchGroup2.enter()
+                self.downloadData(from: threeMinUrl) { data, response, error in
+                    DispatchQueue.main.async() {
+                        if let data = data {
+                            self.threeMinText = String(decoding: data, as: UTF8.self)
+                        } else if error != nil {
+                            hasError = true
+                        }
+                        dispatchGroup2.leave()
+                    }
+                }
+                
+                dispatchGroup2.notify(queue: DispatchQueue.main) { [weak self] in
+                    guard let self = self else { return }
                     
-                    self.chart = Chart.generateChart(ticker: "NQ",
-                                                     candleSticks: candleSticks,
-                                                     indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],
-                                                     startTime: Config.shared.ByPassTradingTimeRestrictions ? nil : self.chartStartTime,
-                                                     cutOffTime: Config.shared.ByPassTradingTimeRestrictions ? nil : self.chartEndTime)
-                    completion(self.chart)
+                    if hasError {
+                        print("Data fetching failed")
+                        completion(nil)
+                    } else if let oneMinText = self.oneMinText, let twoMinText = self.twoMinText, let threeMinText = self.threeMinText {
+                        let candleSticks = Parser.getPriceData(rawFileInput: oneMinText)
+                        let oneMinSignals = Parser.getSignalData(rawFileInput: oneMinText, inteval: .oneMin)
+                        let twoMinSignals = Parser.getSignalData(rawFileInput: twoMinText, inteval: .twoMin)
+                        let threeMinSignals = Parser.getSignalData(rawFileInput: threeMinText, inteval: .threeMin)
+                        let oneMinIndicators = Indicators(interval: .oneMin, signals: oneMinSignals)
+                        let twoMinIndicators = Indicators(interval: .twoMin, signals: twoMinSignals)
+                        let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
+                    
+                        self.chart = Chart.generateChart(ticker: "NQ",
+                                                         candleSticks: candleSticks,
+                                                         indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],
+                                                         startTime: self.chartStartTime,
+                                                         cutOffTime: self.chartEndTime)
+                        print("Data fetched, last bar: " + (self.chart?.absLastBarDate?.generateDateIdentifier() ?? ""))
+                        completion(self.chart)
+                    }
                 }
             }
-        } else if simulateMinByMinData {
-            completion(subsetChart)
         } else {
-            completion(chart)
+            completion(subsetChart)
         }
     }
     
@@ -212,19 +245,69 @@ class ChartDataManager {
     
     @objc
     private func updateChart() {
-        // only fetch data 3 seconds after a new minute has started, and keep fetching every 2 seconds
-        // until the last modified date for all 3 minute files are past the the start of the current minute
+        if fetching {
+            return
+        }
         
+        fetching = true
         fetchChart { [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
                 self.delegate?.chartUpdated(chart: chart)
             }
+            
+            self.fetching = false
         }
     }
     
-    private func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
-        URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
+    private func downloadData(from url: String, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
+        Alamofire.SessionManager.default.request(url).responseData { response in
+            if let data = response.data {
+                completion(data, nil, nil)
+            } else {
+                completion(nil, nil, nil)
+            }
+        }
+    }
+    
+    private func fetchLatestAvailableUrl(interval: SignalInteval, completion: @escaping (String) -> ()) {
+        let queue = DispatchQueue.global()
+        queue.async {
+            let semaphore = DispatchSemaphore(value: 0)
+            var existUrl: String?
+            
+            while existUrl == nil {
+                let now = Date()
+                
+                if now.second() < 5 {
+                    sleep(1)
+                    continue
+                }
+                
+                for i in stride(from: now.second(), through: 0, by: -1) {
+                    if existUrl != nil {
+                        break
+                    }
+                    
+                    let urlString: String = String(format: "%@%@_%02d-%02d-%02d.txt", Config.shared.dataServerURL, interval.text(), now.hour(), now.minute(), i)
+                    
+                    Alamofire.SessionManager.default.request(urlString).validate().response { response in
+                        if response.response?.statusCode == 200 {
+                            existUrl = urlString
+                        }
+                        semaphore.signal()
+                    }
+                    
+                    semaphore.wait()
+                }
+                
+                DispatchQueue.main.async {
+                    if let existUrl = existUrl {
+                        completion(existUrl)
+                    }
+                }
+            }
+        }
     }
 }

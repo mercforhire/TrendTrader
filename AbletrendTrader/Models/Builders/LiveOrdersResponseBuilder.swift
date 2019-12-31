@@ -11,7 +11,13 @@ import Foundation
 class LiveOrdersResponseBuilder {
     func buildAccountsFrom(_ jsonData : Data) -> LiveOrdersResponse? {
         let decoder: JSONDecoder = JSONDecoder()
-        let liveOrdersResponse: LiveOrdersResponse? = try? decoder.decode(LiveOrdersResponse?.self, from: jsonData)
-        return liveOrdersResponse
+        do {
+            let liveOrdersResponse: LiveOrdersResponse? = try decoder.decode(LiveOrdersResponse?.self, from: jsonData)
+            return liveOrdersResponse
+        }
+        catch(let error) {
+            print(error)
+        }
+        return nil
     }
 }

@@ -9,6 +9,6 @@
 import Foundation
 
 struct LiveOrdersResponse: Codable {
-    var orders: [LiveOrder]
-    var notifications: [String]
+    var orders: [LiveOrder]?
+    var notifications: [String]?
 }

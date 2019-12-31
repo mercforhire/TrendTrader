@@ -1,5 +1,5 @@
 //
-//  PlacedOrderResponse.swift
+//  ErrorResponse.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2019-12-28.
@@ -8,7 +8,6 @@
 
 import Foundation
 
-struct PlacedOrderResponse: Codable {
-    var identifier: String
-    var message: [String]
+struct ErrorResponse: Codable {
+    var error: String?
 }

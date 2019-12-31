@@ -1,5 +1,5 @@
 //
-//  IBTradesBuilder.swift
+//  OrderQuestionsBuilder.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2019-12-29.
@@ -8,12 +8,12 @@
 
 import Foundation
 
-class IBTradesBuilder {
-    func buildIBTradesFrom(_ jsonData : Data) -> [IBTrade]? {
+class OrderQuestionsBuilder {
+    func buildQuestionsFrom(_ jsonData : Data) -> [Question]? {
         let decoder: JSONDecoder = JSONDecoder()
         do {
-            let trades: [IBTrade]? = try decoder.decode([IBTrade]?.self, from: jsonData)
-            return trades
+            let orderQuestions = try decoder.decode([Question]?.self, from: jsonData)
+            return orderQuestions
         }
         catch(let error) {
             print(error)

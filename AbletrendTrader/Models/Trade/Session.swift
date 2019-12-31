@@ -10,7 +10,6 @@ import Foundation
 
 // Stores all the information of a trading session
 // The Trader will use the saved info here to decide the next trade
-
 struct TradeDisplayable {
     var type: String
     var entry: String

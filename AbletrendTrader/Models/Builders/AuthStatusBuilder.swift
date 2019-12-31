@@ -11,7 +11,13 @@ import Foundation
 class AuthStatusBuilder {
     func buildAuthStatusFrom(_ jsonData : Data) -> AuthStatus? {
         let decoder: JSONDecoder = JSONDecoder()
-        let status: AuthStatus? = try? decoder.decode(AuthStatus.self, from: jsonData)
-        return status
+        do {
+            let status: AuthStatus? = try decoder.decode(AuthStatus.self, from: jsonData)
+            return status
+        }
+        catch(let error) {
+            print(error)
+        }
+        return nil
     }
 }

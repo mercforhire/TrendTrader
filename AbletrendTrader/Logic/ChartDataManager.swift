@@ -14,8 +14,8 @@ protocol DataManagerDelegate: class {
 }
 
 class ChartDataManager {
-    private let readFromServer = true
-    
+    private let readFromServer = false
+    private let config = Config.shared
     private var oneMinText: String?
     private var twoMinText: String?
     private var threeMinText: String?
@@ -32,29 +32,29 @@ class ChartDataManager {
     weak var delegate: DataManagerDelegate?
     var fetching = false
     
-    init(updateFrequency: TimeInterval = 5) {
+    init(updateFrequency: TimeInterval = 10) {
         let now = Date()
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
         let components1 = DateComponents(year: now.year(),
                                         month: now.month(),
                                         day: now.day(),
-                                        hour: Config.shared.ChartStart.0,
-                                        minute: Config.shared.ChartStart.1)
+                                        hour: config.chartStart.0,
+                                        minute: config.chartStart.1)
         self.chartStartTime = calendar.date(from: components1)!
         
         let components2 = DateComponents(year: now.year(),
                                         month: now.month(),
                                         day: now.day(),
-                                        hour: Config.shared.ChartEnd.0,
-                                        minute: Config.shared.ChartEnd.1)
+                                        hour: config.chartEnd.0,
+                                        minute: config.chartEnd.1)
         self.chartEndTime = calendar.date(from: components2)!
         self.updateFrequency = updateFrequency
         
         if !readFromServer {
-            if let oneMinText = Parser.readFile(fileName: Parser.fileName1),
-                let twoMinText = Parser.readFile(fileName: Parser.fileName2),
-                let threeMinText = Parser.readFile(fileName: Parser.fileName3) {
+            if let oneMinText = Parser.readFile(fileName: config.fileName1),
+                let twoMinText = Parser.readFile(fileName: config.fileName2),
+                let threeMinText = Parser.readFile(fileName: config.fileName3) {
                 
                 let candleSticks = Parser.getPriceData(rawFileInput: oneMinText)
                 let oneMinSignals = Parser.getSignalData(rawFileInput: oneMinText, inteval: .oneMin)
@@ -69,15 +69,15 @@ class ChartDataManager {
                 let components1 = DateComponents(year: chartDate.year(),
                                                 month: chartDate.month(),
                                                 day: chartDate.day(),
-                                                hour: Config.shared.ChartStart.0,
-                                                minute: Config.shared.ChartStart.1)
+                                                hour: config.chartStart.0,
+                                                minute: config.chartStart.1)
                 self.chartStartTime = calendar.date(from: components1)!
                 
                 let components2 = DateComponents(year: chartDate.year(),
                                                 month: chartDate.month(),
                                                 day: chartDate.day(),
-                                                hour: Config.shared.ChartEnd.0,
-                                                minute: Config.shared.ChartEnd.1)
+                                                hour: config.chartEnd.0,
+                                                minute: config.chartEnd.1)
                 self.chartEndTime = calendar.date(from: components2)!
                 
                 self.chart = Chart.generateChart(ticker: "NQ",
@@ -97,28 +97,28 @@ class ChartDataManager {
             var twoMinUrl: String?
             var threeMinUrl: String?
             
-            let dispatchGroup1 = DispatchGroup()
+            let urlFetchingTask = DispatchGroup()
             
             print("Fetching urls...")
-            dispatchGroup1.enter()
+            urlFetchingTask.enter()
             fetchLatestAvailableUrl(interval: .oneMin, completion: { url in
                 oneMinUrl = url
-                dispatchGroup1.leave()
+                urlFetchingTask.leave()
             })
             
-            dispatchGroup1.enter()
+            urlFetchingTask.enter()
             fetchLatestAvailableUrl(interval: .twoMin, completion: { url in
                 twoMinUrl = url
-                dispatchGroup1.leave()
+                urlFetchingTask.leave()
             })
             
-            dispatchGroup1.enter()
+            urlFetchingTask.enter()
             fetchLatestAvailableUrl(interval: .threeMin, completion: { url in
                 threeMinUrl = url
-                dispatchGroup1.leave()
+                urlFetchingTask.leave()
             })
             
-            dispatchGroup1.notify(queue: DispatchQueue.main) { [weak self] in
+            urlFetchingTask.notify(queue: DispatchQueue.main) { [weak self] in
                 guard let self = self,
                     let oneMinUrl = oneMinUrl,
                     let twoMinUrl = twoMinUrl,
@@ -131,53 +131,54 @@ class ChartDataManager {
                 print(twoMinUrl, terminator:" ")
                 print(threeMinUrl)
                 
-                let dispatchGroup2 = DispatchGroup()
+                let chartFetchingTask = DispatchGroup()
                 var hasError: Bool = false
                 
-                print("Fetching data...")
-                dispatchGroup2.enter()
-                self.downloadData(from: oneMinUrl) { data, response, error in
+                print("Fetching chart...")
+                chartFetchingTask.enter()
+                self.downloadData(from: oneMinUrl, fileName: self.config.fileName1) { string, response, error in
                     DispatchQueue.main.async() {
-                        if let data = data {
-                            self.oneMinText = String(decoding: data, as: UTF8.self)
+                        if let string = string {
+                            self.oneMinText = string
                         } else if error != nil {
                             hasError = true
                         }
-                        dispatchGroup2.leave()
+                        chartFetchingTask.leave()
                     }
                 }
                 
-                dispatchGroup2.enter()
-                self.downloadData(from: twoMinUrl) { data, response, error in
+                chartFetchingTask.enter()
+                self.downloadData(from: twoMinUrl, fileName: self.config.fileName2) { string, response, error in
                     DispatchQueue.main.async() {
-                        if let data = data {
-                            self.twoMinText = String(decoding: data, as: UTF8.self)
+                        if let string = string {
+                            self.twoMinText = string
                         } else if error != nil {
                             hasError = true
                         }
-                        dispatchGroup2.leave()
+                        chartFetchingTask.leave()
                     }
                 }
                 
-                dispatchGroup2.enter()
-                self.downloadData(from: threeMinUrl) { data, response, error in
+                chartFetchingTask.enter()
+                self.downloadData(from: threeMinUrl, fileName: self.config.fileName3) { string, response, error in
                     DispatchQueue.main.async() {
-                        if let data = data {
-                            self.threeMinText = String(decoding: data, as: UTF8.self)
+                        if let string = string {
+                            self.threeMinText = string
                         } else if error != nil {
                             hasError = true
                         }
-                        dispatchGroup2.leave()
+                        chartFetchingTask.leave()
                     }
                 }
                 
-                dispatchGroup2.notify(queue: DispatchQueue.main) { [weak self] in
+                chartFetchingTask.notify(queue: DispatchQueue.main) { [weak self] in
                     guard let self = self else { return }
                     
                     if hasError {
-                        print("Data fetching failed")
+                        print("Chart fetching failed")
                         completion(nil)
                     } else if let oneMinText = self.oneMinText, let twoMinText = self.twoMinText, let threeMinText = self.threeMinText {
+                        
                         let candleSticks = Parser.getPriceData(rawFileInput: oneMinText)
                         let oneMinSignals = Parser.getSignalData(rawFileInput: oneMinText, inteval: .oneMin)
                         let twoMinSignals = Parser.getSignalData(rawFileInput: twoMinText, inteval: .twoMin)
@@ -191,7 +192,7 @@ class ChartDataManager {
                                                          indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],
                                                          startTime: self.chartStartTime,
                                                          cutOffTime: self.chartEndTime)
-                        print("Data fetched, last bar: " + (self.chart?.absLastBarDate?.generateDateIdentifier() ?? ""))
+                        print("Chart fetched, last bar: " + (self.chart?.absLastBarDate?.generateDateIdentifier() ?? ""))
                         completion(self.chart)
                     }
                 }
@@ -261,17 +262,23 @@ class ChartDataManager {
         }
     }
     
-    private func downloadData(from url: String, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
-        Alamofire.SessionManager.default.request(url).responseData { response in
-            if let data = response.data {
-                completion(data, nil, nil)
+    private func downloadData(from url: String, fileName: String, completion: @escaping (String?, URLResponse?, Error?) -> ()) {
+        let destination: DownloadRequest.DownloadFileDestination = { _, _ in
+            var documentsURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            documentsURL = documentsURL.appendingPathComponent(fileName)
+            return (documentsURL, [.removePreviousFile])
+        }
+
+        Alamofire.download(url, to: destination).responseData { response in
+            if let destinationUrl = response.destinationURL, let string = try? String(contentsOf: destinationUrl, encoding: .utf8) {
+               completion(string, nil, nil)
             } else {
                 completion(nil, nil, nil)
             }
         }
     }
     
-    private func fetchLatestAvailableUrl(interval: SignalInteval, completion: @escaping (String) -> ()) {
+    private func fetchLatestAvailableUrl(interval: SignalInteval, completion: @escaping (String?) -> ()) {
         let queue = DispatchQueue.global()
         queue.async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -279,18 +286,19 @@ class ChartDataManager {
             
             while existUrl == nil {
                 let now = Date()
+                let currentSecond = now.second() - 1
                 
-                if now.second() < 5 {
+                if currentSecond < 5 {
                     sleep(1)
                     continue
                 }
                 
-                for i in stride(from: now.second(), through: 0, by: -1) {
+                for i in stride(from: currentSecond, through: 0, by: -1) {
                     if existUrl != nil {
                         break
                     }
                     
-                    let urlString: String = String(format: "%@%@_%02d-%02d-%02d.txt", Config.shared.dataServerURL, interval.text(), now.hour(), now.minute(), i)
+                    let urlString: String = String(format: "%@%@_%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), now.hour(), now.minute(), i)
                     
                     Alamofire.SessionManager.default.request(urlString).validate().response { response in
                         if response.response?.statusCode == 200 {

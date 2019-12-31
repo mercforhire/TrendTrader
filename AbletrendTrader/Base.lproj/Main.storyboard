@@ -451,7 +451,7 @@
                 </viewController>
                 <customObject id="O5U-D5-IU2" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-75" y="1462"/>
+            <point key="canvasLocation" x="237" y="1610"/>
         </scene>
         <!--Configuration-->
         <scene sceneID="8lg-qv-ddx">
@@ -759,9 +759,9 @@
         <!--Live Trader-->
         <scene sceneID="vdT-mG-0Wb">
             <objects>
-                <viewController title="Live Trader" showSeguePresentationStyle="single" id="cVa-8a-a9U" sceneMemberID="viewController">
+                <viewController title="Live Trader" showSeguePresentationStyle="single" id="cVa-8a-a9U" customClass="LiveTradingViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="mB6-MV-HSJ">
-                        <rect key="frame" x="0.0" y="0.0" width="535" height="480"/>
+                        <rect key="frame" x="0.0" y="0.0" width="660" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YHY-kb-BJS">
@@ -781,7 +781,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="i66-Zv-rsj">
-                                <rect key="frame" x="363" y="356" width="158" height="32"/>
+                                <rect key="frame" x="488" y="356" width="158" height="32"/>
                                 <buttonCell key="cell" type="push" title="Exit all positions" bezelStyle="rounded" image="NSStopProgressFreestandingTemplate" imagePosition="leading" alignment="center" borderStyle="border" inset="2" id="UzP-gg-GPs">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -795,7 +795,7 @@
                                 </buttonCell>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YrC-Ec-i9K">
-                                <rect key="frame" x="197" y="356" width="142" height="32"/>
+                                <rect key="frame" x="259" y="356" width="142" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="130" id="ggN-CL-HOM"/>
                                 </constraints>
@@ -813,7 +813,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nbh-eo-Sz9">
-                                <rect key="frame" x="447" y="432" width="74" height="32"/>
+                                <rect key="frame" x="572" y="432" width="74" height="32"/>
                                 <buttonCell key="cell" type="push" title="Chart" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="N2U-OU-lfU">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -830,21 +830,21 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jdZ-WN-2Ok">
-                                <rect key="frame" x="367" y="410" width="150" height="16"/>
+                                <rect key="frame" x="492" y="410" width="150" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Latest data time: [TIME]" id="bYy-mD-u3y">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qtM-KX-Hzj">
-                                <rect key="frame" x="20" y="50" width="495" height="269"/>
+                            <scrollView autohidesScrollers="YES" horizontalLineScroll="44" horizontalPageScroll="10" verticalLineScroll="44" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qtM-KX-Hzj">
+                                <rect key="frame" x="20" y="50" width="620" height="269"/>
                                 <clipView key="contentView" id="3iV-AP-Jon">
-                                    <rect key="frame" x="1" y="0.0" width="493" height="268"/>
+                                    <rect key="frame" x="1" y="0.0" width="618" height="268"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="QE7-S2-60t" viewBased="YES" id="YGd-1N-eew">
-                                            <rect key="frame" x="0.0" y="0.0" width="493" height="243"/>
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="42" rowSizeStyle="automatic" headerView="QE7-S2-60t" viewBased="YES" id="YGd-1N-eew">
+                                            <rect key="frame" x="0.0" y="0.0" width="618" height="243"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1085,9 +1085,6 @@
                                         </tableView>
                                     </subviews>
                                 </clipView>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="495" id="C3P-R8-YbZ"/>
-                                </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="nFx-Qx-P4M">
                                     <rect key="frame" x="1" y="244" width="492" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
@@ -1097,7 +1094,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <tableHeaderView key="headerView" id="QE7-S2-60t">
-                                    <rect key="frame" x="0.0" y="0.0" width="493" height="25"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="618" height="25"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
@@ -1127,15 +1124,26 @@
                             <constraint firstItem="qPe-gd-HwE" firstAttribute="top" secondItem="Cwt-3G-1lk" secondAttribute="bottom" constant="16" id="xXb-Au-cxT"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="chartButton" destination="Nbh-eo-Sz9" id="uVF-OM-Cci"/>
+                        <outlet property="exitButton" destination="i66-Zv-rsj" id="Ktg-BI-urb"/>
+                        <outlet property="latestDataTimeLabel" destination="jdZ-WN-2Ok" id="OI8-1T-QWT"/>
+                        <outlet property="pauseButton" destination="YrC-Ec-i9K" id="VDD-It-D3P"/>
+                        <outlet property="refreshDataButton" destination="qPe-gd-HwE" id="X5o-kT-cUN"/>
+                        <outlet property="startButton" destination="qBw-zu-FaF" id="xZN-2z-l0N"/>
+                        <outlet property="systemTimeLabel" destination="Cwt-3G-1lk" id="5eW-Ai-1yh"/>
+                        <outlet property="tableView" destination="YGd-1N-eew" id="y3F-DR-kne"/>
+                        <outlet property="totalPLLabel" destination="jwv-nJ-CuY" id="eqF-BF-QNE"/>
+                    </connections>
                 </viewController>
                 <customObject id="Wtg-RB-62N" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="482.5" y="849"/>
+            <point key="canvasLocation" x="626" y="849"/>
         </scene>
         <!--Simulation Trader-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController title="Simulation Trader" showSeguePresentationStyle="single" id="XfG-lQ-9wD" customClass="ViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Simulation Trader" showSeguePresentationStyle="single" id="XfG-lQ-9wD" customClass="SimTradingViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="535" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>

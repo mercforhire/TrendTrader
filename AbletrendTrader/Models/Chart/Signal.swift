@@ -8,52 +8,6 @@
 
 import Foundation
 
-enum SignalColor {
-    case green
-    case blue
-    case red
-}
-
-enum TradeDirection {
-    case long
-    case short
-    
-    func description() -> String {
-        switch self {
-        case .long:
-            return "Long"
-        case .short:
-            return "Short"
-        }
-    }
-    
-    func ibTradeString() -> String {
-        switch self {
-        case .long:
-            return "BUY"
-        case .short:
-            return "SELL"
-        }
-    }
-}
-
-enum SignalInteval {
-    case oneMin
-    case twoMin
-    case threeMin
-    
-    func text() -> String {
-        switch self {
-        case .oneMin:
-            return "1"
-        case .twoMin:
-            return "2"
-        case .threeMin:
-            return "3"
-        }
-    }
-}
-
 struct Signal {
     var time: Date
     var color: SignalColor

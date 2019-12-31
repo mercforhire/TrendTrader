@@ -8,26 +8,6 @@
 
 import Foundation
 
-enum ExitMethod {
-    case brokeSupportResistence
-    case twoGreenBars
-    case signalReversed
-    case endOfDay
-    
-    func reason() -> String {
-        switch self {
-        case .brokeSupportResistence:
-            return "Broke Support or Resistence"
-        case .twoGreenBars:
-            return "Two Green Bars"
-        case .signalReversed:
-            return "Signal Reversed"
-        case .endOfDay:
-            return "End Of Day"
-        }
-    }
-}
-
 struct Trade {
     var direction: TradeDirection
     var entryPrice: Double // enter at the close of the bar

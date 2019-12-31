@@ -9,6 +9,7 @@
 import Cocoa
 
 class ConfigViewController: NSViewController {
+    let config = Config.shared
     
     @IBOutlet private weak var maxSLField: NSTextField!
     @IBOutlet private weak var minSTPField: NSTextField!
@@ -40,18 +41,18 @@ class ConfigViewController: NSViewController {
     }
     
     func loadConfig() {
-        maxSLField.stringValue = String(format: "%.2f", Config.shared.MaxRisk)
-        minSTPField.stringValue = String(format: "%.2f", Config.shared.MinBarStop)
-        sweetspotDistanceField.stringValue = String(format: "%.2f", Config.shared.SweetSpotMinDistance)
-        minProfitGreenBarField.stringValue = String(format: "%.2f", Config.shared.GreenBarsExit)
-        minProfitByPass.stringValue = String(format: "%.2f", Config.shared.SkipGreenBarsExit)
-        minProfitPullbackField.stringValue = String(format: "%.2f", Config.shared.EnterOnPullback)
-        highRiskEntryStartPicker.dateValue = Date().getNewDateFromTime(hour: Config.shared.HighRiskStart.0, min: Config.shared.HighRiskStart.1)
-        highRiskEntryEndPicker.dateValue = Date().getNewDateFromTime(hour: Config.shared.HighRiskEnd.0, min: Config.shared.HighRiskEnd.1)
-        sessionStartTimePicker.dateValue = Date().getNewDateFromTime(hour: Config.shared.TradingStart.0, min: Config.shared.TradingStart.1)
-        liquidateTimePicker.dateValue = Date().getNewDateFromTime(hour: Config.shared.ClearTime.0, min: Config.shared.ClearTime.1)
-        flatTimePicker.dateValue = Date().getNewDateFromTime(hour: Config.shared.FlatTime.0, min: Config.shared.FlatTime.1)
-        dailyLossLimitPicker.stringValue = String(format: "%.2f", Config.shared.MaxDailyLoss)
+        maxSLField.stringValue = String(format: "%.2f", config.maxRisk)
+        minSTPField.stringValue = String(format: "%.2f", config.minBarStop)
+        sweetspotDistanceField.stringValue = String(format: "%.2f", config.sweetSpotMinDistance)
+        minProfitGreenBarField.stringValue = String(format: "%.2f", config.greenBarsExit)
+        minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenBarsExit)
+        minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnPullback)
+        highRiskEntryStartPicker.dateValue = Date().getNewDateFromTime(hour: config.highRiskStart.0, min: config.highRiskStart.1)
+        highRiskEntryEndPicker.dateValue = Date().getNewDateFromTime(hour: config.highRiskEnd.0, min: config.highRiskEnd.1)
+        sessionStartTimePicker.dateValue = Date().getNewDateFromTime(hour: config.tradingStart.0, min: config.tradingStart.1)
+        liquidateTimePicker.dateValue = Date().getNewDateFromTime(hour: config.clearTime.0, min: config.clearTime.1)
+        flatTimePicker.dateValue = Date().getNewDateFromTime(hour: config.flatTime.0, min: config.flatTime.1)
+        dailyLossLimitPicker.stringValue = String(format: "%.2f", config.maxDailyLoss)
     }
     
     override func viewDidLoad() {

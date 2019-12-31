@@ -15,17 +15,25 @@
 		856D958323B8518A004A4385 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958223B8518A004A4385 /* Account.swift */; };
 		856D958523B85D88004A4385 /* IBTrade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958423B85D88004A4385 /* IBTrade.swift */; };
 		856D958723B86039004A4385 /* LiveOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958623B86039004A4385 /* LiveOrder.swift */; };
-		856D958923B866F1004A4385 /* PlacedOrderResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958823B866F1004A4385 /* PlacedOrderResponse.swift */; };
+		856D958923B866F1004A4385 /* ErrorResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958823B866F1004A4385 /* ErrorResponse.swift */; };
 		856D958C23B87B25004A4385 /* SSOTokenBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958B23B87B25004A4385 /* SSOTokenBuilder.swift */; };
 		856D959023B898FC004A4385 /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958F23B898FC004A4385 /* AuthViewController.swift */; };
 		856D959223B9411F004A4385 /* AuthStatusBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959123B9411F004A4385 /* AuthStatusBuilder.swift */; };
 		856D959423B94154004A4385 /* AccountsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959323B94154004A4385 /* AccountsBuilder.swift */; };
 		856D959623B95BE5004A4385 /* LiveOrdersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959523B95BE5004A4385 /* LiveOrdersResponse.swift */; };
 		856D959823B95C15004A4385 /* LiveOrdersResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959723B95C15004A4385 /* LiveOrdersResponseBuilder.swift */; };
-		856D959A23B964B3004A4385 /* PlacedOrderResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959923B964B3004A4385 /* PlacedOrderResponseBuilder.swift */; };
+		856D959A23B964B3004A4385 /* OrderQuestionsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959923B964B3004A4385 /* OrderQuestionsBuilder.swift */; };
 		856D959C23B96DB9004A4385 /* IBTradesBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959B23B96DB9004A4385 /* IBTradesBuilder.swift */; };
+		856D95A023BA8152004A4385 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959F23BA8152004A4385 /* Enums.swift */; };
+		856D95A423BA8525004A4385 /* LiveTradingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95A323BA8524004A4385 /* LiveTradingViewController.swift */; };
+		856D95A623BAB259004A4385 /* IBPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95A523BAB259004A4385 /* IBPosition.swift */; };
+		856D95A923BB0635004A4385 /* Question.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95A823BB0635004A4385 /* Question.swift */; };
+		856D95AC23BB0B78004A4385 /* ErrorResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AB23BB0B78004A4385 /* ErrorResponseBuilder.swift */; };
+		856D95AE23BB0D70004A4385 /* IBPositionsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */; };
+		856D95B023BB1F65004A4385 /* PreviewResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AF23BB1F65004A4385 /* PreviewResponse.swift */; };
+		856D95B223BB2106004A4385 /* PreviewResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */; };
 		8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432923AC3EAF004CE61F /* AppDelegate.swift */; };
-		8592432C23AC3EAF004CE61F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432B23AC3EAF004CE61F /* ViewController.swift */; };
+		8592432C23AC3EAF004CE61F /* SimTradingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */; };
 		8592432E23AC3EB0004CE61F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8592432D23AC3EB0004CE61F /* Assets.xcassets */; };
 		8592433123AC3EB0004CE61F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8592432F23AC3EB0004CE61F /* Main.storyboard */; };
 		8592433A23AC41C8004CE61F /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592433923AC41C8004CE61F /* Parser.swift */; };
@@ -37,7 +45,7 @@
 		8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434723AD9DA0004CE61F /* Date+Extensions.swift */; };
 		8592434D23ADABA7004CE61F /* Indicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434C23ADABA7004CE61F /* Indicators.swift */; };
 		8592434F23ADE06E004CE61F /* Trade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592434E23ADE06E004CE61F /* Trade.swift */; };
-		8592435223ADE182004CE61F /* Trader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435123ADE182004CE61F /* Trader.swift */; };
+		8592435223ADE182004CE61F /* TraderBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435123ADE182004CE61F /* TraderBot.swift */; };
 		8592435423AF1AE4004CE61F /* Pullback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435323AF1AE4004CE61F /* Pullback.swift */; };
 		8592435623B00CC6004CE61F /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435523B00CC6004CE61F /* Position.swift */; };
 		8592435823B14DD5004CE61F /* StopLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435723B14DD5004CE61F /* StopLoss.swift */; };
@@ -58,18 +66,26 @@
 		856D958223B8518A004A4385 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		856D958423B85D88004A4385 /* IBTrade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBTrade.swift; sourceTree = "<group>"; };
 		856D958623B86039004A4385 /* LiveOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveOrder.swift; sourceTree = "<group>"; };
-		856D958823B866F1004A4385 /* PlacedOrderResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrderResponse.swift; sourceTree = "<group>"; };
+		856D958823B866F1004A4385 /* ErrorResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorResponse.swift; sourceTree = "<group>"; };
 		856D958B23B87B25004A4385 /* SSOTokenBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSOTokenBuilder.swift; sourceTree = "<group>"; };
 		856D958F23B898FC004A4385 /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; };
 		856D959123B9411F004A4385 /* AuthStatusBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStatusBuilder.swift; sourceTree = "<group>"; };
 		856D959323B94154004A4385 /* AccountsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsBuilder.swift; sourceTree = "<group>"; };
 		856D959523B95BE5004A4385 /* LiveOrdersResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveOrdersResponse.swift; sourceTree = "<group>"; };
 		856D959723B95C15004A4385 /* LiveOrdersResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveOrdersResponseBuilder.swift; sourceTree = "<group>"; };
-		856D959923B964B3004A4385 /* PlacedOrderResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrderResponseBuilder.swift; sourceTree = "<group>"; };
+		856D959923B964B3004A4385 /* OrderQuestionsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderQuestionsBuilder.swift; sourceTree = "<group>"; };
 		856D959B23B96DB9004A4385 /* IBTradesBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBTradesBuilder.swift; sourceTree = "<group>"; };
+		856D959F23BA8152004A4385 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		856D95A323BA8524004A4385 /* LiveTradingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTradingViewController.swift; sourceTree = "<group>"; };
+		856D95A523BAB259004A4385 /* IBPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBPosition.swift; sourceTree = "<group>"; };
+		856D95A823BB0635004A4385 /* Question.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Question.swift; sourceTree = "<group>"; };
+		856D95AB23BB0B78004A4385 /* ErrorResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorResponseBuilder.swift; sourceTree = "<group>"; };
+		856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBPositionsBuilder.swift; sourceTree = "<group>"; };
+		856D95AF23BB1F65004A4385 /* PreviewResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewResponse.swift; sourceTree = "<group>"; };
+		856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewResponseBuilder.swift; sourceTree = "<group>"; };
 		8592432623AC3EAF004CE61F /* AbletrendTrader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AbletrendTrader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8592432923AC3EAF004CE61F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8592432B23AC3EAF004CE61F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimTradingViewController.swift; sourceTree = "<group>"; };
 		8592432D23AC3EB0004CE61F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8592433023AC3EB0004CE61F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		8592433223AC3EB0004CE61F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -83,7 +99,7 @@
 		8592434723AD9DA0004CE61F /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
 		8592434C23ADABA7004CE61F /* Indicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicators.swift; sourceTree = "<group>"; };
 		8592434E23ADE06E004CE61F /* Trade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trade.swift; sourceTree = "<group>"; };
-		8592435123ADE182004CE61F /* Trader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trader.swift; sourceTree = "<group>"; };
+		8592435123ADE182004CE61F /* TraderBot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraderBot.swift; sourceTree = "<group>"; };
 		8592435323AF1AE4004CE61F /* Pullback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pullback.swift; sourceTree = "<group>"; };
 		8592435523B00CC6004CE61F /* Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
 		8592435723B14DD5004CE61F /* StopLoss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopLoss.swift; sourceTree = "<group>"; };
@@ -123,8 +139,11 @@
 				856D958223B8518A004A4385 /* Account.swift */,
 				856D959523B95BE5004A4385 /* LiveOrdersResponse.swift */,
 				856D958623B86039004A4385 /* LiveOrder.swift */,
-				856D958823B866F1004A4385 /* PlacedOrderResponse.swift */,
+				856D958823B866F1004A4385 /* ErrorResponse.swift */,
+				856D95A823BB0635004A4385 /* Question.swift */,
 				856D958423B85D88004A4385 /* IBTrade.swift */,
+				856D95A523BAB259004A4385 /* IBPosition.swift */,
+				856D95AF23BB1F65004A4385 /* PreviewResponse.swift */,
 			);
 			path = IB;
 			sourceTree = "<group>";
@@ -136,8 +155,11 @@
 				856D959123B9411F004A4385 /* AuthStatusBuilder.swift */,
 				856D959323B94154004A4385 /* AccountsBuilder.swift */,
 				856D959723B95C15004A4385 /* LiveOrdersResponseBuilder.swift */,
-				856D959923B964B3004A4385 /* PlacedOrderResponseBuilder.swift */,
+				856D959923B964B3004A4385 /* OrderQuestionsBuilder.swift */,
 				856D959B23B96DB9004A4385 /* IBTradesBuilder.swift */,
+				856D95AB23BB0B78004A4385 /* ErrorResponseBuilder.swift */,
+				856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */,
+				856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */,
 			);
 			path = Builders;
 			sourceTree = "<group>";
@@ -169,7 +191,8 @@
 				8592435023ADE168004CE61F /* Logic */,
 				8592432923AC3EAF004CE61F /* AppDelegate.swift */,
 				856D958F23B898FC004A4385 /* AuthViewController.swift */,
-				8592432B23AC3EAF004CE61F /* ViewController.swift */,
+				8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */,
+				856D95A323BA8524004A4385 /* LiveTradingViewController.swift */,
 				85C8CED723B7130B00E75F76 /* ConfigViewController.swift */,
 				85C8CEDB23B7235300E75F76 /* ChartViewController.swift */,
 				8592432F23AC3EB0004CE61F /* Main.storyboard */,
@@ -213,7 +236,7 @@
 		8592435023ADE168004CE61F /* Logic */ = {
 			isa = PBXGroup;
 			children = (
-				8592435123ADE182004CE61F /* Trader.swift */,
+				8592435123ADE182004CE61F /* TraderBot.swift */,
 				8592435E23B1E59E004CE61F /* Config.swift */,
 				85582AB223B5E97800DC16AC /* ChartDataManager.swift */,
 				856D957B23B73B04004A4385 /* IBNetworkManager.swift */,
@@ -240,6 +263,7 @@
 				8592435523B00CC6004CE61F /* Position.swift */,
 				8592435723B14DD5004CE61F /* StopLoss.swift */,
 				8592435C23B15643004CE61F /* Session.swift */,
+				856D959F23BA8152004A4385 /* Enums.swift */,
 			);
 			path = Trade;
 			sourceTree = "<group>";
@@ -381,22 +405,28 @@
 				856D959823B95C15004A4385 /* LiveOrdersResponseBuilder.swift in Sources */,
 				8592435D23B15643004CE61F /* Session.swift in Sources */,
 				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,
+				856D95A623BAB259004A4385 /* IBPosition.swift in Sources */,
 				856D958C23B87B25004A4385 /* SSOTokenBuilder.swift in Sources */,
 				8592434023AC7A19004CE61F /* String+Extensions.swift in Sources */,
 				856D957F23B7FE32004A4385 /* SSOToken.swift in Sources */,
 				8592434F23ADE06E004CE61F /* Trade.swift in Sources */,
+				856D95B023BB1F65004A4385 /* PreviewResponse.swift in Sources */,
 				8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */,
 				8592434223AD403E004CE61F /* Signal.swift in Sources */,
 				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
 				856D959223B9411F004A4385 /* AuthStatusBuilder.swift in Sources */,
 				85C8CEDC23B7235300E75F76 /* ChartViewController.swift in Sources */,
-				8592432C23AC3EAF004CE61F /* ViewController.swift in Sources */,
+				8592432C23AC3EAF004CE61F /* SimTradingViewController.swift in Sources */,
 				8592435623B00CC6004CE61F /* Position.swift in Sources */,
 				8592435F23B1E59E004CE61F /* Config.swift in Sources */,
+				856D95A423BA8525004A4385 /* LiveTradingViewController.swift in Sources */,
+				856D95A023BA8152004A4385 /* Enums.swift in Sources */,
+				856D95AE23BB0D70004A4385 /* IBPositionsBuilder.swift in Sources */,
 				8592435423AF1AE4004CE61F /* Pullback.swift in Sources */,
 				856D958723B86039004A4385 /* LiveOrder.swift in Sources */,
 				856D958523B85D88004A4385 /* IBTrade.swift in Sources */,
 				856D959C23B96DB9004A4385 /* IBTradesBuilder.swift in Sources */,
+				856D95A923BB0635004A4385 /* Question.swift in Sources */,
 				8592436123B55270004CE61F /* Double+Extensions.swift in Sources */,
 				8592433D23AC689E004CE61F /* CandleStick.swift in Sources */,
 				856D957C23B73B04004A4385 /* IBNetworkManager.swift in Sources */,
@@ -404,11 +434,13 @@
 				856D959423B94154004A4385 /* AccountsBuilder.swift in Sources */,
 				856D959023B898FC004A4385 /* AuthViewController.swift in Sources */,
 				8592434D23ADABA7004CE61F /* Indicators.swift in Sources */,
+				856D95B223BB2106004A4385 /* PreviewResponseBuilder.swift in Sources */,
 				856D958323B8518A004A4385 /* Account.swift in Sources */,
+				856D95AC23BB0B78004A4385 /* ErrorResponseBuilder.swift in Sources */,
 				8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */,
-				8592435223ADE182004CE61F /* Trader.swift in Sources */,
-				856D958923B866F1004A4385 /* PlacedOrderResponse.swift in Sources */,
-				856D959A23B964B3004A4385 /* PlacedOrderResponseBuilder.swift in Sources */,
+				8592435223ADE182004CE61F /* TraderBot.swift in Sources */,
+				856D958923B866F1004A4385 /* ErrorResponse.swift in Sources */,
+				856D959A23B964B3004A4385 /* OrderQuestionsBuilder.swift in Sources */,
 				85C8CED823B7130B00E75F76 /* ConfigViewController.swift in Sources */,
 				8592433A23AC41C8004CE61F /* Parser.swift in Sources */,
 			);

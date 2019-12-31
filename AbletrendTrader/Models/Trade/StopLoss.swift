@@ -8,23 +8,6 @@
 
 import Foundation
 
-enum StopLossSource {
-    case supportResistanceLevel
-    case twoGreenBars
-    case currentBar
-    
-    func reason() -> String {
-        switch self {
-        case .supportResistanceLevel:
-            return "Prev S/R"
-        case .twoGreenBars:
-            return "Green bars"
-        case .currentBar:
-            return "Cur S/R"
-        }
-    }
-}
-
 struct StopLoss {
     var stop: Double
     var source: StopLossSource

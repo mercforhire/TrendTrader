@@ -11,7 +11,13 @@ import Foundation
 class SSOTokenBuilder {
     func buildSSOTokenFrom(_ jsonData : Data) -> SSOToken? {
         let decoder: JSONDecoder = JSONDecoder()
-        let ssoToken: SSOToken? = try? decoder.decode(SSOToken.self, from: jsonData)
-        return ssoToken
+        do {
+            let ssoToken: SSOToken? = try decoder.decode(SSOToken.self, from: jsonData)
+            return ssoToken
+        }
+        catch(let error) {
+            print(error)
+        }
+        return nil
     }
 }

@@ -9,6 +9,8 @@
 import Cocoa
 
 class AuthViewController: NSViewController {
+    private let config = Config.shared
+    
     @IBOutlet weak var authStatusLabel: NSTextField!
     @IBOutlet weak var validateSSOButton: NSButton!
     @IBOutlet weak var getStatusButton: NSButton!
@@ -22,7 +24,7 @@ class AuthViewController: NSViewController {
     @IBOutlet weak var goToSimButton: NSButton!
     @IBOutlet weak var goToLiveButton: NSButton!
     
-    var authenticated: Bool? {
+    private var authenticated: Bool? {
         didSet {
             if authenticated == true {
                 authStatusLabel.stringValue = "Authenticated"
@@ -44,11 +46,17 @@ class AuthViewController: NSViewController {
         }
     }
     
-    var ssoToken: SSOToken?
+    private var ssoToken: SSOToken?
     private var timer: Timer?
-    var accounts: [Account]? {
+    private var accounts: [Account]? {
         didSet {
             accountsPicker.reloadData()
+        }
+    }
+   private  var selectedAccount: Account? {
+        didSet {
+            IBNetworkManager.shared.selectedAccount = selectedAccount
+            accountInfoLabel.stringValue = selectedAccount?.accountTitle ?? "No account selected"
         }
     }
     
@@ -58,9 +66,12 @@ class AuthViewController: NSViewController {
         logOffButton.isEnabled = false
         goToLiveButton.isEnabled = false
         
-        tickerField.stringValue = Config.shared.Ticker
-        conIdField.stringValue = String(format: "%d", Config.shared.ConId)
-        sizeField.stringValue = String(format: "%d", Config.shared.PositionSize)
+        tickerField.stringValue = config.ticker
+        tickerField.isEditable = false
+        conIdField.stringValue = String(format: "%d", config.conId)
+        conIdField.isEditable = false
+        sizeField.stringValue = String(format: "%d", config.positionSize)
+        sizeField.isEditable = false
     }
     
     override func viewDidLoad() {
@@ -96,7 +107,8 @@ class AuthViewController: NSViewController {
                 self.accounts = accounts
                 if let defaultAccount = accounts.first {
                     self.accountsPicker.selectItem(at: 0)
-                    IBNetworkManager.shared.selectedAccount = defaultAccount
+                    self.selectedAccount = defaultAccount
+                    NSApp.keyWindow?.makeFirstResponder(nil)
                 }
             case .failure:
                 break
@@ -171,7 +183,7 @@ class AuthViewController: NSViewController {
     
     @IBAction func accountSelected(_ sender: NSComboBox) {
         if let selectedAccount = accounts?[sender.selectedTag()] {
-            IBNetworkManager.shared.selectedAccount = selectedAccount
+            self.selectedAccount = selectedAccount
         }
     }
 }

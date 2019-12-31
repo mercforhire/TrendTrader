@@ -52,6 +52,8 @@ class ChartViewController: NSViewController {
         chartView.xAxis.labelPosition = .bottom
         chartView.xAxis.labelFont = NSFont(name: "HelveticaNeue-Light", size: 10)!
         chartView.xAxis.drawGridLinesEnabled = false
+        
+        generateCandleStickChartDate()
     }
     
     func generateCandleStickChartDate() {
@@ -74,7 +76,7 @@ class ChartViewController: NSViewController {
         chartView.leftAxis.axisMinimum = set1.yMin
         
         let dateValueFormatter = DateValueFormatter()
-        dateValueFormatter.startDate = chart.startDate
+        dateValueFormatter.startDate = startDate
         chartView.xAxis.valueFormatter = dateValueFormatter
         
         let data = CandleChartData(dataSet: set1)

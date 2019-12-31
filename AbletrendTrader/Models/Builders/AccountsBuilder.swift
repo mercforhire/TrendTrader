@@ -11,8 +11,7 @@ import Foundation
 class AccountsBuilder {
     func buildAccountsFrom(_ jsonData : Data) -> [Account]? {
         let decoder: JSONDecoder = JSONDecoder()
-        do
-        {
+        do {
             let accounts: [Account]? = try decoder.decode([Account]?.self, from: jsonData)
             return accounts
         }

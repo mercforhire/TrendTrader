@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  SimTradingViewController.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2019-12-19.
@@ -12,7 +12,7 @@ class ChartNotifications {
     static let ChartUpdated: Notification.Name = Notification.Name("ChartNotifications")
 }
 
-class ViewController: NSViewController {
+class SimTradingViewController: NSViewController {
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -27,7 +27,7 @@ class ViewController: NSViewController {
     private var dataManager: ChartDataManager?
     private let dateFormatter = DateFormatter()
     private var timer: Timer!
-    private var trader: Trader?
+    private var trader: TraderBot?
     private var listOfTrades: [TradeDisplayable]?
     private var realTimeChart: Chart? {
         didSet {
@@ -87,7 +87,7 @@ class ViewController: NSViewController {
             
             if let chart = chart {
                 self.realTimeChart = chart
-                self.trader = Trader(chart: chart)
+                self.trader = TraderBot(chart: chart)
                 self.startButton.isEnabled = true
                 self.endButton.isEnabled = true
             }
@@ -100,7 +100,7 @@ class ViewController: NSViewController {
         
         beginningButton.isEnabled = true
         startButton.isEnabled = false
-        trader?.generateSession()
+        trader?.generateSimSession()
         updateTradesList()
         dataManager?.startMonitoring()
     }
@@ -109,7 +109,7 @@ class ViewController: NSViewController {
         guard let chart = realTimeChart else { return }
         
         dataManager?.stopMonitoring()
-        trader = Trader(chart: chart)
+        trader = TraderBot(chart: chart)
         listOfTrades?.removeAll()
         
         simTimeLabel.stringValue = "--:--"
@@ -131,7 +131,7 @@ class ViewController: NSViewController {
         dataManager?.stopMonitoring()
         realTimeChart = completedChart
         trader?.chart = completedChart
-        trader?.generateSession()
+        trader?.generateSimSession()
         updateTradesList()
         delegate?.chartUpdated(chart: completedChart)
     }
@@ -160,7 +160,7 @@ class ViewController: NSViewController {
     }
 }
 
-extension ViewController: DataManagerDelegate {
+extension SimTradingViewController: DataManagerDelegate {
     func chartUpdated(chart: Chart) {
         realTimeChart = chart
         delegate?.chartUpdated(chart: chart)
@@ -173,7 +173,7 @@ extension ViewController: DataManagerDelegate {
         
         trader?.chart = realTimeChart
         
-        if let actions = trader?.process(), latestProcessedTimeKey != realTimeChart.lastTimeKey {
+        if let actions = trader?.decide(), latestProcessedTimeKey != realTimeChart.lastTimeKey {
             for action in actions {
                 switch action {
                 case .noAction:
@@ -194,7 +194,7 @@ extension ViewController: DataManagerDelegate {
     }
 }
 
-extension ViewController: NSTableViewDelegate {
+extension SimTradingViewController: NSTableViewDelegate {
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         guard let listOfTrades = listOfTrades else { return nil }
         
@@ -235,7 +235,7 @@ extension ViewController: NSTableViewDelegate {
     }
 }
 
-extension ViewController: NSTableViewDataSource {
+extension SimTradingViewController: NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
         return listOfTrades?.count ?? 0
     }

@@ -19,6 +19,8 @@ class LiveTradingViewController: NSViewController {
     @IBOutlet weak var totalPLLabel: NSTextField!
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var chartButton: NSButton!
+    @IBOutlet weak var buyButton: NSButton!
+    @IBOutlet weak var sellButton: NSButton!
     
     private var dataManager: ChartManager?
     private let dateFormatter = DateFormatter()
@@ -69,15 +71,16 @@ class LiveTradingViewController: NSViewController {
     }
     
     private func updateTradesList() {
-        listOfTrades = trader!.session.listOfTrades()
+        listOfTrades = sessionManager.listOfTrades()
         tableView.reloadData()
-        totalPLLabel.stringValue = String(format: "Total P/L: %.2f", trader!.session.getTotalPAndL())
+        totalPLLabel.stringValue = String(format: "Total P/L: %.2f", sessionManager.getTotalPAndL())
     }
     
     @IBAction
     private func refreshData(_ sender: NSButton) {
         dataManager?.stopMonitoring()
         realTimeChart = nil
+        sender.isEnabled = false
         
         let fetchingTask = DispatchGroup()
         
@@ -87,9 +90,7 @@ class LiveTradingViewController: NSViewController {
             
             if let chart = chart {
                 self.realTimeChart = chart
-                self.trader = TraderBot(chart: chart)
-                
-                
+                self.trader = TraderBot(chart: chart, live: true, sessionManager: self.sessionManager)
             }
             
             fetchingTask.leave()
@@ -103,6 +104,7 @@ class LiveTradingViewController: NSViewController {
         fetchingTask.notify(queue: DispatchQueue.main) { [weak self] in
             guard let self = self else { return }
             
+            sender.isEnabled = true
         }
     }
     
@@ -118,12 +120,31 @@ class LiveTradingViewController: NSViewController {
     
     @IBAction
     private func pauseTrading(_ sender: NSButton) {
-        
+        startButton.isEnabled = true
+        pauseButton.isEnabled = false
+        dataManager?.stopMonitoring()
     }
     
     @IBAction
     private func exitAllPosition(_ sender: NSButton) {
-        
+        sender.isEnabled = false
+        sessionManager.exitPositions { success in
+            sender.isEnabled = true
+        }
+    }
+    
+    @IBAction func buyPressed(_ sender: NSButton) {
+        sender.isEnabled = false
+        sessionManager.buyMarket { error in
+            sender.isEnabled = true
+        }
+    }
+    
+    @IBAction func sellPressed(_ sender: NSButton) {
+        sender.isEnabled = false
+        sessionManager.sellMarket { error in
+            sender.isEnabled = true
+        }
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
@@ -157,7 +178,7 @@ extension LiveTradingViewController: DataManagerDelegate {
                     print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
-                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime.generateShortDate(), trade.exitTime.generateShortDate(), trade.profit ?? 0))
+                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))
                 case .updatedStop(let position):
                     print(String(format: "Updated stop loss to %.2f", position.stopLoss.stop))
                 }

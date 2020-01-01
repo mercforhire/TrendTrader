@@ -9,26 +9,26 @@
 import Foundation
 
 class TraderBot {
-    var session: Session
+    var sessionManager: SessionManager
     var chart: Chart
     
     private let config = Config.shared
     private let networkManager = NetworkManager.shared
     private let live: Bool
     
-    init(chart: Chart, live: Bool = false, session: Session = Session()) {
+    init(chart: Chart, live: Bool, sessionManager: SessionManager) {
         self.chart = chart
         self.live = live
-        self.session = session
+        self.sessionManager = sessionManager
     }
     
     // Public:
     func generateSimSession(upToPriceBar: PriceBar? = nil) {
-        guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.lastBar else {
+        guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.lastBar, !live else {
             return
         }
         
-        session = Session()
+        sessionManager.resetSession()
         
         for timeKey in chart.timeKeys {
             if timeKey == lastBar.identifier {
@@ -48,7 +48,7 @@ class TraderBot {
                     print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
-                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entryTime.generateShortDate(), trade.exitTime.generateShortDate(), trade.profit ?? 0, trade.exitMethod.reason()))
+                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0, trade.exitMethod.reason()))
                 case .updatedStop(let position):
                     print(String(format: "Updated stop loss to %.2f reason: %@", position.stopLoss.stop, position.stopLoss.source.reason()))
                 }
@@ -70,7 +70,7 @@ class TraderBot {
         }
         
         // no current position, check if we should enter on the current bar
-        if session.currentPosition == nil {
+        if sessionManager.hasCurrentPosition {
             return [handleOpeningNewTrade(currentBar: priceBar)]
         }
         // already have current position, update it or close it if needed
@@ -82,7 +82,7 @@ class TraderBot {
             
             // Rule 4: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
             if config.clearPositionTime(chart: chart) <= priceBar.time && !config.byPassTradingTimeRestrictions {
-                switch session.currentPosition!.direction {
+                switch sessionManager.currentPositionDirection {
                 case .long:
                     if priceBar.barColor == .blue {
                         return [exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .endOfDay)]
@@ -95,12 +95,13 @@ class TraderBot {
             }
             
             // Rule 1: exit when the the low of the price hit the current stop loss
-            switch session.currentPosition!.direction {
+            switch sessionManager.currentPositionDirection {
             case .long:
-                if priceBar.candleStick.low <= session.currentPosition!.stopLoss.stop {
-                    let exitMethod: ExitMethod = session.currentPosition!.stopLoss.source == .supportResistanceLevel ||
-                        session.currentPosition!.stopLoss.source == .currentBar ? .brokeSupportResistence : .twoGreenBars
-                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: session.currentPosition!.stopLoss.stop, exitMethod: exitMethod)
+                if let stop = sessionManager.stopLoss?.stop,
+                    priceBar.candleStick.low <= stop {
+                    let exitMethod: ExitMethod = sessionManager.stopLoss?.source == .supportResistanceLevel ||
+                        sessionManager.stopLoss?.source == .currentBar ? .brokeSupportResistence : .twoGreenBars
+                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: stop, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openedPosition(let position):
@@ -110,9 +111,11 @@ class TraderBot {
                     }
                 }
             default:
-                if priceBar.candleStick.high >= session.currentPosition!.stopLoss.stop {
-                    let exitMethod: ExitMethod = session.currentPosition!.stopLoss.source == .supportResistanceLevel || session.currentPosition!.stopLoss.source == .currentBar ? .brokeSupportResistence : .twoGreenBars
-                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: session.currentPosition!.stopLoss.stop, exitMethod: exitMethod)
+                if let stop = sessionManager.stopLoss?.stop,
+                    let stopSource = sessionManager.stopLoss?.source,
+                    priceBar.candleStick.high >= stop {
+                    let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .brokeSupportResistence : .twoGreenBars
+                    let exitAction = exitPosition(currentBar: priceBar, exitPrice: stop, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openedPosition(let position):
@@ -124,7 +127,7 @@ class TraderBot {
             }
             
             // Rule 2: exit when bar of opposite color bar appears
-            switch session.currentPosition!.direction {
+            switch sessionManager.currentPositionDirection {
             case .long:
                 if priceBar.barColor == .red {
                     let exitAction = exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .signalReversed)
@@ -152,19 +155,21 @@ class TraderBot {
             // If not exited the trade yet, update the current trade's stop loss:
             
             // Calculate the SL based on the 2 green bars(if applicable)
-            var twoGreenBarsSL: Double = session.currentPosition!.direction == .long ? 0 : Double.greatestFiniteMagnitude
+            var twoGreenBarsSL: Double = sessionManager.currentPositionDirection == .long ? 0 : Double.greatestFiniteMagnitude
 
-            if session.currentPosition!.securedProfit < config.skipGreenBarsExit,
+            if let securedProfit = sessionManager.securedProfit,
+                securedProfit < config.skipGreenBarsExit,
+                let entryPrice = sessionManager.currentPosition?.entryPrice,
                 previousPriceBar.barColor == .green,
                 priceBar.barColor == .green,
                 let currentStop = priceBar.oneMinSignal?.stop {
                 
-                switch session.currentPosition!.direction {
+                switch sessionManager.currentPositionDirection {
                 case .long:
                     let stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
                     
                     if stopLossFromGreenBars > currentStop,
-                        stopLossFromGreenBars - session.currentPosition!.entryPrice >= config.greenBarsExit,
+                        stopLossFromGreenBars - entryPrice >= config.greenBarsExit,
                         previousPriceBar.candleStick.close >= currentStop,
                         priceBar.candleStick.close >= currentStop {
                         
@@ -179,7 +184,7 @@ class TraderBot {
                     let stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
                     
                     if stopLossFromGreenBars < currentStop,
-                        session.currentPosition!.entryPrice - stopLossFromGreenBars >= config.greenBarsExit,
+                        sessionManager.currentPosition!.entryPrice - stopLossFromGreenBars >= config.greenBarsExit,
                         previousPriceBar.candleStick.close <= currentStop,
                         priceBar.candleStick.close <= currentStop {
                         
@@ -193,13 +198,13 @@ class TraderBot {
                 }
             }
             
-            var newStop: Double = session.currentPosition!.stopLoss.stop
-            var newStopSource: StopLossSource = session.currentPosition!.stopLoss.source
+            var newStop: Double = sessionManager.currentPosition!.stopLoss.stop
+            var newStopSource: StopLossSource = sessionManager.currentPosition!.stopLoss.source
             
             // Calculate the SL based on the previous S/R level and decide which of the two SLs should we use
-            if let previousLevelSL: Double = findPreviousLevel(direction: session.currentPosition!.direction, entryBar: priceBar) {
+            if let previousLevelSL: Double = findPreviousLevel(direction: sessionManager.currentPosition!.direction, entryBar: priceBar) {
                 
-                switch session.currentPosition!.direction {
+                switch sessionManager.currentPositionDirection {
                 case .long:
                     newStop = max(twoGreenBarsSL, previousLevelSL)
                     newStopSource = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
@@ -210,18 +215,22 @@ class TraderBot {
             }
             
             // Apply the new SL if it is more in favor than the existing SL
-            switch session.currentPosition!.direction {
+            switch sessionManager.currentPosition!.direction {
             case .long:
-                if newStop > session.currentPosition!.stopLoss.stop {
-                    session.currentPosition!.stopLoss.stop = newStop
-                    session.currentPosition!.stopLoss.source = newStopSource
-                    return [.updatedStop(position: session.currentPosition!)]
+                if let stop = sessionManager.stopLoss?.stop,
+                    newStop > stop {
+                    
+                    sessionManager.stopLoss.stop = newStop
+                    sessionManager.stopLoss.source = newStopSource
+                    return [.updatedStop(position: sessionManager.currentPosition!)]
                 }
             default:
-                if newStop < session.currentPosition!.stopLoss.stop {
-                    session.currentPosition!.stopLoss.stop = newStop
-                    session.currentPosition!.stopLoss.source = newStopSource
-                    return [.updatedStop(position: session.currentPosition!)]
+                if let stop = sessionManager.stopLoss?.stop,
+                    newStop < stop {
+                    
+                    sessionManager.stopLoss.stop = newStop
+                    sessionManager.stopLoss.source = newStopSource
+                    return [.updatedStop(position: sessionManager.currentPosition!)]
                 }
             }
             
@@ -233,7 +242,7 @@ class TraderBot {
     // Private:
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let position: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
-            session.currentPosition = position
+            sessionManager.currentPosition = position
             return .openedPosition(position: position)
         }
         return .noAction
@@ -298,7 +307,7 @@ class TraderBot {
     
     private func handleOpeningNewTrade(currentBar: PriceBar) -> TradeActionType {
         // stop trading if P&L <= MaxDailyLoss
-        if session.getTotalPAndL() <= config.maxDailyLoss {
+        if sessionManager.getTotalPAndL() <= config.maxDailyLoss {
             return .noAction
         }
         
@@ -312,7 +321,7 @@ class TraderBot {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
         // If the a previous trade exists, the direction of the trade matches the current bar:
-        else if let lastTrade = session.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
+        else if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
                 return seekToOpenPosition(bar: currentBar, entryType: .initial)
@@ -340,14 +349,14 @@ class TraderBot {
     }
     
     private func exitPosition(currentBar: PriceBar, exitPrice: Double, exitMethod: ExitMethod) -> TradeActionType {
-        let trade = Trade(direction: session.currentPosition!.direction,
-                          entryPrice: session.currentPosition!.entryPrice,
+        let trade = Trade(direction: sessionManager.currentPosition!.direction,
+                          entryPrice: sessionManager.currentPosition!.entryPrice,
                           exitPrice: exitPrice,
                           exitMethod: exitMethod,
-                          entryTime: session.currentPosition!.entryTime,
+                          entryTime: sessionManager.currentPosition!.entryTime,
                           exitTime: currentBar.time)
-        session.trades.append(trade)
-        session.currentPosition = nil
+        sessionManager.trades.append(trade)
+        sessionManager.currentPosition = nil
         return .closedPosition(trade: trade)
     }
     

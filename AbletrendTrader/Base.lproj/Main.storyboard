@@ -1107,30 +1107,37 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ucq-Vb-N7V">
-                                <rect key="frame" x="409" y="317" width="108" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ucq-Vb-N7V">
+                                <rect key="frame" x="538" y="317" width="108" height="32"/>
                                 <buttonCell key="cell" type="push" title="Sell Market" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5wv-jA-Tzh">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="sellPressed:" target="cVa-8a-a9U" id="0F2-1N-6Is"/>
+                                </connections>
                             </button>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5dO-j7-eHc">
-                                <rect key="frame" x="160" y="317" width="109" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5dO-j7-eHc">
+                                <rect key="frame" x="429" y="317" width="109" height="32"/>
                                 <buttonCell key="cell" type="push" title="Buy Market" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="J3g-Ye-AiN">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="buyPressed:" target="cVa-8a-a9U" id="wfI-8p-rds"/>
+                                </connections>
                             </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="YrC-Ec-i9K" firstAttribute="centerX" secondItem="mB6-MV-HSJ" secondAttribute="centerX" id="1wb-vm-bK9"/>
                             <constraint firstItem="qtM-KX-Hzj" firstAttribute="top" secondItem="YHY-kb-BJS" secondAttribute="bottom" constant="8" id="6nE-kA-TqE"/>
+                            <constraint firstItem="QE7-S2-60t" firstAttribute="top" secondItem="5dO-j7-eHc" secondAttribute="bottom" constant="5" id="7dj-3S-KP3"/>
                             <constraint firstAttribute="trailing" secondItem="Nbh-eo-Sz9" secondAttribute="trailing" constant="20" id="8lN-Hi-ds4"/>
                             <constraint firstAttribute="trailing" secondItem="jdZ-WN-2Ok" secondAttribute="trailing" constant="20" id="AEn-2x-cqH"/>
                             <constraint firstItem="qBw-zu-FaF" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="Akz-cE-aZc"/>
+                            <constraint firstItem="ucq-Vb-N7V" firstAttribute="leading" secondItem="5dO-j7-eHc" secondAttribute="trailing" constant="12" id="BZb-Pf-cxl"/>
                             <constraint firstAttribute="trailing" secondItem="i66-Zv-rsj" secondAttribute="trailing" constant="20" id="BZw-Oi-XOU"/>
+                            <constraint firstAttribute="trailing" secondItem="ucq-Vb-N7V" secondAttribute="trailing" constant="20" id="Bgf-mm-8Hf"/>
                             <constraint firstItem="jdZ-WN-2Ok" firstAttribute="centerY" secondItem="qPe-gd-HwE" secondAttribute="centerY" id="CeX-Yq-LVx"/>
                             <constraint firstItem="YHY-kb-BJS" firstAttribute="top" secondItem="qBw-zu-FaF" secondAttribute="bottom" constant="20" id="FGm-jf-IWP"/>
                             <constraint firstItem="Cwt-3G-1lk" firstAttribute="top" secondItem="mB6-MV-HSJ" secondAttribute="top" constant="20" id="Hly-gH-jdY"/>
@@ -1142,6 +1149,7 @@
                             <constraint firstItem="YHY-kb-BJS" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="YHI-jy-byq"/>
                             <constraint firstItem="YrC-Ec-i9K" firstAttribute="top" secondItem="qBw-zu-FaF" secondAttribute="top" id="Zkb-za-1yV"/>
                             <constraint firstAttribute="trailing" secondItem="qtM-KX-Hzj" secondAttribute="trailing" constant="20" id="a5v-cj-HDE"/>
+                            <constraint firstItem="QE7-S2-60t" firstAttribute="top" secondItem="ucq-Vb-N7V" secondAttribute="bottom" constant="5" id="aDl-9e-8Hq"/>
                             <constraint firstItem="Cwt-3G-1lk" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="ls4-ju-cD9"/>
                             <constraint firstItem="qBw-zu-FaF" firstAttribute="top" secondItem="qPe-gd-HwE" secondAttribute="bottom" constant="23" id="mDE-4e-6IJ"/>
                             <constraint firstAttribute="bottom" secondItem="jwv-nJ-CuY" secondAttribute="bottom" constant="20" id="qUq-9M-flh"/>
@@ -1150,11 +1158,13 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="buyButton" destination="5dO-j7-eHc" id="RXG-fJ-KYt"/>
                         <outlet property="chartButton" destination="Nbh-eo-Sz9" id="uVF-OM-Cci"/>
                         <outlet property="exitButton" destination="i66-Zv-rsj" id="Ktg-BI-urb"/>
                         <outlet property="latestDataTimeLabel" destination="jdZ-WN-2Ok" id="OI8-1T-QWT"/>
                         <outlet property="pauseButton" destination="YrC-Ec-i9K" id="VDD-It-D3P"/>
                         <outlet property="refreshDataButton" destination="qPe-gd-HwE" id="X5o-kT-cUN"/>
+                        <outlet property="sellButton" destination="ucq-Vb-N7V" id="ZKg-zn-Hok"/>
                         <outlet property="startButton" destination="qBw-zu-FaF" id="xZN-2z-l0N"/>
                         <outlet property="systemTimeLabel" destination="Cwt-3G-1lk" id="5eW-Ai-1yh"/>
                         <outlet property="tableView" destination="YGd-1N-eew" id="y3F-DR-kne"/>

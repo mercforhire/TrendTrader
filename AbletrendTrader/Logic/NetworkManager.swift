@@ -232,15 +232,14 @@ class NetworkManager {
     
     // Preview Order
     // https://localhost:5000/v1/portal/iserver/account/{accountId}/order/whatif
-    func previewOrder(orderType: OrderType, direction: TradeDirection, price: Double = 0, source: PriceBar, completionHandler: @escaping (Swift.Result<PreviewResponse, NetworkError>) -> Void) {
+    func previewOrder(orderType: OrderType, direction: TradeDirection, price: Double = 0, time: Date, completionHandler: @escaping (Swift.Result<PreviewResponse, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
             completionHandler(.failure(.previewOrderFailed))
             return
         }
         
-        
         let url = "https://localhost:5000/v1/portal/iserver/account/" + selectedAccount.accountId + "/order/whatif"
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, source: source), orderType.typeString(), direction.ibTradeString(),  price, config.ticker, config.positionSize)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(),  price, config.ticker, config.positionSize)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -262,7 +261,7 @@ class NetworkManager {
     func placeOrder(orderType: OrderType,
                     direction: TradeDirection,
                     price: Double = 0,
-                    source: PriceBar,
+                    time: Date,
                     completionHandler: @escaping (Swift.Result<[Question], NetworkError>) -> Void) {
         
         guard let selectedAccount = selectedAccount,
@@ -271,7 +270,7 @@ class NetworkManager {
             return
         }
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": true, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"DAY\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, source: source), orderType.typeString(), direction.ibTradeString(),  price, config.ticker, config.positionSize)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": true, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"DAY\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(),  price, config.ticker, config.positionSize)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -341,8 +340,7 @@ class NetworkManager {
     }
     
     // Delete Order
-    func deleteOrder(order: LiveOrder,
-                     completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+    func deleteOrder(order: LiveOrder, completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
             completionHandler(.failure(.deleteOrderFailed))
             return
@@ -416,7 +414,7 @@ class NetworkManager {
     }
     
     // Private:
-    private func generateOrderIdentifier(direction: TradeDirection, source: PriceBar) -> String {
-        return direction.description() + "-" + source.identifier
+    private func generateOrderIdentifier(direction: TradeDirection, time: Date) -> String {
+        return direction.description() + "-" + time.generateShortDate()
     }
 }

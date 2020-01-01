@@ -24,6 +24,7 @@ class SimTradingViewController: NSViewController {
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
+    private let sessionManager = SessionManager()
     private var listOfTrades: [TradesTableRowItem]?
     private var realTimeChart: Chart? {
         didSet {
@@ -80,19 +81,23 @@ class SimTradingViewController: NSViewController {
         dataManager?.stopMonitoring()
         trader = nil
         realTimeChart = nil
+        sender.isEnabled = false
         
         dataManager?.fetchChart(completion: {  [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
                 self.realTimeChart = chart
-                self.trader = TraderBot(chart: chart)
+                self.sessionManager.resetSession()
+                self.trader = TraderBot(chart: chart, live: false, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
                 
                 if self.dataManager?.simulateTimePassage ?? false {
                     self.startButton.isEnabled = true
                 }
             }
+            
+            sender.isEnabled = true
         })
     }
     
@@ -113,7 +118,8 @@ class SimTradingViewController: NSViewController {
         guard let chart = realTimeChart else { return }
         
         dataManager?.stopMonitoring()
-        trader = TraderBot(chart: chart)
+        sessionManager.resetSession()
+        trader = TraderBot(chart: chart, live: false, sessionManager: sessionManager)
         listOfTrades?.removeAll()
         
         simTimeLabel.stringValue = "--:--"
@@ -146,9 +152,9 @@ class SimTradingViewController: NSViewController {
     }
     
     private func updateTradesList() {
-        listOfTrades = trader!.session.listOfTrades()
+        listOfTrades = sessionManager.listOfTrades()
         tableView.reloadData()
-        totalPLLabel.stringValue = String(format: "Total P/L: %.2f", trader!.session.getTotalPAndL())
+        totalPLLabel.stringValue = String(format: "Total P/L: %.2f", sessionManager.getTotalPAndL())
         
         if let lastSimTime = trader?.chart.lastBar?.time {
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
@@ -186,9 +192,9 @@ extension SimTradingViewController: DataManagerDelegate {
                     print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
-                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime.generateShortDate(), trade.exitTime.generateShortDate(), trade.profit ?? 0))
+                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))
                 case .updatedStop(let position):
-                    print(String(format: "Updated stop loss to %.2f", position.stopLoss.stop))
+                    print(String(format: "Updated stop loss to %.2f", position.stopLoss.stop ))
                 }
             }
             updateTradesList()

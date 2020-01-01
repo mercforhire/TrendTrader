@@ -24,9 +24,7 @@ class DateValueFormatter: NSObject, IAxisValueFormatter {
 }
 
 class ChartViewController: NSViewController {
-    
     @IBOutlet private weak var chartView: CandleStickChartView!
-    
     var chart: Chart?
     
     override func viewDidLoad() {

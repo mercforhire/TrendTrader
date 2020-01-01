@@ -1,5 +1,5 @@
 //
-//  IBNetworkManager.swift
+//  NetworkManager.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2019-12-28.
@@ -40,11 +40,10 @@ enum NetworkError: Error {
     case placeOrderFailed
     case modifyOrderFailed
     case deleteOrderFailed
-    case fetchLiveSessionFailed
 }
 
-class IBNetworkManager {
-    static let shared = IBNetworkManager()
+class NetworkManager {
+    static let shared = NetworkManager()
     
     private let afManager: Alamofire.SessionManager
     private let config = Config.shared
@@ -166,12 +165,23 @@ class IBNetworkManager {
     
     // List of Trades
     // https://localhost:5000/v1/portal/iserver/account/trades
-    func fetchTrades(completionHandler: @escaping (Swift.Result<[IBTrade], NetworkError>) -> Void) {
+    func fetchRelevantTrades(completionHandler: @escaping (Swift.Result<[IBTrade], NetworkError>) -> Void) {
+        guard let selectedAccount = selectedAccount else {
+            completionHandler(.failure(.previewOrderFailed))
+            return
+        }
+        
         afManager.request("https://localhost:5000/v1/portal/iserver/account/trades").responseData { [weak self] response in
             guard let self = self else { return }
             
             if let data = response.data, let ibTrades = self.ibTradesBuilder.buildIBTradesFrom(data) {
-                completionHandler(.success(ibTrades))
+                var relevantTrades: [IBTrade] = ibTrades.filter { trade -> Bool in
+                    return trade.account == selectedAccount.accountId && trade.symbol == self.config.ticker
+                }
+                relevantTrades.sort { (left, right) -> Bool in
+                    return left.tradeTime_r > right.tradeTime_r
+                }
+                completionHandler(.success(relevantTrades))
             } else {
                 completionHandler(.failure(.fetchTradesFailed))
             }
@@ -189,7 +199,7 @@ class IBNetworkManager {
                 let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
                 let orders = liveOrdersResponse.orders {
                 let relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
-                    return liveOrder.status == "Submitted" && liveOrder.conid == self.config.conId
+                    return liveOrder.status == "Submitted" && liveOrder.conid == self.config.conId && liveOrder.orderType == "STP"
                 }
                 completionHandler(.success(relevantOrders))
             } else {
@@ -200,7 +210,7 @@ class IBNetworkManager {
     
     // Portfolio Positions
     // https://localhost:5000/v1/portal/portfolio/{accountId}/positions/{pageId}
-    func fetchPositions(completionHandler: @escaping (Swift.Result<[IBPosition], NetworkError>) -> Void) {
+    func fetchRelevantPositions(completionHandler: @escaping (Swift.Result<IBPosition?, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
             completionHandler(.failure(.previewOrderFailed))
             return
@@ -210,7 +220,10 @@ class IBNetworkManager {
             guard let self = self else { return }
             
             if let data = response.data, let positions = self.ibPositionsBuilder.buildErrorResponseFrom(data) {
-                completionHandler(.success(positions))
+                let relevantPositions: [IBPosition] = positions.filter { position -> Bool in
+                    return position.acctId == selectedAccount.accountId && position.conid == self.config.conId
+                }
+                completionHandler(.success(relevantPositions.first))
             } else {
                 completionHandler(.failure(.fetchLiveOrdersFailed))
             }
@@ -342,6 +355,63 @@ class IBNetworkManager {
                             } else {
                                 completionHandler(.failure(.deleteOrderFailed))
                             }
+        }
+    }
+    
+    func downloadData(from url: String, fileName: String, completion: @escaping (String?, URLResponse?, Error?) -> ()) {
+        let destination: DownloadRequest.DownloadFileDestination = { _, _ in
+            var documentsURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            documentsURL = documentsURL.appendingPathComponent(fileName)
+            return (documentsURL, [.removePreviousFile])
+        }
+
+        Alamofire.download(url, to: destination).responseData { response in
+            if let destinationUrl = response.destinationURL, let string = try? String(contentsOf: destinationUrl, encoding: .utf8) {
+               completion(string, nil, nil)
+            } else {
+                completion(nil, nil, nil)
+            }
+        }
+    }
+    
+    func fetchLatestAvailableUrl(interval: SignalInteval, completion: @escaping (String?) -> ()) {
+        let queue = DispatchQueue.global()
+        queue.async {
+            let semaphore = DispatchSemaphore(value: 0)
+            var existUrl: String?
+            
+            while existUrl == nil {
+                let now = Date()
+                let currentSecond = now.second() - 1
+                
+                if currentSecond < 5 {
+                    sleep(1)
+                    continue
+                }
+                
+                for i in stride(from: currentSecond, through: 0, by: -1) {
+                    if existUrl != nil {
+                        break
+                    }
+                    
+                    let urlString: String = String(format: "%@%@_%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), now.hour(), now.minute(), i)
+                    
+                    Alamofire.SessionManager.default.request(urlString).validate().response { response in
+                        if response.response?.statusCode == 200 {
+                            existUrl = urlString
+                        }
+                        semaphore.signal()
+                    }
+                    
+                    semaphore.wait()
+                }
+                
+                DispatchQueue.main.async {
+                    if let existUrl = existUrl {
+                        completion(existUrl)
+                    }
+                }
+            }
         }
     }
     

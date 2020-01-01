@@ -20,4 +20,8 @@ struct IBPosition: Codable {
     var avgPrice: Double
     var realizedPnl: Double
     var unrealizedPnl: Double
+    
+    var direction: TradeDirection {
+        return position > 0 ? .long : .short
+    }
 }

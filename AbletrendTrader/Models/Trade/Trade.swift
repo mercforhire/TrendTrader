@@ -13,8 +13,8 @@ struct Trade {
     var entryPrice: Double // enter at the close of the bar
     var exitPrice: Double
     var exitMethod: ExitMethod
-    var entry: PriceBar
-    var exit: PriceBar
+    var entryTime: Date
+    var exitTime: Date
     
     var profit: Double? {
         switch direction {
@@ -30,11 +30,11 @@ struct Trade {
         
         switch direction {
         case .long:
-            summary = String(format: "Initial buy at %@ - %.2f", entry.identifier, entryPrice)
+            summary = String(format: "Initial buy at %@ - %.2f", entryTime.generateShortDate(), entryPrice)
         default:
-            summary = String(format: "Initial short at %@ - %.2f", entry.identifier, entryPrice)
+            summary = String(format: "Initial short at %@ - %.2f", entryTime.generateShortDate(), entryPrice)
         }
         
-        return summary + String(format: " closed at %@ - %.2f with P/L %.2f reason %@", exit.identifier, exitPrice, profit ?? 0, exitMethod.reason())
+        return summary + String(format: " closed at %@ - %.2f with P/L %.2f reason %@", exitTime.generateShortDate(), exitPrice, profit ?? 0, exitMethod.reason())
     }
 }

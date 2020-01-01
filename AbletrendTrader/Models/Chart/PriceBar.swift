@@ -13,8 +13,10 @@ struct PriceBar {
     var identifier: String
     var candleStick: CandleStick
     var signals: [Signal]
-    
-    func getOneMinSignal() -> Signal? {
+    var time: Date {
+        return candleStick.time
+    }
+    var oneMinSignal: Signal? {
         for signal in signals {
             if signal.inteval == .oneMin {
                 return signal
@@ -23,9 +25,8 @@ struct PriceBar {
         
         return nil
     }
-    
-    func getBarColor() -> SignalColor {
-        return getOneMinSignal()?.color ?? .green
+    var barColor: SignalColor {
+        return oneMinSignal?.color ?? .green
     }
     
     func getCandleStickData(x: Double) -> CandleChartDataEntry {

@@ -786,6 +786,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="exitAllPosition:" target="cVa-8a-a9U" id="gLD-Q4-Nh0"/>
+                                </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qBw-zu-FaF">
                                 <rect key="frame" x="14" y="356" width="137" height="32"/>
@@ -793,6 +796,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="startTrading:" target="cVa-8a-a9U" id="fER-sO-YS3"/>
+                                </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YrC-Ec-i9K">
                                 <rect key="frame" x="259" y="356" width="142" height="32"/>
@@ -803,6 +809,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="pauseTrading:" target="cVa-8a-a9U" id="iAd-C2-dLz"/>
+                                </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Cwt-3G-1lk">
                                 <rect key="frame" x="18" y="444" width="100" height="16"/>
@@ -820,13 +829,13 @@
                                 </buttonCell>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qPe-gd-HwE">
-                                <rect key="frame" x="14" y="400" width="153" height="32"/>
-                                <buttonCell key="cell" type="push" title="Refresh chart data" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="7Cv-Lx-Vfp">
+                                <rect key="frame" x="14" y="400" width="87" height="32"/>
+                                <buttonCell key="cell" type="push" title="Refresh" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="7Cv-Lx-Vfp">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="refreshChartData:" target="XfG-lQ-9wD" id="zld-km-fNc"/>
+                                    <action selector="refreshData:" target="cVa-8a-a9U" id="HL5-xK-vTO"/>
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jdZ-WN-2Ok">
@@ -1098,6 +1107,22 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ucq-Vb-N7V">
+                                <rect key="frame" x="409" y="317" width="108" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Sell Market" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5wv-jA-Tzh">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5dO-j7-eHc">
+                                <rect key="frame" x="160" y="317" width="109" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Buy Market" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="J3g-Ye-AiN">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="YrC-Ec-i9K" firstAttribute="centerX" secondItem="mB6-MV-HSJ" secondAttribute="centerX" id="1wb-vm-bK9"/>

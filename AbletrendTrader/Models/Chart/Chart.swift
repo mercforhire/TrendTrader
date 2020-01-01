@@ -25,13 +25,13 @@ struct Chart {
     }
     
     var startDate: Date? {
-        return startBar?.candleStick.time
+        return startBar?.time
     }
     
     var absLastBarDate: Date? {
         guard let absLastTimeKey = timeKeys.last, let absLastBar = priceBars[absLastTimeKey] else { return nil }
         
-        return absLastBar.candleStick.time
+        return absLastBar.time
     }
     
     // The last bar is always the second last bar in timeKeys, because the last bar signals are not finalized.

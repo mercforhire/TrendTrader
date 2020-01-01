@@ -68,13 +68,16 @@ extension Date {
         return response
     }
     
-    func isInSameDay(date: Date, timeZone: TimeZone? = Date.DefaultTimeZone) -> Bool {
-        if let timeZone = timeZone {
-            var calender = Calendar.current
-            calender.timeZone = timeZone
-            return calender.isDate(self, equalTo: date, toGranularity: .day)
-        }
-        return Calendar.current.isDate(self, equalTo: date, toGranularity: .day)
+    func isInSameDay(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {
+        var calender = Calendar.current
+        calender.timeZone = timeZone
+        return calender.isDate(self, equalTo: date, toGranularity: .day)
+    }
+    
+    func isInSameMinute(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {
+        var calender = Calendar.current
+        calender.timeZone = timeZone
+        return calender.isDate(self, equalTo: date, toGranularity: .minute)
     }
     
     func getNewDateFromTime(hour: Int, min: Int) -> Date {
@@ -87,5 +90,14 @@ extension Date {
                                          minute: min)
         let startDate: Date = calendar.date(from: components1)!
         return startDate
+    }
+    
+    func generateShortDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.calendar = Calendar(identifier: .iso8601)
+        dateFormatter.timeZone = Date.DefaultTimeZone
+        dateFormatter.dateFormat = "HH:mm"
+        let response = dateFormatter.string(from: self)
+        return response
     }
 }

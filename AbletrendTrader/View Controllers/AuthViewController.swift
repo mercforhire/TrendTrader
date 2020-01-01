@@ -10,6 +10,7 @@ import Cocoa
 
 class AuthViewController: NSViewController {
     private let config = Config.shared
+    private let networkManager = NetworkManager.shared
     
     @IBOutlet weak var authStatusLabel: NSTextField!
     @IBOutlet weak var validateSSOButton: NSButton!
@@ -55,7 +56,7 @@ class AuthViewController: NSViewController {
     }
    private  var selectedAccount: Account? {
         didSet {
-            IBNetworkManager.shared.selectedAccount = selectedAccount
+            networkManager.selectedAccount = selectedAccount
             accountInfoLabel.stringValue = selectedAccount?.accountTitle ?? "No account selected"
         }
     }
@@ -85,7 +86,7 @@ class AuthViewController: NSViewController {
     
     @objc
     private func pingServer() {
-        IBNetworkManager.shared.pingServer { [weak self] result in
+        networkManager.pingServer { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -99,7 +100,7 @@ class AuthViewController: NSViewController {
     }
     
     func fetchAccounts() {
-        IBNetworkManager.shared.fetchAccounts { [weak self] result in
+        networkManager.fetchAccounts { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -118,7 +119,7 @@ class AuthViewController: NSViewController {
     
     @IBAction func validateSSOPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        IBNetworkManager.shared.validateSSO { [weak self] result in
+        networkManager.validateSSO { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -134,7 +135,7 @@ class AuthViewController: NSViewController {
     
     @IBAction func getStatusPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        IBNetworkManager.shared.fetchAuthenticationStatus { [weak self] result in
+        networkManager.fetchAuthenticationStatus { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -150,7 +151,7 @@ class AuthViewController: NSViewController {
     
     @IBAction func reAuthPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        IBNetworkManager.shared.reauthenticate { [weak self] result in
+        networkManager.reauthenticate { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -166,7 +167,7 @@ class AuthViewController: NSViewController {
     
     @IBAction func logOffPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        IBNetworkManager.shared.logOut { [weak self] result in
+        networkManager.logOut { [weak self] result in
             guard let self = self else { return }
             
             switch result {

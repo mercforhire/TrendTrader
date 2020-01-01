@@ -10,10 +10,10 @@ import Foundation
 
 struct Position {
     var direction: TradeDirection
+    var entryTime: Date
     var entryPrice: Double
+    var size: Int = 1
     var stopLoss: StopLoss
-    var entry: PriceBar
-    var currentBar: PriceBar
     
     var securedProfit: Double {
         switch direction {

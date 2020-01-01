@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		711AC8F5D49C3C0C53B19B09 /* Pods_AbletrendTrader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */; };
-		85582AB323B5E97800DC16AC /* ChartDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85582AB223B5E97800DC16AC /* ChartDataManager.swift */; };
-		856D957C23B73B04004A4385 /* IBNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957B23B73B04004A4385 /* IBNetworkManager.swift */; };
+		85582AB323B5E97800DC16AC /* ChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85582AB223B5E97800DC16AC /* ChartManager.swift */; };
+		856D957C23B73B04004A4385 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957B23B73B04004A4385 /* NetworkManager.swift */; };
 		856D957F23B7FE32004A4385 /* SSOToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957E23B7FE32004A4385 /* SSOToken.swift */; };
 		856D958123B7FED3004A4385 /* AuthStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958023B7FED3004A4385 /* AuthStatus.swift */; };
 		856D958323B8518A004A4385 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958223B8518A004A4385 /* Account.swift */; };
@@ -32,6 +32,7 @@
 		856D95AE23BB0D70004A4385 /* IBPositionsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */; };
 		856D95B023BB1F65004A4385 /* PreviewResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AF23BB1F65004A4385 /* PreviewResponse.swift */; };
 		856D95B223BB2106004A4385 /* PreviewResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */; };
+		856D95B523BBE180004A4385 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95B423BBE180004A4385 /* SessionManager.swift */; };
 		8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432923AC3EAF004CE61F /* AppDelegate.swift */; };
 		8592432C23AC3EAF004CE61F /* SimTradingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */; };
 		8592432E23AC3EB0004CE61F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8592432D23AC3EB0004CE61F /* Assets.xcassets */; };
@@ -59,8 +60,8 @@
 /* Begin PBXFileReference section */
 		0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AbletrendTrader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7987637B8B2780B3C1E7F8FD /* Pods-AbletrendTrader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.debug.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.debug.xcconfig"; sourceTree = "<group>"; };
-		85582AB223B5E97800DC16AC /* ChartDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDataManager.swift; sourceTree = "<group>"; };
-		856D957B23B73B04004A4385 /* IBNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBNetworkManager.swift; sourceTree = "<group>"; };
+		85582AB223B5E97800DC16AC /* ChartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartManager.swift; sourceTree = "<group>"; };
+		856D957B23B73B04004A4385 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		856D957E23B7FE32004A4385 /* SSOToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSOToken.swift; sourceTree = "<group>"; };
 		856D958023B7FED3004A4385 /* AuthStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStatus.swift; sourceTree = "<group>"; };
 		856D958223B8518A004A4385 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -83,6 +84,7 @@
 		856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBPositionsBuilder.swift; sourceTree = "<group>"; };
 		856D95AF23BB1F65004A4385 /* PreviewResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewResponse.swift; sourceTree = "<group>"; };
 		856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewResponseBuilder.swift; sourceTree = "<group>"; };
+		856D95B423BBE180004A4385 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		8592432623AC3EAF004CE61F /* AbletrendTrader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AbletrendTrader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8592432923AC3EAF004CE61F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimTradingViewController.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 		856D958A23B87AEF004A4385 /* Builders */ = {
 			isa = PBXGroup;
 			children = (
+				8592433923AC41C8004CE61F /* Parser.swift */,
 				856D958B23B87B25004A4385 /* SSOTokenBuilder.swift */,
 				856D959123B9411F004A4385 /* AuthStatusBuilder.swift */,
 				856D959323B94154004A4385 /* AccountsBuilder.swift */,
@@ -162,6 +165,18 @@
 				856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */,
 			);
 			path = Builders;
+			sourceTree = "<group>";
+		};
+		856D95B323BBE098004A4385 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				856D958F23B898FC004A4385 /* AuthViewController.swift */,
+				8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */,
+				856D95A323BA8524004A4385 /* LiveTradingViewController.swift */,
+				85C8CED723B7130B00E75F76 /* ConfigViewController.swift */,
+				85C8CEDB23B7235300E75F76 /* ChartViewController.swift */,
+			);
+			path = "View Controllers";
 			sourceTree = "<group>";
 		};
 		8592431D23AC3EAF004CE61F = {
@@ -185,16 +200,11 @@
 		8592432823AC3EAF004CE61F /* AbletrendTrader */ = {
 			isa = PBXGroup;
 			children = (
+				856D95B323BBE098004A4385 /* View Controllers */,
 				8592433E23AC7A08004CE61F /* Extension */,
 				8592433B23AC688F004CE61F /* Models */,
-				8592434B23ADA041004CE61F /* Builders */,
 				8592435023ADE168004CE61F /* Logic */,
 				8592432923AC3EAF004CE61F /* AppDelegate.swift */,
-				856D958F23B898FC004A4385 /* AuthViewController.swift */,
-				8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */,
-				856D95A323BA8524004A4385 /* LiveTradingViewController.swift */,
-				85C8CED723B7130B00E75F76 /* ConfigViewController.swift */,
-				85C8CEDB23B7235300E75F76 /* ChartViewController.swift */,
 				8592432F23AC3EB0004CE61F /* Main.storyboard */,
 				8592432D23AC3EB0004CE61F /* Assets.xcassets */,
 				8592433223AC3EB0004CE61F /* Info.plist */,
@@ -225,21 +235,14 @@
 			path = Extension;
 			sourceTree = "<group>";
 		};
-		8592434B23ADA041004CE61F /* Builders */ = {
-			isa = PBXGroup;
-			children = (
-				8592433923AC41C8004CE61F /* Parser.swift */,
-			);
-			path = Builders;
-			sourceTree = "<group>";
-		};
 		8592435023ADE168004CE61F /* Logic */ = {
 			isa = PBXGroup;
 			children = (
 				8592435123ADE182004CE61F /* TraderBot.swift */,
 				8592435E23B1E59E004CE61F /* Config.swift */,
-				85582AB223B5E97800DC16AC /* ChartDataManager.swift */,
-				856D957B23B73B04004A4385 /* IBNetworkManager.swift */,
+				85582AB223B5E97800DC16AC /* ChartManager.swift */,
+				856D95B423BBE180004A4385 /* SessionManager.swift */,
+				856D957B23B73B04004A4385 /* NetworkManager.swift */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -429,14 +432,15 @@
 				856D95A923BB0635004A4385 /* Question.swift in Sources */,
 				8592436123B55270004CE61F /* Double+Extensions.swift in Sources */,
 				8592433D23AC689E004CE61F /* CandleStick.swift in Sources */,
-				856D957C23B73B04004A4385 /* IBNetworkManager.swift in Sources */,
-				85582AB323B5E97800DC16AC /* ChartDataManager.swift in Sources */,
+				856D957C23B73B04004A4385 /* NetworkManager.swift in Sources */,
+				85582AB323B5E97800DC16AC /* ChartManager.swift in Sources */,
 				856D959423B94154004A4385 /* AccountsBuilder.swift in Sources */,
 				856D959023B898FC004A4385 /* AuthViewController.swift in Sources */,
 				8592434D23ADABA7004CE61F /* Indicators.swift in Sources */,
 				856D95B223BB2106004A4385 /* PreviewResponseBuilder.swift in Sources */,
 				856D958323B8518A004A4385 /* Account.swift in Sources */,
 				856D95AC23BB0B78004A4385 /* ErrorResponseBuilder.swift in Sources */,
+				856D95B523BBE180004A4385 /* SessionManager.swift in Sources */,
 				8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */,
 				8592435223ADE182004CE61F /* TraderBot.swift in Sources */,
 				856D958923B866F1004A4385 /* ErrorResponse.swift in Sources */,

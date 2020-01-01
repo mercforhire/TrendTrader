@@ -13,112 +13,16 @@ class TraderBot {
     var chart: Chart
     
     private let config = Config.shared
-    private let networkManager = IBNetworkManager.shared
+    private let networkManager = NetworkManager.shared
     private let live: Bool
     
-    init(chart: Chart, live: Bool = false) {
+    init(chart: Chart, live: Bool = false, session: Session = Session()) {
         self.chart = chart
-        self.session = Session()
         self.live = live
+        self.session = session
     }
     
     // Public:
-    
-    func fetchLiveSession(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
-        var liveOrders: [LiveOrder]?
-        var trades: [IBTrade]?
-        
-        let fetchingSessionTask = DispatchGroup()
-        var fetchError = false
-        
-        fetchingSessionTask.enter()
-        networkManager.fetchRelevantLiveOrders { (result) in
-            switch result {
-            case .success(let response):
-                liveOrders = response
-            case .failure:
-                fetchError = true
-            }
-            fetchingSessionTask.leave()
-        }
-        
-        fetchingSessionTask.enter()
-        networkManager.fetchTrades { result in
-            switch result {
-            case .success(let response):
-                trades = response
-            case .failure:
-                fetchError = true
-            }
-            fetchingSessionTask.leave()
-        }
-        
-        fetchingSessionTask.notify(queue: DispatchQueue.main) { [weak self] in
-            guard let self = self else { return }
-            
-            if fetchError {
-                completionHandler(.failure(.fetchLiveSessionFailed))
-            } else if let liveOrders = liveOrders, let trades = trades {
-                
-                completionHandler(.success(true))
-            }
-        }
-    }
-    
-    func fetchPositions() {
-        networkManager.fetchPositions { result in
-            switch result {
-            case .success(let response):
-                break
-            case .failure:
-                break
-            }
-        }
-    }
-    
-    func previewTrade() {
-        networkManager.previewOrder(orderType: .Market, direction: .long, source: chart.priceBars[chart.timeKeys[1]]!) { result in
-            switch result {
-            case .success(let response):
-                break
-            case .failure:
-                break
-            }
-        }
-    }
-    
-    func placeOrder() {
-        var question: Question?
-        networkManager.placeOrder(orderType: .Market, direction: .long, source: chart.priceBars[chart.timeKeys[1]]!) { result in
-            switch result {
-            case .success(let response):
-                question = response.first
-            case .failure:
-                break
-            }
-        }
-    }
-    
-    func modifyOrder() {
-        networkManager.fetchRelevantLiveOrders { result in
-            switch result {
-            case .success(let liveOrders):
-                if let order = liveOrders.first {
-                    self.networkManager.modifyOrder(orderType: .Limit, direction: .long, price: (order.price ?? 0.0) + 1, quantity: 1, order: order) { result in
-                        switch result {
-                        case .success(let questions):
-                            break
-                        case .failure:
-                            break
-                        }
-                    }
-                }
-            case .failure:
-                break
-            }
-        }
-    }
-    
     func generateSimSession(upToPriceBar: PriceBar? = nil) {
         guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.lastBar else {
             return
@@ -144,9 +48,9 @@ class TraderBot {
                     print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
-                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entry.identifier, trade.exit.identifier, trade.profit ?? 0, trade.exitMethod.reason()))
+                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entryTime.generateShortDate(), trade.exitTime.generateShortDate(), trade.profit ?? 0, trade.exitMethod.reason()))
                 case .updatedStop(let position):
-                    print(String(format: "%@ updated stop loss to %.2f reason: %@", position.currentBar.identifier, position.stopLoss.stop, position.stopLoss.source.reason()))
+                    print(String(format: "Updated stop loss to %.2f reason: %@", position.stopLoss.stop, position.stopLoss.source.reason()))
                 }
             }
         }
@@ -165,30 +69,26 @@ class TraderBot {
                 return [.noAction]
         }
         
-        session.latestPriceBar = priceBar
-        
         // no current position, check if we should enter on the current bar
         if session.currentPosition == nil {
             return [handleOpeningNewTrade(currentBar: priceBar)]
         }
         // already have current position, update it or close it if needed
         else {
-            session.currentPosition!.currentBar = priceBar
-            
             // Rule 3: If we reached FlatPositionsTime, exit the trade immediately
-            if config.flatPositionsTime(chart: chart) <= priceBar.candleStick.time && !config.byPassTradingTimeRestrictions {
+            if config.flatPositionsTime(chart: chart) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 return [exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .endOfDay)]
             }
             
             // Rule 4: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
-            if config.clearPositionTime(chart: chart) <= priceBar.candleStick.time && !config.byPassTradingTimeRestrictions {
+            if config.clearPositionTime(chart: chart) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 switch session.currentPosition!.direction {
                 case .long:
-                    if priceBar.getBarColor() == .blue {
+                    if priceBar.barColor == .blue {
                         return [exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .endOfDay)]
                     }
                 default:
-                    if priceBar.getBarColor() == .red {
+                    if priceBar.barColor == .red {
                         return [exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .endOfDay)]
                     }
                 }
@@ -226,7 +126,7 @@ class TraderBot {
             // Rule 2: exit when bar of opposite color bar appears
             switch session.currentPosition!.direction {
             case .long:
-                if priceBar.getBarColor() == .red {
+                if priceBar.barColor == .red {
                     let exitAction = exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .signalReversed)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
@@ -237,7 +137,7 @@ class TraderBot {
                     }
                 }
             default:
-                if priceBar.getBarColor() == .blue {
+                if priceBar.barColor == .blue {
                     let exitAction = exitPosition(currentBar: priceBar, exitPrice: priceBar.candleStick.close, exitMethod: .signalReversed)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
@@ -255,9 +155,9 @@ class TraderBot {
             var twoGreenBarsSL: Double = session.currentPosition!.direction == .long ? 0 : Double.greatestFiniteMagnitude
 
             if session.currentPosition!.securedProfit < config.skipGreenBarsExit,
-                previousPriceBar.getBarColor() == .green,
-                priceBar.getBarColor() == .green,
-                let currentStop = priceBar.getOneMinSignal()?.stop {
+                previousPriceBar.barColor == .green,
+                priceBar.barColor == .green,
+                let currentStop = priceBar.oneMinSignal?.stop {
                 
                 switch session.currentPosition!.direction {
                 case .long:
@@ -343,10 +243,13 @@ class TraderBot {
     private func checkForEntrySignal(direction: TradeDirection, bar: PriceBar, entryType: EntryType = .pullBack) -> Position? {
         let color: SignalColor = direction == .long ? .blue : .red
         
-        guard bar.getBarColor() == color,
+        guard bar.barColor == color,
             checkForSignalConfirmation(direction: direction, bar: bar),
-            let oneMinStop = bar.getOneMinSignal()?.stop,
-            var stopLoss = calculateStopLoss(direction: direction, entryBar: bar) else {
+            let oneMinStop = bar.oneMinSignal?.stop,
+            var stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
+            let barIndex: Int = chart.timeKeys.firstIndex(of: bar.identifier),
+            barIndex < chart.timeKeys.count - 2,
+            let nextBar = chart.priceBars[chart.timeKeys[barIndex + 1]] else {
             return nil
         }
         
@@ -381,12 +284,12 @@ class TraderBot {
             break
         }
         
-        if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(chart: chart).contains(bar.candleStick.time) {
+        if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(chart: chart).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
-            let position = Position(direction: direction, entryPrice: bar.candleStick.close, stopLoss: stopLoss, entry: bar, currentBar: bar)
+            let position = Position(direction: direction, entryTime: nextBar.time, entryPrice: nextBar.candleStick.open, stopLoss: stopLoss)
             return position
         } else if risk <= config.maxRisk {
-            let position = Position(direction: direction, entryPrice: bar.candleStick.close, stopLoss: stopLoss, entry: bar, currentBar: bar)
+            let position = Position(direction: direction, entryTime: nextBar.time, entryPrice: nextBar.candleStick.open, stopLoss: stopLoss)
             return position
         }
 
@@ -400,24 +303,26 @@ class TraderBot {
         }
         
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
-        if !config.tradingTimeInterval(chart: chart).contains(currentBar.candleStick.time) && !config.byPassTradingTimeRestrictions {
+        if !config.tradingTimeInterval(chart: chart).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
             return .noAction
         }
         
         // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
-        if config.timeIntervalForHighRiskEntry(chart: chart).contains(currentBar.candleStick.time) {
+        if config.timeIntervalForHighRiskEntry(chart: chart).contains(currentBar.time) {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
         // If the a previous trade exists, the direction of the trade matches the current bar:
-        else if let lastTrade = session.trades.last, let currentBarDirection = currentBar.getOneMinSignal()?.direction {
+        else if let lastTrade = session.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
-            if lastTrade.exit.identifier == currentBar.identifier {
+            if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
                 return seekToOpenPosition(bar: currentBar, entryType: .initial)
             }
             // Check if signals from the end of the last trade to current bar are all of the same color as current
             // If yes, we need to decide if we want to enter on any Pullback or only Sweepspot
             // Otherwise, then enter aggressively on any entry
-            else if chart.checkAllSameDirection(direction: currentBarDirection, fromKey: lastTrade.exit.identifier, toKey: currentBar.identifier) {
+            else if chart.checkAllSameDirection(direction: currentBarDirection,
+                                                fromKey: lastTrade.exitTime.generateDateIdentifier(),
+                                                toKey: currentBar.time.generateDateIdentifier()) {
                 // If the previous trade profit is higher than ProfitRequiredToReenterTradeonPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
                 if (lastTrade.profit ?? 0) > config.enterOnPullback {
@@ -439,8 +344,8 @@ class TraderBot {
                           entryPrice: session.currentPosition!.entryPrice,
                           exitPrice: exitPrice,
                           exitMethod: exitMethod,
-                          entry: session.currentPosition!.entry,
-                          exit: currentBar)
+                          entryTime: session.currentPosition!.entryTime,
+                          exitTime: currentBar.time)
         session.trades.append(trade)
         session.currentPosition = nil
         return .closedPosition(trade: trade)
@@ -483,8 +388,8 @@ class TraderBot {
     // given an entry bar and direction of the trade, find the previous resistence/support level, if none exists, use the current one +-1
     private func findPreviousLevel(direction: TradeDirection, entryBar: PriceBar, minimalDistance: Double = 1) -> Double? {
         guard let startIndex = chart.timeKeys.firstIndex(of: entryBar.identifier),
-            let initialBarStop = entryBar.getOneMinSignal()?.stop,
-            entryBar.getOneMinSignal()?.direction == direction else {
+            let initialBarStop = entryBar.oneMinSignal?.stop,
+            entryBar.oneMinSignal?.direction == direction else {
             return nil
         }
         
@@ -495,9 +400,9 @@ class TraderBot {
         outerLoop: for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
             guard let currentPriceBar = chart.priceBars[timeKey] else { continue }
             
-            if currentPriceBar.getOneMinSignal()?.direction != direction {
+            if currentPriceBar.oneMinSignal?.direction != direction {
                 break
-            } else if let level = currentPriceBar.getOneMinSignal()?.stop {
+            } else if let level = currentPriceBar.oneMinSignal?.stop {
                 let levelRounded = level.roundBasedOnDirection(direction: direction)
                 
                 switch direction {
@@ -530,7 +435,7 @@ class TraderBot {
     // check if the give bar is the end of a 'pullback' pattern based on the given trade direction
     private func checkForPullback(direction: TradeDirection, start: PriceBar) -> Pullback? {
         guard let startIndex = chart.timeKeys.firstIndex(of: start.identifier),
-        start.getOneMinSignal()?.stop != nil else {
+        start.oneMinSignal?.stop != nil else {
             return nil
         }
         
@@ -542,25 +447,25 @@ class TraderBot {
         var coloredBarsIsComplete: Bool = false
         
         for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
-            guard let priceBar = chart.priceBars[timeKey], priceBar.getOneMinSignal()?.direction == direction else {
+            guard let priceBar = chart.priceBars[timeKey], priceBar.oneMinSignal?.direction == direction else {
                 break
             }
             
             // if the current bar is green or an opposite color, it's not a sweetspot
-            if coloredBars.isEmpty, priceBar.getBarColor() != color {
+            if coloredBars.isEmpty, priceBar.barColor != color {
                 return nil
             }
             // if the current bar is the correct color, add it to 'coloredBars'
-            else if !coloredBarsIsComplete, priceBar.getBarColor() == color {
+            else if !coloredBarsIsComplete, priceBar.barColor == color {
                 coloredBars.insert(priceBar, at: 0)
             }
             // if the current bar is green, 'coloredBars' array is complete, start adding to 'greenBars'
-            else if !coloredBars.isEmpty, priceBar.getBarColor() == .green {
+            else if !coloredBars.isEmpty, priceBar.barColor == .green {
                 coloredBarsIsComplete = true
                 greenBars.insert(priceBar, at: 0)
             }
             // if the current bar is not green anymore, 'greenBars' array is complete, the sweet spot is formed
-            else if coloredBarsIsComplete, priceBar.getBarColor() != .green {
+            else if coloredBarsIsComplete, priceBar.barColor != .green {
                 break
             }
         }
@@ -576,8 +481,8 @@ class TraderBot {
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)
     private func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
         guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier),
-            bar.getOneMinSignal()?.stop != nil,
-            bar.getOneMinSignal()?.direction == direction else {
+            bar.oneMinSignal?.stop != nil,
+            bar.oneMinSignal?.direction == direction else {
             return false
         }
         

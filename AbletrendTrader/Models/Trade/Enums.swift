@@ -104,3 +104,13 @@ enum SignalInteval {
         }
     }
 }
+
+struct TradesTableRowItem {
+    var type: String
+    var entry: String
+    var stop: String
+    var exit: String
+    var pAndL: String
+    var entryTime: String
+    var exitTime: String
+}

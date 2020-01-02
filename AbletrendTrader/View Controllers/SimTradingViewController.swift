@@ -24,7 +24,7 @@ class SimTradingViewController: NSViewController {
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
-    private let sessionManager = SessionManager()
+    private let sessionManager = SessionManager(live: false)
     private var listOfTrades: [TradesTableRowItem]?
     private var realTimeChart: Chart? {
         didSet {
@@ -89,7 +89,7 @@ class SimTradingViewController: NSViewController {
             if let chart = chart {
                 self.realTimeChart = chart
                 self.sessionManager.resetSession()
-                self.trader = TraderBot(chart: chart, live: false, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
                 
                 if self.dataManager?.simulateTimePassage ?? false {
@@ -119,7 +119,7 @@ class SimTradingViewController: NSViewController {
         
         dataManager?.stopMonitoring()
         sessionManager.resetSession()
-        trader = TraderBot(chart: chart, live: false, sessionManager: sessionManager)
+        trader = TraderBot(chart: chart, sessionManager: sessionManager)
         listOfTrades?.removeAll()
         
         simTimeLabel.stringValue = "--:--"
@@ -193,12 +193,14 @@ extension SimTradingViewController: DataManagerDelegate {
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
                     print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))
-                case .updatedStop(let position):
-                    print(String(format: "Updated stop loss to %.2f", position.stopLoss.stop ))
+                case .updatedStop(let stopLoss):
+                    print(String(format: "Updated stop loss to %.2f", stopLoss.stop))
                 }
             }
-            updateTradesList()
-            latestProcessedTimeKey = realTimeChart.lastTimeKey
+            sessionManager.processActions(actions: actions) { networkError in
+                self.updateTradesList()
+                self.latestProcessedTimeKey = realTimeChart.lastTimeKey
+            }
         }
     }
 }

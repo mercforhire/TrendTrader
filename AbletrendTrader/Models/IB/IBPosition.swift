@@ -13,15 +13,17 @@ struct IBPosition: Codable {
     var conid: Int
     var assetClass: String
     var position: Int
-    var mktPrice: Double
-    var mktValue: Double
     var currency: String
-    var avgCost: Double
     var avgPrice: Double
     var realizedPnl: Double
     var unrealizedPnl: Double
     
     var direction: TradeDirection {
         return position > 0 ? .long : .short
+    }
+    
+    func toPosition() -> Position {
+        let defaultStop = direction == .long ? avgPrice - Config.shared.maxRisk : avgPrice + Config.shared.maxRisk
+        return Position(direction: direction, entryTime: nil, entryPrice: avgPrice, stopLoss: StopLoss(stop: defaultStop, source: .currentBar))
     }
 }

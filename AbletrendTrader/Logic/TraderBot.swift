@@ -14,17 +14,15 @@ class TraderBot {
     
     private let config = Config.shared
     private let networkManager = NetworkManager.shared
-    private let live: Bool
     
-    init(chart: Chart, live: Bool, sessionManager: SessionManager) {
+    init(chart: Chart, sessionManager: SessionManager) {
         self.chart = chart
-        self.live = live
         self.sessionManager = sessionManager
     }
     
     // Public:
     func generateSimSession(upToPriceBar: PriceBar? = nil) {
-        guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.lastBar, !live else {
+        guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.lastBar else {
             return
         }
         
@@ -49,15 +47,18 @@ class TraderBot {
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
                     print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0, trade.exitMethod.reason()))
-                case .updatedStop(let position):
-                    print(String(format: "Updated stop loss to %.2f reason: %@", position.stopLoss.stop, position.stopLoss.source.reason()))
+                case .updatedStop(let stopLoss):
+                    print(String(format: "Updated stop loss to %.2f reason: %@", stopLoss.stop, stopLoss.source.reason()))
                 }
+            }
+            sessionManager.processActions(actions: actions) { networkError in
+                
             }
         }
     }
     
     
-    // Decide trade actions at the given PriceBar object, returns the list of actions performed
+    // Decide trade actions at the given PriceBar object, returns the list of actions need to be performed
     func decide(priceBar: PriceBar? = nil) -> [TradeActionType] {
         guard chart.timeKeys.count > 1,
             let priceBar = priceBar ?? chart.lastBar,
@@ -217,20 +218,12 @@ class TraderBot {
             // Apply the new SL if it is more in favor than the existing SL
             switch sessionManager.currentPosition!.direction {
             case .long:
-                if let stop = sessionManager.stopLoss?.stop,
-                    newStop > stop {
-                    
-                    sessionManager.stopLoss.stop = newStop
-                    sessionManager.stopLoss.source = newStopSource
-                    return [.updatedStop(position: sessionManager.currentPosition!)]
+                if let stop = sessionManager.stopLoss?.stop, newStop > stop {
+                    return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                 }
             default:
-                if let stop = sessionManager.stopLoss?.stop,
-                    newStop < stop {
-                    
-                    sessionManager.stopLoss.stop = newStop
-                    sessionManager.stopLoss.source = newStopSource
-                    return [.updatedStop(position: sessionManager.currentPosition!)]
+                if let stop = sessionManager.stopLoss?.stop, newStop < stop {
+                    return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                 }
             }
             
@@ -242,7 +235,6 @@ class TraderBot {
     // Private:
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let position: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
-            sessionManager.currentPosition = position
             return .openedPosition(position: position)
         }
         return .noAction
@@ -349,14 +341,14 @@ class TraderBot {
     }
     
     private func exitPosition(currentBar: PriceBar, exitPrice: Double, exitMethod: ExitMethod) -> TradeActionType {
+        guard let currentPosition = sessionManager.currentPosition else { return .noAction }
+        
         let trade = Trade(direction: sessionManager.currentPosition!.direction,
                           entryPrice: sessionManager.currentPosition!.entryPrice,
                           exitPrice: exitPrice,
                           exitMethod: exitMethod,
                           entryTime: sessionManager.currentPosition!.entryTime,
                           exitTime: currentBar.time)
-        sessionManager.trades.append(trade)
-        sessionManager.currentPosition = nil
         return .closedPosition(trade: trade)
     }
     

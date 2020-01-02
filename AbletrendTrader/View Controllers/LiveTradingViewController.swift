@@ -26,7 +26,7 @@ class LiveTradingViewController: NSViewController {
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
-    private let sessionManager: SessionManager = SessionManager()
+    private let sessionManager: SessionManager = SessionManager(live: true)
     private var listOfTrades: [TradesTableRowItem]?
     private var realTimeChart: Chart? {
         didSet {
@@ -90,7 +90,7 @@ class LiveTradingViewController: NSViewController {
             
             if let chart = chart {
                 self.realTimeChart = chart
-                self.trader = TraderBot(chart: chart, live: true, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
             }
             
             fetchingTask.leave()
@@ -134,17 +134,11 @@ class LiveTradingViewController: NSViewController {
     }
     
     @IBAction func buyPressed(_ sender: NSButton) {
-        sender.isEnabled = false
-        sessionManager.buyMarket { error in
-            sender.isEnabled = true
-        }
+        
     }
     
     @IBAction func sellPressed(_ sender: NSButton) {
-        sender.isEnabled = false
-        sessionManager.sellMarket { error in
-            sender.isEnabled = true
-        }
+        
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
@@ -179,8 +173,8 @@ extension LiveTradingViewController: DataManagerDelegate {
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
                     print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))
-                case .updatedStop(let position):
-                    print(String(format: "Updated stop loss to %.2f", position.stopLoss.stop))
+                case .updatedStop(let stoploss):
+                    print(String(format: "Updated stop loss to %.2f", stoploss.stop))
                 }
             }
             updateTradesList()

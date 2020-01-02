@@ -191,7 +191,7 @@ class NetworkManager {
     // Live Orders
     // https://localhost:5000/v1/portal/iserver/account/orders
     // Only fetch orders this bot trades
-    func fetchRelevantLiveOrders(completionHandler: @escaping (Swift.Result<[LiveOrder], NetworkError>) -> Void) {
+    func fetchStopOrder(completionHandler: @escaping (Swift.Result<LiveOrder?, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/account/orders").responseData { [weak self] response in
             guard let self = self else { return }
             
@@ -201,7 +201,7 @@ class NetworkManager {
                 let relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
                     return liveOrder.status == "Submitted" && liveOrder.conid == self.config.conId && liveOrder.orderType == "STP"
                 }
-                completionHandler(.success(relevantOrders))
+                completionHandler(.success(relevantOrders.first))
             } else {
                 completionHandler(.failure(.fetchLiveOrdersFailed))
             }

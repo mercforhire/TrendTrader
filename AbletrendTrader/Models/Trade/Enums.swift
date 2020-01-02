@@ -18,7 +18,7 @@ enum EntryType {
 enum TradeActionType {
     case noAction
     case openedPosition(position: Position)
-    case updatedStop(position: Position)
+    case updatedStop(stop: StopLoss)
     case closedPosition(trade: Trade)
 }
 

@@ -21,38 +21,55 @@ class TraderBot {
     }
     
     // Public:
-    func generateSimSession(upToPriceBar: PriceBar? = nil) {
+    func generateSimSession(upToPriceBar: PriceBar? = nil, completion: @escaping () -> ()) {
         guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.lastBar else {
             return
         }
         
         sessionManager.resetSession()
         
-        for timeKey in chart.timeKeys {
-            if timeKey == lastBar.identifier {
-                break
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
+            guard let self = self else {
+                return
             }
             
-            guard let currentBar = chart.priceBars[timeKey] else { continue }
-            
-            let actions = decide(priceBar: currentBar)
-            for action in actions {
-                switch action {
-                case .noAction:
+            let semaphore = DispatchSemaphore(value: 0)
+            for timeKey in self.chart.timeKeys {
+                if timeKey == lastBar.identifier {
                     break
-                    print(String(format: "No action on %@", timeKey))
-                case .openedPosition(let position):
-                    let type: String = position.direction == .long ? "Long" : "Short"
-                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
-                case .closedPosition(let trade):
-                    let type: String = trade.direction == .long ? "Long" : "Short"
-                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0, trade.exitMethod.reason()))
-                case .updatedStop(let stopLoss):
-                    print(String(format: "Updated stop loss to %.2f reason: %@", stopLoss.stop, stopLoss.source.reason()))
                 }
-            }
-            sessionManager.processActions(actions: actions) { networkError in
                 
+                guard let currentBar = self.chart.priceBars[timeKey] else { continue }
+                
+                let actions = self.decide(priceBar: currentBar)
+                DispatchQueue.main.async {
+                    for action in actions {
+                        switch action {
+                        case .noAction:
+                            break
+                            print(String(format: "No action on %@", timeKey))
+                        case .openedPosition(let position):
+                            let type: String = position.direction == .long ? "Long" : "Short"
+                            print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
+                        case .closedPosition(let trade):
+                            let type: String = trade.direction == .long ? "Long" : "Short"
+                            print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0, trade.exitMethod.reason()))
+                        case .updatedStop(let stopLoss):
+                            print(String(format: "Updated stop loss to %.2f reason: %@", stopLoss.stop, stopLoss.source.reason()))
+                        }
+                    }
+                }
+                
+                self.sessionManager.processActions(actions: actions) { networkError in
+                    semaphore.signal()
+                }
+                
+                semaphore.wait()
+            }
+            
+            DispatchQueue.main.async {
+                completion()
             }
         }
     }
@@ -71,7 +88,7 @@ class TraderBot {
         }
         
         // no current position, check if we should enter on the current bar
-        if sessionManager.hasCurrentPosition {
+        if !sessionManager.hasCurrentPosition {
             return [handleOpeningNewTrade(currentBar: priceBar)]
         }
         // already have current position, update it or close it if needed
@@ -249,7 +266,7 @@ class TraderBot {
             let oneMinStop = bar.oneMinSignal?.stop,
             var stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
             let barIndex: Int = chart.timeKeys.firstIndex(of: bar.identifier),
-            barIndex < chart.timeKeys.count - 2,
+            barIndex < chart.timeKeys.count - 1,
             let nextBar = chart.priceBars[chart.timeKeys[barIndex + 1]] else {
             return nil
         }
@@ -343,11 +360,11 @@ class TraderBot {
     private func exitPosition(currentBar: PriceBar, exitPrice: Double, exitMethod: ExitMethod) -> TradeActionType {
         guard let currentPosition = sessionManager.currentPosition else { return .noAction }
         
-        let trade = Trade(direction: sessionManager.currentPosition!.direction,
-                          entryPrice: sessionManager.currentPosition!.entryPrice,
+        let trade = Trade(direction: currentPosition.direction,
+                          entryPrice: currentPosition.entryPrice,
                           exitPrice: exitPrice,
                           exitMethod: exitMethod,
-                          entryTime: sessionManager.currentPosition!.entryTime,
+                          entryTime: currentPosition.entryTime,
                           exitTime: currentBar.time)
         return .closedPosition(trade: trade)
     }

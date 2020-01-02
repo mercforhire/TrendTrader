@@ -14,7 +14,7 @@ protocol DataManagerDelegate: class {
 
 class ChartManager {
     let readFromServer = false
-    let simulateTimePassage = false
+    let simulateTimePassage = true
     
     private let networkManager = NetworkManager.shared
     private var calendar = Calendar(identifier: .gregorian)
@@ -150,6 +150,7 @@ class ChartManager {
                         let twoMinIndicators = Indicators(interval: .twoMin, signals: twoMinSignals)
                         let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
                     
+                        self.subsetChart = nil
                         self.chart = Chart.generateChart(ticker: "NQ",
                                                          candleSticks: candleSticks,
                                                          indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],
@@ -189,6 +190,7 @@ class ChartManager {
                                                  minute: config.chartEnd.1)
                 self.chartEndTime = calendar.date(from: components2)!
                 
+                self.subsetChart = nil
                 self.chart = Chart.generateChart(ticker: "NQ",
                                                  candleSticks: candleSticks,
                                                  indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],

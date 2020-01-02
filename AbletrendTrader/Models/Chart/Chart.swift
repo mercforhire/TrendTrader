@@ -28,6 +28,14 @@ struct Chart {
         return startBar?.time
     }
     
+    var absLastBar: PriceBar? {
+        guard timeKeys.count > 0 else { return nil }
+        
+        let lastBarKey = timeKeys[timeKeys.count - 1]
+        let lastBar = priceBars[lastBarKey]
+        return lastBar
+    }
+    
     var absLastBarDate: Date? {
         guard let absLastTimeKey = timeKeys.last, let absLastBar = priceBars[absLastTimeKey] else { return nil }
         

@@ -26,15 +26,6 @@ class SimTradingViewController: NSViewController {
     private var trader: TraderBot?
     private let sessionManager = SessionManager(live: false)
     private var listOfTrades: [TradesTableRowItem]?
-    private var realTimeChart: Chart? {
-        didSet {
-            if let chart = realTimeChart, let lastDate = chart.absLastBarDate {
-                latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
-            } else {
-                latestDataTimeLabel.stringValue = "Latest data time: --:--"
-            }
-        }
-    } // all or subset of the full chart, simulating a particular moment during the session and used by the Trader algo
     
     weak var delegate: DataManagerDelegate?
     private var latestProcessedTimeKey: String?
@@ -76,18 +67,25 @@ class SimTradingViewController: NSViewController {
         systemTimeLabel.stringValue = dateFormatter.string(from: Date())
     }
     
+    private func updateLatestDataTimeLabel(chart: Chart?) {
+        if let chart = chart, let lastDate = chart.absLastBarDate {
+            latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
+        } else {
+            latestDataTimeLabel.stringValue = "Latest data time: --:--"
+        }
+    }
+    
     @IBAction
     private func refreshChartData(_ sender: NSButton) {
         dataManager?.stopMonitoring()
-        trader = nil
-        realTimeChart = nil
+        updateLatestDataTimeLabel(chart: nil)
         sender.isEnabled = false
         
         dataManager?.fetchChart(completion: {  [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
-                self.realTimeChart = chart
+                self.updateLatestDataTimeLabel(chart: chart)
                 self.sessionManager.resetSession()
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
@@ -103,23 +101,20 @@ class SimTradingViewController: NSViewController {
     
     @IBAction
     private func startMonitoring(_ sender: NSButton) {
-        guard trader != nil, let realTimeChart = realTimeChart, !realTimeChart.timeKeys.isEmpty
-        else { return }
+        guard trader != nil, let realTimeChart = trader?.chart, !realTimeChart.timeKeys.isEmpty else {
+            return
+        }
         
         beginningButton.isEnabled = true
         startButton.isEnabled = false
-        trader?.generateSimSession()
-        updateTradesList()
         dataManager?.startMonitoring()
     }
     
     @IBAction
     private func restartSimulation(_ sender: Any) {
-        guard let chart = realTimeChart else { return }
-        
         dataManager?.stopMonitoring()
+        dataManager?.subsetChart = nil
         sessionManager.resetSession()
-        trader = TraderBot(chart: chart, sessionManager: sessionManager)
         listOfTrades?.removeAll()
         
         simTimeLabel.stringValue = "--:--"
@@ -144,11 +139,14 @@ class SimTradingViewController: NSViewController {
         }
         
         dataManager?.stopMonitoring()
-        realTimeChart = completedChart
+        updateLatestDataTimeLabel(chart: completedChart)
         trader?.chart = completedChart
-        trader?.generateSimSession()
-        updateTradesList()
-        delegate?.chartUpdated(chart: completedChart)
+        trader?.generateSimSession(completion: { [weak self] in
+            guard let self = self else { return }
+            
+            self.updateTradesList()
+            self.delegate?.chartUpdated(chart: completedChart)
+        })
     }
     
     private func updateTradesList() {
@@ -162,8 +160,8 @@ class SimTradingViewController: NSViewController {
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
-        if let chartVC = segue.destinationController as? ChartViewController {
-            chartVC.chart = realTimeChart
+        if let chartVC = segue.destinationController as? ChartViewController, let chart = trader?.chart {
+            chartVC.chart = chart
             delegate = chartVC
         }
     }
@@ -171,18 +169,17 @@ class SimTradingViewController: NSViewController {
 
 extension SimTradingViewController: DataManagerDelegate {
     func chartUpdated(chart: Chart) {
-        realTimeChart = chart
+        updateLatestDataTimeLabel(chart: chart)
         delegate?.chartUpdated(chart: chart)
         
-        guard let realTimeChart = realTimeChart,
-            !realTimeChart.timeKeys.isEmpty,
-            let timeKey = realTimeChart.lastTimeKey else {
+        guard !chart.timeKeys.isEmpty,
+            let timeKey = chart.lastTimeKey else {
                 return
         }
         
-        trader?.chart = realTimeChart
+        trader?.chart = chart
         
-        if let actions = trader?.decide(), latestProcessedTimeKey != realTimeChart.lastTimeKey {
+        if let actions = trader?.decide(), latestProcessedTimeKey != chart.lastTimeKey {
             for action in actions {
                 switch action {
                 case .noAction:
@@ -199,7 +196,7 @@ extension SimTradingViewController: DataManagerDelegate {
             }
             sessionManager.processActions(actions: actions) { networkError in
                 self.updateTradesList()
-                self.latestProcessedTimeKey = realTimeChart.lastTimeKey
+                self.latestProcessedTimeKey = chart.lastTimeKey
             }
         }
     }

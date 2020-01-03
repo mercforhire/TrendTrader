@@ -86,6 +86,15 @@ enum TradeDirection {
             return "SELL"
         }
     }
+    
+    func reverse() -> TradeDirection {
+        switch self {
+        case .long:
+            return .short
+        case .short:
+            return .long
+        }
+    }
 }
 
 enum SignalInteval {

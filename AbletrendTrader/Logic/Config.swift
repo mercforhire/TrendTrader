@@ -45,7 +45,7 @@ class Config {
     var conId = 346577750
     var positionSize: Int = 1
     
-    let byPassTradingTimeRestrictions = true
+    let byPassTradingTimeRestrictions = false
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
     func timeIntervalForHighRiskEntry(chart: Chart) -> DateInterval {

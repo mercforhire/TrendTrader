@@ -33,6 +33,7 @@ enum NetworkError: Error {
     case logoffFailed
     case fetchAccountsFailed
     case fetchTradesFailed
+    case fetchPositionsFailed
     case fetchLiveOrdersFailed
     case orderReplyFailed
     case previewOrderFailed
@@ -40,6 +41,7 @@ enum NetworkError: Error {
     case placeOrderFailed
     case modifyOrderFailed
     case deleteOrderFailed
+    case verifyClosedPositionFailed
 }
 
 class NetworkManager {
@@ -165,7 +167,7 @@ class NetworkManager {
     
     // List of Trades
     // https://localhost:5000/v1/portal/iserver/account/trades
-    func fetchRelevantTrades(completionHandler: @escaping (Swift.Result<[IBTrade], NetworkError>) -> Void) {
+    func fetchLatestTrade(completionHandler: @escaping (Swift.Result<IBTrade?, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
             completionHandler(.failure(.previewOrderFailed))
             return
@@ -181,7 +183,7 @@ class NetworkManager {
                 relevantTrades.sort { (left, right) -> Bool in
                     return left.tradeTime_r > right.tradeTime_r
                 }
-                completionHandler(.success(relevantTrades))
+                completionHandler(.success(relevantTrades.first))
             } else {
                 completionHandler(.failure(.fetchTradesFailed))
             }
@@ -270,7 +272,7 @@ class NetworkManager {
             return
         }
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": true, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"DAY\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(),  price, config.ticker, config.positionSize)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": true, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"DAY\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(), price, config.ticker, config.positionSize)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody

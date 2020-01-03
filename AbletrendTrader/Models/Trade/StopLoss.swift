@@ -11,4 +11,5 @@ import Foundation
 struct StopLoss {
     var stop: Double
     var source: StopLossSource
+    var stopOrder: LiveOrder?
 }

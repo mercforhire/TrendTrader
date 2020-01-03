@@ -20,6 +20,7 @@ struct IBTrade: Codable {
     var secType: String
     var conidex: String
     var orderRef: String
+    var position: Int
     
     enum CodingKeys: String, CodingKey {
         case symbol = "symbol"
@@ -33,6 +34,7 @@ struct IBTrade: Codable {
         case secType = "sec_type"
         case conidex = "conidex"
         case orderRef = "order_ref"
+        case position = "position"
     }
     
     var tradeTime: Date {

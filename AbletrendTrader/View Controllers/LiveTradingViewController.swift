@@ -97,7 +97,7 @@ class LiveTradingViewController: NSViewController {
         })
         
         fetchingTask.enter()
-        sessionManager.fetchSession(completionHandler: { result in
+        sessionManager.refreshIBSession(completionHandler: { result in
             fetchingTask.leave()
         })
         

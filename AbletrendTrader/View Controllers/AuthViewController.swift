@@ -90,10 +90,11 @@ class AuthViewController: NSViewController {
             guard let self = self else { return }
             
             switch result {
-            case .success:
+            case .failure:
                 self.ssoToken = nil
                 self.authenticated = false
-            case .failure:
+                print("Pinging server failed, please re-authenticate")
+            default:
                 break
             }
         }

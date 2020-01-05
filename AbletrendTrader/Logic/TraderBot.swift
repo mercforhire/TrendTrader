@@ -248,6 +248,19 @@ class TraderBot {
         }
     }
 
+    func buyAtMarket() -> TradeActionType {
+        guard let currentPrice = chart.absLastBar?.candleStick.close else { return .noAction }
+        
+        let buyPosition = Position(direction: .long, entryTime: chart.absLastBarDate, entryPrice: currentPrice, stopLoss: StopLoss(stop: currentPrice, source: .currentBar, stopOrder: nil))
+        return .openedPosition(position: buyPosition)
+    }
+    
+    func sellAtMarket() -> TradeActionType {
+        guard let currentPrice = chart.absLastBar?.candleStick.close else { return .noAction }
+        
+        let sellPosition = Position(direction: .long, entryTime: chart.absLastBarDate, entryPrice: currentPrice, stopLoss: StopLoss(stop: currentPrice, source: .currentBar, stopOrder: nil))
+        return .openedPosition(position: sellPosition)
+    }
     
     // Private:
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
@@ -453,12 +466,11 @@ class TraderBot {
     // check if the give bar is the end of a 'pullback' pattern based on the given trade direction
     private func checkForPullback(direction: TradeDirection, start: PriceBar) -> Pullback? {
         guard let startIndex = chart.timeKeys.firstIndex(of: start.identifier),
-        start.oneMinSignal?.stop != nil else {
-            return nil
+            start.oneMinSignal?.stop != nil else {
+                return nil
         }
         
         let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
-        
         let color: SignalColor = direction == .long ? .blue : .red
         var greenBars: [PriceBar] = []
         var coloredBars: [PriceBar] = []

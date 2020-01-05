@@ -343,7 +343,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <segue destination="cVa-8a-a9U" kind="modal" id="u3b-PS-Rg7"/>
+                                    <segue destination="cVa-8a-a9U" kind="show" id="u3b-PS-Rg7"/>
                                 </connections>
                             </button>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aOm-qF-Mqw">

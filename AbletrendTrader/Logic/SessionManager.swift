@@ -150,7 +150,7 @@ class SessionManager {
         
         // cancel all stop orders
         exitPositionsTask.enter()
-        self.deleteAllOrders { networkError in
+        self.deleteStopOrder { networkError in
             if let networkError = networkError {
                 networkErrors.append(networkError)
             }
@@ -200,7 +200,7 @@ class SessionManager {
         }
     }
     
-    func deleteAllOrders(completion: @escaping (NetworkError?) -> ()) {
+    func deleteStopOrder(completion: @escaping (NetworkError?) -> ()) {
         guard let stopOrder = currentPosition?.stopLoss.stopOrder else { return }
         
         self.networkManager.deleteOrder(order: stopOrder) { result in

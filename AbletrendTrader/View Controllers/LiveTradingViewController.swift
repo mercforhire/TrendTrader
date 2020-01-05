@@ -134,11 +134,29 @@ class LiveTradingViewController: NSViewController {
     }
     
     @IBAction func buyPressed(_ sender: NSButton) {
+        guard let action = trader?.buyAtMarket() else { return }
         
+        sender.isEnabled = false
+        sessionManager.processActions(actions: [action]) { networkError in
+            sender.isEnabled = true
+            
+            if let networkError = networkError {
+                print("Network Error: ", networkError)
+            }
+        }
     }
     
     @IBAction func sellPressed(_ sender: NSButton) {
+        guard let action = trader?.sellAtMarket() else { return }
         
+        sender.isEnabled = false
+        sessionManager.processActions(actions: [action]) { networkError in
+            sender.isEnabled = true
+            
+            if let networkError = networkError {
+                print("Network Error: ", networkError)
+            }
+        }
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

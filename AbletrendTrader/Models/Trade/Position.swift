@@ -12,9 +12,11 @@ struct Position {
     var direction: TradeDirection
     var entryTime: Date?
     var entryPrice: Double
-    var stopLoss: StopLoss
+    var stopLoss: StopLoss?
     
-    var securedProfit: Double {
+    var securedProfit: Double? {
+        guard let stopLoss = stopLoss else { return nil }
+        
         switch direction {
         case .long:
             return stopLoss.stop - entryPrice

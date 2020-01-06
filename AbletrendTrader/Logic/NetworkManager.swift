@@ -42,6 +42,50 @@ enum NetworkError: Error {
     case modifyOrderFailed
     case deleteOrderFailed
     case verifyClosedPositionFailed
+    
+    func displayMessage() -> String {
+        switch self {
+        case .ssoAuthenticationFailed:
+            return "SSO authentication failed."
+        case .fetchAuthStatusFailed:
+            return "Fetch authentication status failed."
+        case .tickleFailed:
+            return "Ping server failed."
+        case .logoffFailed:
+            return "Log off failed."
+        case .fetchAccountsFailed:
+            return "Fetch accounts failed."
+        case .fetchTradesFailed:
+            return "fetch trades failed."
+        case .fetchPositionsFailed:
+            return "fetch positions failed."
+        case .fetchLiveOrdersFailed:
+            return "fetch live orders failed"
+        case .orderReplyFailed:
+            return "answer question failed."
+        case .previewOrderFailed:
+            return "preview order failed."
+        case .orderAlreadyPlaced:
+            return "order already placed."
+        case .placeOrderFailed:
+            return "place order failed."
+        case .modifyOrderFailed:
+            return "place order failed."
+        case .deleteOrderFailed:
+            return "delete order failed."
+        case .verifyClosedPositionFailed:
+            return "verify closed position failed."
+        }
+    }
+    
+    func showDialog() {
+        let a: NSAlert = NSAlert()
+        a.messageText = "Error"
+        a.informativeText = self.displayMessage()
+        a.addButton(withTitle: "Okay")
+        a.alertStyle = NSAlert.Style.warning
+        a.runModal()
+    }
 }
 
 class NetworkManager {
@@ -115,14 +159,13 @@ class NetworkManager {
     
     // Tries to re-authenticate to Brokerage
     // https://localhost:5000/v1/portal/iserver/reauthenticate
-    func reauthenticate(completionHandler: @escaping (Swift.Result<AuthStatus, NetworkError>) -> Void) {
-        afManager.request("https://localhost:5000/v1/portal/iserver/reauthenticate", method: .post).responseData { [weak self] response in
-            guard let self = self else { return }
+    func reauthenticate(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/iserver/reauthenticate", method: .post).responseData { response in
             
-            if let data = response.data, let authStatus = self.authStatusBuilder.buildAuthStatusFrom(data) {
-                completionHandler(.success(authStatus))
+            if response.response?.statusCode == 200 {
+                completionHandler(.success(true))
             } else {
-                completionHandler(.failure(.fetchAuthStatusFailed))
+                completionHandler(.failure(.tickleFailed))
             }
         }
     }
@@ -223,7 +266,7 @@ class NetworkManager {
             
             if let data = response.data, let positions = self.ibPositionsBuilder.buildErrorResponseFrom(data) {
                 let relevantPositions: [IBPosition] = positions.filter { position -> Bool in
-                    return position.acctId == selectedAccount.accountId && position.conid == self.config.conId
+                    return position.acctId == selectedAccount.accountId && position.conid == self.config.conId && position.position != 0
                 }
                 completionHandler(.success(relevantPositions.first))
             } else {
@@ -296,16 +339,25 @@ class NetworkManager {
     // Place Order Reply
     // https://localhost:5000/v1/portal/iserver/reply/{replyid}
     func placeOrderReply(question: Question, answer: Bool, completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
-        let parameters: [String : Any] = ["confirmed": answer]
+
+        guard let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/reply/" + question.identifier) else {
+            completionHandler(.failure(.orderReplyFailed))
+            return
+        }
         
-        afManager.request("https://localhost:5000/v1/portal/iserver/reply/" + question.identifier,
-                          method: .post,
-                          parameters: parameters).responseJSON { response in
-                            if response.response?.statusCode == 200 {
-                                completionHandler(.success(true))
-                            } else {
-                                completionHandler(.failure(.orderReplyFailed))
-                            }
+        let bodyString = String(format: "{ \"confirmed\": %@}", answer ? "true" : "false")
+        if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
+            let httpBody: Data = bodyString.data(using: .utf8) {
+            request.httpBody = httpBody
+            afManager.request(request).responseData { response in
+                if response.response?.statusCode == 200 {
+                    completionHandler(.success(true))
+                } else {
+                    completionHandler(.failure(.orderReplyFailed))
+                }
+            }
+        } else {
+            completionHandler(.failure(.placeOrderFailed))
         }
     }
     

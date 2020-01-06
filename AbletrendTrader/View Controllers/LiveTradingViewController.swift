@@ -51,6 +51,8 @@ class LiveTradingViewController: NSViewController {
         startButton.isEnabled = false
         pauseButton.isEnabled = false
         exitButton.isEnabled = false
+        buyButton.isEnabled = false
+        sellButton.isEnabled = false
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -74,6 +76,19 @@ class LiveTradingViewController: NSViewController {
         listOfTrades = sessionManager.listOfTrades()
         tableView.reloadData()
         totalPLLabel.stringValue = String(format: "Total P/L: %.2f", sessionManager.getTotalPAndL())
+        
+        if let currentPosition = sessionManager.currentPosition {
+            if currentPosition.direction == .long {
+                self.buyButton.isEnabled = false
+                self.sellButton.isEnabled = true
+            } else {
+                self.buyButton.isEnabled = true
+                self.sellButton.isEnabled = false
+            }
+        } else {
+            self.buyButton.isEnabled = true
+            self.sellButton.isEnabled = true
+        }
     }
     
     @IBAction
@@ -85,7 +100,7 @@ class LiveTradingViewController: NSViewController {
         let fetchingTask = DispatchGroup()
         
         fetchingTask.enter()
-        dataManager?.fetchChart(completion: {  [weak self] chart in
+        dataManager?.fetchChart(completion: { [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
@@ -97,13 +112,22 @@ class LiveTradingViewController: NSViewController {
         })
         
         fetchingTask.enter()
-        sessionManager.refreshIBSession(completionHandler: { result in
+        sessionManager.refreshIBSession(completionHandler: { [weak self] result in
             fetchingTask.leave()
-        })
-        
-        fetchingTask.notify(queue: DispatchQueue.main) { [weak self] in
+            
             guard let self = self else { return }
             
+            switch result {
+            case .success(let success):
+                if success {
+                    self.updateTradesList()
+                }
+            case .failure(let networkError):
+                networkError.showDialog()
+            }
+        })
+        
+        fetchingTask.notify(queue: DispatchQueue.main) {
             sender.isEnabled = true
         }
     }
@@ -141,7 +165,20 @@ class LiveTradingViewController: NSViewController {
             sender.isEnabled = true
             
             if let networkError = networkError {
-                print("Network Error: ", networkError)
+                networkError.showDialog()
+            } else {
+                self.sessionManager.refreshIBSession { [weak self] result in
+                    guard let self = self else { return }
+                    
+                    switch result {
+                    case .success(let success):
+                        if success {
+                            self.updateTradesList()
+                        }
+                    case .failure(let networkError):
+                        networkError.showDialog()
+                    }
+                }
             }
         }
     }
@@ -155,6 +192,19 @@ class LiveTradingViewController: NSViewController {
             
             if let networkError = networkError {
                 print("Network Error: ", networkError)
+            } else {
+                self.sessionManager.refreshIBSession { [weak self] result in
+                    guard let self = self else { return }
+                    
+                    switch result {
+                    case .success(let success):
+                        if success {
+                            self.updateTradesList()
+                        }
+                    case .failure(let networkError):
+                        networkError.showDialog()
+                    }
+                }
             }
         }
     }
@@ -187,7 +237,7 @@ extension LiveTradingViewController: DataManagerDelegate {
                     print(String(format: "No action on %@", timeKey))
                 case .openedPosition(let position):
                     let type: String = position.direction == .long ? "Long" : "Short"
-                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
+                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss?.stop ?? -1))
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
                     print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))
@@ -195,8 +245,15 @@ extension LiveTradingViewController: DataManagerDelegate {
                     print(String(format: "Updated stop loss to %.2f", stoploss.stop))
                 }
             }
-            updateTradesList()
-            latestProcessedTimeKey = realTimeChart.lastTimeKey
+            
+            sessionManager.processActions(actions: actions) { networkError in
+                if let networkError = networkError {
+                    networkError.showDialog()
+                } else {
+                    self.updateTradesList()
+                    self.latestProcessedTimeKey = chart.lastTimeKey
+                }
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ class OrderQuestionsBuilder {
         }
         catch(let error) {
             print(error)
+            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

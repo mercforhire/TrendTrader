@@ -51,7 +51,7 @@ class TraderBot {
                             print(String(format: "No action on %@", timeKey))
                         case .openedPosition(let position):
                             let type: String = position.direction == .long ? "Long" : "Short"
-                            print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
+                            print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss?.stop ?? -1))
                         case .closedPosition(let trade):
                             let type: String = trade.direction == .long ? "Long" : "Short"
                             print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f reason: %@", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0, trade.exitMethod.reason()))
@@ -216,31 +216,32 @@ class TraderBot {
                 }
             }
             
-            var newStop: Double = sessionManager.currentPosition!.stopLoss.stop
-            var newStopSource: StopLossSource = sessionManager.currentPosition!.stopLoss.source
-            
-            // Calculate the SL based on the previous S/R level and decide which of the two SLs should we use
-            if let previousLevelSL: Double = findPreviousLevel(direction: sessionManager.currentPosition!.direction, entryBar: priceBar) {
+            if var newStop: Double = sessionManager.currentPosition?.stopLoss?.stop,
+                var newStopSource: StopLossSource = sessionManager.currentPosition?.stopLoss?.source {
                 
-                switch sessionManager.currentPositionDirection {
+                // Calculate the SL based on the previous S/R level and decide which of the two SLs should we use
+                if let previousLevelSL: Double = findPreviousLevel(direction: sessionManager.currentPosition!.direction, entryBar: priceBar) {
+                    
+                    switch sessionManager.currentPositionDirection {
+                    case .long:
+                        newStop = max(twoGreenBarsSL, previousLevelSL)
+                        newStopSource = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                    default:
+                        newStop = min(twoGreenBarsSL, previousLevelSL)
+                        newStopSource = twoGreenBarsSL < previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                    }
+                }
+                
+                // Apply the new SL if it is more in favor than the existing SL
+                switch sessionManager.currentPosition!.direction {
                 case .long:
-                    newStop = max(twoGreenBarsSL, previousLevelSL)
-                    newStopSource = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
+                    if let stop = sessionManager.stopLoss?.stop, newStop > stop {
+                        return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
+                    }
                 default:
-                    newStop = min(twoGreenBarsSL, previousLevelSL)
-                    newStopSource = twoGreenBarsSL < previousLevelSL ? .twoGreenBars : .supportResistanceLevel
-                }
-            }
-            
-            // Apply the new SL if it is more in favor than the existing SL
-            switch sessionManager.currentPosition!.direction {
-            case .long:
-                if let stop = sessionManager.stopLoss?.stop, newStop > stop {
-                    return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
-                }
-            default:
-                if let stop = sessionManager.stopLoss?.stop, newStop < stop {
-                    return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
+                    if let stop = sessionManager.stopLoss?.stop, newStop < stop {
+                        return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
+                    }
                 }
             }
             
@@ -251,14 +252,14 @@ class TraderBot {
     func buyAtMarket() -> TradeActionType {
         guard let currentPrice = chart.absLastBar?.candleStick.close else { return .noAction }
         
-        let buyPosition = Position(direction: .long, entryTime: chart.absLastBarDate, entryPrice: currentPrice, stopLoss: StopLoss(stop: currentPrice, source: .currentBar, stopOrder: nil))
+        let buyPosition = Position(direction: .long, entryTime: chart.absLastBarDate, entryPrice: currentPrice)
         return .openedPosition(position: buyPosition)
     }
     
     func sellAtMarket() -> TradeActionType {
         guard let currentPrice = chart.absLastBar?.candleStick.close else { return .noAction }
         
-        let sellPosition = Position(direction: .long, entryTime: chart.absLastBarDate, entryPrice: currentPrice, stopLoss: StopLoss(stop: currentPrice, source: .currentBar, stopOrder: nil))
+        let sellPosition = Position(direction: .short, entryTime: chart.absLastBarDate, entryPrice: currentPrice)
         return .openedPosition(position: sellPosition)
     }
     

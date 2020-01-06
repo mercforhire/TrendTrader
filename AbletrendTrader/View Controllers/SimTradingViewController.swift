@@ -186,7 +186,7 @@ extension SimTradingViewController: DataManagerDelegate {
                     print(String(format: "No action on %@", timeKey))
                 case .openedPosition(let position):
                     let type: String = position.direction == .long ? "Long" : "Short"
-                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss.stop))
+                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss?.stop ?? -1))
                 case .closedPosition(let trade):
                     let type: String = trade.direction == .long ? "Long" : "Short"
                     print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))

@@ -60,8 +60,7 @@ class SessionManager {
                         switch result {
                         case .success(let order):
                             if let order = order, let stopPrice = order.price {
-                                self.currentPosition?.stopLoss.stop = stopPrice
-                                self.currentPosition?.stopLoss.stopOrder = order
+                                self.currentPosition?.stopLoss = StopLoss(stop: stopPrice, source: .currentBar, stopOrder: order)
                             }
                             completionHandler?(.success(true))
                         case .failure(let error2):
@@ -70,6 +69,7 @@ class SessionManager {
                     }
                 } else {
                     self.currentPosition = nil
+                    completionHandler?(.success(true))
                 }
             case .failure(let error):
                 completionHandler?(.failure(error))
@@ -90,7 +90,7 @@ class SessionManager {
                         completion(networkError)
                     }
                 case .updatedStop(let newStop):
-                    guard let stopOrder = currentPosition?.stopLoss.stopOrder else {
+                    guard let stopOrder = currentPosition?.stopLoss?.stopOrder else {
                         completion(.modifyOrderFailed)
                         return
                     }
@@ -179,14 +179,18 @@ class SessionManager {
     func openNewPosition(newPosition: Position, completion: @escaping (NetworkError?) -> ()) {
         let handler: (NetworkError?) -> () = { networkError in
             if networkError == nil {
-                self.placeStopOrder(direction: newPosition.direction.reverse(), stop: newPosition.stopLoss.stop) { networkError2 in
-                    if networkError2 == nil {
-                        self.refreshIBSession { _ in
-                            completion(nil)
+                if let stopLoss = newPosition.stopLoss {
+                    self.placeStopOrder(direction: newPosition.direction.reverse(), stop: stopLoss.stop) { networkError2 in
+                        if networkError2 == nil {
+                            self.refreshIBSession { _ in
+                                completion(nil)
+                            }
+                        } else {
+                            completion(networkError2)
                         }
-                    } else {
-                        completion(networkError2)
                     }
+                } else {
+                    completion(nil)
                 }
             } else {
                 completion(networkError)
@@ -201,7 +205,7 @@ class SessionManager {
     }
     
     func deleteStopOrder(completion: @escaping (NetworkError?) -> ()) {
-        guard let stopOrder = currentPosition?.stopLoss.stopOrder else { return }
+        guard let stopOrder = currentPosition?.stopLoss?.stopOrder else { return }
         
         self.networkManager.deleteOrder(order: stopOrder) { result in
             switch result {
@@ -237,7 +241,7 @@ class SessionManager {
         if let currentPosition = currentPosition {
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
                                            entry: String(format: "%.2f", currentPosition.entryPrice),
-                                           stop: String(format: "%.2f", currentPosition.stopLoss.stop),
+                                           stop: String(format: "%.2f", currentPosition.stopLoss?.stop ?? -1),
                                            exit: "--",
                                            pAndL: "--",
                                            entryTime: currentPosition.entryTime != nil ? dateFormatter.string(from: currentPosition.entryTime!) : "--",
@@ -367,7 +371,7 @@ class SessionManager {
             case .success(let questions):
                 self.answerQuestions(questions: questions) { success in
                     if success {
-                        self.currentPosition?.stopLoss.stop = stop
+                        self.currentPosition?.stopLoss?.stop = stop
                         completion(nil)
                     } else {
                         completion(.modifyOrderFailed)

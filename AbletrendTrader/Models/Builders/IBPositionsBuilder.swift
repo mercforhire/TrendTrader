@@ -9,7 +9,7 @@
 import Foundation
 
 class IBPositionsBuilder {
-    func buildErrorResponseFrom(_ jsonData : Data) -> [IBPosition]? {
+    func buildIBPositionsResponseFrom(_ jsonData : Data) -> [IBPosition]? {
         let decoder: JSONDecoder = JSONDecoder()
         do {
             let ibPositions = try decoder.decode([IBPosition]?.self, from: jsonData)

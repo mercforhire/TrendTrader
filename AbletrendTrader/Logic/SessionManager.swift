@@ -10,6 +10,7 @@ import Foundation
 
 class SessionManager {
     private let networkManager = NetworkManager.shared
+    private let config = Config.shared
     
     let live: Bool
     private(set) var currentPosition: Position?
@@ -85,10 +86,6 @@ class SessionManager {
                     openNewPosition(newPosition: newPosition) { networkError in
                         completion(networkError)
                     }
-                case .closedPosition(let closedTrade):
-                    verifyClosedPosition(closedTrade: closedTrade) { networkError in
-                        completion(networkError)
-                    }
                 case .updatedStop(let newStop):
                     guard let stopOrder = currentPosition?.stopLoss?.stopOrder else {
                         completion(.modifyOrderFailed)
@@ -96,6 +93,14 @@ class SessionManager {
                     }
                     
                     modifyStopOrder(liveOrder: stopOrder, stop: newStop.stop) { networkError in
+                        completion(networkError)
+                    }
+                case .forceClosePosition(_, _, _, _):
+                    exitPositions { networkErrors in
+                        completion(networkErrors.first)
+                    }
+                case .verifyPositionClosed(_, _, _, let reason):
+                    verifyClosedPosition(reason: reason) { networkError in
                         completion(networkError)
                     }
                 default:
@@ -107,11 +112,17 @@ class SessionManager {
                 switch action {
                 case .openedPosition(let newPosition):
                     currentPosition = newPosition
-                case .closedPosition(let closedTrade):
-                    trades.append(closedTrade)
-                    currentPosition = nil
+                    currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
                 case .updatedStop(let newStop):
                     currentPosition?.stopLoss = newStop
+                case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let reason):
+                    let trade = Trade(direction: closedPosition.direction, entryPrice: closedPosition.idealEntryPrice, exitPrice: closingPrice, exitMethod: reason, entryTime: closedPosition.entryTime, exitTime: closingTime)
+                    trades.append(trade)
+                    currentPosition = nil
+                case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason):
+                    let trade = Trade(direction: closedPosition.direction, entryPrice: closedPosition.idealEntryPrice, exitPrice: closingPrice, exitMethod: reason, entryTime: closedPosition.entryTime, exitTime: closingTime)
+                    trades.append(trade)
+                    currentPosition = nil
                 default:
                     break
                 }
@@ -130,7 +141,7 @@ class SessionManager {
             
             switch currentPosition.direction {
             case .long:
-                self.sellMarket { networkError in
+                self.sellMarket(size: currentPosition.size) { networkError in
                     if let networkError = networkError {
                         networkErrors.append(networkError)
                     }
@@ -138,7 +149,7 @@ class SessionManager {
                     exitPositionsTask.leave()
                 }
             case .short:
-                self.buyMarket { networkError in
+                self.buyMarket(size: currentPosition.size) { networkError in
                     if let networkError = networkError {
                         networkErrors.append(networkError)
                     }
@@ -177,12 +188,14 @@ class SessionManager {
     func openNewPosition(newPosition: Position, completion: @escaping (NetworkError?) -> ()) {
         let handler: (NetworkError?) -> () = { networkError in
             if networkError == nil {
-                if let stopLoss = newPosition.stopLoss {
-                    self.placeStopOrder(direction: newPosition.direction.reverse(), stop: stopLoss.stop) { networkError2 in
+                self.currentPosition = newPosition
+                self.currentPosition?.stopLoss = nil
+                
+                if let entryTime = newPosition.entryTime, let stopLoss = newPosition.stopLoss {
+                    self.placeStopOrder(direction: newPosition.direction.reverse(), stop: stopLoss.stop, time: entryTime) { networkError2 in
                         if networkError2 == nil {
-                            self.refreshIBSession { _ in
-                                completion(nil)
-                            }
+                            self.currentPosition?.stopLoss = stopLoss
+                            completion(nil)
                         } else {
                             completion(networkError2)
                         }
@@ -196,9 +209,9 @@ class SessionManager {
         }
         
         if newPosition.direction == .long {
-            buyMarket(completion: handler)
+            buyMarket(size: config.positionSize , completion: handler)
         } else {
-            sellMarket(completion: handler)
+            sellMarket(size: config.positionSize, completion: handler)
         }
     }
     
@@ -238,7 +251,7 @@ class SessionManager {
         
         if let currentPosition = currentPosition {
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
-                                           entry: String(format: "%.2f", currentPosition.entryPrice),
+                                                 entry: String(format: "%.2f", currentPosition.actualEntryPrice ?? currentPosition.idealEntryPrice),
                                            stop: String(format: "%.2f", currentPosition.stopLoss?.stop ?? -1),
                                            exit: "--",
                                            pAndL: "--",
@@ -259,8 +272,8 @@ class SessionManager {
         return tradesList
     }
     
-    private func buyMarket(completion: @escaping (NetworkError?) -> ()) {
-        networkManager.placeOrder(orderType: .Market, direction: .long, time: Date()) { [weak self] result in
+    private func buyMarket(size: Int, completion: @escaping (NetworkError?) -> ()) {
+        networkManager.placeOrder(orderType: .market, direction: .long, size: size, time: Date()) { [weak self] result in
             guard let self = self else {
                 return
             }
@@ -280,8 +293,8 @@ class SessionManager {
         }
     }
     
-    private func sellMarket(completion: @escaping (NetworkError?) -> ()) {
-        networkManager.placeOrder(orderType: .Market, direction: .short, time: Date()) { [weak self] result in
+    private func sellMarket(size: Int, completion: @escaping (NetworkError?) -> ()) {
+        networkManager.placeOrder(orderType: .market, direction: .short, size: size, time: Date()) { [weak self] result in
             guard let self = self else {
                 return
             }
@@ -338,8 +351,13 @@ class SessionManager {
         }
     }
     
-    private func placeStopOrder(direction: TradeDirection, stop: Double, completion: @escaping (NetworkError?) -> ()) {
-        networkManager.placeOrder(orderType: .Stop, direction: direction, time: Date()) { [weak self] result in
+    private func placeStopOrder(direction: TradeDirection, stop: Double, time: Date, completion: @escaping (NetworkError?) -> ()) {
+        guard let currentPosition = currentPosition else {
+            completion(.noCurrentPositionToPlaceStopLoss)
+            return
+        }
+        
+        networkManager.placeOrder(orderType: .stop(price: stop), direction: direction, size: currentPosition.size, time: time) { [weak self] result in
             guard let self = self else {
                 return
             }
@@ -360,7 +378,7 @@ class SessionManager {
     }
     
     private func modifyStopOrder(liveOrder: LiveOrder, stop: Double, completion: @escaping (NetworkError?) -> ()) {
-        networkManager.modifyOrder(orderType: .Stop, direction: liveOrder.direction, price: stop, quantity: liveOrder.remainingQuantity, order: liveOrder) { [weak self] result in
+        networkManager.modifyOrder(orderType: .stop(price: stop), direction: liveOrder.direction, price: stop, quantity: liveOrder.remainingQuantity, order: liveOrder) { [weak self] result in
             guard let self = self else {
                 return
             }
@@ -381,7 +399,7 @@ class SessionManager {
         }
     }
     
-    private func verifyClosedPosition(closedTrade: Trade, completion: @escaping (NetworkError?) -> ()) {
+    private func verifyClosedPosition(reason: ExitMethod, completion: @escaping (NetworkError?) -> ()) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {
@@ -400,7 +418,7 @@ class SessionManager {
                 switch result {
                 case .success(let response):
                     if response != nil {
-                        verifyClosedPositionError = .verifyClosedPositionFailed
+                        verifyClosedPositionError = .positionNotClosed
                     }
                 case .failure(let error):
                     verifyClosedPositionError = error
@@ -426,13 +444,16 @@ class SessionManager {
                         return
                     }
                     
-                    var closedTrade = closedTrade
                     switch result {
-                    case .success(let latestTrade):
-                        if let trade = latestTrade, trade.direction == self.currentPosition?.direction.reverse(), trade.position == 0, let exitPrice = trade.price.double  {
-                            closedTrade.exitPrice = exitPrice
-                            closedTrade.exitTime = trade.tradeTime
-                            self.trades.append(closedTrade)
+                    case .success(let latestIBTrade):
+                        if let currentPosition = self.currentPosition,
+                            let entryPrice = currentPosition.actualEntryPrice,
+                            let ibTrade = latestIBTrade, ibTrade.direction == currentPosition.direction.reverse(), ibTrade.position == 0,
+                            let exitPrice = ibTrade.price.double {
+                            
+                            let justClosedTrade = Trade(direction: currentPosition.direction, entryPrice: entryPrice, exitPrice: exitPrice, exitMethod: reason, entryTime: currentPosition.entryTime, exitTime: ibTrade.tradeTime)
+                            self.trades.append(justClosedTrade)
+                            self.currentPosition = nil
                         } else {
                             verifyClosedPositionError = .verifyClosedPositionFailed
                         }

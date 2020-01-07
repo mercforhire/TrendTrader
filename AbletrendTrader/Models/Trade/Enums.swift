@@ -17,9 +17,28 @@ enum EntryType {
 
 enum TradeActionType {
     case noAction
-    case openedPosition(position: Position)
+    case openedPosition(newPosition: Position)
     case updatedStop(stop: StopLoss)
-    case closedPosition(trade: Trade)
+    case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
+    case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
+    
+    func description(actionTime: Date) -> String {
+        switch self {
+        case .noAction:
+            return String(format: "No action on %@", actionTime.generateShortDate())
+        case .openedPosition(let newPosition):
+            let type: String = newPosition.direction == .long ? "Long" : "Short"
+            return String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, newPosition.entryTime?.generateShortDate() ?? "--", newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1)
+        case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason):
+            let type: String = closedPosition.direction == .long ? "Long" : "Short"
+            return String(format: "Verify %@ position closed from %@ on %@ at %.2f reason: %@", type, closedPosition.entryTime?.generateShortDate() ?? "--", closingTime.generateShortDate(), closingPrice, reason.reason())
+        case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let reason):
+            let type: String = closedPosition.direction == .long ? "Long" : "Short"
+            return String(format: "Flat %@ position from %@ on %@ at %@ %.2f reason: %@", type, closedPosition.entryTime?.generateShortDate() ?? "--", closingTime.generateShortDate(), closingTime.generateShortDate(), closingPrice, reason.reason())
+        case .updatedStop(let stopLoss):
+            return String(format: "Updated stop loss to %.2f reason: %@", stopLoss.stop, stopLoss.source.reason())
+        }
+    }
 }
 
 enum StopLossSource {

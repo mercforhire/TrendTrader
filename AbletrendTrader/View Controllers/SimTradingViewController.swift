@@ -90,7 +90,7 @@ class SimTradingViewController: NSViewController {
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
                 
-                if self.dataManager?.simulateTimePassage ?? false {
+                if Config.shared.simulateTimePassage {
                     self.startButton.isEnabled = true
                 }
             }
@@ -121,7 +121,7 @@ class SimTradingViewController: NSViewController {
         totalPLLabel.stringValue = "Total P/L: --"
         beginningButton.isEnabled = false
         endButton.isEnabled = true
-        if dataManager?.simulateTimePassage ?? false {
+        if Config.shared.simulateTimePassage {
             startButton.isEnabled = true
         }
         tableView.reloadData()
@@ -134,7 +134,7 @@ class SimTradingViewController: NSViewController {
         
         beginningButton.isEnabled = true
         endButton.isEnabled = false
-        if dataManager?.simulateTimePassage ?? false {
+        if Config.shared.simulateTimePassage {
             startButton.isEnabled = true
         }
         
@@ -173,7 +173,7 @@ extension SimTradingViewController: DataManagerDelegate {
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,
-            let timeKey = chart.lastTimeKey else {
+            let lastBarTime = chart.lastBar?.time else {
                 return
         }
         
@@ -181,18 +181,7 @@ extension SimTradingViewController: DataManagerDelegate {
         
         if let actions = trader?.decide(), latestProcessedTimeKey != chart.lastTimeKey {
             for action in actions {
-                switch action {
-                case .noAction:
-                    print(String(format: "No action on %@", timeKey))
-                case .openedPosition(let position):
-                    let type: String = position.direction == .long ? "Long" : "Short"
-                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss?.stop ?? -1))
-                case .closedPosition(let trade):
-                    let type: String = trade.direction == .long ? "Long" : "Short"
-                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))
-                case .updatedStop(let stopLoss):
-                    print(String(format: "Updated stop loss to %.2f", stopLoss.stop))
-                }
+                print(action.description(actionTime: lastBarTime))
             }
             sessionManager.processActions(actions: actions) { networkError in
                 self.updateTradesList()

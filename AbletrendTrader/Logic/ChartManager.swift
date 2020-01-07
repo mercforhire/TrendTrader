@@ -13,9 +13,6 @@ protocol DataManagerDelegate: class {
 }
 
 class ChartManager {
-    let readFromServer = true
-    let simulateTimePassage = true
-    
     private let networkManager = NetworkManager.shared
     private var calendar = Calendar(identifier: .gregorian)
     private let config = Config.shared
@@ -55,7 +52,7 @@ class ChartManager {
     }
     
     func fetchChart(completion: @escaping (_ chart: Chart?) -> Void) {
-        if readFromServer {
+        if config.readFromServer {
             var oneMinUrl: String?
             var twoMinUrl: String?
             var threeMinUrl: String?
@@ -199,7 +196,7 @@ class ChartManager {
                 
                 _ = simulateMinPassed()
                 
-                if simulateTimePassage {
+                if config.simulateTimePassage {
                     completion(subsetChart)
                 } else {
                     completion(chart)
@@ -209,7 +206,7 @@ class ChartManager {
     }
     
     func startMonitoring() {
-        if readFromServer {
+        if config.readFromServer {
             timer = Timer.scheduledTimer(timeInterval: updateFrequency, target: self, selector: #selector(updateChart), userInfo: self, repeats: true)
         } else {
             timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(0.05), repeats: true, block: { [weak self] timer in

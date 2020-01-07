@@ -45,7 +45,11 @@ class Config {
     let conId = 346577750
     let positionSize: Int = 1
     
-    let byPassTradingTimeRestrictions = true
+    // DEMO SETTINGS:
+    let byPassTradingTimeRestrictions = true // DEFAULT: false
+    let readFromServer = true // DEFAULT: false
+    let simulateTimePassage = true // DEFAULT: true
+    let traderBotDemoMode = true // DEFAULT: false
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
     func timeIntervalForHighRiskEntry(chart: Chart) -> DateInterval {

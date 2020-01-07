@@ -232,7 +232,7 @@ extension LiveTradingViewController: DataManagerDelegate {
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,
-            let timeKey = chart.lastTimeKey else {
+            let lastBarTime = chart.lastBar?.time else {
                 return
         }
         
@@ -240,18 +240,7 @@ extension LiveTradingViewController: DataManagerDelegate {
         
         if let actions = trader?.decide(), latestProcessedTimeKey != chart.lastTimeKey {
             for action in actions {
-                switch action {
-                case .noAction:
-                    print(String(format: "No action on %@", timeKey))
-                case .openedPosition(let position):
-                    let type: String = position.direction == .long ? "Long" : "Short"
-                    print(String(format: "Opened %@ position on %@ at price %.2f with SL: %.2f", type, timeKey, position.entryPrice, position.stopLoss?.stop ?? -1))
-                case .closedPosition(let trade):
-                    let type: String = trade.direction == .long ? "Long" : "Short"
-                    print(String(format: "Closed %@ position from %@ on %@ with P/L of %.2f", type, trade.entryTime?.generateShortDate() ?? "--", trade.exitTime.generateShortDate(), trade.profit ?? 0))
-                case .updatedStop(let stoploss):
-                    print(String(format: "Updated stop loss to %.2f", stoploss.stop))
-                }
+                print(action.description(actionTime: lastBarTime))
             }
             
             sessionManager.processActions(actions: actions) { networkError in

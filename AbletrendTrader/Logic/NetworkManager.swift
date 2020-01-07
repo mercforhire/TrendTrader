@@ -10,17 +10,17 @@ import Foundation
 import Alamofire
 
 enum OrderType {
-    case Market
-    case Limit
-    case Stop
+    case market
+    case limit(price: Double)
+    case stop(price: Double)
     
     func typeString() -> String {
         switch self {
-        case .Market:
+        case .market:
             return "MKT"
-        case .Limit:
+        case .limit:
             return "LMT"
-        case .Stop:
+        case .stop:
             return "STP"
         }
     }
@@ -42,6 +42,9 @@ enum NetworkError: Error {
     case modifyOrderFailed
     case deleteOrderFailed
     case verifyClosedPositionFailed
+    case noPositionToClose
+    case noCurrentPositionToPlaceStopLoss
+    case positionNotClosed
     
     func displayMessage() -> String {
         switch self {
@@ -56,25 +59,31 @@ enum NetworkError: Error {
         case .fetchAccountsFailed:
             return "Fetch accounts failed."
         case .fetchTradesFailed:
-            return "fetch trades failed."
+            return "Fetch trades failed."
         case .fetchPositionsFailed:
-            return "fetch positions failed."
+            return "Fetch positions failed."
         case .fetchLiveOrdersFailed:
-            return "fetch live orders failed"
+            return "Fetch live orders failed"
         case .orderReplyFailed:
-            return "answer question failed."
+            return "Answer question failed."
         case .previewOrderFailed:
-            return "preview order failed."
+            return "{review order failed."
         case .orderAlreadyPlaced:
-            return "order already placed."
+            return "Order already placed."
         case .placeOrderFailed:
-            return "place order failed."
+            return "Place order failed."
         case .modifyOrderFailed:
-            return "place order failed."
+            return "Place order failed."
         case .deleteOrderFailed:
             return "delete order failed."
         case .verifyClosedPositionFailed:
             return "verify closed position failed."
+        case .noPositionToClose:
+            return "No position to close."
+        case .noCurrentPositionToPlaceStopLoss:
+            return "No current position to place stop loss."
+        case .positionNotClosed:
+            return "Position not closed"
         }
     }
     
@@ -248,6 +257,8 @@ class NetworkManager {
                 }
                 completionHandler(.success(relevantOrders.first))
             } else {
+                print("fetchLiveOrdersFailed:")
+                print(String(data: response.data!, encoding: .utf8))
                 completionHandler(.failure(.fetchLiveOrdersFailed))
             }
         }
@@ -261,16 +272,16 @@ class NetworkManager {
             return
         }
         
-        afManager.request("https://localhost:5000/v1/portal/portfolio/" + selectedAccount.accountId + "/positions/0").responseData { [weak self] response in
+        afManager.request("https://localhost:5000/v1/portal/portfolio/\(selectedAccount.accountId)/position/\(config.conId)").responseData { [weak self] response in
             guard let self = self else { return }
             
-            if let data = response.data, let positions = self.ibPositionsBuilder.buildErrorResponseFrom(data) {
+            if let data = response.data, let positions = self.ibPositionsBuilder.buildIBPositionsResponseFrom(data) {
                 let relevantPositions: [IBPosition] = positions.filter { position -> Bool in
                     return position.acctId == selectedAccount.accountId && position.conid == self.config.conId && position.position != 0
                 }
                 completionHandler(.success(relevantPositions.first))
             } else {
-                completionHandler(.failure(.fetchLiveOrdersFailed))
+                completionHandler(.failure(.fetchPositionsFailed))
             }
         }
     }
@@ -305,17 +316,26 @@ class NetworkManager {
     // Place Order
     func placeOrder(orderType: OrderType,
                     direction: TradeDirection,
-                    price: Double = 0,
+                    size: Int,
                     time: Date,
                     completionHandler: @escaping (Swift.Result<[Question], NetworkError>) -> Void) {
-        
         guard let selectedAccount = selectedAccount,
             let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/account/" + selectedAccount.accountId + "/order") else {
             completionHandler(.failure(.placeOrderFailed))
             return
         }
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(), price, config.ticker, config.positionSize)
+        var orderPrice: Double = 0
+        switch orderType {
+        case .limit(let price):
+            orderPrice = price
+        case .stop(let price):
+            orderPrice = price
+        default:
+            break
+        }
+        
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(), orderPrice, config.ticker, size)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -327,6 +347,8 @@ class NetworkManager {
                 } else if let data = response.data, let _ = self.errorResponseBuilder.buildErrorResponseFrom(data) {
                     completionHandler(.failure(.orderAlreadyPlaced))
                 } else {
+                    print("placeOrderFailed:")
+                    print(String(data: response.data!, encoding: .utf8))
                     completionHandler(.failure(.placeOrderFailed))
                 }
             }
@@ -353,6 +375,8 @@ class NetworkManager {
                 if response.response?.statusCode == 200 {
                     completionHandler(.success(true))
                 } else {
+                    print("orderReplyFailed:")
+                    print(String(data: response.data!, encoding: .utf8))
                     completionHandler(.failure(.orderReplyFailed))
                 }
             }
@@ -385,6 +409,8 @@ class NetworkManager {
                 if let data = response.data, let questions = self.orderQuestionsBuilder.buildQuestionsFrom(data) {
                     completionHandler(.success(questions))
                 } else {
+                    print("modifyOrderFailed:")
+                    print(String(data: response.data!, encoding: .utf8))
                     completionHandler(.failure(.modifyOrderFailed))
                 }
             }

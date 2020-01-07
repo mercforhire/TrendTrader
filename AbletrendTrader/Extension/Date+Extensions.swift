@@ -100,4 +100,11 @@ extension Date {
         let response = dateFormatter.string(from: self)
         return response
     }
+    
+    func getOffByMinutes(minutes: Int) -> Date {
+        var components = DateComponents()
+        components.minute = minutes
+        let offsetDate = Calendar.current.date(byAdding: components, to: self)!
+        return offsetDate
+    }
 }

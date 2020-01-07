@@ -8,7 +8,11 @@
 
 import Foundation
 
+struct Notification: Codable {
+    var text: String
+}
+
 struct LiveOrdersResponse: Codable {
     var orders: [LiveOrder]?
-    var notifications: [String]?
+    var notifications: [Notification]?
 }

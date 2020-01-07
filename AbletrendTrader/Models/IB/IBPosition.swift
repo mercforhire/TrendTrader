@@ -24,6 +24,6 @@ struct IBPosition: Codable {
     
     func toPosition() -> Position {
         let defaultStop = direction == .long ? avgPrice - Config.shared.maxRisk : avgPrice + Config.shared.maxRisk
-        return Position(direction: direction, entryTime: nil, entryPrice: avgPrice, stopLoss: StopLoss(stop: defaultStop, source: .currentBar))
+        return Position(direction: direction, size: abs(position), entryTime: nil, idealEntryPrice: avgPrice, actualEntryPrice: avgPrice, stopLoss: StopLoss(stop: defaultStop, source: .currentBar))
     }
 }

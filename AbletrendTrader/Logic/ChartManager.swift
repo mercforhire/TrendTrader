@@ -13,7 +13,7 @@ protocol DataManagerDelegate: class {
 }
 
 class ChartManager {
-    let readFromServer = false
+    let readFromServer = true
     let simulateTimePassage = true
     
     private let networkManager = NetworkManager.shared

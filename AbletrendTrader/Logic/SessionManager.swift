@@ -120,7 +120,7 @@ class SessionManager {
         }
     }
     
-    func exitPositions(completion: @escaping (Bool) -> ()) {
+    func exitPositions(completion: @escaping ([NetworkError]) -> ()) {
         let exitPositionsTask = DispatchGroup()
         var networkErrors: [NetworkError] = []
         
@@ -148,14 +148,16 @@ class SessionManager {
             }
         }
         
-        // cancel all stop orders
-        exitPositionsTask.enter()
-        self.deleteStopOrder { networkError in
-            if let networkError = networkError {
-                networkErrors.append(networkError)
+        if currentPosition?.stopLoss?.stopOrder != nil {
+            // cancel all stop orders
+            exitPositionsTask.enter()
+            self.deleteStopOrder { networkError in
+                if let networkError = networkError {
+                    networkErrors.append(networkError)
+                }
+                
+                exitPositionsTask.leave()
             }
-            
-            exitPositionsTask.leave()
         }
         
         exitPositionsTask.notify(queue: DispatchQueue.main) {
@@ -167,11 +169,7 @@ class SessionManager {
                     break
                 }
                 
-                if networkErrors.isEmpty {
-                    completion(true)
-                } else {
-                    completion(false)
-                }
+                completion(networkErrors)
             }
         }
     }

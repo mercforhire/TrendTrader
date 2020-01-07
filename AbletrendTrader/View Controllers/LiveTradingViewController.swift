@@ -28,15 +28,6 @@ class LiveTradingViewController: NSViewController {
     private var trader: TraderBot?
     private let sessionManager: SessionManager = SessionManager(live: true)
     private var listOfTrades: [TradesTableRowItem]?
-    private var realTimeChart: Chart? {
-        didSet {
-            if let chart = realTimeChart, let lastDate = chart.absLastBarDate {
-                latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
-            } else {
-                latestDataTimeLabel.stringValue = "Latest data time: --:--"
-            }
-        }
-    }
     
     weak var delegate: DataManagerDelegate?
     private var latestProcessedTimeKey: String?
@@ -72,6 +63,14 @@ class LiveTradingViewController: NSViewController {
         systemTimeLabel.stringValue = dateFormatter.string(from: Date())
     }
     
+    private func updateLatestDataTimeLabel(chart: Chart?) {
+        if let chart = chart, let lastDate = chart.absLastBarDate {
+            latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
+        } else {
+            latestDataTimeLabel.stringValue = "Latest data time: --:--"
+        }
+    }
+    
     private func updateTradesList() {
         listOfTrades = sessionManager.listOfTrades()
         tableView.reloadData()
@@ -85,16 +84,18 @@ class LiveTradingViewController: NSViewController {
                 self.buyButton.isEnabled = true
                 self.sellButton.isEnabled = false
             }
+            self.exitButton.isEnabled = true
         } else {
             self.buyButton.isEnabled = true
             self.sellButton.isEnabled = true
+            self.exitButton.isEnabled = false
         }
     }
     
     @IBAction
     private func refreshData(_ sender: NSButton) {
         dataManager?.stopMonitoring()
-        realTimeChart = nil
+        updateLatestDataTimeLabel(chart: nil)
         sender.isEnabled = false
         
         let fetchingTask = DispatchGroup()
@@ -104,8 +105,9 @@ class LiveTradingViewController: NSViewController {
             guard let self = self else { return }
             
             if let chart = chart {
-                self.realTimeChart = chart
+                self.updateLatestDataTimeLabel(chart: chart)
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.startButton.isEnabled = true
             }
             
             fetchingTask.leave()
@@ -134,7 +136,7 @@ class LiveTradingViewController: NSViewController {
     
     @IBAction
     private func startTrading(_ sender: NSButton) {
-        guard trader != nil, let realTimeChart = realTimeChart, !realTimeChart.timeKeys.isEmpty
+        guard trader != nil, let realTimeChart = trader?.chart, !realTimeChart.timeKeys.isEmpty
         else { return }
         
         startButton.isEnabled = false
@@ -152,8 +154,18 @@ class LiveTradingViewController: NSViewController {
     @IBAction
     private func exitAllPosition(_ sender: NSButton) {
         sender.isEnabled = false
-        sessionManager.exitPositions { success in
+        sessionManager.exitPositions { [weak self] networkErrors in
+            guard let self = self else { return }
+            
             sender.isEnabled = true
+            
+            if !networkErrors.isEmpty {
+                for networkError in networkErrors {
+                    networkError.showDialog()
+                }
+            } else {
+                self.updateTradesList()
+            }
         }
     }
     
@@ -161,24 +173,15 @@ class LiveTradingViewController: NSViewController {
         guard let action = trader?.buyAtMarket() else { return }
         
         sender.isEnabled = false
-        sessionManager.processActions(actions: [action]) { networkError in
+        sessionManager.processActions(actions: [action]) { [weak self] networkError in
+            guard let self = self else { return }
+            
             sender.isEnabled = true
             
             if let networkError = networkError {
                 networkError.showDialog()
             } else {
-                self.sessionManager.refreshIBSession { [weak self] result in
-                    guard let self = self else { return }
-                    
-                    switch result {
-                    case .success(let success):
-                        if success {
-                            self.updateTradesList()
-                        }
-                    case .failure(let networkError):
-                        networkError.showDialog()
-                    }
-                }
+                self.refreshIBSession()
             }
         }
     }
@@ -187,50 +190,55 @@ class LiveTradingViewController: NSViewController {
         guard let action = trader?.sellAtMarket() else { return }
         
         sender.isEnabled = false
-        sessionManager.processActions(actions: [action]) { networkError in
+        sessionManager.processActions(actions: [action]) { [weak self] networkError in
+            guard let self = self else { return }
+            
             sender.isEnabled = true
             
             if let networkError = networkError {
                 print("Network Error: ", networkError)
             } else {
-                self.sessionManager.refreshIBSession { [weak self] result in
-                    guard let self = self else { return }
-                    
-                    switch result {
-                    case .success(let success):
-                        if success {
-                            self.updateTradesList()
-                        }
-                    case .failure(let networkError):
-                        networkError.showDialog()
-                    }
-                }
+                self.refreshIBSession()
             }
         }
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
-        if let chartVC = segue.destinationController as? ChartViewController {
-            chartVC.chart = realTimeChart
+        if let chartVC = segue.destinationController as? ChartViewController, let chart = trader?.chart {
+            chartVC.chart = chart
             delegate = chartVC
+        }
+    }
+    
+    private func refreshIBSession () {
+        sessionManager.refreshIBSession { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let success):
+                if success {
+                    self.updateTradesList()
+                }
+            case .failure(let networkError):
+                networkError.showDialog()
+            }
         }
     }
 }
 
 extension LiveTradingViewController: DataManagerDelegate {
     func chartUpdated(chart: Chart) {
-        realTimeChart = chart
+        updateLatestDataTimeLabel(chart: chart)
         delegate?.chartUpdated(chart: chart)
         
-        guard let realTimeChart = realTimeChart,
-            !realTimeChart.timeKeys.isEmpty,
-            let timeKey = realTimeChart.lastTimeKey else {
+        guard !chart.timeKeys.isEmpty,
+            let timeKey = chart.lastTimeKey else {
                 return
         }
         
-        trader?.chart = realTimeChart
+        trader?.chart = chart
         
-        if let actions = trader?.decide(), latestProcessedTimeKey != realTimeChart.lastTimeKey {
+        if let actions = trader?.decide(), latestProcessedTimeKey != chart.lastTimeKey {
             for action in actions {
                 switch action {
                 case .noAction:

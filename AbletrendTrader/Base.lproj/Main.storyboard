@@ -827,6 +827,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <segue destination="cu5-OY-MBx" kind="show" identifier="ShowChartSegue" id="YpO-Ih-4re"/>
+                                </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qPe-gd-HwE">
                                 <rect key="frame" x="14" y="400" width="87" height="32"/>
@@ -1597,5 +1600,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="nwD-O7-QXe"/>
+        <segue reference="YpO-Ih-4re"/>
     </inferredMetricsTieBreakers>
 </document>

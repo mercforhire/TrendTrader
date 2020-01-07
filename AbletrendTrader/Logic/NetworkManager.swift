@@ -111,6 +111,7 @@ class NetworkManager {
     private let errorResponseBuilder: ErrorResponseBuilder = ErrorResponseBuilder()
     private let ibPositionsBuilder: IBPositionsBuilder = IBPositionsBuilder()
     private let previewResponseBuilder: PreviewResponseBuilder = PreviewResponseBuilder()
+    private let placedOrderResponseBuilder: PlacedOrderResponseBuilder = PlacedOrderResponseBuilder()
     
     var selectedAccount: Account?
     
@@ -253,12 +254,12 @@ class NetworkManager {
                 let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
                 let orders = liveOrdersResponse.orders {
                 let relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
-                    return liveOrder.status == "Submitted" && liveOrder.conid == self.config.conId && liveOrder.orderType == "STP"
+                    return liveOrder.status == "PreSubmitted" && liveOrder.conid == self.config.conId && liveOrder.orderType == "Stop"
                 }
                 completionHandler(.success(relevantOrders.first))
             } else {
                 print("fetchLiveOrdersFailed:")
-                print(String(data: response.data!, encoding: .utf8))
+                print(String(data: response.data!, encoding: .utf8)!)
                 completionHandler(.failure(.fetchLiveOrdersFailed))
             }
         }
@@ -271,18 +272,18 @@ class NetworkManager {
             completionHandler(.failure(.previewOrderFailed))
             return
         }
-        
-        afManager.request("https://localhost:5000/v1/portal/portfolio/\(selectedAccount.accountId)/position/\(config.conId)").responseData { [weak self] response in
-            guard let self = self else { return }
-            
-            if let data = response.data, let positions = self.ibPositionsBuilder.buildIBPositionsResponseFrom(data) {
-                let relevantPositions: [IBPosition] = positions.filter { position -> Bool in
-                    return position.acctId == selectedAccount.accountId && position.conid == self.config.conId && position.position != 0
+        afManager.request("https://localhost:5000/v1/portal/portfolio/\(selectedAccount.accountId)/position/\(config.conId)").responseData
+            { [weak self] response in
+                guard let self = self else { return }
+                
+                if let data = response.data, let positions = self.ibPositionsBuilder.buildIBPositionsResponseFrom(data) {
+                    let relevantPositions: [IBPosition] = positions.filter { position -> Bool in
+                        return position.acctId == selectedAccount.accountId && position.conid == self.config.conId && position.position != 0
+                    }
+                    completionHandler(.success(relevantPositions.first))
+                } else {
+                    completionHandler(.failure(.fetchPositionsFailed))
                 }
-                completionHandler(.success(relevantPositions.first))
-            } else {
-                completionHandler(.failure(.fetchPositionsFailed))
-            }
         }
     }
     
@@ -318,7 +319,7 @@ class NetworkManager {
                     direction: TradeDirection,
                     size: Int,
                     time: Date,
-                    completionHandler: @escaping (Swift.Result<[Question], NetworkError>) -> Void) {
+                    completionHandler: @escaping (Swift.Result<PlacedOrderResponse, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount,
             let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/account/" + selectedAccount.accountId + "/order") else {
             completionHandler(.failure(.placeOrderFailed))
@@ -342,13 +343,22 @@ class NetworkManager {
             afManager.request(request).responseData { [weak self] response in
                 guard let self = self else { return }
                 
-                if let data = response.data, let questions = self.orderQuestionsBuilder.buildQuestionsFrom(data) {
-                    completionHandler(.success(questions))
+                if let data = response.data, let question = self.orderQuestionsBuilder.buildQuestionsFrom(data)?.first {
+                    self.placeOrderReply(question: question, answer: true) { result in
+                        switch result {
+                        case .success(let response) :
+                            completionHandler(.success(response))
+                        case .failure(let networkError):
+                            completionHandler(.failure(networkError))
+                        }
+                    }
                 } else if let data = response.data, let _ = self.errorResponseBuilder.buildErrorResponseFrom(data) {
                     completionHandler(.failure(.orderAlreadyPlaced))
+                } else if response.response?.statusCode == 200 {
+                    completionHandler(.success(PlacedOrderResponse(orderId: "123", orderStatus: "Filled")))
                 } else {
                     print("placeOrderFailed:")
-                    print(String(data: response.data!, encoding: .utf8))
+                    print(String(data: response.data!, encoding: .utf8)!)
                     completionHandler(.failure(.placeOrderFailed))
                 }
             }
@@ -360,7 +370,7 @@ class NetworkManager {
     
     // Place Order Reply
     // https://localhost:5000/v1/portal/iserver/reply/{replyid}
-    func placeOrderReply(question: Question, answer: Bool, completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+    func placeOrderReply(question: Question, answer: Bool, completionHandler: @escaping (Swift.Result<PlacedOrderResponse, NetworkError>) -> Void) {
 
         guard let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/reply/" + question.identifier) else {
             completionHandler(.failure(.orderReplyFailed))
@@ -372,16 +382,21 @@ class NetworkManager {
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
             afManager.request(request).responseData { response in
-                if response.response?.statusCode == 200 {
-                    completionHandler(.success(true))
+                
+                if let data = response.data, let placedOrderResponse = self.placedOrderResponseBuilder.buildPlacedOrderResponseFrom(data)?.first {
+                    completionHandler(.success(placedOrderResponse))
+                } else if let data = response.data, let question = self.orderQuestionsBuilder.buildQuestionsFrom(data)?.first {
+                    self.placeOrderReply(question: question, answer: true, completionHandler: completionHandler)
+                } else if response.response?.statusCode == 200 {
+                    completionHandler(.success(PlacedOrderResponse(orderId: "123", orderStatus: "Filled")))
                 } else {
                     print("orderReplyFailed:")
-                    print(String(data: response.data!, encoding: .utf8))
+                    print(String(data: response.data!, encoding: .utf8)!)
                     completionHandler(.failure(.orderReplyFailed))
                 }
             }
         } else {
-            completionHandler(.failure(.placeOrderFailed))
+            completionHandler(.failure(.orderReplyFailed))
         }
     }
     
@@ -390,27 +405,39 @@ class NetworkManager {
                      direction: TradeDirection,
                      price: Double,
                      quantity: Int,
-                     order: LiveOrder,
-                     completionHandler: @escaping (Swift.Result<[Question], NetworkError>) -> Void) {
+                     orderId: String,
+                     completionHandler: @escaping (Swift.Result<PlacedOrderResponse, NetworkError>) -> Void) {
         
         guard let selectedAccount = selectedAccount,
-            let url: URL = URL(string: String(format: "https://localhost:5000/v1/portal/iserver/account/%@/order/%d", selectedAccount.accountId, order.orderId)) else {
-            completionHandler(.failure(.placeOrderFailed))
+            let url: URL = URL(string: String(format: "https://localhost:5000/v1/portal/iserver/account/%@/order/%@", selectedAccount.accountId, orderId)) else {
+                completionHandler(.failure(.modifyOrderFailed))
             return
         }
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"orderType\": \"%@\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"orderId\": %d}", selectedAccount.accountId, config.conId, orderType.typeString(), direction.ibTradeString(), price, config.ticker, config.positionSize, order.orderId)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"orderType\": \"%@\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"orderId\": %d}", selectedAccount.accountId, config.conId, orderType.typeString(), direction.ibTradeString(), price, config.ticker, config.positionSize, orderId)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
             afManager.request(request).responseData { [weak self] response in
                 guard let self = self else { return }
                 
-                if let data = response.data, let questions = self.orderQuestionsBuilder.buildQuestionsFrom(data) {
-                    completionHandler(.success(questions))
+                if let data = response.data, let question = self.orderQuestionsBuilder.buildQuestionsFrom(data)?.first {
+                    self.placeOrderReply(question: question, answer: true) { result in
+                        switch result {
+                        case .success(let response) :
+                            completionHandler(.success(response))
+                        case .failure(let networkError):
+                            completionHandler(.failure(networkError))
+                        }
+                    }
+                } else if let data = response.data,
+                    let placedOrderResponse = self.placedOrderResponseBuilder.buildPlacedOrderResponseFrom(data)?.first {
+                    completionHandler(.success(placedOrderResponse))
+                } else if response.response?.statusCode == 200 {
+                    completionHandler(.success(PlacedOrderResponse(orderId: "123", orderStatus: "Filled")))
                 } else {
                     print("modifyOrderFailed:")
-                    print(String(data: response.data!, encoding: .utf8))
+                    print(String(data: response.data!, encoding: .utf8)!)
                     completionHandler(.failure(.modifyOrderFailed))
                 }
             }
@@ -420,19 +447,18 @@ class NetworkManager {
     }
     
     // Delete Order
-    func deleteOrder(order: LiveOrder, completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+    func deleteOrder(orderId: String, completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
             completionHandler(.failure(.deleteOrderFailed))
             return
         }
         
-        afManager.request(String(format: "https://localhost:5000/v1/portal/iserver/account/%@/order/%d", selectedAccount.accountId, order.orderId),
-                          method: .delete).responseData { response in
-                            if response.response?.statusCode == 200 {
-                                completionHandler(.success(true))
-                            } else {
-                                completionHandler(.failure(.deleteOrderFailed))
-                            }
+        afManager.request(String(format: "https://localhost:5000/v1/portal/iserver/account/%@/order/%@", selectedAccount.accountId, orderId), method: .delete).responseData { response in
+            if response.response?.statusCode == 200 {
+                completionHandler(.success(true))
+            } else {
+                completionHandler(.failure(.deleteOrderFailed))
+            }
         }
     }
     

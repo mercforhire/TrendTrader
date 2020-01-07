@@ -28,7 +28,6 @@ class SimTradingViewController: NSViewController {
     private var listOfTrades: [TradesTableRowItem]?
     
     weak var delegate: DataManagerDelegate?
-    private var latestProcessedTimeKey: String?
     
     func setupUI() {
         dateFormatter.timeStyle = .medium
@@ -173,19 +172,19 @@ extension SimTradingViewController: DataManagerDelegate {
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,
-            let lastBarTime = chart.lastBar?.time else {
+            let lastBarTime = chart.lastBar?.time,
+            let lastBarId = chart.lastBar?.identifier else {
                 return
         }
         
         trader?.chart = chart
         
-        if let actions = trader?.decide(), latestProcessedTimeKey != chart.lastTimeKey {
+        if let actions = trader?.decide() {
             for action in actions {
                 print(action.description(actionTime: lastBarTime))
             }
-            sessionManager.processActions(actions: actions) { networkError in
+            sessionManager.processActions(priceBarId: lastBarId, actions: actions) { networkError in
                 self.updateTradesList()
-                self.latestProcessedTimeKey = chart.lastTimeKey
             }
         }
     }

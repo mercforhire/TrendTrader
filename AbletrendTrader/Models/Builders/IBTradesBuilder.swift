@@ -16,6 +16,7 @@ class IBTradesBuilder {
             return trades
         }
         catch(let error) {
+            print("IBTradesBuilder:")
             print(error)
             print(String(data: jsonData, encoding: .utf8))
         }

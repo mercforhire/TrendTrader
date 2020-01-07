@@ -16,6 +16,7 @@ class IBPositionsBuilder {
             return ibPositions
         }
         catch(let error) {
+            print("IBPositionsBuilder:")
             print(error)
             print(String(data: jsonData, encoding: .utf8))
         }

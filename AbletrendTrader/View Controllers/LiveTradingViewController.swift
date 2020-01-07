@@ -30,7 +30,6 @@ class LiveTradingViewController: NSViewController {
     private var listOfTrades: [TradesTableRowItem]?
     
     weak var delegate: DataManagerDelegate?
-    private var latestProcessedTimeKey: String?
     
     func setupUI() {
         dateFormatter.timeStyle = .medium
@@ -154,6 +153,7 @@ class LiveTradingViewController: NSViewController {
     @IBAction
     private func exitAllPosition(_ sender: NSButton) {
         sender.isEnabled = false
+        sessionManager.resetCurrentlyProcessingPriceBar()
         sessionManager.exitPositions { [weak self] networkErrors in
             guard let self = self else { return }
             
@@ -170,10 +170,11 @@ class LiveTradingViewController: NSViewController {
     }
     
     @IBAction func buyPressed(_ sender: NSButton) {
-        guard let action = trader?.buyAtMarket() else { return }
+        guard let action = trader?.buyAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier else { return }
         
         sender.isEnabled = false
-        sessionManager.processActions(actions: [action]) { [weak self] networkError in
+        sessionManager.resetCurrentlyProcessingPriceBar()
+        sessionManager.processActions(priceBarId: lastBarId, actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
@@ -187,10 +188,11 @@ class LiveTradingViewController: NSViewController {
     }
     
     @IBAction func sellPressed(_ sender: NSButton) {
-        guard let action = trader?.sellAtMarket() else { return }
+        guard let action = trader?.sellAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier else { return }
         
         sender.isEnabled = false
-        sessionManager.processActions(actions: [action]) { [weak self] networkError in
+        sessionManager.resetCurrentlyProcessingPriceBar()
+        sessionManager.processActions(priceBarId: lastBarId, actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
@@ -232,23 +234,23 @@ extension LiveTradingViewController: DataManagerDelegate {
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,
-            let lastBarTime = chart.lastBar?.time else {
+            let lastBarTime = chart.lastBar?.time,
+            let lastBarId = chart.lastBar?.identifier else {
                 return
         }
         
         trader?.chart = chart
         
-        if let actions = trader?.decide(), latestProcessedTimeKey != chart.lastTimeKey {
+        if let actions = trader?.decide() {
             for action in actions {
                 print(action.description(actionTime: lastBarTime))
             }
             
-            sessionManager.processActions(actions: actions) { networkError in
+            sessionManager.processActions(priceBarId: lastBarId, actions: actions) { networkError in
                 if let networkError = networkError {
                     networkError.showDialog()
                 } else {
                     self.updateTradesList()
-                    self.latestProcessedTimeKey = chart.lastTimeKey
                 }
             }
         }

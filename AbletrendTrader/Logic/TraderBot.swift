@@ -49,7 +49,7 @@ class TraderBot {
                     }
                 }
                 
-                self.sessionManager.processActions(actions: actions) { networkError in
+                self.sessionManager.processActions(priceBarId: timeKey, actions: actions) { networkError in
                     semaphore.signal()
                 }
                 
@@ -67,21 +67,31 @@ class TraderBot {
     // Decide trade actions at the given PriceBar object, returns the list of actions need to be performed
     func decide(priceBar: PriceBar? = nil) -> [TradeActionType] {
         if config.traderBotDemoMode {
-            let longPosition = Position(direction: .long, size: 1, entryTime: Date(), idealEntryPrice: 9000, stopLoss: StopLoss(stop: 7000, source: .currentBar, stopOrder: nil))
-            print("TraderBotDemo, counter: ", counter)
+            let longPosition = Position(direction: .long, size: 1, entryTime: Date(), idealEntryPrice: 9000, stopLoss: StopLoss(stop: 7000, source: .currentBar, stopOrderId: nil))
             switch counter % 4 {
             case 0:
+                counter = counter + 1
+                print("TraderBotDemo openedPosition")
+                sessionManager.resetCurrentlyProcessingPriceBar()
                 return [.openedPosition(newPosition: longPosition)]
             case 1:
-                return [.updatedStop(stop: StopLoss(stop: 7500, source: .currentBar, stopOrder: nil))]
+                counter = counter + 1
+                print("TraderBotDemo updatedStop")
+                sessionManager.resetCurrentlyProcessingPriceBar()
+                return [.updatedStop(stop: StopLoss(stop: 7500, source: .currentBar, stopOrderId: nil))]
             case 2:
+                counter = counter + 1
+                print("TraderBotDemo forceClosePosition")
+                sessionManager.resetCurrentlyProcessingPriceBar()
                 return [.forceClosePosition(closedPosition: longPosition, closingPrice: 9500, closingTime: Date(), reason: .signalReversed)]
             case 3:
+                counter = counter + 1
+                print("TraderBotDemo verifyPositionClosed")
+                sessionManager.resetCurrentlyProcessingPriceBar()
                 return [.verifyPositionClosed(closedPosition: longPosition, closingPrice: 9500, closingTime: Date(), reason: .signalReversed)]
             default:
                 break
             }
-            counter += 1
         }
         
         guard chart.timeKeys.count > 1,

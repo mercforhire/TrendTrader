@@ -18,7 +18,7 @@ struct LiveOrder: Codable {
     var lastExecutionTime_r: Double
     var orderType: String
     var side: String
-    var price: Double?
+    var auxPrice: String?
     var orderId: Int
     var status: String
     

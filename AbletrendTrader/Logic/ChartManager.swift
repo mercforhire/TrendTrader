@@ -32,7 +32,7 @@ class ChartManager {
     weak var delegate: DataManagerDelegate?
     var fetching = false
     
-    init(updateFrequency: TimeInterval = 10) {
+    init(updateFrequency: TimeInterval = 20) {
         let now = Date()
         calendar.timeZone = Date.DefaultTimeZone
         let components1 = DateComponents(year: now.year(),

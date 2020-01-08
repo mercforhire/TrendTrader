@@ -330,9 +330,13 @@ class TraderBot {
         if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(chart: chart).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            print("Opening position:")
+            print(position)
             return position
         } else if risk <= config.maxRisk {
             let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            print("Opening position:")
+            print(position)
             return position
         }
 

@@ -26,8 +26,10 @@ class ChartManager {
     private var updateFrequency: TimeInterval
     private var timer: Timer?
     
+    
     weak var delegate: DataManagerDelegate?
     var fetching = false
+    var monitoring: Bool = false
     
     init(updateFrequency: TimeInterval = 10) {
         self.updateFrequency = updateFrequency
@@ -175,10 +177,13 @@ class ChartManager {
                 }
             })
         }
+        
+        monitoring = true
     }
     
     func stopMonitoring() {
         timer?.invalidate()
+        monitoring = false
     }
     
     func simulateMinPassed() -> Bool {

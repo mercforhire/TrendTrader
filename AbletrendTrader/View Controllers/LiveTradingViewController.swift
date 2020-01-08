@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class LiveTradingViewController: NSViewController {
+class LiveTradingViewController: NSViewController, NSWindowDelegate {
 
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
@@ -46,6 +46,8 @@ class LiveTradingViewController: NSViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
+        
+        view.window?.delegate = self
     }
     
     override func viewDidLoad() {
@@ -56,6 +58,20 @@ class LiveTradingViewController: NSViewController {
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
         dataManager = ChartManager()
         dataManager?.delegate = self
+    }
+    
+    override func viewWillAppear() {
+        super.viewWillAppear()
+        
+        if dataManager?.monitoring ?? false {
+            dataManager?.startMonitoring()
+        }
+    }
+    
+    override func viewDidDisappear() {
+        super.viewDidDisappear()
+        
+        dataManager?.stopMonitoring()
     }
     
     @objc func updateSystemTimeLabel() {

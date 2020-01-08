@@ -98,7 +98,7 @@ class SessionManager {
         
         currentlyProcessingPriceBar = priceBarId
         for action in actions {
-            print(action.description(actionTime: priceBarTime))
+            print(action.description(actionBarTime: priceBarTime))
         }
         
         if live {

@@ -163,7 +163,7 @@ struct Chart {
             }
         }
         
-        for timekey in timeKeys.reversed() {
+        outerloop1: for timekey in timeKeys.reversed() {
             guard let bar = priceBars[timekey] else { continue }
             
             if latestBarWith2MinSignal != nil {
@@ -172,14 +172,14 @@ struct Chart {
             
             for signal in bar.signals where signal.inteval == .twoMin {
                 if signal.direction != currentDirection {
-                    break
+                    break outerloop1
                 } else {
                     latestBarWith2MinSignal = bar.time
                 }
             }
         }
         
-        for timekey in timeKeys.reversed() {
+        outerloop2: for timekey in timeKeys.reversed() {
             guard let bar = priceBars[timekey] else { continue }
             
             if latestBarWith3MinSignal != nil {
@@ -188,7 +188,7 @@ struct Chart {
             
             for signal in bar.signals where signal.inteval == .threeMin {
                 if signal.direction != currentDirection {
-                    break
+                    break outerloop2
                 } else {
                     latestBarWith3MinSignal = bar.time
                 }

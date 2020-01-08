@@ -170,9 +170,12 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     
     @IBAction
     private func exitAllPosition(_ sender: NSButton) {
+        guard let latestPrice = trader?.chart.absLastBar?.candleStick.close else { return }
+        
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
         sessionManager.exitPositions(priceBarTime: Date(),
+                                     idealExitPrice: latestPrice,
                                      exitReason: .manual,
                                      closingChart: trader?.chart)
         { [weak self] result in
@@ -272,21 +275,27 @@ extension LiveTradingViewController: NSTableViewDelegate {
             text = trade.type
             cellIdentifier = .TypeCell
         } else if tableColumn == tableView.tableColumns[1] {
-            text = trade.entry
-            cellIdentifier = .EntryCell
+            text = trade.iEntry
+            cellIdentifier = .IdealEntryCell
         } else if tableColumn == tableView.tableColumns[2] {
+            text = trade.aEntry
+            cellIdentifier = .ActualEntryCell
+        } else if tableColumn == tableView.tableColumns[3] {
             text = trade.stop
             cellIdentifier = .StopCell
-        } else if tableColumn == tableView.tableColumns[3] {
-            text = trade.exit
-            cellIdentifier = .ExitCell
         } else if tableColumn == tableView.tableColumns[4] {
+            text = trade.iExit
+            cellIdentifier = .IdealExitCell
+        } else if tableColumn == tableView.tableColumns[5] {
+            text = trade.aExit
+            cellIdentifier = .ActualExitCell
+        } else if tableColumn == tableView.tableColumns[6] {
             text = trade.pAndL
             cellIdentifier = .PAndLCell
-        } else if tableColumn == tableView.tableColumns[5] {
+        } else if tableColumn == tableView.tableColumns[7] {
             text = trade.entryTime
             cellIdentifier = .EntryTimeCell
-        } else if tableColumn == tableView.tableColumns[6] {
+        } else if tableColumn == tableView.tableColumns[8] {
             text = trade.exitTime
             cellIdentifier = .ExitTimeCell
         }

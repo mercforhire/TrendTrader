@@ -200,14 +200,14 @@ extension SimTradingViewController: NSTableViewDelegate {
             text = trade.type
             cellIdentifier = .TypeCell
         } else if tableColumn == tableView.tableColumns[1] {
-            text = trade.entry
-            cellIdentifier = .EntryCell
+            text = trade.iEntry
+            cellIdentifier = .IdealEntryCell
         } else if tableColumn == tableView.tableColumns[2] {
             text = trade.stop
             cellIdentifier = .StopCell
         } else if tableColumn == tableView.tableColumns[3] {
-            text = trade.exit
-            cellIdentifier = .ExitCell
+            text = trade.iExit
+            cellIdentifier = .IdealExitCell
         } else if tableColumn == tableView.tableColumns[4] {
             text = trade.pAndL
             cellIdentifier = .PAndLCell
@@ -236,9 +236,11 @@ extension SimTradingViewController: NSTableViewDataSource {
 
 extension NSUserInterfaceItemIdentifier {
     static let TypeCell = NSUserInterfaceItemIdentifier("TypeCellID")
-    static let EntryCell = NSUserInterfaceItemIdentifier("EntryCellID")
+    static let IdealEntryCell = NSUserInterfaceItemIdentifier("IdealEntryCellID")
+    static let ActualEntryCell = NSUserInterfaceItemIdentifier("ActualEntryCellID")
     static let StopCell = NSUserInterfaceItemIdentifier("StopCellID")
-    static let ExitCell = NSUserInterfaceItemIdentifier("ExitCellID")
+    static let IdealExitCell = NSUserInterfaceItemIdentifier("IdealExitCellID")
+    static let ActualExitCell = NSUserInterfaceItemIdentifier("ActualCellID")
     static let PAndLCell = NSUserInterfaceItemIdentifier("PAndLCellID")
     static let EntryTimeCell = NSUserInterfaceItemIdentifier("EntryCellID")
     static let ExitTimeCell = NSUserInterfaceItemIdentifier("ExitTimeCellID")

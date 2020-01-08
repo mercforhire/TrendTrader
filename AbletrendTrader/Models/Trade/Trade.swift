@@ -10,8 +10,10 @@ import Foundation
 
 struct Trade {
     var direction: TradeDirection
-    var entryPrice: Double // enter at the close of the bar
-    var exitPrice: Double
+    var idealEntryPrice: Double
+    var actualEntryPrice: Double
+    var idealExitPrice: Double
+    var actualExitPrice: Double
     var exitMethod: ExitMethod
     var entryTime: Date?
     var exitTime: Date
@@ -21,9 +23,9 @@ struct Trade {
     var profit: Double? {
         switch direction {
         case .long:
-            return exitPrice - entryPrice
+            return idealExitPrice - idealEntryPrice
         default:
-            return entryPrice - exitPrice
+            return idealEntryPrice - idealExitPrice
         }
     }
 }

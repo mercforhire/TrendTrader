@@ -184,8 +184,9 @@ class SessionManager {
                             }
                             semaphore.signal()
                         }
-                    case .forceClosePosition(_, _, _, let reason, let closingChart):
+                    case .forceClosePosition(_, let idealExitPrice, _, let reason, let closingChart):
                         self.exitPositions(priceBarTime: priceBarTime,
+                                           idealExitPrice: idealExitPrice,
                                            exitReason: reason,
                                            closingChart: closingChart,
                                            completion:
@@ -198,13 +199,15 @@ class SessionManager {
                                 }
                                 semaphore.signal()
                         })
-                    case .verifyPositionClosed(let closedPosition, _, let closingTime, let reason, let closingChart):
+                    case .verifyPositionClosed(let closedPosition, let idealClosingPrice, let closingTime, let reason, let closingChart):
                         self.verifyClosedPosition(closedPosition: closedPosition, reason: reason) { result in
                             switch result {
                             case .success(let closingPrice):
                                 var trade = Trade(direction: closedPosition.direction,
-                                                  entryPrice:  closedPosition.actualEntryPrice ?? closedPosition.idealEntryPrice,
-                                                  exitPrice: closingPrice,
+                                                  idealEntryPrice:  closedPosition.idealEntryPrice,
+                                                  actualEntryPrice: closedPosition.actualEntryPrice ?? -1.0,
+                                                  idealExitPrice: idealClosingPrice,
+                                                  actualExitPrice: closingPrice,
                                                   exitMethod: reason,
                                                   entryTime: closedPosition.entryTime,
                                                   exitTime: closingTime)
@@ -238,13 +241,27 @@ class SessionManager {
                 case .updatedStop(let newStop):
                     currentPosition?.stopLoss = newStop
                 case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let reason, let closingChart):
-                    var trade = Trade(direction: closedPosition.direction, entryPrice: closedPosition.idealEntryPrice, exitPrice: closingPrice, exitMethod: reason, entryTime: closedPosition.entryTime, exitTime: closingTime)
+                    var trade = Trade(direction: closedPosition.direction,
+                                      idealEntryPrice: closedPosition.idealEntryPrice,
+                                      actualEntryPrice: closedPosition.idealEntryPrice,
+                                      idealExitPrice: closingPrice,
+                                      actualExitPrice: closingPrice,
+                                      exitMethod: reason,
+                                      entryTime: closedPosition.entryTime,
+                                      exitTime: closingTime)
                     trade.entrySnapshot = closedPosition.entrySnapshot
                     trade.exitSnapshot = closingChart
                     trades.append(trade)
                     currentPosition = nil
                 case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason, let closingChart):
-                    var trade = Trade(direction: closedPosition.direction, entryPrice: closedPosition.idealEntryPrice, exitPrice: closingPrice, exitMethod: reason, entryTime: closedPosition.entryTime, exitTime: closingTime)
+                    var trade = Trade(direction: closedPosition.direction,
+                                      idealEntryPrice: closedPosition.idealEntryPrice,
+                                      actualEntryPrice: closedPosition.idealEntryPrice,
+                                      idealExitPrice: closingPrice,
+                                      actualExitPrice: closingPrice,
+                                      exitMethod: reason,
+                                      entryTime: closedPosition.entryTime,
+                                      exitTime: closingTime)
                     trade.entrySnapshot = closedPosition.entrySnapshot
                     trade.exitSnapshot = closingChart
                     trades.append(trade)
@@ -258,6 +275,7 @@ class SessionManager {
     }
     
     func exitPositions(priceBarTime: Date,
+                       idealExitPrice: Double,
                        exitReason: ExitMethod,
                        closingChart: Chart?,
                        completion: @escaping (Swift.Result<(Double, Date), NetworkError>) -> Void) {
@@ -279,8 +297,10 @@ class SessionManager {
                     switch result {
                     case .success(let exitPriceAndDate):
                         var trade = Trade(direction: currentPosition.direction,
-                                          entryPrice:  currentPosition.actualEntryPrice ?? currentPosition.idealEntryPrice,
-                                          exitPrice: exitPriceAndDate.0,
+                                          idealEntryPrice: currentPosition.idealEntryPrice,
+                                          actualEntryPrice: currentPosition.actualEntryPrice ?? -1.0,
+                                          idealExitPrice: idealExitPrice,
+                                          actualExitPrice: exitPriceAndDate.0,
                                           exitMethod: exitReason,
                                           entryTime: currentPosition.entryTime,
                                           exitTime: exitPriceAndDate.1)
@@ -416,22 +436,26 @@ class SessionManager {
             let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.2f", currentPosition.stopLoss!.stop) : "--"
             
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
-                                                 entry: String(format: "%.2f", currentPosition.actualEntryPrice ?? currentPosition.idealEntryPrice),
-                                           stop: currentStop,
-                                           exit: "--",
-                                           pAndL: "--",
-                                           entryTime: dateFormatter.string(from: currentPosition.entryTime),
-                                           exitTime: "--"))
+                                                 iEntry: String(format: "%.2f", currentPosition.idealEntryPrice),
+                                                 aEntry: String(format: "%.2f", currentPosition.actualEntryPrice ?? -1.0),
+                                                 stop: currentStop,
+                                                 iExit: "--",
+                                                 aExit: "--",
+                                                 pAndL: "--",
+                                                 entryTime: dateFormatter.string(from: currentPosition.entryTime),
+                                                 exitTime: "--"))
         }
         
         for trade in trades.reversed() {
             tradesList.append(TradesTableRowItem(type: trade.direction.description(),
-                                           entry: String(format: "%.2f", trade.entryPrice),
-                                           stop: "--",
-                                           exit: String(format: "%.2f", trade.exitPrice),
-                                           pAndL: String(format: "%.2f", trade.profit ?? 0),
-                                           entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
-                                           exitTime: dateFormatter.string(from: trade.exitTime)))
+                                                 iEntry: String(format: "%.2f", trade.idealEntryPrice),
+                                                 aEntry: String(format: "%.2f", trade.actualEntryPrice ?? -1.0),
+                                                 stop: "--",
+                                                 iExit: String(format: "%.2f", trade.idealExitPrice),
+                                                 aExit: String(format: "%.2f", trade.actualExitPrice),
+                                                 pAndL: String(format: "%.2f", trade.profit ?? 0),
+                                                 entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
+                                                 exitTime: dateFormatter.string(from: trade.exitTime)))
         }
         
         return tradesList

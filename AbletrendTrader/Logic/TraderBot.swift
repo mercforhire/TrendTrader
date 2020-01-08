@@ -61,28 +61,49 @@ class TraderBot {
     // Decide trade actions at the given PriceBar object, returns the list of actions need to be performed
     func decide(priceBar: PriceBar? = nil) -> [TradeActionType] {
         if config.traderBotDemoMode {
-            let longPosition = Position(direction: .long, size: 1, entryTime: Date(), idealEntryPrice: 9000, stopLoss: StopLoss(stop: 7000, source: .currentBar, stopOrderId: nil))
-            switch demoCounter % 4 {
+            let longPosition = Position(direction: .long, size: 1, entryTime: Date(), idealEntryPrice: 8000, stopLoss: StopLoss(stop: 7000, source: .currentBar, stopOrderId: nil))
+            let shortPosition = Position(direction: .short, size: 1, entryTime: Date(), idealEntryPrice: 9000, stopLoss: StopLoss(stop: 10000, source: .currentBar, stopOrderId: nil))
+            switch demoCounter % 8 {
             case 0:
                 demoCounter = demoCounter + 1
-                print("TraderBotDemo: openedPosition")
+                print("TraderBotDemo: opened long position")
                 sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.openedPosition(newPosition: longPosition)]
+                return [.openedPosition(newPosition: longPosition, entryType: .initial)]
             case 1:
                 demoCounter = demoCounter + 1
-                print("TraderBotDemo: updatedStop")
+                print("TraderBotDemo: update stop")
                 sessionManager.resetCurrentlyProcessingPriceBar()
                 return [.updatedStop(stop: StopLoss(stop: 7500, source: .currentBar, stopOrderId: nil))]
             case 2:
                 demoCounter = demoCounter + 1
-                print("TraderBotDemo: forceClosePosition")
+                print("TraderBotDemo: force close position")
                 sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.forceClosePosition(closedPosition: longPosition, closingPrice: 9500, closingTime: Date(), reason: .signalReversed)]
+                return [.forceClosePosition(closedPosition: longPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed, closingChart: chart)]
             case 3:
                 demoCounter = demoCounter + 1
-                print("TraderBotDemo: verifyPositionClosed")
+                print("TraderBotDemo: verify position closed")
                 sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.verifyPositionClosed(closedPosition: longPosition, closingPrice: 9500, closingTime: Date(), reason: .signalReversed)]
+                return [.verifyPositionClosed(closedPosition: longPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed, closingChart: chart)]
+            case 4:
+                demoCounter = demoCounter + 1
+                print("TraderBotDemo: opened short position")
+                sessionManager.resetCurrentlyProcessingPriceBar()
+                return [.openedPosition(newPosition: shortPosition, entryType: .initial)]
+            case 5:
+                demoCounter = demoCounter + 1
+                print("TraderBotDemo: update stop")
+                sessionManager.resetCurrentlyProcessingPriceBar()
+                return [.updatedStop(stop: StopLoss(stop: 9500, source: .currentBar, stopOrderId: nil))]
+            case 6:
+                demoCounter = demoCounter + 1
+                print("TraderBotDemo: force close position")
+                sessionManager.resetCurrentlyProcessingPriceBar()
+                return [.forceClosePosition(closedPosition: shortPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed, closingChart: chart)]
+            case 7:
+                demoCounter = demoCounter + 1
+                print("TraderBotDemo: verify position closed")
+                sessionManager.resetCurrentlyProcessingPriceBar()
+                return [.verifyPositionClosed(closedPosition: shortPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed, closingChart: chart)]
             default:
                 break
             }
@@ -133,8 +154,8 @@ class TraderBot {
                     let exitAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position):
-                        return [exitAction, .openedPosition(newPosition: position)]
+                    case .openedPosition(let position, let entryType):
+                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -147,8 +168,8 @@ class TraderBot {
                     let exitAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position):
-                        return [exitAction, .openedPosition(newPosition: position)]
+                    case .openedPosition(let position, let entryType):
+                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -162,8 +183,8 @@ class TraderBot {
                     let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position):
-                        return [exitAction, .openedPosition(newPosition: position)]
+                    case .openedPosition(let position, let entryType):
+                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -173,8 +194,8 @@ class TraderBot {
                    let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position):
-                        return [exitAction, .openedPosition(newPosition: position)]
+                    case .openedPosition(let position, let entryType):
+                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -265,7 +286,7 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction }
         
         let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice)
-        return .openedPosition(newPosition: buyPosition)
+        return .openedPosition(newPosition: buyPosition, entryType: .initial)
     }
     
     func sellAtMarket() -> TradeActionType {
@@ -273,13 +294,13 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction }
         
         let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice)
-        return .openedPosition(newPosition: sellPosition)
+        return .openedPosition(newPosition: sellPosition, entryType: .initial)
     }
     
     // Private:
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let position: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
-            return .openedPosition(newPosition: position)
+            return .openedPosition(newPosition: position, entryType: entryType)
         }
         return .noAction
     }
@@ -331,10 +352,12 @@ class TraderBot {
         
         if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(chart: chart).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
-            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            var position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            position.entrySnapshot = chart
             return position
         } else if risk <= config.maxRisk {
-            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            var position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            position.entrySnapshot = chart
             return position
         }
 
@@ -387,13 +410,13 @@ class TraderBot {
     private func forceExitPosition(atEndOfBar: PriceBar, exitMethod: ExitMethod) -> TradeActionType {
         guard let currentPosition = sessionManager.currentPosition else { return .noAction }
         
-        return .forceClosePosition(closedPosition: currentPosition, closingPrice: atEndOfBar.candleStick.close, closingTime: atEndOfBar.time.getOffByMinutes(minutes: 1), reason: exitMethod)
+        return .forceClosePosition(closedPosition: currentPosition, closingPrice: atEndOfBar.candleStick.close, closingTime: atEndOfBar.time.getOffByMinutes(minutes: 1), reason: exitMethod, closingChart: chart)
     }
     
     private func verifyStopWasHit(duringBar: PriceBar, exitMethod: ExitMethod) -> TradeActionType {
         guard let currentPosition = sessionManager.currentPosition, let stop = currentPosition.stopLoss?.stop else { return .noAction }
         
-        return .forceClosePosition(closedPosition: currentPosition, closingPrice: stop, closingTime: duringBar.time, reason: exitMethod)
+        return .verifyPositionClosed(closedPosition: currentPosition, closingPrice: stop, closingTime: duringBar.time, reason: exitMethod, closingChart: chart)
     }
     
     private func calculateStopLoss(direction: TradeDirection, entryBar: PriceBar) -> StopLoss? {

@@ -117,7 +117,14 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             if let chart = chart {
                 self.updateLatestDataTimeLabel(chart: chart)
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
-                self.startButton.isEnabled = true
+                
+                if self.dataManager?.monitoring ?? false {
+                    self.startButton.isEnabled = false
+                    self.pauseButton.isEnabled = true
+                } else {
+                    self.startButton.isEnabled = true
+                    self.pauseButton.isEnabled = false
+                }
             }
             
             fetchingTask.leave()
@@ -166,7 +173,8 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
         sessionManager.exitPositions(priceBarTime: Date(),
-                                     exitReason: .manual)
+                                     exitReason: .manual,
+                                     closingChart: trader?.chart)
         { [weak self] result in
             guard let self = self else { return }
             
@@ -195,7 +203,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             if let networkError = networkError {
                 networkError.showDialog()
             } else {
-                self.refreshIBSession()
+                self.updateTradesList()
             }
         }
     }
@@ -213,7 +221,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             if let networkError = networkError {
                 print("Network Error: ", networkError)
             } else {
-                self.refreshIBSession()
+                self.updateTradesList()
             }
         }
     }
@@ -222,21 +230,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         if let chartVC = segue.destinationController as? ChartViewController, let chart = trader?.chart {
             chartVC.chart = chart
             delegate = chartVC
-        }
-    }
-    
-    private func refreshIBSession () {
-        sessionManager.refreshIBSession { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let success):
-                if success {
-                    self.updateTradesList()
-                }
-            case .failure(let networkError):
-                networkError.showDialog()
-            }
         }
     }
 }

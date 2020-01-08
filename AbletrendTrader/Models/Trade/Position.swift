@@ -15,6 +15,7 @@ struct Position {
     var idealEntryPrice: Double
     var actualEntryPrice: Double?
     var stopLoss: StopLoss?
+    var entrySnapshot: Chart?
     
     var securedProfit: Double? {
         guard let stopLoss = stopLoss, let actualEntryPrice = actualEntryPrice else { return nil }

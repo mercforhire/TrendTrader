@@ -15,6 +15,8 @@ struct Trade {
     var exitMethod: ExitMethod
     var entryTime: Date?
     var exitTime: Date
+    var entrySnapshot: Chart?
+    var exitSnapshot: Chart?
     
     var profit: Double? {
         switch direction {

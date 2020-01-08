@@ -13,26 +13,37 @@ enum EntryType {
     case initial // enter on the first signal of a new triple confirmation
     case pullBack // enter on any blue/red bar followed by one or more green bars
     case sweetSpot // enter on pullback that bounced/almost bounced off the S/R level
+    
+    func description() -> String {
+        switch self {
+        case .initial:
+            return "Initial"
+        case .pullBack:
+            return "PullBack"
+        case .sweetSpot:
+            return "SweetSpot"
+        }
+    }
 }
 
 enum TradeActionType {
     case noAction
-    case openedPosition(newPosition: Position)
+    case openedPosition(newPosition: Position, entryType: EntryType)
     case updatedStop(stop: StopLoss)
-    case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
-    case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
+    case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod, closingChart: Chart)
+    case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod, closingChart: Chart)
     
     func description(actionBarTime: Date) -> String {
         switch self {
         case .noAction:
             return String(format: "%@: No action for bar: %@", Date().hourMinuteSecond(), actionBarTime.hourMinute())
-        case .openedPosition(let newPosition):
+        case .openedPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f for bar: %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, actionBarTime.hourMinute())
-        case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason):
+            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
+        case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason, _):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
-        case .forceClosePosition(let closedPosition, let closingPrice, _, let reason):
+        case .forceClosePosition(let closedPosition, let closingPrice, _, let reason, _):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Flat %@ position at %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
         case .updatedStop(let stopLoss):

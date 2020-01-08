@@ -138,4 +138,69 @@ struct Chart {
         let chart = Chart(ticker: ticker, timeKeys: keys, priceBars: timeVsPriceBars)
         return chart
     }
+    
+    func printSignalsDescription() {
+        guard let latestBar = absLastBar,
+            let currentDirection: TradeDirection = latestBar.oneMinSignal?.direction else { return }
+        
+        var latestBarWith1MinSignal: Date?
+        var latestBarWith2MinSignal: Date?
+        var latestBarWith3MinSignal: Date?
+        
+        for timekey in timeKeys.reversed() {
+            guard let bar = priceBars[timekey] else { continue }
+            
+            if latestBarWith1MinSignal != nil {
+                break
+            }
+            
+            for signal in bar.signals where signal.inteval == .oneMin {
+                if signal.direction != currentDirection {
+                    break
+                } else {
+                    latestBarWith1MinSignal = bar.time
+                }
+            }
+        }
+        
+        for timekey in timeKeys.reversed() {
+            guard let bar = priceBars[timekey] else { continue }
+            
+            if latestBarWith2MinSignal != nil {
+                break
+            }
+            
+            for signal in bar.signals where signal.inteval == .twoMin {
+                if signal.direction != currentDirection {
+                    break
+                } else {
+                    latestBarWith2MinSignal = bar.time
+                }
+            }
+        }
+        
+        for timekey in timeKeys.reversed() {
+            guard let bar = priceBars[timekey] else { continue }
+            
+            if latestBarWith3MinSignal != nil {
+                break
+            }
+            
+            for signal in bar.signals where signal.inteval == .threeMin {
+                if signal.direction != currentDirection {
+                    break
+                } else {
+                    latestBarWith3MinSignal = bar.time
+                }
+            }
+        }
+        
+        let log = String(format: "For bar %@: Latest 1m %@ Signal: %@, 2m Signal: %@, 3m Signal: %@",
+                         latestBar.time.hourMinuteSecond(),
+                         currentDirection.description(),
+                         (latestBarWith1MinSignal?.hourMinute() ?? "--"),
+                         (latestBarWith2MinSignal?.hourMinute() ?? "--"),
+                         (latestBarWith3MinSignal?.hourMinute() ?? "--"))
+        print(log)
+    }
 }

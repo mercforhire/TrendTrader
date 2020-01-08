@@ -128,6 +128,7 @@ class ChartManager {
                         self.chart = Chart.generateChart(ticker: "NQ",
                                                          candleSticks: candleSticks,
                                                          indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
+                        self.chart?.printSignalsDescription()
                         completion(self.chart)
                     }
                 }

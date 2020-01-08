@@ -365,7 +365,6 @@ class NetworkManager {
     func placeOrder(orderType: OrderType,
                     direction: TradeDirection,
                     size: Int,
-                    time: Date,
                     completionHandler: @escaping (Swift.Result<PlacedOrderResponse, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount,
             let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/account/" + selectedAccount.accountId + "/order") else {
@@ -383,7 +382,7 @@ class NetworkManager {
             break
         }
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(), orderPrice, config.ticker, size)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: Date()), orderType.typeString(), direction.ibTradeString(), orderPrice, config.ticker, size)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody

@@ -23,31 +23,13 @@ class ChartManager {
     var chart: Chart?
     var subsetChart: Chart?
     
-    private var chartStartTime: Date
-    private var chartEndTime: Date
-    
     private var updateFrequency: TimeInterval
     private var timer: Timer?
     
     weak var delegate: DataManagerDelegate?
     var fetching = false
     
-    init(updateFrequency: TimeInterval = 20) {
-        let now = Date()
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: now.year(),
-                                        month: now.month(),
-                                        day: now.day(),
-                                        hour: config.chartStart.0,
-                                        minute: config.chartStart.1)
-        self.chartStartTime = calendar.date(from: components1)!
-        
-        let components2 = DateComponents(year: now.year(),
-                                        month: now.month(),
-                                        day: now.day(),
-                                        hour: config.chartEnd.0,
-                                        minute: config.chartEnd.1)
-        self.chartEndTime = calendar.date(from: components2)!
+    init(updateFrequency: TimeInterval = 10) {
         self.updateFrequency = updateFrequency
     }
     
@@ -59,7 +41,6 @@ class ChartManager {
             
             let urlFetchingTask = DispatchGroup()
             
-            print("Fetching urls...")
             urlFetchingTask.enter()
             networkManager.fetchLatestAvailableUrl(interval: .oneMin, completion: { url in
                 oneMinUrl = url
@@ -86,15 +67,9 @@ class ChartManager {
                     return
                 }
                 
-                print("Fetched urls:", terminator:" ")
-                print(oneMinUrl, terminator:" ")
-                print(twoMinUrl, terminator:" ")
-                print(threeMinUrl)
-                
                 let chartFetchingTask = DispatchGroup()
                 var hasError: Bool = false
                 
-                print("Fetching chart...")
                 chartFetchingTask.enter()
                 self.networkManager.downloadData(from: oneMinUrl, fileName: self.config.fileName1) { string, response, error in
                     DispatchQueue.main.async() {
@@ -150,10 +125,7 @@ class ChartManager {
                         self.subsetChart = nil
                         self.chart = Chart.generateChart(ticker: "NQ",
                                                          candleSticks: candleSticks,
-                                                         indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],
-                                                         startTime: self.chartStartTime,
-                                                         cutOffTime: self.chartEndTime)
-                        print("Chart fetched, last bar: " + (self.chart?.absLastBarDate?.generateDateIdentifier() ?? ""))
+                                                         indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
                         completion(self.chart)
                     }
                 }
@@ -171,28 +143,10 @@ class ChartManager {
                 let twoMinIndicators = Indicators(interval: .twoMin, signals: twoMinSignals)
                 let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
                 
-                let chartDate: Date = candleSticks.last!.time
-                
-                let components1 = DateComponents(year: chartDate.year(),
-                                                 month: chartDate.month(),
-                                                 day: chartDate.day(),
-                                                 hour: config.chartStart.0,
-                                                 minute: config.chartStart.1)
-                self.chartStartTime = calendar.date(from: components1)!
-                
-                let components2 = DateComponents(year: chartDate.year(),
-                                                 month: chartDate.month(),
-                                                 day: chartDate.day(),
-                                                 hour: config.chartEnd.0,
-                                                 minute: config.chartEnd.1)
-                self.chartEndTime = calendar.date(from: components2)!
-                
                 self.subsetChart = nil
                 self.chart = Chart.generateChart(ticker: "NQ",
                                                  candleSticks: candleSticks,
-                                                 indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators],
-                                                 startTime: self.chartStartTime,
-                                                 cutOffTime: self.chartEndTime)
+                                                 indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
                 
                 _ = simulateMinPassed()
                 

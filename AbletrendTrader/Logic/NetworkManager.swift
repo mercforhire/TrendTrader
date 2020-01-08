@@ -34,7 +34,7 @@ enum NetworkError: Error {
     case fetchAccountsFailed
     case fetchTradesFailed
     case fetchPositionsFailed
-    case fetchLiveOrdersFailed
+    case fetchStopOrdersFailed
     case orderReplyFailed
     case previewOrderFailed
     case orderAlreadyPlaced
@@ -45,6 +45,7 @@ enum NetworkError: Error {
     case noPositionToClose
     case noCurrentPositionToPlaceStopLoss
     case positionNotClosed
+    case resetPortfolioPositionsFailed
     
     func displayMessage() -> String {
         switch self {
@@ -62,8 +63,8 @@ enum NetworkError: Error {
             return "Fetch trades failed."
         case .fetchPositionsFailed:
             return "Fetch positions failed."
-        case .fetchLiveOrdersFailed:
-            return "Fetch live orders failed"
+        case .fetchStopOrdersFailed:
+            return "Fetch stop orders failed."
         case .orderReplyFailed:
             return "Answer question failed."
         case .previewOrderFailed:
@@ -83,7 +84,9 @@ enum NetworkError: Error {
         case .noCurrentPositionToPlaceStopLoss:
             return "No current position to place stop loss."
         case .positionNotClosed:
-            return "Position not closed"
+            return "Position not closed."
+        case .resetPortfolioPositionsFailed:
+            return "Reset portfolio positions failed."
         }
     }
     
@@ -140,7 +143,6 @@ class NetworkManager {
     }
     
     // Validate SSO
-    // https://localhost:5000/v1/portal/sso/validate
     func validateSSO(completionHandler: @escaping (Swift.Result<SSOToken, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/sso/validate").responseData { [weak self] response in
             guard let self = self else { return }
@@ -154,7 +156,6 @@ class NetworkManager {
     }
     
     // Authentication Status
-    // https://localhost:5000/v1/portal/iserver/auth/status
     func fetchAuthenticationStatus(completionHandler: @escaping (Swift.Result<AuthStatus, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/auth/status", method: .post).responseData { [weak self] response in
             guard let self = self else { return }
@@ -168,7 +169,6 @@ class NetworkManager {
     }
     
     // Tries to re-authenticate to Brokerage
-    // https://localhost:5000/v1/portal/iserver/reauthenticate
     func reauthenticate(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/reauthenticate", method: .post).responseData { response in
             
@@ -181,7 +181,6 @@ class NetworkManager {
     }
     
     // Ping the server to keep the session open
-    // https://localhost:5000/v1/portal/tickle
     func pingServer(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/tickle", method: .post).responseJSON { response in
             if response.response?.statusCode == 200 {
@@ -193,7 +192,6 @@ class NetworkManager {
     }
     
     // Ends the current session
-    // https://localhost:5000/v1/portal/logout
     func logOut(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/logout", method: .post).responseJSON { response in
             if response.response?.statusCode == 200 {
@@ -205,7 +203,6 @@ class NetworkManager {
     }
     
     // Portfolio Accounts
-    // https://localhost:5000/v1/portal/portfolio/accounts
     func fetchAccounts(completionHandler: @escaping (Swift.Result<[Account], NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/portfolio/accounts").responseData { [weak self] response in
             guard let self = self else { return }
@@ -219,14 +216,13 @@ class NetworkManager {
     }
     
     // List of Trades
-    // https://localhost:5000/v1/portal/iserver/account/trades
-    func fetchLatestTrade(completionHandler: @escaping (Swift.Result<IBTrade?, NetworkError>) -> Void) {
+    func fetchTrades(completionHandler: @escaping (Swift.Result<[IBTrade], NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
             completionHandler(.failure(.previewOrderFailed))
             return
         }
-        
-        afManager.request("https://localhost:5000/v1/portal/iserver/account/trades").responseData { [weak self] response in
+        let url = "https://localhost:5000/v1/portal/iserver/account/trades"
+        afManager.request(url).responseData { [weak self] response in
             guard let self = self else { return }
             
             if let data = response.data, let ibTrades = self.ibTradesBuilder.buildIBTradesFrom(data) {
@@ -236,54 +232,105 @@ class NetworkManager {
                 relevantTrades.sort { (left, right) -> Bool in
                     return left.tradeTime_r > right.tradeTime_r
                 }
-                completionHandler(.success(relevantTrades.first))
+                completionHandler(.success(relevantTrades))
             } else {
                 completionHandler(.failure(.fetchTradesFailed))
             }
         }
     }
     
-    // Live Orders
-    // https://localhost:5000/v1/portal/iserver/account/orders
-    // Only fetch orders this bot trades
-    func fetchStopOrder(completionHandler: @escaping (Swift.Result<LiveOrder?, NetworkError>) -> Void) {
+    // Stop Live Orders
+    func fetchStopOrders(completionHandler: @escaping (Swift.Result<[LiveOrder], NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/account/orders").responseData { [weak self] response in
             guard let self = self else { return }
             
             if let data = response.data,
                 let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
                 let orders = liveOrdersResponse.orders {
+                
                 let relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
                     return liveOrder.status == "PreSubmitted" && liveOrder.conid == self.config.conId && liveOrder.orderType == "Stop"
                 }
-                completionHandler(.success(relevantOrders.first))
+                completionHandler(.success(relevantOrders))
             } else {
-                print("fetchLiveOrdersFailed:")
+                print("fetchStopOrdersFailed:")
                 print(String(data: response.data!, encoding: .utf8)!)
-                completionHandler(.failure(.fetchLiveOrdersFailed))
+                completionHandler(.failure(.fetchStopOrdersFailed))
             }
         }
     }
     
-    // Portfolio Positions
-    // https://localhost:5000/v1/portal/portfolio/{accountId}/positions/{pageId}
-    func fetchRelevantPositions(completionHandler: @escaping (Swift.Result<IBPosition?, NetworkError>) -> Void) {
+    // Reset Portfolio Positions Cache
+    private func resetPositionsCache(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
             completionHandler(.failure(.previewOrderFailed))
             return
         }
-        afManager.request("https://localhost:5000/v1/portal/portfolio/\(selectedAccount.accountId)/position/\(config.conId)").responseData
-            { [weak self] response in
+        let url = "https://localhost:5000/v1/portal/portfolio/" + selectedAccount.accountId + "/positions/invalidate)"
+        afManager.request(url).responseData
+            { response in
+                if response.response?.statusCode == 200 {
+                    completionHandler(.success(true))
+                } else {
+                    completionHandler(.failure(.resetPortfolioPositionsFailed))
+                }
+        }
+    }
+    
+    
+    // Portfolio Positions
+    func fetchRelevantPositions(completionHandler: @escaping (Swift.Result<IBPosition?, NetworkError>) -> Void) {
+        guard let selectedAccount = selectedAccount else {
+            completionHandler(.failure(.previewOrderFailed))
+            return
+            
+        }
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            
+            let semaphore = DispatchSemaphore(value: 0)
+            var networkErrors: [NetworkError] = []
+            
+            self.resetPositionsCache { result in
+                switch result {
+                case .failure(let networkError):
+                    networkErrors.append(networkError)
+                default:
+                    break
+                }
+                semaphore.signal()
+            }
+            
+            semaphore.wait()
+            
+            
+            if !networkErrors.isEmpty {
+                DispatchQueue.main.async {
+                    completionHandler(.failure(.fetchPositionsFailed))
+                }
+                return
+            }
+            
+            let url = "https://localhost:5000/v1/portal/portfolio/\(selectedAccount.accountId)/position/\(self.config.conId)"
+            self.afManager.request(url).responseData { [weak self] response in
                 guard let self = self else { return }
                 
                 if let data = response.data, let positions = self.ibPositionsBuilder.buildIBPositionsResponseFrom(data) {
                     let relevantPositions: [IBPosition] = positions.filter { position -> Bool in
                         return position.acctId == selectedAccount.accountId && position.conid == self.config.conId && position.position != 0
                     }
-                    completionHandler(.success(relevantPositions.first))
+                    DispatchQueue.main.async {
+                        completionHandler(.success(relevantPositions.first))
+                    }
                 } else {
-                    completionHandler(.failure(.fetchPositionsFailed))
+                    DispatchQueue.main.async {
+                        completionHandler(.failure(.fetchPositionsFailed))
+                    }
                 }
+            }
         }
     }
     
@@ -355,7 +402,7 @@ class NetworkManager {
                 } else if let data = response.data, let _ = self.errorResponseBuilder.buildErrorResponseFrom(data) {
                     completionHandler(.failure(.orderAlreadyPlaced))
                 } else if response.response?.statusCode == 200 {
-                    completionHandler(.success(PlacedOrderResponse(orderId: "123", orderStatus: "Filled")))
+                    completionHandler(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
                 } else {
                     print("placeOrderFailed:")
                     print(String(data: response.data!, encoding: .utf8)!)
@@ -388,7 +435,7 @@ class NetworkManager {
                 } else if let data = response.data, let question = self.orderQuestionsBuilder.buildQuestionsFrom(data)?.first {
                     self.placeOrderReply(question: question, answer: true, completionHandler: completionHandler)
                 } else if response.response?.statusCode == 200 {
-                    completionHandler(.success(PlacedOrderResponse(orderId: "123", orderStatus: "Filled")))
+                    completionHandler(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
                 } else {
                     print("orderReplyFailed:")
                     print(String(data: response.data!, encoding: .utf8)!)
@@ -434,7 +481,7 @@ class NetworkManager {
                     let placedOrderResponse = self.placedOrderResponseBuilder.buildPlacedOrderResponseFrom(data)?.first {
                     completionHandler(.success(placedOrderResponse))
                 } else if response.response?.statusCode == 200 {
-                    completionHandler(.success(PlacedOrderResponse(orderId: "123", orderStatus: "Filled")))
+                    completionHandler(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
                 } else {
                     print("modifyOrderFailed:")
                     print(String(data: response.data!, encoding: .utf8)!)

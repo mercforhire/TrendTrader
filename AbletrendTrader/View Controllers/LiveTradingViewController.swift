@@ -170,11 +170,11 @@ class LiveTradingViewController: NSViewController {
     }
     
     @IBAction func buyPressed(_ sender: NSButton) {
-        guard let action = trader?.buyAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier else { return }
+        guard let action = trader?.buyAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier, let lastBarTime = trader?.chart.lastBar?.time else { return }
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarId: lastBarId, actions: [action]) { [weak self] networkError in
+        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
@@ -188,11 +188,11 @@ class LiveTradingViewController: NSViewController {
     }
     
     @IBAction func sellPressed(_ sender: NSButton) {
-        guard let action = trader?.sellAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier else { return }
+        guard let action = trader?.sellAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier, let lastBarTime = trader?.chart.lastBar?.time else { return }
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarId: lastBarId, actions: [action]) { [weak self] networkError in
+        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
@@ -242,11 +242,7 @@ extension LiveTradingViewController: DataManagerDelegate {
         trader?.chart = chart
         
         if let actions = trader?.decide() {
-            for action in actions {
-                print(action.description(actionTime: lastBarTime))
-            }
-            
-            sessionManager.processActions(priceBarId: lastBarId, actions: actions) { networkError in
+            sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: actions) { networkError in
                 if let networkError = networkError {
                     networkError.showDialog()
                 } else {

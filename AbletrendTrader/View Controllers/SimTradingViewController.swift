@@ -180,10 +180,7 @@ extension SimTradingViewController: DataManagerDelegate {
         trader?.chart = chart
         
         if let actions = trader?.decide() {
-            for action in actions {
-                print(action.description(actionTime: lastBarTime))
-            }
-            sessionManager.processActions(priceBarId: lastBarId, actions: actions) { networkError in
+            sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: actions) { networkError in
                 self.updateTradesList()
             }
         }

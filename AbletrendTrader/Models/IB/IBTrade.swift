@@ -19,7 +19,7 @@ struct IBTrade: Codable {
     var account: String
     var secType: String
     var conidex: String
-    var orderRef: String
+    var orderRef: String?
     var position: String
     
     enum CodingKeys: String, CodingKey {

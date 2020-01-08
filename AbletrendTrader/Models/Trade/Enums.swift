@@ -27,7 +27,7 @@ enum EntryType {
 }
 
 enum TradeActionType {
-    case noAction
+    case noAction(entryType: EntryType)
     case openedPosition(newPosition: Position, entryType: EntryType)
     case updatedStop(stop: StopLoss)
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod, closingChart: Chart)
@@ -35,19 +35,19 @@ enum TradeActionType {
     
     func description(actionBarTime: Date) -> String {
         switch self {
-        case .noAction:
-            return String(format: "%@: No action for bar: %@", Date().hourMinuteSecond(), actionBarTime.hourMinute())
+        case .noAction(let entryType):
+            return String(format: "%@: No action at %@ (looking to enter by %@)", Date().hourMinuteSecond(), actionBarTime.hourMinute(), entryType.description())
         case .openedPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
+            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ at %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
         case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason, _):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
+            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ at %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
         case .forceClosePosition(let closedPosition, let closingPrice, _, let reason, _):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Flat %@ position at %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
+            return String(format: "%@: Flat %@ position at %.2f reason: %@ at %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
         case .updatedStop(let stopLoss):
-            return String(format: "%@: Updated stop loss to %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), stopLoss.stop, stopLoss.source.reason(), actionBarTime.hourMinute())
+            return String(format: "%@: Updated stop loss to %.2f reason: %@ at %@", Date().hourMinuteSecond(), stopLoss.stop, stopLoss.source.reason(), actionBarTime.hourMinute())
         }
     }
 }

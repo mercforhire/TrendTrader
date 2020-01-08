@@ -250,7 +250,7 @@ extension LiveTradingViewController: DataManagerDelegate {
         
         trader?.chart = chart
         
-        if let actions = trader?.decide() {
+        if let actions = trader?.decide(), dataManager?.monitoring ?? false {
             sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: actions) { networkError in
                 if let networkError = networkError {
                     networkError.showDialog()

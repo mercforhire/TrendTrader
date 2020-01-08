@@ -240,7 +240,7 @@ extension NSUserInterfaceItemIdentifier {
     static let ActualEntryCell = NSUserInterfaceItemIdentifier("ActualEntryCellID")
     static let StopCell = NSUserInterfaceItemIdentifier("StopCellID")
     static let IdealExitCell = NSUserInterfaceItemIdentifier("IdealExitCellID")
-    static let ActualExitCell = NSUserInterfaceItemIdentifier("ActualCellID")
+    static let ActualExitCell = NSUserInterfaceItemIdentifier("ActualExitCellID")
     static let PAndLCell = NSUserInterfaceItemIdentifier("PAndLCellID")
     static let EntryTimeCell = NSUserInterfaceItemIdentifier("EntryCellID")
     static let ExitTimeCell = NSUserInterfaceItemIdentifier("ExitTimeCellID")

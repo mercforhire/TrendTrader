@@ -128,7 +128,7 @@ class ChartManager {
                         self.chart = Chart.generateChart(ticker: "NQ",
                                                          candleSticks: candleSticks,
                                                          indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
-                        self.chart?.printSignalsDescription()
+//                        self.chart?.printSignalsDescription()
                         completion(self.chart)
                     }
                 }
@@ -164,7 +164,7 @@ class ChartManager {
     
     func startMonitoring() {
         if config.readFromServer {
-            timer = Timer.scheduledTimer(timeInterval: updateFrequency, target: self, selector: #selector(updateChart), userInfo: self, repeats: true)
+            startRefreshTimer()
         } else {
             timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(0.05), repeats: true, block: { [weak self] timer in
                 guard let self = self else { return }
@@ -214,6 +214,9 @@ class ChartManager {
         }
         
         fetching = true
+        if monitoring, config.readFromServer {
+            timer?.invalidate()
+        }
         fetchChart { [weak self] chart in
             guard let self = self else { return }
             
@@ -222,6 +225,13 @@ class ChartManager {
             }
             
             self.fetching = false
+            if self.monitoring, self.config.readFromServer {
+                self.startRefreshTimer()
+            }
         }
+    }
+    
+    private func startRefreshTimer() {
+        timer = Timer.scheduledTimer(timeInterval: updateFrequency, target: self, selector: #selector(updateChart), userInfo: self, repeats: true)
     }
 }

@@ -16,9 +16,9 @@ class PlacedOrderResponseBuilder {
             return placedOrderResponses
         }
         catch(let error) {
-            print("PlacedOrderResponseBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+//            print("PlacedOrderResponseBuilder:")
+//            print(error)
+//            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

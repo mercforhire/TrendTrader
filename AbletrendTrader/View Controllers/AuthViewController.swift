@@ -29,16 +29,22 @@ class AuthViewController: NSViewController {
         didSet {
             if authenticated == true {
                 authStatusLabel.stringValue = "Authenticated"
-                timer = Timer.scheduledTimer(timeInterval: TimeInterval(60.0), target: self, selector: #selector(pingServer), userInfo: nil, repeats: true)
+                if timer == nil {
+                    timer = Timer.scheduledTimer(timeInterval: TimeInterval(60.0), target: self, selector: #selector(pingServer), userInfo: nil, repeats: true)
+                }
                 logOffButton.isEnabled = true
                 goToLiveButton.isEnabled = true
                 fetchAccounts()
             } else if authenticated == false {
+                timer?.invalidate()
+                timer = nil
                 authStatusLabel.stringValue = "Not authenticated"
                 timer?.invalidate()
                 logOffButton.isEnabled = false
                 goToLiveButton.isEnabled = false
             } else {
+                timer?.invalidate()
+                timer = nil
                 authStatusLabel.stringValue = "--"
                 timer?.invalidate()
                 logOffButton.isEnabled = false
@@ -90,12 +96,12 @@ class AuthViewController: NSViewController {
             guard let self = self else { return }
             
             switch result {
+            case .success:
+                print("Pinging server success at", Date().hourMinuteSecond())
             case .failure:
                 self.ssoToken = nil
                 self.authenticated = false
                 print("Pinging server failed, please re-authenticate")
-            default:
-                break
             }
         }
     }

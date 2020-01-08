@@ -130,7 +130,7 @@ class SessionManager {
     func processActions(priceBarId: String, priceBarTime: Date, actions: [TradeActionType], completion: @escaping (NetworkError?) -> ()) {
         if currentlyProcessingPriceBar == priceBarId {
             // Actions for this bar already processed
-            print(Date().hourMinuteSecond() + ": Actions for " + priceBarId + " already processed")
+//            print(Date().hourMinuteSecond() + ": Actions for " + priceBarId + " already processed")
             return
         }
         
@@ -175,7 +175,7 @@ class SessionManager {
                             return
                         }
                         
-                        self.modifyStopOrder(stopOrderId: stopOrderId, stop: newStop.stop, quantity: size, direction: direction) { networkError in
+                        self.modifyStopOrder(stopOrderId: stopOrderId, stop: newStop.stop, quantity: size, direction: direction.reverse()) { networkError in
                             if networkError == nil {
                                 self.currentPosition?.stopLoss?.stop = newStop.stop
                             }
@@ -204,8 +204,8 @@ class SessionManager {
                             switch result {
                             case .success(let closingPrice):
                                 var trade = Trade(direction: closedPosition.direction,
-                                                  idealEntryPrice:  closedPosition.idealEntryPrice,
-                                                  actualEntryPrice: closedPosition.actualEntryPrice ?? -1.0,
+                                                  idealEntryPrice: closedPosition.idealEntryPrice,
+                                                  actualEntryPrice: closedPosition.actualEntryPrice ?? closedPosition.idealEntryPrice,
                                                   idealExitPrice: idealClosingPrice,
                                                   actualExitPrice: closingPrice,
                                                   exitMethod: reason,
@@ -214,6 +214,7 @@ class SessionManager {
                                 trade.entrySnapshot = closedPosition.entrySnapshot
                                 trade.exitSnapshot = closingChart
                                 self.trades.append(trade)
+                                self.currentPosition = nil
                                 DispatchQueue.main.async {
                                     completion(nil)
                                 }
@@ -298,7 +299,7 @@ class SessionManager {
                     case .success(let exitPriceAndDate):
                         var trade = Trade(direction: currentPosition.direction,
                                           idealEntryPrice: currentPosition.idealEntryPrice,
-                                          actualEntryPrice: currentPosition.actualEntryPrice ?? -1.0,
+                                          actualEntryPrice: currentPosition.actualEntryPrice ?? currentPosition.idealEntryPrice,
                                           idealExitPrice: idealExitPrice,
                                           actualExitPrice: exitPriceAndDate.0,
                                           exitMethod: exitReason,
@@ -307,6 +308,7 @@ class SessionManager {
                         trade.entrySnapshot = currentPosition.entrySnapshot
                         trade.exitSnapshot = closingChart
                         self.trades.append(trade)
+                        self.currentPosition = nil
                         exitPrice = exitPriceAndDate.0
                         exitTime = exitPriceAndDate.1
                     case .failure(let networkError):
@@ -419,7 +421,7 @@ class SessionManager {
         var pAndL: Double = 0
         
         for trade in trades {
-            pAndL = pAndL + (trade.profit ?? 0)
+            pAndL = pAndL + (trade.actualProfit ?? 0)
         }
         
         return pAndL
@@ -449,11 +451,11 @@ class SessionManager {
         for trade in trades.reversed() {
             tradesList.append(TradesTableRowItem(type: trade.direction.description(),
                                                  iEntry: String(format: "%.2f", trade.idealEntryPrice),
-                                                 aEntry: String(format: "%.2f", trade.actualEntryPrice ?? -1.0),
+                                                 aEntry: String(format: "%.2f", trade.actualEntryPrice),
                                                  stop: "--",
                                                  iExit: String(format: "%.2f", trade.idealExitPrice),
                                                  aExit: String(format: "%.2f", trade.actualExitPrice),
-                                                 pAndL: String(format: "%.2f", trade.profit ?? 0),
+                                                 pAndL: String(format: "%.2f", trade.actualProfit ?? 0),
                                                  entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
                                                  exitTime: dateFormatter.string(from: trade.exitTime)))
         }

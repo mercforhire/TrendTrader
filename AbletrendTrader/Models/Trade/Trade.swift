@@ -20,12 +20,21 @@ struct Trade {
     var entrySnapshot: Chart?
     var exitSnapshot: Chart?
     
-    var profit: Double? {
+    var idealProfit: Double? {
         switch direction {
         case .long:
             return idealExitPrice - idealEntryPrice
         default:
             return idealEntryPrice - idealExitPrice
+        }
+    }
+    
+    var actualProfit: Double? {
+        switch direction {
+        case .long:
+            return actualExitPrice - actualEntryPrice
+        default:
+            return actualEntryPrice - actualExitPrice
         }
     }
 }

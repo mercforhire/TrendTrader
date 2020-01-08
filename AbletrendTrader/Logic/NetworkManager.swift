@@ -371,7 +371,6 @@ class NetworkManager {
             completionHandler(.failure(.placeOrderFailed))
             return
         }
-        
         var orderPrice: Double = 0
         switch orderType {
         case .limit(let price):
@@ -381,6 +380,11 @@ class NetworkManager {
         default:
             break
         }
+        
+        print(String(format: "%@ %@ Order called at %@",
+                     direction.description(),
+                     orderType.typeString(),
+                     orderPrice == 0 ? "Market" : String(format: "%.2f", orderPrice)))
         
         let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: Date()), orderType.typeString(), direction.ibTradeString(), orderPrice, config.ticker, size)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
@@ -460,6 +464,12 @@ class NetworkManager {
             return
         }
         
+        print(String(format: "Modify %@ %@ Order %@ called to %@",
+                     direction.description(),
+                     orderType.typeString(),
+                     orderId,
+                     String(format: "%.2f", price)))
+        
         let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"orderType\": \"%@\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"orderId\": %d}", selectedAccount.accountId, config.conId, orderType.typeString(), direction.ibTradeString(), price, config.ticker, config.positionSize, orderId)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
@@ -498,6 +508,8 @@ class NetworkManager {
             completionHandler(.failure(.deleteOrderFailed))
             return
         }
+        
+        print("DeleteOrder " + orderId + " called")
         
         afManager.request(String(format: "https://localhost:5000/v1/portal/iserver/account/%@/order/%@", selectedAccount.accountId, orderId), method: .delete).responseData { response in
             if response.response?.statusCode == 200 {
@@ -544,7 +556,7 @@ class NetworkManager {
                         break
                     }
                     
-                    let urlString: String = String(format: "%@%@_%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), now.hour(), now.minute(), i)
+                    let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), now.month(), now.day(), now.hour(), now.minute(), i)
                     
                     Alamofire.SessionManager.default.request(urlString).validate().response { response in
                         if response.response?.statusCode == 200 {

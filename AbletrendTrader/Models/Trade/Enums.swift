@@ -25,18 +25,18 @@ enum TradeActionType {
     func description(actionBarTime: Date) -> String {
         switch self {
         case .noAction:
-            return String(format: "%@: No action for bar: %@", Date().generateShortDate(), actionBarTime.generateShortDate())
+            return String(format: "%@: No action for bar: %@", Date().hourMinuteSecond(), actionBarTime.hourMinute())
         case .openedPosition(let newPosition):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Opened %@ position at price %.2f with SL: %.2f for bar: %@", Date().generateShortDate(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1, actionBarTime.generateShortDate())
+            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f for bar: %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, actionBarTime.hourMinute())
         case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for bar: %@", Date().generateShortDate(), type, closingPrice, reason.reason(), actionBarTime.generateShortDate())
+            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
         case .forceClosePosition(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Flat %@ position at %@ %.2f reason: %@ for bar: %@", Date().generateShortDate(), type, closingPrice, reason.reason(), actionBarTime.generateShortDate())
+            return String(format: "%@: Flat %@ position at %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
         case .updatedStop(let stopLoss):
-            return String(format: "%@: Updated stop loss to %.2f reason: %@ for bar: %@", Date().generateShortDate(), stopLoss.stop, stopLoss.source.reason(), actionBarTime.generateShortDate())
+            return String(format: "%@: Updated stop loss to %.2f reason: %@ for bar: %@", Date().hourMinuteSecond(), stopLoss.stop, stopLoss.source.reason(), actionBarTime.hourMinute())
         }
     }
 }
@@ -63,6 +63,7 @@ enum ExitMethod {
     case twoGreenBars
     case signalReversed
     case endOfDay
+    case manual
     
     func reason() -> String {
         switch self {
@@ -74,6 +75,8 @@ enum ExitMethod {
             return "Signal Reversed"
         case .endOfDay:
             return "End Of Day"
+        case .manual:
+            return "Manual action"
         }
     }
 }

@@ -44,13 +44,37 @@ class SessionManager {
     func refreshIBSession(completionHandler: ((Swift.Result<Bool, NetworkError>) -> Void)? ) {
         guard live else { return }
         
-        networkManager.fetchAccounts { [weak self] result in
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
             guard let self = self else {
+                return
+            }
+            
+            let semaphore = DispatchSemaphore(value: 0)
+            var errorSoFar: NetworkError?
+            
+            self.networkManager.fetchAccounts { result in
+                switch result {
+                case .failure(let error):
+                    errorSoFar = error
+                default:
+                    break
+                }
+                semaphore.signal()
+            }
+            
+            semaphore.wait()
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completionHandler?(.failure(errorSoFar))
+                }
                 return
             }
             
             self.networkManager.fetchRelevantPositions { [weak self] result in
                 guard let self = self else {
+                    semaphore.signal()
                     return
                 }
                 
@@ -58,27 +82,40 @@ class SessionManager {
                 case .success(let response):
                     if let ibPosition = response {
                         self.currentPosition = ibPosition.toPosition()
-                        self.networkManager.fetchStopOrders { [weak self] result in
-                            guard let self = self else {
-                                return
-                            }
-                            
-                            switch result {
-                            case .success(let orders):
-                                if let order = orders.first, let stopPrice = order.auxPrice?.double {
-                                    self.currentPosition?.stopLoss = StopLoss(stop: stopPrice, source: .currentBar, stopOrderId: String(format: "%d", order.orderId))
-                                }
-                                completionHandler?(.success(true))
-                            case .failure(let error2):
-                                completionHandler?(.failure(error2))
-                            }
-                        }
                     } else {
                         self.currentPosition = nil
-                        completionHandler?(.success(true))
                     }
                 case .failure(let error):
-                    completionHandler?(.failure(error))
+                    errorSoFar = error
+                }
+                
+                semaphore.signal()
+            }
+            
+            semaphore.wait()
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completionHandler?(.failure(errorSoFar))
+                }
+                return
+            }
+            
+            self.networkManager.fetchStopOrders { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let orders):
+                    if let order = orders.first, let stopPrice = order.auxPrice?.double, order.direction != self.currentPositionDirection {
+                        self.currentPosition?.stopLoss = StopLoss(stop: stopPrice, source: .currentBar, stopOrderId: String(format: "%d", order.orderId))
+                    }
+                    DispatchQueue.main.async {
+                        completionHandler?(.success(true))
+                    }
+                case .failure(let error2):
+                    DispatchQueue.main.async {
+                        completionHandler?(.failure(error2))
+                    }
                 }
             }
         }
@@ -111,10 +148,20 @@ class SessionManager {
                 for action in actions {
                     switch action {
                     case .openedPosition(let newPosition):
-                        self.openNewPosition(newPosition: newPosition) { networkError in
-                            DispatchQueue.main.async {
+                        self.openNewPosition(newPosition: newPosition,
+                                             entryTime: priceBarTime)
+                        { result in
+                            switch result {
+                            case .success(let entryPriceEntryTimeStopOrderId):
+                                self.currentPosition = newPosition
+                                self.currentPosition?.actualEntryPrice = entryPriceEntryTimeStopOrderId.0
+                                self.currentPosition?.entryTime = entryPriceEntryTimeStopOrderId.1
+                                self.currentPosition?.stopLoss?.stopOrderId = entryPriceEntryTimeStopOrderId.2
+                                completion(nil)
+                            case .failure(let networkError):
                                 completion(networkError)
                             }
+                            
                             semaphore.signal()
                         }
                     case .updatedStop(let newStop):
@@ -129,23 +176,47 @@ class SessionManager {
                         }
                         
                         self.modifyStopOrder(stopOrderId: stopOrderId, stop: newStop.stop, quantity: size, direction: direction) { networkError in
+                            if networkError == nil {
+                                self.currentPosition?.stopLoss?.stop = newStop.stop
+                            }
                             DispatchQueue.main.async {
                                 completion(networkError)
                             }
                             semaphore.signal()
                         }
-                    case .forceClosePosition(_, _, _, _):
-                        self.exitPositions { networkErrors in
-                            DispatchQueue.main.async {
-                                completion(networkErrors.first)
+                    case .forceClosePosition(_, _, _, let reason):
+                        self.exitPositions(priceBarTime: priceBarTime,
+                                           exitReason: reason,
+                                           completion:
+                            { result in
+                                switch result {
+                                case .success:
+                                    completion(nil)
+                                case .failure(let networkError):
+                                    completion(networkError)
+                                }
+                                semaphore.signal()
+                        })
+                    case .verifyPositionClosed(let closedPosition, _, let closingTime, let reason):
+                        self.verifyClosedPosition(closedPosition: closedPosition, reason: reason) { result in
+                            switch result {
+                            case .success(let closingPrice):
+                                let trade = Trade(direction: closedPosition.direction,
+                                                  entryPrice:  closedPosition.actualEntryPrice ?? closedPosition.idealEntryPrice,
+                                                  exitPrice: closingPrice,
+                                                  exitMethod: reason,
+                                                  entryTime: closedPosition.entryTime,
+                                                  exitTime: closingTime)
+                                self.trades.append(trade)
+                                DispatchQueue.main.async {
+                                    completion(nil)
+                                }
+                            case .failure(let networkError):
+                                DispatchQueue.main.async {
+                                    completion(networkError)
+                                }
                             }
-                            semaphore.signal()
-                        }
-                    case .verifyPositionClosed(_, _, _, let reason):
-                        self.verifyClosedPosition(reason: reason) { networkError in
-                            DispatchQueue.main.async {
-                                completion(networkError)
-                            }
+                            
                             semaphore.signal()
                         }
                     default:
@@ -179,7 +250,9 @@ class SessionManager {
         }
     }
     
-    func exitPositions(completion: @escaping ([NetworkError]) -> ()) {
+    func exitPositions(priceBarTime: Date,
+                       exitReason: ExitMethod,
+                       completion: @escaping (Swift.Result<(Double, Date), NetworkError>) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {
@@ -187,35 +260,39 @@ class SessionManager {
             }
             
             let semaphore = DispatchSemaphore(value: 0)
-            var networkErrors: [NetworkError] = []
-            
+            var errorSoFar: NetworkError?
+            var exitPrice: Double?
+            var exitTime: Date?
             // reverse current positions
             if let currentPosition = self.currentPosition {
-                switch currentPosition.direction {
-                case .long:
-                    self.sellMarket(size: currentPosition.size) { networkError in
-                        if let networkError = networkError {
-                            networkErrors.append(networkError)
-                        }
-                        semaphore.signal()
+                self.enterMarket(direction: currentPosition.direction.reverse(),
+                                 size: currentPosition.size,
+                                 priceBarTime: priceBarTime)
+                { result in
+                    switch result {
+                    case .success(let exitPriceAndDate):
+                        let trade = Trade(direction: currentPosition.direction,
+                                          entryPrice:  currentPosition.actualEntryPrice ?? currentPosition.idealEntryPrice,
+                                          exitPrice: exitPriceAndDate.0,
+                                          exitMethod: exitReason,
+                                          entryTime: currentPosition.entryTime,
+                                          exitTime: exitPriceAndDate.1)
+                        self.trades.append(trade)
+                        exitPrice = exitPriceAndDate.0
+                        exitTime = exitPriceAndDate.1
+                    case .failure(let networkError):
+                        errorSoFar = networkError
                     }
-                case .short:
-                    self.buyMarket(size: currentPosition.size) { networkError in
-                        if let networkError = networkError {
-                            networkErrors.append(networkError)
-                        }
-                        semaphore.signal()
-                    }
+                    semaphore.signal()
                 }
+                
                 semaphore.wait()
             }
             
             // cancel stop order
             self.deleteAllStopOrders { networkError in
                 if let networkError = networkError {
-                    networkErrors.append(networkError)
-                } else {
-                    self.currentPosition?.stopLoss = nil
+                    errorSoFar = networkError
                 }
                 semaphore.signal()
             }
@@ -228,43 +305,46 @@ class SessionManager {
                 }
                 
                 self.refreshIBSession { result in
-                    switch result {
-                    case .failure(let error):
-                        networkErrors.append(error)
-                    default:
-                        break
+                    if let networkError = errorSoFar {
+                        completion(.failure(networkError))
+                    } else if let exitPrice = exitPrice, let exitTime = exitTime {
+                        completion(.success((exitPrice, exitTime)))
                     }
-                    completion(networkErrors)
                 }
             }
         }
     }
     
-    func openNewPosition(newPosition: Position, completion: @escaping (NetworkError?) -> ()) {
-        let handler: (NetworkError?) -> () = { networkError in
-            if networkError == nil {
-                self.currentPosition = newPosition
-                self.currentPosition?.stopLoss = nil
-                if let entryTime = newPosition.entryTime, let stopLoss = newPosition.stopLoss {
-                    self.placeStopOrder(direction: newPosition.direction.reverse(),
-                                        newStop: stopLoss,
-                                        time: entryTime)
-                    { networkError2 in
-                        completion(networkError2)
+    func openNewPosition(newPosition: Position,
+                         entryTime: Date,
+                         completion: @escaping (Swift.Result<(Double, Date, String?), NetworkError>) -> Void) {
+        enterMarket(direction: newPosition.direction,
+                    size: config.positionSize,
+                    priceBarTime: entryTime,
+                    completion:
+            { result in
+                switch result {
+                case .success(let entryPriceAndDate):
+                    if let stopLoss = newPosition.stopLoss {
+                        self.placeStopOrder(direction: newPosition.direction.reverse(),
+                                            stopPrice: stopLoss.stop,
+                                            size: newPosition.size,
+                                            time: entryTime)
+                        { result in
+                            switch result {
+                            case .success(let orderId):
+                                completion(.success((entryPriceAndDate.0, entryPriceAndDate.1, orderId)))
+                            case .failure(let networkError2):
+                                completion(.failure(networkError2))
+                            }
+                        }
+                    } else {
+                        completion(.success((entryPriceAndDate.0, entryPriceAndDate.1, nil)))
                     }
-                } else {
-                    completion(nil)
+                case .failure(let networkError):
+                    completion(.failure(networkError))
                 }
-            } else {
-                completion(networkError)
-            }
-        }
-        
-        if newPosition.direction == .long {
-            buyMarket(size: config.positionSize , completion: handler)
-        } else {
-            sellMarket(size: config.positionSize, completion: handler)
-        }
+        })
     }
     
     func deleteAllStopOrders(completion: @escaping (NetworkError?) -> ()) {
@@ -333,7 +413,7 @@ class SessionManager {
                                            stop: currentStop,
                                            exit: "--",
                                            pAndL: "--",
-                                           entryTime: currentPosition.entryTime != nil ? dateFormatter.string(from: currentPosition.entryTime!) : "--",
+                                           entryTime: dateFormatter.string(from: currentPosition.entryTime),
                                            exitTime: "--"))
         }
         
@@ -365,59 +445,85 @@ class SessionManager {
         }
     }
     
-    private func buyMarket(size: Int, completion: @escaping (NetworkError?) -> ()) {
-        networkManager.placeOrder(orderType: .market, direction: .long, size: size, time: Date()) { result in
-            switch result {
-            case .success:
-                completion(nil)
-            case .failure(let error):
-                completion(error)
-            }
-        }
-    }
-    
-    private func sellMarket(size: Int, completion: @escaping (NetworkError?) -> ()) {
-        networkManager.placeOrder(orderType: .market, direction: .short, size: size, time: Date()) { result in
-            switch result {
-            case .success:
-                completion(nil)
-            case .failure(let error):
-                completion(error)
-            }
-        }
-    }
-    
-    private func placeStopOrder(direction: TradeDirection, newStop: StopLoss, time: Date, completion: @escaping (NetworkError?) -> ()) {
-        guard let currentPosition = currentPosition else {
-            completion(.noCurrentPositionToPlaceStopLoss)
-            return
-        }
+    private func enterMarket(direction: TradeDirection,
+                             size: Int,
+                             priceBarTime: Date,
+                             completion: @escaping (Swift.Result<(Double, Date), NetworkError>) -> Void) {
         
-        networkManager.placeOrder(orderType: .stop(price: newStop.stop), direction: direction, size: currentPosition.size, time: time) { [weak self] result in
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
             guard let self = self else {
                 return
             }
             
+            let semaphore = DispatchSemaphore(value: 0)
+            var errorSoFar: NetworkError?
+            
+            self.networkManager.placeOrder(orderType: .market,
+                                           direction: direction,
+                                           size: size,
+                                           time: priceBarTime) { result in
+                switch result {
+                case .failure(let error):
+                    errorSoFar = error
+                default:
+                    break
+                }
+                semaphore.signal()
+            }
+            semaphore.wait()
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completion(.failure(errorSoFar))
+                }
+                return
+            }
+            
+            self.networkManager.fetchTrades { result in
+                switch result {
+                case .success(let trades):
+                    let matchingTrades = trades.filter { trade -> Bool in
+                        return trade.tradeTime < priceBarTime &&
+                        trade.direction == direction &&
+                            trade.size == size
+                        }
+                    if let recentTrade = matchingTrades.first, let actualPrice = recentTrade.price.double {
+                        DispatchQueue.main.async {
+                            completion(.success((actualPrice, recentTrade.tradeTime)))
+                        }
+                    } else {
+                        completion(.failure(.placeOrderFailed))
+                    }
+                case .failure(let error):
+                    DispatchQueue.main.async {
+                        completion(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+    
+    private func placeStopOrder(direction: TradeDirection,
+                                stopPrice: Double,
+                                size: Int,
+                                time: Date,
+                                completion: @escaping (Swift.Result<String, NetworkError>) -> Void) {
+        networkManager.placeOrder(orderType: .stop(price: stopPrice), direction: direction, size: size, time: time) { result in
             switch result {
             case .success(let response):
-                self.currentPosition?.stopLoss = newStop
-                self.currentPosition?.stopLoss?.stopOrderId = response.orderId
-                completion(nil)
+                completion(.success(response.orderId))
             case .failure(let error):
-                completion(error)
+                completion(.failure(error))
             }
         }
     }
     
     private func modifyStopOrder(stopOrderId: String, stop: Double, quantity: Int, direction: TradeDirection, completion: @escaping (NetworkError?) -> ()) {
-        networkManager.modifyOrder(orderType: .stop(price: stop), direction: direction, price: stop, quantity: quantity, orderId: stopOrderId) { [weak self] result in
-            guard let self = self else {
-                return
-            }
+        networkManager.modifyOrder(orderType: .stop(price: stop), direction: direction, price: stop, quantity: quantity, orderId: stopOrderId) { result in
             
             switch result {
             case .success:
-                self.currentPosition?.stopLoss?.stop = stop
                 completion(nil)
             case .failure(let error):
                 completion(error)
@@ -425,26 +531,75 @@ class SessionManager {
         }
     }
     
-    private func verifyClosedPosition(reason: ExitMethod, completion: @escaping (NetworkError?) -> ()) {
-        networkManager.fetchAccounts { [weak self] result in
+    private func verifyClosedPosition(closedPosition: Position, reason: ExitMethod, completion: @escaping (Swift.Result<Double, NetworkError>) -> Void) {
+        
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
             guard let self = self else {
                 return
             }
             
-            self.networkManager.fetchRelevantPositions { [weak self] result in
-                guard let _ = self else {
-                    return
+            let semaphore = DispatchSemaphore(value: 0)
+            var errorSoFar: NetworkError?
+        
+            self.networkManager.fetchAccounts { result in
+                switch result {
+                case .failure(let error):
+                    errorSoFar = error
+                default:
+                    break
                 }
-                
+                semaphore.signal()
+            }
+            
+            semaphore.wait()
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completion(.failure(errorSoFar))
+                }
+                return
+            }
+        
+            self.networkManager.fetchRelevantPositions { result in
                 switch result {
                 case .success(let response):
                     if response != nil {
-                        completion(.positionNotClosed)
-                    } else {
-                        completion(nil)
+                        errorSoFar = .positionNotClosed
                     }
                 case .failure(let error):
-                    completion(error)
+                    errorSoFar = error
+                }
+                semaphore.signal()
+            }
+            
+            semaphore.wait()
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completion(.failure(errorSoFar))
+                }
+                return
+            }
+            
+            self.networkManager.fetchTrades { result in
+                switch result {
+                case .success(let trades):
+                    let matchingTrades = trades.filter { trade -> Bool in
+                        return trade.tradeTime > closedPosition.entryTime &&
+                            trade.direction != closedPosition.direction &&
+                            trade.size == closedPosition.size &&
+                            trade.position == "0"
+                        }
+                    if let closingTrade = matchingTrades.first, let closingPrice = closingTrade.price.double {
+                        DispatchQueue.main.async {
+                            completion(.success(closingPrice))
+                        }
+                    }
+                case .failure(let error):
+                    DispatchQueue.main.async {
+                        completion(.failure(error))
+                    }
                 }
             }
         }

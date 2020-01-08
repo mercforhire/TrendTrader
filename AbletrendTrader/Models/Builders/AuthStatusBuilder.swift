@@ -16,9 +16,9 @@ class AuthStatusBuilder {
             return status
         }
         catch(let error) {
-            print("AuthStatusBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+//            print("AuthStatusBuilder:")
+//            print(error)
+//            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

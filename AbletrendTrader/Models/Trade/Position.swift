@@ -11,7 +11,7 @@ import Foundation
 struct Position {
     var direction: TradeDirection
     var size: Int
-    var entryTime: Date?
+    var entryTime: Date
     var idealEntryPrice: Double
     var actualEntryPrice: Double?
     var stopLoss: StopLoss?

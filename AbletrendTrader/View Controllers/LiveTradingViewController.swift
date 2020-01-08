@@ -91,14 +91,9 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         tableView.reloadData()
         totalPLLabel.stringValue = String(format: "Total P/L: %.2f", sessionManager.getTotalPAndL())
         
-        if let currentPosition = sessionManager.currentPosition {
-            if currentPosition.direction == .long {
-                self.buyButton.isEnabled = false
-                self.sellButton.isEnabled = true
-            } else {
-                self.buyButton.isEnabled = true
-                self.sellButton.isEnabled = false
-            }
+        if sessionManager.currentPosition != nil {
+            self.buyButton.isEnabled = false
+            self.sellButton.isEnabled = false
             self.exitButton.isEnabled = true
         } else {
             self.buyButton.isEnabled = true
@@ -170,27 +165,29 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private func exitAllPosition(_ sender: NSButton) {
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.exitPositions { [weak self] networkErrors in
+        sessionManager.exitPositions(priceBarTime: Date(),
+                                     exitReason: .manual)
+        { [weak self] result in
             guard let self = self else { return }
             
             sender.isEnabled = true
             
-            if !networkErrors.isEmpty {
-                for networkError in networkErrors {
-                    networkError.showDialog()
-                }
-            } else {
+            switch result {
+            case .success:
                 self.updateTradesList()
+            case .failure(let networkError):
+                networkError.showDialog()
             }
         }
     }
     
     @IBAction func buyPressed(_ sender: NSButton) {
-        guard let action = trader?.buyAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier, let lastBarTime = trader?.chart.lastBar?.time else { return }
+        guard let action = trader?.buyAtMarket(),
+            let lastBarId = trader?.chart.lastBar?.identifier else { return }
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: [action]) { [weak self] networkError in
+        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: Date(), actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
@@ -204,11 +201,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     }
     
     @IBAction func sellPressed(_ sender: NSButton) {
-        guard let action = trader?.sellAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier, let lastBarTime = trader?.chart.lastBar?.time else { return }
+        guard let action = trader?.sellAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier else { return }
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: [action]) { [weak self] networkError in
+        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: Date(), actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true

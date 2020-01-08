@@ -16,9 +16,9 @@ class PreviewResponseBuilder {
             return previewResponse
         }
         catch(let error) {
-            print("PreviewResponseBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+//            print("PreviewResponseBuilder:")
+//            print(error)
+//            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

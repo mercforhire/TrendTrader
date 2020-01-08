@@ -68,6 +68,15 @@ extension Date {
         return response
     }
     
+    func generateDateAndTimeIdentifier() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.calendar = Calendar(identifier: .iso8601)
+        dateFormatter.timeZone = Date.DefaultTimeZone
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let response = dateFormatter.string(from: self)
+        return response
+    }
+    
     func isInSameDay(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {
         var calender = Calendar.current
         calender.timeZone = timeZone
@@ -92,11 +101,20 @@ extension Date {
         return startDate
     }
     
-    func generateShortDate() -> String {
+    func hourMinuteSecond() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.calendar = Calendar(identifier: .iso8601)
         dateFormatter.timeZone = Date.DefaultTimeZone
         dateFormatter.dateFormat = "HH:mm:ss"
+        let response = dateFormatter.string(from: self)
+        return response
+    }
+    
+    func hourMinute() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.calendar = Calendar(identifier: .iso8601)
+        dateFormatter.timeZone = Date.DefaultTimeZone
+        dateFormatter.dateFormat = "HH:mm"
         let response = dateFormatter.string(from: self)
         return response
     }

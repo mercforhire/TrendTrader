@@ -16,9 +16,9 @@ class SSOTokenBuilder {
             return ssoToken
         }
         catch(let error) {
-            print("SSOTokenBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+//            print("SSOTokenBuilder:")
+//            print(error)
+//            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

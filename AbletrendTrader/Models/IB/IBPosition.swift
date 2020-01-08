@@ -23,6 +23,11 @@ struct IBPosition: Codable {
     }
     
     func toPosition() -> Position {
-        return Position(direction: direction, size: abs(position), entryTime: nil, idealEntryPrice: avgPrice, actualEntryPrice: avgPrice, stopLoss: nil)
+        return Position(direction: direction,
+                        size: abs(position),
+                        entryTime: Date(),
+                        idealEntryPrice: avgPrice,
+                        actualEntryPrice: avgPrice,
+                        stopLoss: nil)
     }
 }

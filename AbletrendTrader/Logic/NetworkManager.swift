@@ -568,6 +568,6 @@ class NetworkManager {
     
     // Private:
     private func generateOrderIdentifier(direction: TradeDirection, time: Date) -> String {
-        return direction.description() + "-" + time.generateShortDate()
+        return direction.description() + "-" + time.generateDateAndTimeIdentifier()
     }
 }

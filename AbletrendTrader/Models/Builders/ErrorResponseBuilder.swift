@@ -16,9 +16,9 @@ class ErrorResponseBuilder {
             return errorResponse
         }
         catch(let error) {
-            print("ErrorResponseBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+//            print("ErrorResponseBuilder:")
+//            print(error)
+//            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

@@ -24,17 +24,4 @@ struct Trade {
             return entryPrice - exitPrice
         }
     }
-    
-    func summary() -> String {
-        var summary: String = ""
-        
-        switch direction {
-        case .long:
-            summary = String(format: "Initial buy at %@ - %.2f", entryTime?.generateShortDate() ?? "--", entryPrice)
-        default:
-            summary = String(format: "Initial short at %@ - %.2f", entryTime?.generateShortDate() ?? "--", entryPrice)
-        }
-        
-        return summary + String(format: " closed at %@ - %.2f with P/L %.2f reason %@", exitTime.generateShortDate(), exitPrice, profit ?? 0, exitMethod.reason())
-    }
 }

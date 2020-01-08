@@ -261,16 +261,18 @@ class TraderBot {
     }
 
     func buyAtMarket() -> TradeActionType {
-        guard let currentPrice = chart.absLastBar?.candleStick.close else { return .noAction }
+        guard let currentPrice = chart.absLastBar?.candleStick.close,
+            let currentTime = chart.absLastBarDate else { return .noAction }
         
-        let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: chart.absLastBarDate, idealEntryPrice: currentPrice)
+        let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice)
         return .openedPosition(newPosition: buyPosition)
     }
     
     func sellAtMarket() -> TradeActionType {
-        guard let currentPrice = chart.absLastBar?.candleStick.close else { return .noAction }
+        guard let currentPrice = chart.absLastBar?.candleStick.close,
+            let currentTime = chart.absLastBarDate else { return .noAction }
         
-        let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: chart.absLastBarDate, idealEntryPrice: currentPrice)
+        let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice)
         return .openedPosition(newPosition: sellPosition)
     }
     
@@ -330,13 +332,9 @@ class TraderBot {
         if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(chart: chart).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
-            print("Opening position:")
-            print(position)
             return position
         } else if risk <= config.maxRisk {
             let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
-            print("Opening position:")
-            print(position)
             return position
         }
 

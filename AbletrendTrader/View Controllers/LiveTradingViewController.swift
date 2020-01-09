@@ -260,6 +260,10 @@ extension LiveTradingViewController: DataManagerDelegate {
             }
         }
     }
+    
+    func requestStopMonitoring() {
+        
+    }
 }
 
 extension LiveTradingViewController: NSTableViewDelegate {

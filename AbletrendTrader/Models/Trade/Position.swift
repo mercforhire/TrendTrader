@@ -13,18 +13,18 @@ struct Position {
     var size: Int
     var entryTime: Date
     var idealEntryPrice: Double
-    var actualEntryPrice: Double?
+    var actualEntryPrice: Double
     var stopLoss: StopLoss?
     var entrySnapshot: Chart?
     
     var securedProfit: Double? {
-        guard let stopLoss = stopLoss, let actualEntryPrice = actualEntryPrice else { return nil }
+        guard let stopLoss = stopLoss else { return nil }
         
         switch direction {
         case .long:
-            return stopLoss.stop - actualEntryPrice
+            return stopLoss.stop - idealEntryPrice
         default:
-            return actualEntryPrice - stopLoss.stop
+            return idealEntryPrice - stopLoss.stop
         }
     }
 }

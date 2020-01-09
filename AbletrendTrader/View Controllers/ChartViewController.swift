@@ -87,4 +87,8 @@ extension ChartViewController: DataManagerDelegate {
         self.chart = chart
         generateCandleStickChartDate()
     }
+    
+    func requestStopMonitoring() {
+        
+    }
 }

@@ -213,7 +213,7 @@ class SessionManager {
                             case .success(let closingPrice):
                                 var trade = Trade(direction: closedPosition.direction,
                                                   idealEntryPrice: closedPosition.idealEntryPrice,
-                                                  actualEntryPrice: closedPosition.actualEntryPrice ?? closedPosition.idealEntryPrice,
+                                                  actualEntryPrice: closedPosition.actualEntryPrice,
                                                   idealExitPrice: idealClosingPrice,
                                                   actualExitPrice: closingPrice,
                                                   exitMethod: reason,
@@ -307,7 +307,7 @@ class SessionManager {
                     case .success(let exitPriceAndDate):
                         var trade = Trade(direction: currentPosition.direction,
                                           idealEntryPrice: currentPosition.idealEntryPrice,
-                                          actualEntryPrice: currentPosition.actualEntryPrice ?? currentPosition.idealEntryPrice,
+                                          actualEntryPrice: currentPosition.actualEntryPrice,
                                           idealExitPrice: idealExitPrice,
                                           actualExitPrice: exitPriceAndDate.0,
                                           exitMethod: exitReason,
@@ -447,7 +447,7 @@ class SessionManager {
             
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
                                                  iEntry: String(format: "%.2f", currentPosition.idealEntryPrice),
-                                                 aEntry: String(format: "%.2f", currentPosition.actualEntryPrice ?? -1.0),
+                                                 aEntry: String(format: "%.2f", currentPosition.actualEntryPrice),
                                                  stop: currentStop,
                                                  iExit: "--",
                                                  aExit: "--",

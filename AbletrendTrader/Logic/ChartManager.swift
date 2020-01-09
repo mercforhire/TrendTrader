@@ -10,6 +10,7 @@ import Foundation
 
 protocol DataManagerDelegate: class {
     func chartUpdated(chart: Chart)
+    func requestStopMonitoring()
 }
 
 class ChartManager {
@@ -80,12 +81,6 @@ class ChartManager {
             }
         } else {
             if config.simulateTimePassage {
-                guard simTime < Date() else {
-                    print("Simulate time is up to date")
-                    completion(chart)
-                    return
-                }
-                
                 findFirstAvailableUrl { [weak self] urls in
                     guard let self = self else {
                         return
@@ -99,6 +94,8 @@ class ChartManager {
                             self.chart = downloadedChart
                             completion(downloadedChart)
                         }
+                    } else {
+                        completion(nil)
                     }
                 }
             } else {
@@ -133,9 +130,7 @@ class ChartManager {
     
     @objc
     private func updateChart() {
-        if fetching {
-            return
-        }
+        if fetching { return }
         
         fetching = true
         if monitoring, live {
@@ -155,6 +150,13 @@ class ChartManager {
                 // restart the timer after chart is fetched
                 self.startLiveRefreshTimer()
             } else if self.monitoring, self.config.simulateTimePassage {
+                guard self.simTime < Date() else {
+                    print("Simulate time is up to date")
+                    self.stopMonitoring()
+                    self.delegate?.requestStopMonitoring()
+                    return
+                }
+                
                 self.updateChart()
             }
         }
@@ -242,12 +244,11 @@ class ChartManager {
             }
             
             let semaphore = DispatchSemaphore(value: 0)
-            let now = Date()
             var oneMinUrl: String?
             var twoMinUrl: String?
             var threeMinUrl: String?
             
-            while self.simTime < now {
+            while self.simTime < Date() {
                 if let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl {
                     DispatchQueue.main.async {
                         print("Sim time:", self.simTime.hourMinuteSecond(), "has urls: ", terminator:"")
@@ -286,7 +287,9 @@ class ChartManager {
                 self.simTime = self.simTime.getOffByMinutes(minutes: 1)
             }
             
-            completion(nil)
+            DispatchQueue.main.async {
+                completion(nil)
+            }
         }
     }
 }

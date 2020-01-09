@@ -45,10 +45,6 @@ class SimTradingViewController: NSViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-        
-        if config.simulateTimePassage {
-            self.startButton.isEnabled = true
-        }
     }
 
     override func viewWillAppear() {
@@ -94,6 +90,7 @@ class SimTradingViewController: NSViewController {
                 self.sessionManager.resetSession()
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
+                self.startButton.isEnabled = self.config.simulateTimePassage
             }
             
             sender.isEnabled = true
@@ -177,6 +174,10 @@ extension SimTradingViewController: DataManagerDelegate {
                 self.updateTradesList()
             }
         }
+    }
+    
+    func requestStopMonitoring() {
+        startButton.isEnabled = true
     }
 }
 

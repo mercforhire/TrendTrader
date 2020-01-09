@@ -47,7 +47,7 @@ class Config {
     
     // DEMO SETTINGS:
     let byPassTradingTimeRestrictions = true // DEFAULT: false
-    let simulateTimePassage = true // DEFAULT: true
+    let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am

@@ -89,7 +89,8 @@ class AuthViewController: NSViewController {
             
             switch result {
             case .success:
-                print("Pinging server success at", Date().hourMinuteSecond())
+//                print("Pinging server success at", Date().hourMinuteSecond())
+                break
             case .failure:
                 self.ssoToken = nil
                 self.authenticated = false

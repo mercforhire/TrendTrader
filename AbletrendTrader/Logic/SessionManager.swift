@@ -32,6 +32,8 @@ class SessionManager {
         return currentPosition?.securedProfit
     }
     
+    var currentlyProcessingPriceBar: String?
+    
     init(live: Bool) {
         self.live = live
     }
@@ -81,7 +83,10 @@ class SessionManager {
                 switch result {
                 case .success(let response):
                     if let ibPosition = response {
-                        self.currentPosition = ibPosition.toPosition()
+                        let position = ibPosition.toPosition()
+                        if self.currentPosition == nil || self.currentPosition?.direction != position.direction {
+                            self.currentPosition = position
+                        }
                     } else {
                         self.currentPosition = nil
                     }
@@ -106,7 +111,9 @@ class SessionManager {
                 
                 switch result {
                 case .success(let orders):
-                    if let order = orders.first, let stopPrice = order.auxPrice?.double, order.direction != self.currentPositionDirection {
+                    if let order = orders.first,
+                        let stopPrice = order.auxPrice?.double,
+                        order.direction != self.currentPositionDirection {
                         self.currentPosition?.stopLoss = StopLoss(stop: stopPrice, source: .currentBar, stopOrderId: String(format: "%d", order.orderId))
                     }
                     DispatchQueue.main.async {
@@ -120,8 +127,6 @@ class SessionManager {
             }
         }
     }
-    
-    var currentlyProcessingPriceBar: String?
     
     func resetCurrentlyProcessingPriceBar() {
         currentlyProcessingPriceBar = nil

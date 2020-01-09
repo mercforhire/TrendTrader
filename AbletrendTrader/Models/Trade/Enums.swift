@@ -27,7 +27,7 @@ enum EntryType {
 }
 
 enum TradeActionType {
-    case noAction(entryType: EntryType)
+    case noAction(entryType: EntryType?)
     case openedPosition(newPosition: Position, entryType: EntryType)
     case updatedStop(stop: StopLoss)
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod, closingChart: Chart)
@@ -36,7 +36,11 @@ enum TradeActionType {
     func description(actionBarTime: Date) -> String {
         switch self {
         case .noAction(let entryType):
-            return String(format: "%@: No action at %@ (looking to enter by %@)", Date().hourMinuteSecond(), actionBarTime.hourMinute(), entryType.description())
+            if let entryType = entryType {
+                return String(format: "%@: No action at %@ (enter by %@)", Date().hourMinuteSecond(), actionBarTime.hourMinute(), entryType.description())
+            } else {
+                return String(format: "%@: No action at %@", Date().hourMinuteSecond(), actionBarTime.hourMinute())
+            }
         case .openedPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ at %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())

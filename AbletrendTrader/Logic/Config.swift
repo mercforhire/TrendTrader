@@ -47,7 +47,6 @@ class Config {
     
     // DEMO SETTINGS:
     let byPassTradingTimeRestrictions = true // DEFAULT: false
-    let readFromServer = true // DEFAULT: false
     let simulateTimePassage = true // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false
     

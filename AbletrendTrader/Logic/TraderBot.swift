@@ -116,7 +116,7 @@ class TraderBot {
             priceBarIndex > 0,
             let previousPriceBar = chart.priceBars[chart.timeKeys[priceBarIndex - 1]]
             else {
-                return [.noAction(entryType: .initial)]
+                return [.noAction(entryType: nil)]
         }
         
         // no current position, check if we should enter on the current bar
@@ -277,13 +277,13 @@ class TraderBot {
                 }
             }
             
-            return [.noAction(entryType: .initial)]
+            return [.noAction(entryType: nil)]
         }
     }
 
     func buyAtMarket() -> TradeActionType {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
-            let currentTime = chart.absLastBarDate else { return .noAction(entryType: .initial) }
+            let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
         let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice)
         return .openedPosition(newPosition: buyPosition, entryType: .initial)
@@ -291,7 +291,7 @@ class TraderBot {
     
     func sellAtMarket() -> TradeActionType {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
-            let currentTime = chart.absLastBarDate else { return .noAction(entryType: .initial) }
+            let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
         let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice)
         return .openedPosition(newPosition: sellPosition, entryType: .initial)
@@ -368,12 +368,12 @@ class TraderBot {
     private func handleOpeningNewTrade(currentBar: PriceBar) -> TradeActionType {
         // stop trading if P&L <= MaxDailyLoss
         if sessionManager.getTotalPAndL() <= config.maxDailyLoss {
-            return .noAction(entryType: .initial)
+            return .noAction(entryType: nil)
         }
         
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
         if !config.tradingTimeInterval(chart: chart).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
-            return .noAction(entryType: .initial)
+            return .noAction(entryType: nil)
         }
         
         // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
@@ -409,13 +409,13 @@ class TraderBot {
     }
     
     private func forceExitPosition(atEndOfBar: PriceBar, exitMethod: ExitMethod) -> TradeActionType {
-        guard let currentPosition = sessionManager.currentPosition else { return .noAction(entryType: .initial) }
+        guard let currentPosition = sessionManager.currentPosition else { return .noAction(entryType: nil) }
         
         return .forceClosePosition(closedPosition: currentPosition, closingPrice: atEndOfBar.candleStick.close, closingTime: atEndOfBar.time.getOffByMinutes(minutes: 1), reason: exitMethod, closingChart: chart)
     }
     
     private func verifyStopWasHit(duringBar: PriceBar, exitMethod: ExitMethod) -> TradeActionType {
-        guard let currentPosition = sessionManager.currentPosition, let stop = currentPosition.stopLoss?.stop else { return .noAction(entryType: .initial) }
+        guard let currentPosition = sessionManager.currentPosition, let stop = currentPosition.stopLoss?.stop else { return .noAction(entryType: nil) }
         
         return .verifyPositionClosed(closedPosition: currentPosition, closingPrice: stop, closingTime: duringBar.time, reason: exitMethod, closingChart: chart)
     }

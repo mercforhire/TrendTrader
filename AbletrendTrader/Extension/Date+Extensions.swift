@@ -125,4 +125,10 @@ extension Date {
         let offsetDate = Calendar.current.date(byAdding: components, to: self)!
         return offsetDate
     }
+    
+    func startOfDay() -> Date {
+        var calendar = Calendar.current
+        calendar.timeZone = Date.DefaultTimeZone
+        return calendar.startOfDay(for: self)
+    }
 }

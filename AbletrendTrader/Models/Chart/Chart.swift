@@ -102,7 +102,7 @@ struct Chart {
         return candleSticks
     }
     
-    static func generateChart(ticker: String, candleSticks: [CandleStick], indicatorsSet: [Indicators]) -> Chart? {
+    static func generateChart(ticker: String, candleSticks: [CandleStick], indicatorsSet: [Indicators]) -> Chart {
         var keys: [String] = []
         
         var timeVsCandleSticks: [String: CandleStick] = [:]

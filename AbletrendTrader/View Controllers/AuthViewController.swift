@@ -29,24 +29,14 @@ class AuthViewController: NSViewController {
         didSet {
             if authenticated == true {
                 authStatusLabel.stringValue = "Authenticated"
-                if timer == nil {
-                    timer = Timer.scheduledTimer(timeInterval: TimeInterval(60.0), target: self, selector: #selector(pingServer), userInfo: nil, repeats: true)
-                }
                 logOffButton.isEnabled = true
                 goToLiveButton.isEnabled = true
-                fetchAccounts()
             } else if authenticated == false {
-                timer?.invalidate()
-                timer = nil
                 authStatusLabel.stringValue = "Not authenticated"
-                timer?.invalidate()
                 logOffButton.isEnabled = false
                 goToLiveButton.isEnabled = false
             } else {
-                timer?.invalidate()
-                timer = nil
                 authStatusLabel.stringValue = "--"
-                timer?.invalidate()
                 logOffButton.isEnabled = false
                 goToLiveButton.isEnabled = false
             }
@@ -88,6 +78,8 @@ class AuthViewController: NSViewController {
         
         validateSSOPressed(validateSSOButton)
         getStatusPressed(getStatusButton)
+        
+        timer = Timer.scheduledTimer(timeInterval: TimeInterval(60.0), target: self, selector: #selector(pingServer), userInfo: nil, repeats: true)
     }
     
     @objc
@@ -101,7 +93,8 @@ class AuthViewController: NSViewController {
             case .failure:
                 self.ssoToken = nil
                 self.authenticated = false
-                print("Pinging server failed, please re-authenticate")
+                print("Pinging server failed, attempting to re-authenticate")
+                self.reAuthPressed(self.reauthButton)
             }
         }
     }
@@ -148,6 +141,7 @@ class AuthViewController: NSViewController {
             switch result {
             case .success(let status):
                 self.authenticated = status.authenticated
+                self.fetchAccounts()
             case .failure:
                 self.authenticated = false
             }

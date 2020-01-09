@@ -577,6 +577,35 @@ class NetworkManager {
         }
     }
     
+    func fetchFirstAvailableUrlInMinute(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
+        let queue = DispatchQueue.global()
+        queue.async {
+            let semaphore = DispatchSemaphore(value: 0)
+            var existUrl: String?
+            
+            for second in 0...59 {
+                if existUrl != nil {
+                    break
+                }
+                
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
+                
+                Alamofire.SessionManager.default.request(urlString).validate().response { response in
+                    if response.response?.statusCode == 200 {
+                        existUrl = urlString
+                    }
+                    semaphore.signal()
+                }
+                
+                semaphore.wait()
+            }
+            
+            DispatchQueue.main.async {
+                completion(existUrl)
+            }
+        }
+    }
+    
     // Private:
     private func generateOrderIdentifier(direction: TradeDirection, time: Date) -> String {
         return direction.description() + "-" + time.generateDateAndTimeIdentifier()

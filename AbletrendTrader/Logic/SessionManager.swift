@@ -136,6 +136,14 @@ class SessionManager {
         
         currentlyProcessingPriceBar = priceBarId
         for action in actions {
+            switch action {
+            case .noAction(let entryType):
+                if entryType == nil {
+                    continue
+                }
+            default:
+                break
+            }
             print(action.description(actionBarTime: priceBarTime))
         }
         

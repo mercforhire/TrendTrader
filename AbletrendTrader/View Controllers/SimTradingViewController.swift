@@ -9,6 +9,8 @@
 import Cocoa
 
 class SimTradingViewController: NSViewController {
+    private let config = Config.shared
+    
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -43,6 +45,10 @@ class SimTradingViewController: NSViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
+        
+        if config.simulateTimePassage {
+            self.startButton.isEnabled = true
+        }
     }
 
     override func viewWillAppear() {
@@ -57,7 +63,7 @@ class SimTradingViewController: NSViewController {
         setupUI()
         
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
-        dataManager = ChartManager()
+        dataManager = ChartManager(live: false)
         dataManager?.delegate = self
     }
     
@@ -88,10 +94,6 @@ class SimTradingViewController: NSViewController {
                 self.sessionManager.resetSession()
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
-                
-                if Config.shared.simulateTimePassage {
-                    self.startButton.isEnabled = true
-                }
             }
             
             sender.isEnabled = true
@@ -100,10 +102,6 @@ class SimTradingViewController: NSViewController {
     
     @IBAction
     private func startMonitoring(_ sender: NSButton) {
-        guard trader != nil, let realTimeChart = trader?.chart, !realTimeChart.timeKeys.isEmpty else {
-            return
-        }
-        
         beginningButton.isEnabled = true
         startButton.isEnabled = false
         dataManager?.startMonitoring()
@@ -112,17 +110,14 @@ class SimTradingViewController: NSViewController {
     @IBAction
     private func restartSimulation(_ sender: Any) {
         dataManager?.stopMonitoring()
-        dataManager?.subsetChart = nil
+        dataManager?.resetSimTime()
         sessionManager.resetSession()
         listOfTrades?.removeAll()
-        
         simTimeLabel.stringValue = "--:--"
         totalPLLabel.stringValue = "Total P/L: --"
         beginningButton.isEnabled = false
         endButton.isEnabled = true
-        if Config.shared.simulateTimePassage {
-            startButton.isEnabled = true
-        }
+        startButton.isEnabled = config.simulateTimePassage
         tableView.reloadData()
     }
     
@@ -133,9 +128,7 @@ class SimTradingViewController: NSViewController {
         
         beginningButton.isEnabled = true
         endButton.isEnabled = false
-        if Config.shared.simulateTimePassage {
-            startButton.isEnabled = true
-        }
+        startButton.isEnabled = config.simulateTimePassage
         
         dataManager?.stopMonitoring()
         updateLatestDataTimeLabel(chart: completedChart)

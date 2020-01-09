@@ -224,8 +224,8 @@ class SessionManager {
                                                   exitMethod: reason,
                                                   entryTime: closedPosition.entryTime,
                                                   exitTime: closingTime)
-                                trade.entrySnapshot = closedPosition.entrySnapshot
-                                trade.exitSnapshot = closingChart
+                                trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
+                                trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                                 self.trades.append(trade)
                                 self.currentPosition = nil
                                 DispatchQueue.main.async {
@@ -263,8 +263,8 @@ class SessionManager {
                                       exitMethod: reason,
                                       entryTime: closedPosition.entryTime,
                                       exitTime: closingTime)
-                    trade.entrySnapshot = closedPosition.entrySnapshot
-                    trade.exitSnapshot = closingChart
+                    trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
+                    trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                     trades.append(trade)
                     currentPosition = nil
                 case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason, let closingChart):
@@ -276,8 +276,8 @@ class SessionManager {
                                       exitMethod: reason,
                                       entryTime: closedPosition.entryTime,
                                       exitTime: closingTime)
-                    trade.entrySnapshot = closedPosition.entrySnapshot
-                    trade.exitSnapshot = closingChart
+                    trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
+                    trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                     trades.append(trade)
                     currentPosition = nil
                 default:
@@ -318,8 +318,8 @@ class SessionManager {
                                           exitMethod: exitReason,
                                           entryTime: currentPosition.entryTime,
                                           exitTime: exitPriceAndDate.1)
-                        trade.entrySnapshot = currentPosition.entrySnapshot
-                        trade.exitSnapshot = closingChart
+                        trade.entrySnapshot = self.config.saveChartsPerTrade ? currentPosition.entrySnapshot : nil
+                        trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                         self.trades.append(trade)
                         self.currentPosition = nil
                         exitPrice = exitPriceAndDate.0

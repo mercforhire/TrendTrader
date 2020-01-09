@@ -46,6 +46,7 @@ class Config {
     let positionSize: Int = 1
     
     // DEMO SETTINGS:
+    let saveChartsPerTrade = false
     let byPassTradingTimeRestrictions = true // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false

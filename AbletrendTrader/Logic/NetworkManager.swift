@@ -253,7 +253,7 @@ class NetworkManager {
                 }
                 completionHandler(.success(relevantOrders))
             } else {
-                print("fetchStopOrdersFailed:")
+                print("FetchStopOrders Failed:")
                 print(String(data: response.data!, encoding: .utf8)!)
                 completionHandler(.failure(.fetchStopOrdersFailed))
             }
@@ -407,7 +407,7 @@ class NetworkManager {
                 } else if response.response?.statusCode == 200 {
                     completionHandler(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
                 } else {
-                    print("placeOrderFailed:")
+                    print("PlaceOrder failed:")
                     print(String(data: response.data!, encoding: .utf8)!)
                     completionHandler(.failure(.placeOrderFailed))
                 }
@@ -440,7 +440,7 @@ class NetworkManager {
                 } else if response.response?.statusCode == 200 {
                     completionHandler(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
                 } else {
-                    print("orderReplyFailed:")
+                    print("PlaceOrderReply Failed:")
                     print(String(data: response.data!, encoding: .utf8)!)
                     completionHandler(.failure(.orderReplyFailed))
                 }
@@ -464,7 +464,7 @@ class NetworkManager {
             return
         }
         
-        print(String(format: "Modify %@ %@ Order %@ called to %@",
+        print(String(format: "Modify %@ %@ Order %@ to %@ called",
                      direction.description(),
                      orderType.typeString(),
                      orderId,
@@ -492,7 +492,7 @@ class NetworkManager {
                 } else if response.response?.statusCode == 200 {
                     completionHandler(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
                 } else {
-                    print("modifyOrderFailed:")
+                    print("ModifyOrder Failed:")
                     print(String(data: response.data!, encoding: .utf8)!)
                     completionHandler(.failure(.modifyOrderFailed))
                 }

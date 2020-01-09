@@ -18,7 +18,7 @@ class SessionManager {
     private var liveOrders: [LiveOrder] = []
     private var stopOrders: [LiveOrder] {
         return liveOrders.filter { liveOrder -> Bool in
-            return liveOrder.orderType == "Stop"
+            return liveOrder.orderType == "Stop" && liveOrder.status == "PreSubmitted"
         }
     }
     private var timer: Timer?
@@ -68,7 +68,7 @@ class SessionManager {
         currentPosition = nil
     }
     
-    func refreshLiveOrders(triggerTimer: Bool = true, completion: ((NetworkError?) -> ())? = nil) {
+    func refreshLiveOrders(completion: ((NetworkError?) -> ())? = nil) {
         if monitoringLiveOrders {
             timer?.invalidate()
         }
@@ -78,13 +78,16 @@ class SessionManager {
             
             switch result {
             case .success(let orders):
+                if self.liveOrders.count != orders.count {
+                    print(Date().hourMinuteSecond(), "Live orders changed,", self.stopOrders.count, "stop orders")
+                }
                 self.liveOrders = orders
                 completion?(nil)
             case .failure(let error):
                 completion?(error)
-                print(Date().hourMinuteSecond(), "LiveOrders update failed")
+                print(Date().hourMinuteSecond(), "Live orders update failed")
             }
-            if self.monitoringLiveOrders, triggerTimer {
+            if self.monitoringLiveOrders {
                 self.timer = Timer.scheduledTimer(timeInterval: 10,
                                                   target: self,
                                                   selector: #selector(self.refreshLiveOrdersTimerFunc),
@@ -157,27 +160,15 @@ class SessionManager {
                 return
             }
             
-            self.refreshLiveOrders(triggerTimer: false) { [weak self] networkError in
-                guard let self = self else {
-                    return
-                }
-                
-                if networkError == nil {
-                    if let order = self.stopOrders.first,
-                        let stopPrice = order.auxPrice?.double,
-                        order.direction != self.currentPositionDirection {
-                        self.currentPosition?.stopLoss = StopLoss(stop: stopPrice,
-                                                                  source: .currentBar,
-                                                                  stopOrderId: String(format: "%d", order.orderId))
-                    }
-                    DispatchQueue.main.async {
-                        completionHandler?(.success(true))
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        completionHandler?(.failure(.resetPortfolioPositionsFailed))
-                    }
-                }
+            if let order = self.stopOrders.first,
+                let stopPrice = order.auxPrice?.double,
+                order.direction != self.currentPositionDirection {
+                self.currentPosition?.stopLoss = StopLoss(stop: stopPrice,
+                                                          source: .currentBar,
+                                                          stopOrderId: String(format: "%d", order.orderId))
+            }
+            DispatchQueue.main.async {
+                completionHandler?(.success(true))
             }
         }
     }
@@ -214,14 +205,6 @@ class SessionManager {
                         continue
                     }
                     
-                    switch action {
-                    case .noAction(let entryType):
-                        if entryType == nil {
-                            continue
-                        }
-                    default:
-                        break
-                    }
                     print(action.description(actionBarTime: priceBarTime))
                     
                     switch action {
@@ -312,6 +295,7 @@ class SessionManager {
                                 DispatchQueue.main.async {
                                     completion(nil)
                                 }
+                                inProcessActionIndex += 1
                             case .failure(let networkError):
                                 DispatchQueue.main.async {
                                     completion(networkError)

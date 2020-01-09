@@ -34,7 +34,6 @@ enum NetworkError: Error {
     case fetchAccountsFailed
     case fetchTradesFailed
     case fetchPositionsFailed
-    case fetchStopOrdersFailed
     case fetchLiveOrdersFailed
     case orderReplyFailed
     case previewOrderFailed
@@ -64,8 +63,6 @@ enum NetworkError: Error {
             return "Fetch trades failed."
         case .fetchPositionsFailed:
             return "Fetch positions failed."
-        case .fetchStopOrdersFailed:
-            return "Fetch stop orders failed."
         case .fetchLiveOrdersFailed:
              return "Fetch live orders failed."
         case .orderReplyFailed:
@@ -94,12 +91,12 @@ enum NetworkError: Error {
     }
     
     func showDialog() {
-        let a: NSAlert = NSAlert()
-        a.messageText = "Error"
-        a.informativeText = self.displayMessage()
-        a.addButton(withTitle: "Okay")
-        a.alertStyle = NSAlert.Style.warning
-        a.runModal()
+//        let a: NSAlert = NSAlert()
+//        a.messageText = "Error"
+//        a.informativeText = self.displayMessage()
+//        a.addButton(withTitle: "Okay")
+//        a.alertStyle = NSAlert.Style.warning
+//        a.runModal()
         print(Date().hourMinuteSecond(), self.displayMessage(), "error encountered")
     }
 }
@@ -267,27 +264,6 @@ class NetworkManager {
         }
     }
     
-    // Stop Live Orders
-    func fetchStopOrders(completionHandler: @escaping (Swift.Result<[LiveOrder], NetworkError>) -> Void) {
-        afManager.request("https://localhost:5000/v1/portal/iserver/account/orders").responseData { [weak self] response in
-            guard let self = self else { return }
-            
-            if let data = response.data,
-                let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
-                let orders = liveOrdersResponse.orders {
-                
-                let relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
-                    return liveOrder.status == "PreSubmitted" && liveOrder.conid == self.config.conId && liveOrder.orderType == "Stop"
-                }
-                completionHandler(.success(relevantOrders))
-            } else {
-                print("FetchStopOrders Failed:")
-                print(String(data: response.data!, encoding: .utf8)!)
-                completionHandler(.failure(.fetchStopOrdersFailed))
-            }
-        }
-    }
-    
     // Reset Portfolio Positions Cache
     private func resetPositionsCache(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
@@ -304,7 +280,6 @@ class NetworkManager {
                 }
         }
     }
-    
     
     // Portfolio Positions
     func fetchRelevantPositions(completionHandler: @escaping (Swift.Result<IBPosition?, NetworkError>) -> Void) {
@@ -384,7 +359,8 @@ class NetworkManager {
         }
         orderPrice = orderPrice.round(nearest: 0.25)
         
-        print(String(format: "%@ %@ Order called at %@",
+        print(String(format: "%@: %@ %@ Order called at %@",
+                     orderRef,
                      direction.description(),
                      orderType.typeString(),
                      orderPrice == 0 ? "Market" : String(format: "%.2f", orderPrice)))

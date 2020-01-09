@@ -94,11 +94,9 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         if sessionManager.currentPosition != nil {
             self.buyButton.isEnabled = false
             self.sellButton.isEnabled = false
-            self.exitButton.isEnabled = true
         } else {
             self.buyButton.isEnabled = true
             self.sellButton.isEnabled = true
-            self.exitButton.isEnabled = false
         }
     }
     
@@ -126,6 +124,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                     self.pauseButton.isEnabled = false
                 }
                 
+                self.exitButton.isEnabled = true
                 self.sessionManager.startMonitoringLiveOrders()
             }
             

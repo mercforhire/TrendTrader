@@ -12,9 +12,9 @@ class Config {
     static let shared = Config()
     
     let dataServerURL: String = "http://192.168.0.121/"
-    let fileName1: String = "1m.txt"
-    let fileName2: String = "2m.txt"
-    let fileName3: String = "3m.txt"
+    let fileName1: String = "1m.txt" // filename for local sandbox folder
+    let fileName2: String = "2m.txt" // filename for local sandbox folder
+    let fileName3: String = "3m.txt" // filename for local sandbox folder
     
     let maxRisk: Double = 10.0
     let minBarStop: Double = 5.0
@@ -30,14 +30,14 @@ class Config {
     let highRiskStart: (Int, Int) = (9, 30) // Hour/Minute
     let highRiskEnd: (Int, Int) = (10, 0) // Hour/Minute
     
-    let chartStart: (Int, Int) = (0, 0)
-    let chartEnd: (Int, Int) = (23, 59)
+    let chartStart: (Int, Int) = (0, 0) // Hour/Minute
+    let chartEnd: (Int, Int) = (23, 59) // Hour/Minute
     
-    let tradingStart: (Int, Int) = (9, 20)
-    let tradingEnd: (Int, Int) = (15, 55)
+    let tradingStart: (Int, Int) = (9, 20) // Hour/Minute
+    let tradingEnd: (Int, Int) = (15, 55) // Hour/Minute
     
-    let clearTime: (Int, Int) = (15, 59)
-    let flatTime: (Int, Int) = (16, 5)
+    let clearTime: (Int, Int) = (15, 59) // Hour/Minute
+    let flatTime: (Int, Int) = (16, 5) // Hour/Minute
     
     let maxDailyLoss: Double = -50.0 // stop trading when P/L goes under this number
     
@@ -47,7 +47,7 @@ class Config {
     let maxActionRetryTimes = 3
     
     // DEMO SETTINGS:
-    let saveChartsPerTrade = false
+    let saveChartsPerTrade = false // Warning: performance hit
     let byPassTradingTimeRestrictions = true // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false

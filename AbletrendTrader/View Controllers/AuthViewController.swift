@@ -79,7 +79,7 @@ class AuthViewController: NSViewController {
         validateSSOPressed(validateSSOButton)
         getStatusPressed(getStatusButton)
         
-        timer = Timer.scheduledTimer(timeInterval: TimeInterval(60.0), target: self, selector: #selector(pingServer), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: TimeInterval(30.0), target: self, selector: #selector(pingServer), userInfo: nil, repeats: true)
     }
     
     @objc

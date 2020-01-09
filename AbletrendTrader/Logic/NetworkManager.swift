@@ -35,6 +35,7 @@ enum NetworkError: Error {
     case fetchTradesFailed
     case fetchPositionsFailed
     case fetchStopOrdersFailed
+    case fetchLiveOrdersFailed
     case orderReplyFailed
     case previewOrderFailed
     case orderAlreadyPlaced
@@ -65,6 +66,8 @@ enum NetworkError: Error {
             return "Fetch positions failed."
         case .fetchStopOrdersFailed:
             return "Fetch stop orders failed."
+        case .fetchLiveOrdersFailed:
+             return "Fetch live orders failed."
         case .orderReplyFailed:
             return "Answer question failed."
         case .previewOrderFailed:
@@ -97,6 +100,7 @@ enum NetworkError: Error {
         a.addButton(withTitle: "Okay")
         a.alertStyle = NSAlert.Style.warning
         a.runModal()
+        print(Date().hourMinuteSecond(), self.displayMessage(), "error encountered")
     }
 }
 
@@ -113,7 +117,6 @@ class NetworkManager {
     private let orderQuestionsBuilder: OrderQuestionsBuilder = OrderQuestionsBuilder()
     private let errorResponseBuilder: ErrorResponseBuilder = ErrorResponseBuilder()
     private let ibPositionsBuilder: IBPositionsBuilder = IBPositionsBuilder()
-    private let previewResponseBuilder: PreviewResponseBuilder = PreviewResponseBuilder()
     private let placedOrderResponseBuilder: PlacedOrderResponseBuilder = PlacedOrderResponseBuilder()
     
     var selectedAccount: Account?
@@ -239,6 +242,31 @@ class NetworkManager {
         }
     }
     
+    // All Live Orders
+    func fetchLiveOrders(completionHandler: @escaping (Swift.Result<[LiveOrder], NetworkError>) -> Void) {
+        guard let selectedAccount = selectedAccount else {
+            completionHandler(.failure(.previewOrderFailed))
+            return
+        }
+        
+        afManager.request("https://localhost:5000/v1/portal/iserver/account/orders").responseData { [weak self] response in
+            guard let self = self else { return }
+            
+            if let data = response.data,
+                let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
+                let orders = liveOrdersResponse.orders {
+                let relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
+                    return (liveOrder.status == "PreSubmitted" || liveOrder.status == "Filled") && liveOrder.conid == self.config.conId && liveOrder.acct == selectedAccount.accountId
+                }
+                completionHandler(.success(relevantOrders))
+            } else {
+                print("Fetch Live Orders Failed:")
+                print(String(data: response.data!, encoding: .utf8)!)
+                completionHandler(.failure(.fetchLiveOrdersFailed))
+            }
+        }
+    }
+    
     // Stop Live Orders
     func fetchStopOrders(completionHandler: @escaping (Swift.Result<[LiveOrder], NetworkError>) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/account/orders").responseData { [weak self] response in
@@ -334,35 +362,9 @@ class NetworkManager {
         }
     }
     
-    // Preview Order
-    // https://localhost:5000/v1/portal/iserver/account/{accountId}/order/whatif
-    func previewOrder(orderType: OrderType, direction: TradeDirection, price: Double = 0, time: Date, completionHandler: @escaping (Swift.Result<PreviewResponse, NetworkError>) -> Void) {
-        guard let selectedAccount = selectedAccount else {
-            completionHandler(.failure(.previewOrderFailed))
-            return
-        }
-        
-        let url = "https://localhost:5000/v1/portal/iserver/account/" + selectedAccount.accountId + "/order/whatif"
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: time), orderType.typeString(), direction.ibTradeString(),  price, config.ticker, config.positionSize)
-        if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
-            let httpBody: Data = bodyString.data(using: .utf8) {
-            request.httpBody = httpBody
-            afManager.request(request).responseData { [weak self] response in
-                guard let self = self else { return }
-                
-                if let data = response.data, let previewResponse = self.previewResponseBuilder.buildPreviewResponseFrom(data) {
-                    completionHandler(.success(previewResponse))
-                } else {
-                    completionHandler(.failure(.previewOrderFailed))
-                }
-            }
-        } else {
-            completionHandler(.failure(.previewOrderFailed))
-        }
-    }
-    
     // Place Order
-    func placeOrder(orderType: OrderType,
+    func placeOrder(orderRef: String,
+                    orderType: OrderType,
                     direction: TradeDirection,
                     size: Int,
                     completionHandler: @escaping (Swift.Result<PlacedOrderResponse, NetworkError>) -> Void) {
@@ -380,13 +382,14 @@ class NetworkManager {
         default:
             break
         }
+        orderPrice = orderPrice.round(nearest: 0.25)
         
         print(String(format: "%@ %@ Order called at %@",
                      direction.description(),
                      orderType.typeString(),
                      orderPrice == 0 ? "Market" : String(format: "%.2f", orderPrice)))
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, generateOrderIdentifier(direction: direction, time: Date()), orderType.typeString(), direction.ibTradeString(), orderPrice, config.ticker, size)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, orderRef, orderType.typeString(), direction.ibTradeString(), orderPrice, config.ticker, size)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -463,6 +466,8 @@ class NetworkManager {
                 completionHandler(.failure(.modifyOrderFailed))
             return
         }
+        
+        let price = price.round(nearest: 0.25)
         
         print(String(format: "Modify %@ %@ Order %@ to %@ called",
                      direction.description(),
@@ -604,10 +609,5 @@ class NetworkManager {
                 completion(existUrl)
             }
         }
-    }
-    
-    // Private:
-    private func generateOrderIdentifier(direction: TradeDirection, time: Date) -> String {
-        return direction.description() + "-" + time.generateDateAndTimeIdentifier()
     }
 }

@@ -248,6 +248,7 @@ class TraderBot {
                 }
             }
             
+            
             if var newStop: Double = sessionManager.currentPosition?.stopLoss?.stop,
                 var newStopSource: StopLossSource = sessionManager.currentPosition?.stopLoss?.source {
                 

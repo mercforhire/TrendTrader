@@ -10,6 +10,7 @@
 		711AC8F5D49C3C0C53B19B09 /* Pods_AbletrendTrader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */; };
 		854B14F723C4F9D50098A4E5 /* PlacedOrderResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14F623C4F9D50098A4E5 /* PlacedOrderResponse.swift */; };
 		854B14F923C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14F823C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift */; };
+		854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */; };
 		85582AB323B5E97800DC16AC /* ChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85582AB223B5E97800DC16AC /* ChartManager.swift */; };
 		856D957C23B73B04004A4385 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957B23B73B04004A4385 /* NetworkManager.swift */; };
 		856D957F23B7FE32004A4385 /* SSOToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957E23B7FE32004A4385 /* SSOToken.swift */; };
@@ -32,8 +33,6 @@
 		856D95A923BB0635004A4385 /* Question.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95A823BB0635004A4385 /* Question.swift */; };
 		856D95AC23BB0B78004A4385 /* ErrorResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AB23BB0B78004A4385 /* ErrorResponseBuilder.swift */; };
 		856D95AE23BB0D70004A4385 /* IBPositionsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */; };
-		856D95B023BB1F65004A4385 /* PreviewResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95AF23BB1F65004A4385 /* PreviewResponse.swift */; };
-		856D95B223BB2106004A4385 /* PreviewResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */; };
 		856D95B523BBE180004A4385 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95B423BBE180004A4385 /* SessionManager.swift */; };
 		8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432923AC3EAF004CE61F /* AppDelegate.swift */; };
 		8592432C23AC3EAF004CE61F /* SimTradingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */; };
@@ -63,6 +62,7 @@
 		7987637B8B2780B3C1E7F8FD /* Pods-AbletrendTrader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.debug.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.debug.xcconfig"; sourceTree = "<group>"; };
 		854B14F623C4F9D50098A4E5 /* PlacedOrderResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrderResponse.swift; sourceTree = "<group>"; };
 		854B14F823C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrderResponseBuilder.swift; sourceTree = "<group>"; };
+		854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmation.swift; sourceTree = "<group>"; };
 		85582AB223B5E97800DC16AC /* ChartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartManager.swift; sourceTree = "<group>"; };
 		856D957B23B73B04004A4385 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		856D957E23B7FE32004A4385 /* SSOToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSOToken.swift; sourceTree = "<group>"; };
@@ -85,8 +85,6 @@
 		856D95A823BB0635004A4385 /* Question.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Question.swift; sourceTree = "<group>"; };
 		856D95AB23BB0B78004A4385 /* ErrorResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorResponseBuilder.swift; sourceTree = "<group>"; };
 		856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBPositionsBuilder.swift; sourceTree = "<group>"; };
-		856D95AF23BB1F65004A4385 /* PreviewResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewResponse.swift; sourceTree = "<group>"; };
-		856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewResponseBuilder.swift; sourceTree = "<group>"; };
 		856D95B423BBE180004A4385 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		8592432623AC3EAF004CE61F /* AbletrendTrader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AbletrendTrader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8592432923AC3EAF004CE61F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -147,7 +145,6 @@
 				856D95A823BB0635004A4385 /* Question.swift */,
 				856D958423B85D88004A4385 /* IBTrade.swift */,
 				856D95A523BAB259004A4385 /* IBPosition.swift */,
-				856D95AF23BB1F65004A4385 /* PreviewResponse.swift */,
 				854B14F623C4F9D50098A4E5 /* PlacedOrderResponse.swift */,
 			);
 			path = IB;
@@ -165,7 +162,6 @@
 				856D959B23B96DB9004A4385 /* IBTradesBuilder.swift */,
 				856D95AB23BB0B78004A4385 /* ErrorResponseBuilder.swift */,
 				856D95AD23BB0D70004A4385 /* IBPositionsBuilder.swift */,
-				856D95B123BB2106004A4385 /* PreviewResponseBuilder.swift */,
 				854B14F823C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift */,
 			);
 			path = Builders;
@@ -270,6 +266,7 @@
 				8592435523B00CC6004CE61F /* Position.swift */,
 				8592435723B14DD5004CE61F /* StopLoss.swift */,
 				856D959F23BA8152004A4385 /* Enums.swift */,
+				854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */,
 			);
 			path = Trade;
 			sourceTree = "<group>";
@@ -409,6 +406,7 @@
 				856D958123B7FED3004A4385 /* AuthStatus.swift in Sources */,
 				854B14F923C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift in Sources */,
 				856D959623B95BE5004A4385 /* LiveOrdersResponse.swift in Sources */,
+				854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */,
 				856D959823B95C15004A4385 /* LiveOrdersResponseBuilder.swift in Sources */,
 				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,
 				856D95A623BAB259004A4385 /* IBPosition.swift in Sources */,
@@ -416,7 +414,6 @@
 				8592434023AC7A19004CE61F /* String+Extensions.swift in Sources */,
 				856D957F23B7FE32004A4385 /* SSOToken.swift in Sources */,
 				8592434F23ADE06E004CE61F /* Trade.swift in Sources */,
-				856D95B023BB1F65004A4385 /* PreviewResponse.swift in Sources */,
 				8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */,
 				8592434223AD403E004CE61F /* Signal.swift in Sources */,
 				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
@@ -441,7 +438,6 @@
 				856D959423B94154004A4385 /* AccountsBuilder.swift in Sources */,
 				856D959023B898FC004A4385 /* AuthViewController.swift in Sources */,
 				8592434D23ADABA7004CE61F /* Indicators.swift in Sources */,
-				856D95B223BB2106004A4385 /* PreviewResponseBuilder.swift in Sources */,
 				856D958323B8518A004A4385 /* Account.swift in Sources */,
 				856D95AC23BB0B78004A4385 /* ErrorResponseBuilder.swift in Sources */,
 				856D95B523BBE180004A4385 /* SessionManager.swift in Sources */,

@@ -13,13 +13,14 @@ struct LiveOrder: Codable {
     var conid: Int
     var orderDesc: String
     var ticker: String
-    var companyName: String
     var remainingQuantity: Int
+    var filledQuantity: Int
     var lastExecutionTime_r: Double
     var orderType: String
     var side: String
     var auxPrice: String?
     var orderId: Int
+    var order_ref: String
     var status: String
     
     var direction: TradeDirection {        

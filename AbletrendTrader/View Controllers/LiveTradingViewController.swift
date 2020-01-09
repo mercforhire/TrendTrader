@@ -125,6 +125,8 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                     self.startButton.isEnabled = true
                     self.pauseButton.isEnabled = false
                 }
+                
+                self.sessionManager.startMonitoringLiveOrders()
             }
             
             fetchingTask.leave()
@@ -159,6 +161,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         startButton.isEnabled = false
         pauseButton.isEnabled = true
         dataManager?.startMonitoring()
+        sessionManager.startMonitoringLiveOrders()
     }
     
     @IBAction
@@ -166,6 +169,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         startButton.isEnabled = true
         pauseButton.isEnabled = false
         dataManager?.stopMonitoring()
+        sessionManager.stopMonitoringLiveOrders()
     }
     
     @IBAction

@@ -106,12 +106,12 @@ enum TradeDirection {
     case long
     case short
     
-    func description() -> String {
+    func description(short: Bool = false) -> String {
         switch self {
         case .long:
-            return "Long"
+            return short ? "L" : "Long"
         case .short:
-            return "Short"
+            return short ? "S" :"Short"
         }
     }
     

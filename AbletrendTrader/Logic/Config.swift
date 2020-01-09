@@ -44,6 +44,7 @@ class Config {
     let ticker = "NQ"
     let conId = 346577750
     let positionSize: Int = 1
+    let maxActionRetryTimes = 3
     
     // DEMO SETTINGS:
     let saveChartsPerTrade = false

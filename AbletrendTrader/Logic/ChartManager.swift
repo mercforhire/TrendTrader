@@ -38,8 +38,8 @@ class ChartManager {
         let components1 = DateComponents(year: Date().year(),
                                          month: Date().month(),
                                          day: Date().day(),
-                                         hour: 18,
-                                         minute: 0)
+                                         hour: 1,
+                                         minute: 30)
         self.simTime = calendar.date(from: components1)!
     }
     
@@ -260,6 +260,7 @@ class ChartManager {
                     return
                 }
                 
+                print("Sim time:", self.simTime.hourMinuteSecond())
                 let urlFetchingTask = DispatchGroup()
                 
                 urlFetchingTask.enter()

@@ -44,6 +44,7 @@ class ChartViewController: NSViewController {
         chartView.leftAxis.spaceBottom = 0.3
         chartView.leftAxis.axisMinimum = 0
         chartView.leftAxis.drawGridLinesEnabled = false
+        chartView.setVisibleXRangeMaximum(100)
         
         chartView.rightAxis.enabled = false
         
@@ -79,6 +80,9 @@ class ChartViewController: NSViewController {
         
         let data = CandleChartData(dataSet: set1)
         chartView.data = data
+        
+        chartView.scaleYEnabled = false
+        chartView.scaleXEnabled = true
     }
 }
 

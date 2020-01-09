@@ -72,7 +72,7 @@ extension Date {
         let dateFormatter = DateFormatter()
         dateFormatter.calendar = Calendar(identifier: .iso8601)
         dateFormatter.timeZone = Date.DefaultTimeZone
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.dateFormat = "yyMMddHHmmss"
         let response = dateFormatter.string(from: self)
         return response
     }

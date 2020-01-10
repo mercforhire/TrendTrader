@@ -15,7 +15,6 @@ struct Position {
     var idealEntryPrice: Double
     var actualEntryPrice: Double
     var stopLoss: StopLoss?
-    var entrySnapshot: Chart?
     var entryOrderRef: String?
     
     var securedProfit: Double? {

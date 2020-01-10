@@ -203,7 +203,14 @@ class SessionManager {
                         continue
                     }
                     
-                    print(action.description(actionBarTime: priceBarTime))
+                    switch action {
+                    case .noAction(let entryType):
+                        if entryType == nil {
+                            continue
+                        }
+                    default:
+                        print(action.description(actionBarTime: priceBarTime))
+                    }
                     
                     switch action {
                     case .openedPosition(let newPosition, _):
@@ -251,11 +258,10 @@ class SessionManager {
                             }
                             semaphore.signal()
                         }
-                    case .forceClosePosition(_, let idealExitPrice, _, let reason, let closingChart):
+                    case .forceClosePosition(_, let idealExitPrice, _, let reason):
                         self.exitPositions(priceBarTime: priceBarTime,
                                            idealExitPrice: idealExitPrice,
                                            exitReason: reason,
-                                           closingChart: closingChart,
                                            completion:
                             { result in
                                 switch result {
@@ -272,11 +278,11 @@ class SessionManager {
                                 }
                                 semaphore.signal()
                         })
-                    case .verifyPositionClosed(let closedPosition, let idealClosingPrice, _, let reason, let closingChart):
+                    case .verifyPositionClosed(let closedPosition, let idealClosingPrice, _, let reason):
                         self.verifyClosedPosition(closedPosition: closedPosition, reason: reason) { result in
                             switch result {
                             case .success(let orderConfirmation):
-                                var trade = Trade(direction: closedPosition.direction,
+                                let trade = Trade(direction: closedPosition.direction,
                                                   entryTime: closedPosition.entryTime,
                                                   idealEntryPrice: closedPosition.idealEntryPrice,
                                                   actualEntryPrice: closedPosition.actualEntryPrice,
@@ -285,8 +291,6 @@ class SessionManager {
                                                   idealExitPrice: idealClosingPrice,
                                                   actualExitPrice: orderConfirmation.price,
                                                   exitOrderRef: orderConfirmation.orderRef)
-                                trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
-                                trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                                 self.trades.append(trade)
                                 self.currentPosition = nil
                                 DispatchQueue.main.async {
@@ -324,9 +328,8 @@ class SessionManager {
                         continue
                     }
                 default:
-                    break
+                    print(action.description(actionBarTime: priceBarTime))
                 }
-                print(action.description(actionBarTime: priceBarTime))
                 
                 switch action {
                 case .openedPosition(let newPosition, _):
@@ -334,28 +337,24 @@ class SessionManager {
                     currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
                 case .updatedStop(let newStop):
                     currentPosition?.stopLoss = newStop
-                case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let reason, let closingChart):
-                    var trade = Trade(direction: closedPosition.direction,
+                case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let reason):
+                    let trade = Trade(direction: closedPosition.direction,
                                       entryTime: closedPosition.entryTime,
                                       idealEntryPrice: closedPosition.idealEntryPrice,
                                       actualEntryPrice: closedPosition.idealEntryPrice,
                                       exitTime: closingTime,
                                       idealExitPrice: closingPrice,
                                       actualExitPrice: closingPrice)
-                    trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
-                    trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                     trades.append(trade)
                     currentPosition = nil
-                case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason, let closingChart):
-                    var trade = Trade(direction: closedPosition.direction,
+                case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason):
+                    let trade = Trade(direction: closedPosition.direction,
                                       entryTime: closedPosition.entryTime,
                                       idealEntryPrice: closedPosition.idealEntryPrice,
                                       actualEntryPrice: closedPosition.idealEntryPrice,
                                       exitTime: closingTime,
                                       idealExitPrice: closingPrice,
                                       actualExitPrice: closingPrice)
-                    trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
-                    trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                     trades.append(trade)
                     currentPosition = nil
                 default:
@@ -369,7 +368,6 @@ class SessionManager {
     func exitPositions(priceBarTime: Date,
                        idealExitPrice: Double,
                        exitReason: ExitMethod,
-                       closingChart: Chart?,
                        completion: @escaping (Swift.Result<OrderConfirmation, NetworkError>) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
@@ -387,7 +385,7 @@ class SessionManager {
                 { result in
                     switch result {
                     case .success(let exitOrderConfirmation):
-                        var trade = Trade(direction: currentPosition.direction,
+                        let trade = Trade(direction: currentPosition.direction,
                                           entryTime: currentPosition.entryTime,
                                           idealEntryPrice: currentPosition.idealEntryPrice,
                                           actualEntryPrice: currentPosition.actualEntryPrice,
@@ -396,8 +394,6 @@ class SessionManager {
                                           idealExitPrice: idealExitPrice,
                                           actualExitPrice: exitOrderConfirmation.price,
                                           exitOrderRef: exitOrderConfirmation.orderRef)
-                        trade.entrySnapshot = self.config.saveChartsPerTrade ? currentPosition.entrySnapshot : nil
-                        trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                         self.trades.append(trade)
                         self.currentPosition = nil
                         orderConfirmation = exitOrderConfirmation
@@ -715,8 +711,7 @@ class SessionManager {
             if errorSoFar == .positionNotClosed, let unclosedIBPosition = unclosedIBPosition {
                 self.exitPositions(priceBarTime: Date(),
                                    idealExitPrice: unclosedIBPosition.mktPrice,
-                                   exitReason: .manual,
-                                   closingChart: nil)
+                                   exitReason: .manual)
                 { result in
                     switch result {
                     case .success(_):

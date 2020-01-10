@@ -15,13 +15,11 @@ struct Trade {
     var idealEntryPrice: Double
     var actualEntryPrice: Double
     var entryOrderRef: String?
-    var entrySnapshot: Chart?
     
     var exitTime: Date
     var idealExitPrice: Double
     var actualExitPrice: Double
     var exitOrderRef: String?
-    var exitSnapshot: Chart?
     
     var idealProfit: Double? {
         switch direction {

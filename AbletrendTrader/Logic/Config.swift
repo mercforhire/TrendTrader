@@ -47,7 +47,6 @@ class Config {
     let maxActionRetryTimes = 3
     
     // DEMO SETTINGS:
-    let saveChartsPerTrade = false // Warning: performance hit
     let byPassTradingTimeRestrictions = true // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false

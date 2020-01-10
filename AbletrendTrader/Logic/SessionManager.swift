@@ -41,7 +41,7 @@ class SessionManager {
         return currentPosition?.securedProfit
     }
     
-    var currentlyProcessingPriceBar: String?
+    var currentlyPriceBarTime: Date?
     
     init(live: Bool) {
         self.live = live
@@ -172,17 +172,17 @@ class SessionManager {
     }
     
     func resetCurrentlyProcessingPriceBar() {
-        currentlyProcessingPriceBar = nil
+        currentlyPriceBarTime = nil
     }
     
-    func processActions(priceBarId: String, priceBarTime: Date, actions: [TradeActionType], completion: @escaping (NetworkError?) -> ()) {
-        if currentlyProcessingPriceBar == priceBarId {
+    func processActions(priceBarTime: Date, actions: [TradeActionType], completion: @escaping (NetworkError?) -> ()) {
+        if currentlyPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
 //            print(Date().hourMinuteSecond() + ": Actions for " + priceBarId + " already processed")
             return
         }
         
-        currentlyProcessingPriceBar = priceBarId
+        currentlyPriceBarTime = priceBarTime
         if live {
             let queue = DispatchQueue.global()
             queue.async { [weak self] in
@@ -203,15 +203,7 @@ class SessionManager {
                         continue
                     }
                     
-                    switch action {
-                    case .noAction(let entryType):
-                        if entryType == nil {
-                            inProcessActionIndex += 1
-                            continue
-                        }
-                    default:
-                        print(action.description(actionBarTime: priceBarTime))
-                    }
+                    print(action.description(actionBarTime: priceBarTime))
                     
                     switch action {
                     case .openedPosition(let newPosition, _):

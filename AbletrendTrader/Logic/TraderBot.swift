@@ -43,7 +43,7 @@ class TraderBot {
                 guard let currentBar = self.chart.priceBars[timeKey] else { continue }
                 
                 let actions = self.decide(priceBar: currentBar)
-                self.sessionManager.processActions(priceBarId: timeKey, priceBarTime: currentBar.time, actions: actions) { networkError in
+                self.sessionManager.processActions(priceBarTime: currentBar.time, actions: actions) { networkError in
                     semaphore.signal()
                 }
                 

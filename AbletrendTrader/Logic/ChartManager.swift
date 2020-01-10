@@ -16,7 +16,6 @@ protocol DataManagerDelegate: class {
 class ChartManager {
     private let networkManager = NetworkManager.shared
     private let config = Config.shared
-    private let liveUpdateFrequency: TimeInterval = 0
     private var timer: Timer?
     
     weak var delegate: DataManagerDelegate?
@@ -24,7 +23,6 @@ class ChartManager {
     let live: Bool
     var chart: Chart?
     var simTime: Date!
-    var fetching = false
     var monitoring = false
     
     init(live: Bool) {
@@ -115,7 +113,7 @@ class ChartManager {
     
     func startMonitoring() {
         if live {
-            startLiveRefreshTimer()
+            updateChart()
         } else if config.simulateTimePassage {
             updateChart()
         }
@@ -126,29 +124,34 @@ class ChartManager {
     func stopMonitoring() {
         timer?.invalidate()
         monitoring = false
+        currentPriceBarTime = nil
     }
+    
+    var currentPriceBarTime: Date?
     
     @objc
     private func updateChart() {
-        if fetching { return }
-        
-        fetching = true
-        if monitoring, live {
-            // kill the timer during the chart fetching process
-            timer?.invalidate()
+        let now = Date()
+        if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
+            // call this again 5 seconds after the next minute
+            print("Skipped fetching chart at", now.hourMinuteSecond())
+            startLiveRefreshTimer(timeInterval: 65.0 - Double(now.second()))
+            return
         }
         
+        print("Start fetching chart at", now.hourMinuteSecond())
         fetchChart { [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
+                print("Fetched chart at", Date().hourMinuteSecond())
                 self.delegate?.chartUpdated(chart: chart)
+                self.currentPriceBarTime = chart.absLastBarDate
             }
             
-            self.fetching = false
             if self.monitoring, self.live {
-                // restart the timer after chart is fetched
-                self.startLiveRefreshTimer()
+                // keep calling this until the latest chart is fetched
+                self.startLiveRefreshTimer(timeInterval: 1)
             } else if self.monitoring, self.config.simulateTimePassage {
                 guard self.simTime < Date() else {
                     print("Simulate time is up to date")
@@ -156,14 +159,13 @@ class ChartManager {
                     self.delegate?.requestStopMonitoring()
                     return
                 }
-                
                 self.updateChart()
             }
         }
     }
     
-    private func startLiveRefreshTimer() {
-        timer = Timer.scheduledTimer(timeInterval: liveUpdateFrequency,
+    private func startLiveRefreshTimer(timeInterval: TimeInterval) {
+        timer = Timer.scheduledTimer(timeInterval: timeInterval,
                                      target: self,
                                      selector: #selector(updateChart),
                                      userInfo: self,

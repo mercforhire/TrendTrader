@@ -195,12 +195,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     }
     
     @IBAction func buyPressed(_ sender: NSButton) {
-        guard let action = trader?.buyAtMarket(),
-            let lastBarId = trader?.chart.lastBar?.identifier else { return }
+        guard let action = trader?.buyAtMarket() else { return }
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: Date(), actions: [action]) { [weak self] networkError in
+        sessionManager.processActions(priceBarTime: Date(), actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
@@ -214,11 +213,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     }
     
     @IBAction func sellPressed(_ sender: NSButton) {
-        guard let action = trader?.sellAtMarket(), let lastBarId = trader?.chart.lastBar?.identifier else { return }
+        guard let action = trader?.sellAtMarket() else { return }
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarId: lastBarId, priceBarTime: Date(), actions: [action]) { [weak self] networkError in
+        sessionManager.processActions(priceBarTime: Date(), actions: [action]) { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
@@ -245,15 +244,14 @@ extension LiveTradingViewController: DataManagerDelegate {
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,
-            let lastBarTime = chart.lastBar?.time,
-            let lastBarId = chart.lastBar?.identifier else {
+            let lastBarTime = chart.lastBar?.time else {
                 return
         }
         
         trader?.chart = chart
         
         if let actions = trader?.decide(), dataManager?.monitoring ?? false {
-            sessionManager.processActions(priceBarId: lastBarId, priceBarTime: lastBarTime, actions: actions) { networkError in
+            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions) { networkError in
                 if let networkError = networkError {
                     networkError.showDialog()
                 } else {

@@ -206,6 +206,7 @@ class SessionManager {
                     switch action {
                     case .noAction(let entryType):
                         if entryType == nil {
+                            inProcessActionIndex += 1
                             continue
                         }
                     default:
@@ -337,7 +338,7 @@ class SessionManager {
                     currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
                 case .updatedStop(let newStop):
                     currentPosition?.stopLoss = newStop
-                case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let reason):
+                case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, _):
                     let trade = Trade(direction: closedPosition.direction,
                                       entryTime: closedPosition.entryTime,
                                       idealEntryPrice: closedPosition.idealEntryPrice,
@@ -347,7 +348,7 @@ class SessionManager {
                                       actualExitPrice: closingPrice)
                     trades.append(trade)
                     currentPosition = nil
-                case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason):
+                case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
                     let trade = Trade(direction: closedPosition.direction,
                                       entryTime: closedPosition.entryTime,
                                       idealEntryPrice: closedPosition.idealEntryPrice,
@@ -368,7 +369,7 @@ class SessionManager {
     func exitPositions(priceBarTime: Date,
                        idealExitPrice: Double,
                        exitReason: ExitMethod,
-                       completion: @escaping (Swift.Result<OrderConfirmation, NetworkError>) -> Void) {
+                       completion: @escaping (Swift.Result<OrderConfirmation?, NetworkError>) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {
@@ -426,6 +427,8 @@ class SessionManager {
                         completion(.failure(networkError))
                     } else if let orderConfirmation = orderConfirmation {
                         completion(.success(orderConfirmation))
+                    } else {
+                        completion(.success(nil))
                     }
                 }
             }

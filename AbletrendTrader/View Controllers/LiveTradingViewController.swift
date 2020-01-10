@@ -179,8 +179,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         sessionManager.resetCurrentlyProcessingPriceBar()
         sessionManager.exitPositions(priceBarTime: Date(),
                                      idealExitPrice: latestPrice,
-                                     exitReason: .manual,
-                                     closingChart: trader?.chart)
+                                     exitReason: .manual)
         { [weak self] result in
             guard let self = self else { return }
             

@@ -16,7 +16,7 @@ protocol DataManagerDelegate: class {
 class ChartManager {
     private let networkManager = NetworkManager.shared
     private let config = Config.shared
-    private let liveUpdateFrequency: TimeInterval = 10
+    private let liveUpdateFrequency: TimeInterval = 0
     private var timer: Timer?
     
     weak var delegate: DataManagerDelegate?

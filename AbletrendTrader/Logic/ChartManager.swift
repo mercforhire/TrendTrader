@@ -139,7 +139,7 @@ class ChartManager {
             return
         }
         
-        print("Start fetching chart at", now.hourMinuteSecond())
+        print("Start fetching chart at", now.hourMinuteSecond(), terminator:"...")
         fetchChart { [weak self] chart in
             guard let self = self else { return }
             

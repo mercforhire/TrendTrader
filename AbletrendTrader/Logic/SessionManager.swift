@@ -178,7 +178,7 @@ class SessionManager {
     func processActions(priceBarTime: Date, actions: [TradeActionType], completion: @escaping (NetworkError?) -> ()) {
         if currentlyPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
-//            print(Date().hourMinuteSecond() + ": Actions for " + priceBarId + " already processed")
+            print(Date().hourMinuteSecond() + ": Actions for " + priceBarTime.hourMinuteSecond() + " already processed")
             return
         }
         

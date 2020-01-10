@@ -26,4 +26,8 @@ struct LiveOrder: Codable {
     var direction: TradeDirection {        
         return side == "BUY" ? .long : .short
     }
+    
+    var lastExecutionTime: Date {
+        return Date(timeIntervalSince1970: lastExecutionTime_r / 1000)
+    }
 }

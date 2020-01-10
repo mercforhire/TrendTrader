@@ -252,8 +252,11 @@ class NetworkManager {
             if let data = response.data,
                 let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
                 let orders = liveOrdersResponse.orders {
-                let relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
+                var relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
                     return (liveOrder.status == "PreSubmitted" || liveOrder.status == "Filled") && liveOrder.conid == self.config.conId && liveOrder.acct == selectedAccount.accountId
+                }
+                relevantOrders.sort { (left, right) -> Bool in
+                    return left.lastExecutionTime_r > right.lastExecutionTime_r
                 }
                 completionHandler(.success(relevantOrders))
             } else {

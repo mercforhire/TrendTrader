@@ -22,7 +22,6 @@ struct Trade {
     var actualExitPrice: Double
     var exitOrderRef: String?
     var exitSnapshot: Chart?
-    var exitMethod: ExitMethod
     
     var idealProfit: Double? {
         switch direction {

@@ -42,7 +42,7 @@ struct Chart {
         return absLastBar.time
     }
     
-    // The last bar is always the second last bar in timeKeys, because the last bar signals are not finalized.
+    // The last bar is always the second last bar in timeKeys, because the very last bar's signal is not finalized
     // Trading decisions must be made from the second last bar
     var lastBar: PriceBar? {
         guard timeKeys.count > 1 else { return nil }
@@ -50,14 +50,6 @@ struct Chart {
         let lastBarKey = timeKeys[timeKeys.count - 2]
         let lastBar = priceBars[lastBarKey]
         return lastBar
-    }
-    
-    var secondLastBar: PriceBar? {
-        guard timeKeys.count > 2 else { return nil }
-        
-        let secondLastBarKey = timeKeys[timeKeys.count - 3]
-        let secondLastBar = priceBars[secondLastBarKey]
-        return secondLastBar
     }
     
     var lastTimeKey: String? {

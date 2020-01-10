@@ -24,6 +24,7 @@ class AuthViewController: NSViewController {
     @IBOutlet weak var sizeField: NSTextField!
     @IBOutlet weak var goToSimButton: NSButton!
     @IBOutlet weak var goToLiveButton: NSButton!
+    @IBOutlet weak var ipAddressField: NSTextField!
     
     private var authenticated: Bool? {
         didSet {
@@ -43,7 +44,6 @@ class AuthViewController: NSViewController {
         }
     }
     
-    private var ssoToken: SSOToken?
     private var timer: Timer?
     private var accounts: [Account]? {
         didSet {
@@ -69,6 +69,8 @@ class AuthViewController: NSViewController {
         conIdField.isEditable = false
         sizeField.stringValue = String(format: "%d", config.positionSize)
         sizeField.isEditable = false
+        ipAddressField.stringValue = config.dataServerURL
+        ipAddressField.isEditable = false
     }
     
     override func viewDidLoad() {
@@ -89,10 +91,12 @@ class AuthViewController: NSViewController {
             
             switch result {
             case .success:
-//                print("Pinging server success at", Date().hourMinuteSecond())
+                if self.authenticated != true {
+                    print("Pinging server success at", Date().hourMinuteSecond())
+                    self.authenticated = true
+                }
                 break
             case .failure:
-                self.ssoToken = nil
                 self.authenticated = false
                 print("Pinging server failed, attempting to re-authenticate")
                 self.reAuthPressed(self.reauthButton)
@@ -125,9 +129,9 @@ class AuthViewController: NSViewController {
             
             switch result {
             case .success(let token):
-                self.ssoToken = token
+                print("Validate SSO success")
             case .failure:
-                self.ssoToken = nil
+                print("Validate SSO failed")
             }
             
             sender.isEnabled = true
@@ -158,7 +162,7 @@ class AuthViewController: NSViewController {
             
             switch result {
             case .success:
-                self.authenticated = true
+                self.getStatusPressed(self.getStatusButton)
             case .failure:
                 break
             }
@@ -174,7 +178,6 @@ class AuthViewController: NSViewController {
             
             switch result {
             case .success:
-                self.ssoToken = nil
                 self.authenticated = false
             case .failure:
                 break

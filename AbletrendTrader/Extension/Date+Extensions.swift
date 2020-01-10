@@ -131,4 +131,13 @@ extension Date {
         calendar.timeZone = Date.DefaultTimeZone
         return calendar.startOfDay(for: self)
     }
+    
+    func getPastOrFutureDate(days: Int, months: Int, years: Int) -> Date {
+        var components = DateComponents()
+        components.day = days
+        components.month = months
+        components.year = years
+        let offsetDate = Calendar.current.date(byAdding: components, to: self)!
+        return offsetDate
+    }
 }

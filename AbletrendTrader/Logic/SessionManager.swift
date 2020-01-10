@@ -11,6 +11,7 @@ import Foundation
 class SessionManager {
     private let networkManager = NetworkManager.shared
     private let config = Config.shared
+    private let liveUpdateFrequency: TimeInterval = 10
     
     let live: Bool
     private(set) var currentPosition: Position?
@@ -78,9 +79,6 @@ class SessionManager {
             
             switch result {
             case .success(let orders):
-                if self.liveOrders.count != orders.count {
-                    print(Date().hourMinuteSecond(), "Live orders changed,", self.stopOrders.count, "stop orders")
-                }
                 self.liveOrders = orders
                 completion?(nil)
             case .failure(let error):
@@ -88,7 +86,7 @@ class SessionManager {
                 print(Date().hourMinuteSecond(), "Live orders update failed")
             }
             if self.monitoringLiveOrders {
-                self.timer = Timer.scheduledTimer(timeInterval: 10,
+                self.timer = Timer.scheduledTimer(timeInterval: self.liveUpdateFrequency,
                                                   target: self,
                                                   selector: #selector(self.refreshLiveOrdersTimerFunc),
                                                   userInfo: self,
@@ -286,8 +284,7 @@ class SessionManager {
                                                   exitTime: orderConfirmation.time,
                                                   idealExitPrice: idealClosingPrice,
                                                   actualExitPrice: orderConfirmation.price,
-                                                  exitOrderRef: orderConfirmation.orderRef,
-                                                  exitMethod: reason)
+                                                  exitOrderRef: orderConfirmation.orderRef)
                                 trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
                                 trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                                 self.trades.append(trade)
@@ -344,8 +341,7 @@ class SessionManager {
                                       actualEntryPrice: closedPosition.idealEntryPrice,
                                       exitTime: closingTime,
                                       idealExitPrice: closingPrice,
-                                      actualExitPrice: closingPrice,
-                                      exitMethod: reason)
+                                      actualExitPrice: closingPrice)
                     trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
                     trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                     trades.append(trade)
@@ -357,8 +353,7 @@ class SessionManager {
                                       actualEntryPrice: closedPosition.idealEntryPrice,
                                       exitTime: closingTime,
                                       idealExitPrice: closingPrice,
-                                      actualExitPrice: closingPrice,
-                                      exitMethod: reason)
+                                      actualExitPrice: closingPrice)
                     trade.entrySnapshot = self.config.saveChartsPerTrade ? closedPosition.entrySnapshot : nil
                     trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                     trades.append(trade)
@@ -400,8 +395,7 @@ class SessionManager {
                                           exitTime: exitOrderConfirmation.time,
                                           idealExitPrice: idealExitPrice,
                                           actualExitPrice: exitOrderConfirmation.price,
-                                          exitOrderRef: exitOrderConfirmation.orderRef,
-                                          exitMethod: exitReason)
+                                          exitOrderRef: exitOrderConfirmation.orderRef)
                         trade.entrySnapshot = self.config.saveChartsPerTrade ? currentPosition.entrySnapshot : nil
                         trade.exitSnapshot = self.config.saveChartsPerTrade ? closingChart : nil
                         self.trades.append(trade)
@@ -523,11 +517,11 @@ class SessionManager {
         var tradesList: [TradesTableRowItem] = []
         
         if let currentPosition = currentPosition {
-            let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.2f", currentPosition.stopLoss!.stop) : "--"
+            let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.3f", currentPosition.stopLoss!.stop) : "--"
             
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
-                                                 iEntry: String(format: "%.2f", currentPosition.idealEntryPrice),
-                                                 aEntry: String(format: "%.2f", currentPosition.actualEntryPrice),
+                                                 iEntry: String(format: "%.3f", currentPosition.idealEntryPrice),
+                                                 aEntry: String(format: "%.3f", currentPosition.actualEntryPrice),
                                                  stop: currentStop,
                                                  iExit: "--",
                                                  aExit: "--",
@@ -538,12 +532,12 @@ class SessionManager {
         
         for trade in trades.reversed() {
             tradesList.append(TradesTableRowItem(type: trade.direction.description(),
-                                                 iEntry: String(format: "%.2f", trade.idealEntryPrice),
-                                                 aEntry: String(format: "%.2f", trade.actualEntryPrice),
+                                                 iEntry: String(format: "%.3f", trade.idealEntryPrice),
+                                                 aEntry: String(format: "%.3f", trade.actualEntryPrice),
                                                  stop: "--",
-                                                 iExit: String(format: "%.2f", trade.idealExitPrice),
-                                                 aExit: String(format: "%.2f", trade.actualExitPrice),
-                                                 pAndL: String(format: "%.2f", trade.actualProfit ?? 0),
+                                                 iExit: String(format: "%.3f", trade.idealExitPrice),
+                                                 aExit: String(format: "%.3f", trade.actualExitPrice),
+                                                 pAndL: String(format: "%.3f", trade.actualProfit ?? 0),
                                                  entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
                                                  exitTime: dateFormatter.string(from: trade.exitTime)))
         }
@@ -607,10 +601,8 @@ class SessionManager {
                 switch result {
                 case .success(let trades):
                     let matchingTrades = trades.filter { trade -> Bool in
-                        return trade.tradeTime.timeIntervalSinceNow < 0 &&
-                        trade.direction == direction &&
-                            trade.size == size
-                        }
+                        return trade.orderRef == orderRef && trade.direction == direction && trade.size == size
+                    }
                     if let recentTrade = matchingTrades.first,
                         let actualPrice = recentTrade.price.double,
                         let orderId = orderId {
@@ -755,7 +747,10 @@ class SessionManager {
                             trade.position == "0"
                         }
                     if let closingTrade = matchingTrades.first, let closingPrice = closingTrade.price.double {
-                        let orderConfirmation = OrderConfirmation(price: closingPrice, time: closingTrade.tradeTime, orderRef: closingTrade.orderRef ?? "")
+                        
+                        let orderConfirmation = OrderConfirmation(price: closingPrice,
+                                                                  time: closingTrade.tradeTime,
+                                                                  orderRef: closingTrade.orderRef ?? "STOPORDER")
                         DispatchQueue.main.async {
                             completion(.success(orderConfirmation))
                         }
@@ -770,7 +765,6 @@ class SessionManager {
     }
     
     // Private:
-    
     @objc private func refreshLiveOrdersTimerFunc() {
         refreshLiveOrders()
     }
@@ -781,5 +775,52 @@ class SessionManager {
             return time.generateDateAndTimeIdentifier() + "-" + entryTradeRef
         }
         return time.generateDateAndTimeIdentifier()
+    }
+    
+    private func generatesTradesHistory() -> [Trade] {
+        let EntryOrderRefLength = 12
+        let ExitOrderRefLength = 25
+        let startOfToday = Date().startOfDay().getPastOrFutureDate(days: -1, months: 0, years: 0)
+        
+        let relevantOrders = liveOrders.filter { liveOrder -> Bool in
+            return liveOrder.lastExecutionTime > startOfToday &&
+                (liveOrder.order_ref.length == EntryOrderRefLength || liveOrder.order_ref.length == ExitOrderRefLength) &&
+                liveOrder.status == "Filled"
+        }
+        
+        var closingOrder: LiveOrder?
+        var entryOrder: LiveOrder?
+        var trades: [Trade] = []
+        
+        for order in relevantOrders {
+            if closingOrder == nil {
+                if order.order_ref.length == ExitOrderRefLength {
+                    closingOrder = order
+                } else {
+                    continue
+                }
+            } else if let closingOrder = closingOrder, entryOrder == nil {
+                if order.order_ref.length == EntryOrderRefLength,
+                    closingOrder.order_ref.contains(order.order_ref),
+                    closingOrder.direction != order.direction {
+                    entryOrder = order
+                } else {
+                    continue
+                }
+            } else if let closingOrder = closingOrder, let entryOrder = entryOrder {
+                let trade = Trade(direction: order.direction,
+                                  entryTime: entryOrder.lastExecutionTime,
+                                  idealEntryPrice: entryOrder.auxPrice?.double ?? 0.0,
+                                  actualEntryPrice: entryOrder.auxPrice?.double ?? 0.0,
+                                  entryOrderRef: entryOrder.order_ref,
+                                  exitTime: closingOrder.lastExecutionTime,
+                                  idealExitPrice: closingOrder.auxPrice?.double ?? 0.0,
+                                  actualExitPrice: closingOrder.auxPrice?.double ?? 0.0,
+                                  exitOrderRef: closingOrder.order_ref)
+                trades.append(trade)
+            }
+        }
+        
+        return trades
     }
 }

@@ -191,8 +191,9 @@ class SessionManager {
             print(Date().hourMinuteSecond() + ": Actions for " + priceBarTime.hourMinuteSecond() + " already processed")
             return
         }
-        
         currentPriceBarTime = priceBarTime
+        
+        
         if live {
             let queue = DispatchQueue.global()
             queue.async { [weak self] in
@@ -319,13 +320,17 @@ class SessionManager {
                     
                     semaphore.wait()
                     
-                    if actions.count > 1 {
+                    if actions.count > 1, inProcessActionIndex != actions.count - 1 {
                         print("Wait 1 second before executing the next consecutive order")
                         sleep(1)
                     }
                 }
             }
-        } else {
+        }
+        
+        // Simulation:
+        
+        else {
             for action in actions {
                 
                 switch action {
@@ -732,7 +737,6 @@ class SessionManager {
                             trade.position == "0"
                         }
                     if let closingTrade = matchingTrades.first, let closingPrice = closingTrade.price.double {
-                        
                         let orderConfirmation = OrderConfirmation(price: closingPrice,
                                                                   time: closingTrade.tradeTime,
                                                                   orderRef: closingTrade.orderRef ?? "STOPORDER")

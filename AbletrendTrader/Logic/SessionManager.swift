@@ -158,15 +158,25 @@ class SessionManager {
                 return
             }
             
-            if let order = self.stopOrders.first,
-                let stopPrice = order.auxPrice?.double,
-                order.direction != self.currentPositionDirection {
-                self.currentPosition?.stopLoss = StopLoss(stop: stopPrice,
-                                                          source: .currentBar,
-                                                          stopOrderId: String(format: "%d", order.orderId))
-            }
-            DispatchQueue.main.async {
-                completionHandler?(.success(true))
+            self.networkManager.fetchLiveOrders { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let orders):
+                    self.liveOrders = orders
+                    if let order = self.stopOrders.first,
+                        let stopPrice = order.auxPrice?.double,
+                        order.direction != self.currentPositionDirection {
+                        self.currentPosition?.stopLoss = StopLoss(stop: stopPrice,
+                                                                  source: .currentBar,
+                                                                  stopOrderId: String(format: "%d", order.orderId))
+                    }
+                case .failure:
+                    print(Date().hourMinuteSecond(), "Live orders update failed")
+                }
+                DispatchQueue.main.async {
+                    completionHandler?(.success(true))
+                }
             }
         }
     }
@@ -493,8 +503,8 @@ class SessionManager {
             // reverse current positions
             if let currentPosition = self.currentPosition {
                 self.enterAtMarket(priceBarTime: priceBarTime,
-                                 direction: currentPosition.direction.reverse(),
-                                 size: currentPosition.size)
+                                   direction: currentPosition.direction.reverse(),
+                                   size: currentPosition.size)
                 { result in
                     switch result {
                     case .success(let exitOrderConfirmation):

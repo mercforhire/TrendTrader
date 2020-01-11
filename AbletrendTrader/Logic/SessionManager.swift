@@ -85,6 +85,7 @@ class SessionManager {
                 completion?(error)
                 print(Date().hourMinuteSecond(), "Live orders update failed")
             }
+            
             if self.monitoringLiveOrders {
                 self.timer = Timer.scheduledTimer(timeInterval: self.liveUpdateFrequency,
                                                   target: self,
@@ -236,6 +237,38 @@ class SessionManager {
                             
                             semaphore.signal()
                         }
+                    case .reversedPosition(let oldPosition, let newPosition, _):
+                        self.enterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: oldPosition.size + newPosition.size)
+                        { result in
+                            switch result {
+                            case .success(let orderConfirmation):
+                                // closed old position
+                                let trade = Trade(direction: oldPosition.direction,
+                                                  entryTime: oldPosition.entryTime,
+                                                  idealEntryPrice: oldPosition.idealEntryPrice,
+                                                  actualEntryPrice: oldPosition.actualEntryPrice,
+                                                  entryOrderRef: oldPosition.entryOrderRef,
+                                                  exitTime: orderConfirmation.time,
+                                                  idealExitPrice: newPosition.idealEntryPrice,
+                                                  actualExitPrice: orderConfirmation.price,
+                                                  exitOrderRef: orderConfirmation.orderRef)
+                                self.trades.append(trade)
+                                
+                                // opened new position
+                                self.currentPosition = newPosition
+                                self.currentPosition?.actualEntryPrice = orderConfirmation.price
+                                self.currentPosition?.entryTime = orderConfirmation.time
+                                self.currentPosition?.entryOrderRef = orderConfirmation.orderRef
+                                self.currentPosition?.stopLoss?.stopOrderId = orderConfirmation.stopOrderId
+                                completion(nil)
+                                inProcessActionIndex += 1
+                            case .failure(let networkError):
+                                completion(networkError)
+                                retriedTimes += 1
+                            }
+                            
+                            semaphore.signal()
+                        }
                     case .updatedStop(let newStop):
                         guard let stopOrderId = self.currentPosition?.stopLoss?.stopOrderId,
                             let size = self.currentPosition?.size,
@@ -313,7 +346,7 @@ class SessionManager {
                             
                             semaphore.signal()
                         }
-                    default:
+                    case .noAction(_):
                         inProcessActionIndex += 1
                         semaphore.signal()
                     }
@@ -346,6 +379,18 @@ class SessionManager {
                 case .openedPosition(let newPosition, _):
                     currentPosition = newPosition
                     currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
+                case .reversedPosition(let oldPosition, let newPosition, _):
+                    let trade = Trade(direction: oldPosition.direction,
+                                      entryTime: oldPosition.entryTime,
+                                      idealEntryPrice: oldPosition.idealEntryPrice,
+                                      actualEntryPrice: oldPosition.idealEntryPrice,
+                                      exitTime: newPosition.entryTime,
+                                      idealExitPrice: newPosition.idealEntryPrice,
+                                      actualExitPrice: newPosition.idealEntryPrice)
+                    trades.append(trade)
+                    
+                    currentPosition = newPosition
+                    currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
                 case .updatedStop(let newStop):
                     currentPosition?.stopLoss = newStop
                 case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, _):
@@ -368,7 +413,7 @@ class SessionManager {
                                       actualExitPrice: closingPrice)
                     trades.append(trade)
                     currentPosition = nil
-                default:
+                case .noAction(_):
                     break
                 }
             }
@@ -376,7 +421,124 @@ class SessionManager {
         }
     }
     
-    func enterAtMarket(priceBarTime: Date,
+    func exitPositions(priceBarTime: Date,
+                       idealExitPrice: Double,
+                       exitReason: ExitMethod,
+                       completion: @escaping (Swift.Result<OrderConfirmation?, NetworkError>) -> Void) {
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            
+            let semaphore = DispatchSemaphore(value: 0)
+            var errorSoFar: NetworkError?
+            var orderConfirmation: OrderConfirmation?
+            
+            // cancel stop order
+            self.deleteAllStopOrders { networkError in
+                if let networkError = networkError {
+                    errorSoFar = networkError
+                }
+                semaphore.signal()
+            }
+            
+            semaphore.wait()
+            
+            // reverse current position
+            if let currentPosition = self.currentPosition {
+                self.enterAtMarket(priceBarTime: priceBarTime,
+                                   direction: currentPosition.direction.reverse(),
+                                   size: currentPosition.size)
+                { result in
+                    switch result {
+                    case .success(let exitOrderConfirmation):
+                        let trade = Trade(direction: currentPosition.direction,
+                                          entryTime: currentPosition.entryTime,
+                                          idealEntryPrice: currentPosition.idealEntryPrice,
+                                          actualEntryPrice: currentPosition.actualEntryPrice,
+                                          entryOrderRef: currentPosition.entryOrderRef,
+                                          exitTime: exitOrderConfirmation.time,
+                                          idealExitPrice: idealExitPrice,
+                                          actualExitPrice: exitOrderConfirmation.price,
+                                          exitOrderRef: exitOrderConfirmation.orderRef)
+                        self.trades.append(trade)
+                        self.currentPosition = nil
+                        orderConfirmation = exitOrderConfirmation
+                    case .failure(let networkError):
+                        errorSoFar = networkError
+                    }
+                    semaphore.signal()
+                }
+                
+                semaphore.wait()
+            }
+            
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {
+                    return
+                }
+                
+                self.refreshIBSession { result in
+                    if let networkError = errorSoFar {
+                        completion(.failure(networkError))
+                    } else if let orderConfirmation = orderConfirmation {
+                        completion(.success(orderConfirmation))
+                    } else {
+                        completion(.success(nil))
+                    }
+                }
+            }
+        }
+    }
+    
+    func getTotalPAndL() -> Double {
+        var pAndL: Double = 0
+        
+        for trade in trades {
+            pAndL = pAndL + (trade.actualProfit ?? 0)
+        }
+        
+        return pAndL
+    }
+    
+    func listOfTrades() -> [TradesTableRowItem] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeStyle = .medium
+        dateFormatter.timeZone = Date.DefaultTimeZone
+        
+        var tradesList: [TradesTableRowItem] = []
+        
+        if let currentPosition = currentPosition {
+            let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.3f", currentPosition.stopLoss!.stop) : "--"
+            
+            tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
+                                                 iEntry: String(format: "%.3f", currentPosition.idealEntryPrice),
+                                                 aEntry: String(format: "%.3f", currentPosition.actualEntryPrice),
+                                                 stop: currentStop,
+                                                 iExit: "--",
+                                                 aExit: "--",
+                                                 pAndL: "--",
+                                                 entryTime: dateFormatter.string(from: currentPosition.entryTime),
+                                                 exitTime: "--"))
+        }
+        
+        for trade in trades.reversed() {
+            tradesList.append(TradesTableRowItem(type: trade.direction.description(),
+                                                 iEntry: String(format: "%.3f", trade.idealEntryPrice),
+                                                 aEntry: String(format: "%.3f", trade.actualEntryPrice),
+                                                 stop: "--",
+                                                 iExit: String(format: "%.3f", trade.idealExitPrice),
+                                                 aExit: String(format: "%.3f", trade.actualExitPrice),
+                                                 pAndL: String(format: "%.3f", trade.actualProfit ?? 0),
+                                                 entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
+                                                 exitTime: dateFormatter.string(from: trade.exitTime)))
+        }
+        
+        return tradesList
+    }
+    
+    private func enterAtMarket(priceBarTime: Date,
                        stop: Double? = nil,
                        direction: TradeDirection,
                        size: Int,
@@ -481,78 +643,7 @@ class SessionManager {
         }
     }
     
-    func exitPositions(priceBarTime: Date,
-                       idealExitPrice: Double,
-                       exitReason: ExitMethod,
-                       completion: @escaping (Swift.Result<OrderConfirmation?, NetworkError>) -> Void) {
-        let queue = DispatchQueue.global()
-        queue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            
-            let semaphore = DispatchSemaphore(value: 0)
-            var errorSoFar: NetworkError?
-            var orderConfirmation: OrderConfirmation?
-            
-            // cancel stop order
-            self.deleteAllStopOrders { networkError in
-                if let networkError = networkError {
-                    errorSoFar = networkError
-                }
-                semaphore.signal()
-            }
-            
-            semaphore.wait()
-            
-            // reverse current position
-            if let currentPosition = self.currentPosition {
-                self.enterAtMarket(priceBarTime: priceBarTime,
-                                   direction: currentPosition.direction.reverse(),
-                                   size: currentPosition.size)
-                { result in
-                    switch result {
-                    case .success(let exitOrderConfirmation):
-                        let trade = Trade(direction: currentPosition.direction,
-                                          entryTime: currentPosition.entryTime,
-                                          idealEntryPrice: currentPosition.idealEntryPrice,
-                                          actualEntryPrice: currentPosition.actualEntryPrice,
-                                          entryOrderRef: currentPosition.entryOrderRef,
-                                          exitTime: exitOrderConfirmation.time,
-                                          idealExitPrice: idealExitPrice,
-                                          actualExitPrice: exitOrderConfirmation.price,
-                                          exitOrderRef: exitOrderConfirmation.orderRef)
-                        self.trades.append(trade)
-                        self.currentPosition = nil
-                        orderConfirmation = exitOrderConfirmation
-                    case .failure(let networkError):
-                        errorSoFar = networkError
-                    }
-                    semaphore.signal()
-                }
-                
-                semaphore.wait()
-            }
-            
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else {
-                    return
-                }
-                
-                self.refreshIBSession { result in
-                    if let networkError = errorSoFar {
-                        completion(.failure(networkError))
-                    } else if let orderConfirmation = orderConfirmation {
-                        completion(.success(orderConfirmation))
-                    } else {
-                        completion(.success(nil))
-                    }
-                }
-            }
-        }
-    }
-    
-    func deleteAllStopOrders(completion: @escaping (NetworkError?) -> ()) {
+    private func deleteAllStopOrders(completion: @escaping (NetworkError?) -> ()) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {
@@ -580,52 +671,6 @@ class SessionManager {
                 completion(foundNetworkError)
             }
         }
-    }
-    
-    func getTotalPAndL() -> Double {
-        var pAndL: Double = 0
-        
-        for trade in trades {
-            pAndL = pAndL + (trade.actualProfit ?? 0)
-        }
-        
-        return pAndL
-    }
-    
-    func listOfTrades() -> [TradesTableRowItem] {
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeStyle = .medium
-        dateFormatter.timeZone = Date.DefaultTimeZone
-        
-        var tradesList: [TradesTableRowItem] = []
-        
-        if let currentPosition = currentPosition {
-            let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.3f", currentPosition.stopLoss!.stop) : "--"
-            
-            tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
-                                                 iEntry: String(format: "%.3f", currentPosition.idealEntryPrice),
-                                                 aEntry: String(format: "%.3f", currentPosition.actualEntryPrice),
-                                                 stop: currentStop,
-                                                 iExit: "--",
-                                                 aExit: "--",
-                                                 pAndL: "--",
-                                                 entryTime: dateFormatter.string(from: currentPosition.entryTime),
-                                                 exitTime: "--"))
-        }
-        
-        for trade in trades.reversed() {
-            tradesList.append(TradesTableRowItem(type: trade.direction.description(),
-                                                 iEntry: String(format: "%.3f", trade.idealEntryPrice),
-                                                 aEntry: String(format: "%.3f", trade.actualEntryPrice),
-                                                 stop: "--",
-                                                 iExit: String(format: "%.3f", trade.idealExitPrice),
-                                                 aExit: String(format: "%.3f", trade.actualExitPrice),
-                                                 pAndL: String(format: "%.3f", trade.actualProfit ?? 0),
-                                                 entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
-                                                 exitTime: dateFormatter.string(from: trade.exitTime)))
-        }
-        
-        return tradesList
     }
     
     private func deleteStopOrder(stopOrderId: String, completion: @escaping (NetworkError?) -> ()) {
@@ -756,7 +801,6 @@ class SessionManager {
         }
     }
     
-    // Private:
     @objc private func refreshLiveOrdersTimerFunc() {
         refreshLiveOrders()
     }

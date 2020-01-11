@@ -29,6 +29,7 @@ enum EntryType {
 enum TradeActionType {
     case noAction(entryType: EntryType?)
     case openedPosition(newPosition: Position, entryType: EntryType)
+    case reversedPosition(oldPosition: Position, newPosition: Position, entryType: EntryType)
     case updatedStop(stop: StopLoss)
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
@@ -44,6 +45,9 @@ enum TradeActionType {
         case .openedPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
+        case .reversedPosition(let oldPosition, let newPosition, let entryType):
+            let type: String = oldPosition.direction == .long ? "Long" : "Short"
+            return String(format: "%@: Reversed %@ position at price %.2f with SL %.2f for the minute %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
         case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())

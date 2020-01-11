@@ -121,12 +121,8 @@ class TraderBot {
                 return [.noAction(entryType: nil)]
         }
         
-        // no current position, check if we should enter on the current bar
-        if !sessionManager.hasCurrentPosition {
-            return [handleOpeningNewTrade(currentBar: priceBar)]
-        }
         // already have current position, update the stoploss or close it if needed
-        else {
+        if let currentPosition = sessionManager.currentPosition {
             // Rule 3: If we reached FlatPositionsTime, exit the trade immediately
             if config.flatPositionsTime(chart: chart) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
@@ -153,13 +149,13 @@ class TraderBot {
                     priceBar.candleStick.low <= stop {
                     let exitMethod: ExitMethod = sessionManager.stopLoss?.source == .supportResistanceLevel ||
                         sessionManager.stopLoss?.source == .currentBar ? .brokeSupportResistence : .twoGreenBars
-                    let exitAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
+                    let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openedPosition(let position, let entryType):
-                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
+                        return [verifyAction, .openedPosition(newPosition: position, entryType: entryType)]
                     default:
-                        return [exitAction]
+                        return [verifyAction]
                     }
                 }
             default:
@@ -167,13 +163,13 @@ class TraderBot {
                     let stopSource = sessionManager.stopLoss?.source,
                     priceBar.candleStick.high >= stop {
                     let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .brokeSupportResistence : .twoGreenBars
-                    let exitAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
+                    let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openedPosition(let position, let entryType):
-                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
+                        return [verifyAction, .openedPosition(newPosition: position, entryType: entryType)]
                     default:
-                        return [exitAction]
+                        return [verifyAction]
                     }
                 }
             }
@@ -186,7 +182,7 @@ class TraderBot {
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openedPosition(let position, let entryType):
-                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
+                        return [.reversedPosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -197,7 +193,7 @@ class TraderBot {
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openedPosition(let position, let entryType):
-                        return [exitAction, .openedPosition(newPosition: position, entryType: entryType)]
+                        return [.reversedPosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -279,9 +275,13 @@ class TraderBot {
                     }
                 }
             }
-            
-            return [.noAction(entryType: nil)]
         }
+        // no current position, check if we should enter on the current bar
+        else if !sessionManager.hasCurrentPosition {
+            return [handleOpeningNewTrade(currentBar: priceBar)]
+        }
+        
+        return [.noAction(entryType: nil)]
     }
 
     func buyAtMarket() -> TradeActionType {

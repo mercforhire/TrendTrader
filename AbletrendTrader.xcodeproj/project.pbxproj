@@ -53,6 +53,7 @@
 		8592435823B14DD5004CE61F /* StopLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435723B14DD5004CE61F /* StopLoss.swift */; };
 		8592435F23B1E59E004CE61F /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592435E23B1E59E004CE61F /* Config.swift */; };
 		8592436123B55270004CE61F /* Double+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592436023B55270004CE61F /* Double+Extensions.swift */; };
+		85C193B823CA6B6F00F7CE68 /* NinjaTraderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C193B723CA6B6F00F7CE68 /* NinjaTraderManager.swift */; };
 		85C8CED823B7130B00E75F76 /* ConfigViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C8CED723B7130B00E75F76 /* ConfigViewController.swift */; };
 		85C8CEDC23B7235300E75F76 /* ChartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C8CEDB23B7235300E75F76 /* ChartViewController.swift */; };
 /* End PBXBuildFile section */
@@ -108,6 +109,7 @@
 		8592435723B14DD5004CE61F /* StopLoss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopLoss.swift; sourceTree = "<group>"; };
 		8592435E23B1E59E004CE61F /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		8592436023B55270004CE61F /* Double+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Extensions.swift"; sourceTree = "<group>"; };
+		85C193B723CA6B6F00F7CE68 /* NinjaTraderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NinjaTraderManager.swift; sourceTree = "<group>"; };
 		85C8CED723B7130B00E75F76 /* ConfigViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigViewController.swift; sourceTree = "<group>"; };
 		85C8CEDB23B7235300E75F76 /* ChartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartViewController.swift; sourceTree = "<group>"; };
 		E5A4543CD303759A7D95F956 /* Pods-AbletrendTrader.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.release.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.release.xcconfig"; sourceTree = "<group>"; };
@@ -243,6 +245,7 @@
 				85582AB223B5E97800DC16AC /* ChartManager.swift */,
 				856D95B423BBE180004A4385 /* SessionManager.swift */,
 				856D957B23B73B04004A4385 /* NetworkManager.swift */,
+				85C193B723CA6B6F00F7CE68 /* NinjaTraderManager.swift */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -444,6 +447,7 @@
 				8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */,
 				8592435223ADE182004CE61F /* TraderBot.swift in Sources */,
 				856D958923B866F1004A4385 /* ErrorResponse.swift in Sources */,
+				85C193B823CA6B6F00F7CE68 /* NinjaTraderManager.swift in Sources */,
 				856D959A23B964B3004A4385 /* OrderQuestionsBuilder.swift in Sources */,
 				85C8CED823B7130B00E75F76 /* ConfigViewController.swift in Sources */,
 				8592433A23AC41C8004CE61F /* Parser.swift in Sources */,

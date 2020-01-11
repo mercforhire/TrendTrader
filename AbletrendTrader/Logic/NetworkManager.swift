@@ -98,7 +98,7 @@ enum NetworkError: Error {
 //        a.addButton(withTitle: "Okay")
 //        a.alertStyle = NSAlert.Style.warning
 //        a.runModal()
-        print(Date().hourMinuteSecond(), self.displayMessage(), "error encountered")
+        print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
     }
 }
 
@@ -442,7 +442,7 @@ class NetworkManager {
                         }
                     }
                 } else if let data = response.data, let errorResponse = self.errorResponseBuilder.buildErrorResponseFrom(data) {
-                    if errorResponse.error == "Order couldn't be submitted:Local order ID=\(orderRef) is already registered." {
+                    if errorResponse.error?.contains("is already registered") ?? false {
                         completionHandler(.failure(.orderAlreadyPlaced))
                     } else {
                         completionHandler(.failure(.placeOrderFailed))
@@ -463,7 +463,6 @@ class NetworkManager {
     
     
     // Place Order Reply
-    // https://localhost:5000/v1/portal/iserver/reply/{replyid}
     func placeOrderReply(question: Question, answer: Bool, completionHandler: @escaping (Swift.Result<[PlacedOrderResponse], NetworkError>) -> Void) {
 
         guard let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/reply/" + question.identifier) else {

@@ -505,7 +505,7 @@ class SessionManager {
             
             semaphore.wait()
             
-            // reverse current positions
+            // reverse current position
             if let currentPosition = self.currentPosition {
                 self.enterAtMarket(priceBarTime: priceBarTime,
                                    direction: currentPosition.direction.reverse(),
@@ -629,7 +629,7 @@ class SessionManager {
     }
     
     private func deleteStopOrder(stopOrderId: String, completion: @escaping (NetworkError?) -> ()) {
-        self.networkManager.deleteOrder(orderId: stopOrderId) { result in
+        networkManager.deleteOrder(orderId: stopOrderId) { result in
             switch result {
             case .success(let success):
                 if !success {
@@ -643,9 +643,12 @@ class SessionManager {
         }
     }
     
-    private func modifyStopOrder(stopOrderId: String, stop: Double, quantity: Int, direction: TradeDirection, completion: @escaping (NetworkError?) -> ()) {
+    private func modifyStopOrder(stopOrderId: String,
+                                 stop: Double,
+                                 quantity: Int,
+                                 direction: TradeDirection,
+                                 completion: @escaping (NetworkError?) -> ()) {
         networkManager.modifyOrder(orderType: .stop(price: stop), direction: direction, price: stop, quantity: quantity, orderId: stopOrderId) { result in
-            
             switch result {
             case .success:
                 completion(nil)

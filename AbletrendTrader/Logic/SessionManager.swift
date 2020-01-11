@@ -41,7 +41,7 @@ class SessionManager {
         return currentPosition?.securedProfit
     }
     
-    var currentlyPriceBarTime: Date?
+    var currentPriceBarTime: Date?
     
     init(live: Bool) {
         self.live = live
@@ -172,17 +172,17 @@ class SessionManager {
     }
     
     func resetCurrentlyProcessingPriceBar() {
-        currentlyPriceBarTime = nil
+        currentPriceBarTime = nil
     }
     
     func processActions(priceBarTime: Date, actions: [TradeActionType], completion: @escaping (NetworkError?) -> ()) {
-        if currentlyPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
+        if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
             print(Date().hourMinuteSecond() + ": Actions for " + priceBarTime.hourMinuteSecond() + " already processed")
             return
         }
         
-        currentlyPriceBarTime = priceBarTime
+        currentPriceBarTime = priceBarTime
         if live {
             let queue = DispatchQueue.global()
             queue.async { [weak self] in
@@ -207,7 +207,7 @@ class SessionManager {
                     
                     switch action {
                     case .openedPosition(let newPosition, _):
-                        self.openNewPosition(newPosition: newPosition)
+                        self.enterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: newPosition.size)
                         { result in
                             switch result {
                             case .success(let orderConfirmation):
@@ -237,7 +237,10 @@ class SessionManager {
                                 return
                         }
                         
-                        self.modifyStopOrder(stopOrderId: stopOrderId, stop: newStop.stop, quantity: size, direction: direction.reverse()) { networkError in
+                        self.modifyStopOrder(stopOrderId: stopOrderId,
+                                             stop: newStop.stop,
+                                             quantity: size,
+                                             direction: direction.reverse()) { networkError in
                             if networkError == nil {
                                 self.currentPosition?.stopLoss?.stop = newStop.stop
                             }
@@ -307,8 +310,8 @@ class SessionManager {
                     semaphore.wait()
                     
                     if actions.count > 1 {
-                        print("Wait 3 seconds before running the next consecutive order")
-                        sleep(3)
+                        print("Wait 1 second before executing the next consecutive order")
+                        sleep(1)
                     }
                 }
             }
@@ -358,6 +361,111 @@ class SessionManager {
         }
     }
     
+    func enterAtMarket(priceBarTime: Date,
+                       stop: Double? = nil,
+                       direction: TradeDirection,
+                       size: Int,
+                       completion: @escaping (Swift.Result<OrderConfirmation, NetworkError>) -> Void) {
+        
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            
+            let semaphore = DispatchSemaphore(value: 0)
+            var errorSoFar: NetworkError?
+            let orderRef = priceBarTime.generateOrderIdentifier(prefix: direction.description(short: true))
+            var orderId: String?
+            var stopOrderId: String?
+            
+            if let stop = stop {
+                self.networkManager.placeBrackOrder(orderRef: orderRef,
+                                                    stopPrice: stop,
+                                                    direction: direction,
+                                                    size: size)
+                { result in
+                    switch result {
+                    case .success(let entryOrderConfirmations):
+                        if entryOrderConfirmations.count > 1,
+                            let entryOrderConfirmation = entryOrderConfirmations.first,
+                            let stopOrderConfirmation = entryOrderConfirmations.last {
+                            
+                            orderId = entryOrderConfirmation.orderId
+                            stopOrderId = stopOrderConfirmation.orderId
+                        } else {
+                           errorSoFar = .noOrderIdReturned
+                        }
+                    case .failure(let networkError):
+                        if networkError != .orderAlreadyPlaced {
+                            errorSoFar = networkError
+                        }
+                    }
+                    semaphore.signal()
+                }
+                
+                semaphore.wait()
+            } else {
+                self.networkManager.placeOrder(orderRef: orderRef,
+                                               orderType: .market,
+                                               direction: direction,
+                                               size: size) { result in
+                    switch result {
+                    case .success(let response):
+                        if let newOrderId = response.first?.orderId {
+                            orderId = newOrderId
+                        } else {
+                            errorSoFar = .noOrderIdReturned
+                        }
+                    case .failure(let networkError):
+                        if networkError != .orderAlreadyPlaced {
+                            errorSoFar = networkError
+                        }
+                    }
+                    semaphore.signal()
+                }
+                semaphore.wait()
+            }
+            
+            
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completion(.failure(errorSoFar))
+                }
+                return
+            }
+            
+            self.networkManager.fetchTrades { result in
+                switch result {
+                case .success(let trades):
+                    let matchingTrades = trades.filter { trade -> Bool in
+                        return trade.orderRef == orderRef && trade.direction == direction && trade.size == size
+                    }
+                    if let recentTrade = matchingTrades.first,
+                        let actualPrice = recentTrade.price.double,
+                        let orderId = orderId {
+                        
+                        DispatchQueue.main.async {
+                            let orderConfirmation = OrderConfirmation(price: actualPrice,
+                                                                      time: recentTrade.tradeTime,
+                                                                      orderId: orderId,
+                                                                      orderRef: orderRef,
+                                                                      stopOrderId: stopOrderId)
+                            completion(.success(orderConfirmation))
+                        }
+                    } else {
+                        completion(.failure(.placeOrderFailed))
+                    }
+                case .failure(let error):
+                    DispatchQueue.main.async {
+                        completion(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+    
     func exitPositions(priceBarTime: Date,
                        idealExitPrice: Double,
                        exitReason: ExitMethod,
@@ -371,9 +479,21 @@ class SessionManager {
             let semaphore = DispatchSemaphore(value: 0)
             var errorSoFar: NetworkError?
             var orderConfirmation: OrderConfirmation?
+            
+            // cancel stop order
+            self.deleteAllStopOrders { networkError in
+                if let networkError = networkError {
+                    errorSoFar = networkError
+                }
+                semaphore.signal()
+            }
+            
+            semaphore.wait()
+            
             // reverse current positions
             if let currentPosition = self.currentPosition {
-                self.enterMarket(direction: currentPosition.direction.reverse(),
+                self.enterAtMarket(priceBarTime: priceBarTime,
+                                 direction: currentPosition.direction.reverse(),
                                  size: currentPosition.size)
                 { result in
                     switch result {
@@ -399,16 +519,6 @@ class SessionManager {
                 semaphore.wait()
             }
             
-            // cancel stop order
-            self.deleteAllStopOrders { networkError in
-                if let networkError = networkError {
-                    errorSoFar = networkError
-                }
-                semaphore.signal()
-            }
-            
-            semaphore.wait()
-            
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
                     return
@@ -425,39 +535,6 @@ class SessionManager {
                 }
             }
         }
-    }
-    
-    func openNewPosition(newPosition: Position,
-                         completion: @escaping (Swift.Result<OrderConfirmation, NetworkError>) -> Void) {
-        
-        enterMarket(direction: newPosition.direction,
-                    size: config.positionSize,
-                    completion:
-            { result in
-                switch result {
-                case .success(let entryOrderConfirmation):
-                    if let stopLoss = newPosition.stopLoss {
-                        self.placeStopOrder(entryTradeRef: entryOrderConfirmation.orderRef,
-                                            direction: newPosition.direction.reverse(),
-                                            stopPrice: stopLoss.stop,
-                                            size: newPosition.size)
-                        { result in
-                            switch result {
-                            case .success(let stopOrderConfirmation):
-                                var finalOrderConfirmation = entryOrderConfirmation
-                                finalOrderConfirmation.stopOrderId = stopOrderConfirmation.orderId
-                                completion(.success(finalOrderConfirmation))
-                            case .failure(let networkError2):
-                                completion(.failure(networkError2))
-                            }
-                        }
-                    } else {
-                        completion(.success(entryOrderConfirmation))
-                    }
-                case .failure(let networkError):
-                    completion(.failure(networkError))
-                }
-        })
     }
     
     func deleteAllStopOrders(completion: @escaping (NetworkError?) -> ()) {
@@ -547,98 +624,6 @@ class SessionManager {
                 }
             case .failure(let error):
                 completion(error)
-            }
-        }
-    }
-    
-    private func enterMarket(direction: TradeDirection,
-                             size: Int,
-                             completion: @escaping (Swift.Result<OrderConfirmation, NetworkError>) -> Void) {
-        
-        let queue = DispatchQueue.global()
-        queue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            
-            let semaphore = DispatchSemaphore(value: 0)
-            var errorSoFar: NetworkError?
-            let now = Date()
-            let orderRef = self.generateOrderIdentifier(time: now)
-            var orderId: String?
-            
-            self.networkManager.placeOrder(orderRef: orderRef,
-                                           orderType: .market,
-                                           direction: direction,
-                                           size: size) { result in
-                switch result {
-                case .success(let response):
-                    orderId = response.orderId
-                case .failure(let error):
-                    errorSoFar = error
-                }
-                semaphore.signal()
-            }
-            semaphore.wait()
-            
-            if let errorSoFar = errorSoFar {
-                DispatchQueue.main.async {
-                    completion(.failure(errorSoFar))
-                }
-                return
-            }
-            
-            self.networkManager.fetchTrades { result in
-                switch result {
-                case .success(let trades):
-                    let matchingTrades = trades.filter { trade -> Bool in
-                        return trade.orderRef == orderRef && trade.direction == direction && trade.size == size
-                    }
-                    if let recentTrade = matchingTrades.first,
-                        let actualPrice = recentTrade.price.double,
-                        let orderId = orderId {
-                        
-                        DispatchQueue.main.async {
-                            let orderConfirmation = OrderConfirmation(price: actualPrice,
-                                                                      time: now,
-                                                                      orderId: orderId,
-                                                                      orderRef: orderRef)
-                            completion(.success(orderConfirmation))
-                        }
-                    } else {
-                        completion(.failure(.placeOrderFailed))
-                    }
-                case .failure(let error):
-                    DispatchQueue.main.async {
-                        completion(.failure(error))
-                    }
-                }
-            }
-        }
-    }
-    
-    private func placeStopOrder(entryTradeRef: String,
-                                direction: TradeDirection,
-                                stopPrice: Double,
-                                size: Int,
-                                completion: @escaping (Swift.Result<OrderConfirmation, NetworkError>) -> Void) {
-        
-        let now = Date()
-        let orderRef = generateOrderIdentifier(time: now, entryTradeRef: entryTradeRef)
-        networkManager.placeOrder(orderRef: orderRef,
-                                  orderType: .stop(price: stopPrice),
-                                  direction: direction,
-                                  size: size)
-        { result in
-            switch result {
-            case .success(let response):
-                let orderConfirmation = OrderConfirmation(price: stopPrice,
-                                                          time: now,
-                                                          orderId: response.orderId,
-                                                          orderRef: orderRef)
-                completion(.success(orderConfirmation))
-            case .failure(let error):
-                completion(.failure(error))
             }
         }
     }
@@ -757,60 +742,5 @@ class SessionManager {
     // Private:
     @objc private func refreshLiveOrdersTimerFunc() {
         refreshLiveOrders()
-    }
-    
-    // generate a unique order Id based on the current time and an optional entry trade ref
-    private func generateOrderIdentifier(time: Date, entryTradeRef: String? = nil) -> String {
-        if let entryTradeRef = entryTradeRef {
-            return time.generateDateAndTimeIdentifier() + "-" + entryTradeRef
-        }
-        return time.generateDateAndTimeIdentifier()
-    }
-    
-    private func generatesTradesHistory() -> [Trade] {
-        let EntryOrderRefLength = 12
-        let ExitOrderRefLength = 25
-        let startOfToday = Date().startOfDay().getPastOrFutureDate(days: -1, months: 0, years: 0)
-        
-        let relevantOrders = liveOrders.filter { liveOrder -> Bool in
-            return liveOrder.lastExecutionTime > startOfToday &&
-                (liveOrder.order_ref.length == EntryOrderRefLength || liveOrder.order_ref.length == ExitOrderRefLength) &&
-                liveOrder.status == "Filled"
-        }
-        
-        var closingOrder: LiveOrder?
-        var entryOrder: LiveOrder?
-        var trades: [Trade] = []
-        
-        for order in relevantOrders {
-            if closingOrder == nil {
-                if order.order_ref.length == ExitOrderRefLength {
-                    closingOrder = order
-                } else {
-                    continue
-                }
-            } else if let closingOrder = closingOrder, entryOrder == nil {
-                if order.order_ref.length == EntryOrderRefLength,
-                    closingOrder.order_ref.contains(order.order_ref),
-                    closingOrder.direction != order.direction {
-                    entryOrder = order
-                } else {
-                    continue
-                }
-            } else if let closingOrder = closingOrder, let entryOrder = entryOrder {
-                let trade = Trade(direction: order.direction,
-                                  entryTime: entryOrder.lastExecutionTime,
-                                  idealEntryPrice: entryOrder.auxPrice?.double ?? 0.0,
-                                  actualEntryPrice: entryOrder.auxPrice?.double ?? 0.0,
-                                  entryOrderRef: entryOrder.order_ref,
-                                  exitTime: closingOrder.lastExecutionTime,
-                                  idealExitPrice: closingOrder.auxPrice?.double ?? 0.0,
-                                  actualExitPrice: closingOrder.auxPrice?.double ?? 0.0,
-                                  exitOrderRef: closingOrder.order_ref)
-                trades.append(trade)
-            }
-        }
-        
-        return trades
     }
 }

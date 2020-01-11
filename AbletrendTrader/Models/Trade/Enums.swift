@@ -111,7 +111,7 @@ enum TradeDirection {
         case .long:
             return short ? "L" : "Long"
         case .short:
-            return short ? "S" :"Short"
+            return short ? "S" : "Short"
         }
     }
     

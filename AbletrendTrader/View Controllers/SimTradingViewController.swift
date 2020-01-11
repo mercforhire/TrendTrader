@@ -47,11 +47,6 @@ class SimTradingViewController: NSViewController {
         tableView.dataSource = self
     }
 
-    override func viewWillAppear() {
-        super.viewWillAppear()
-        preferredContentSize = NSSize(width: 860, height: 480)
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -162,8 +157,7 @@ extension SimTradingViewController: DataManagerDelegate {
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,
-            let lastBarTime = chart.lastBar?.time,
-            let lastBarId = chart.lastBar?.identifier else {
+            let lastBarTime = chart.lastBar?.time else {
                 return
         }
         

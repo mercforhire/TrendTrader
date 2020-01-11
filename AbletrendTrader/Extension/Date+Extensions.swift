@@ -68,13 +68,20 @@ extension Date {
         return response
     }
     
-    func generateDateAndTimeIdentifier() -> String {
+    private func generateDateAndTimeIdentifier() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.calendar = Calendar(identifier: .iso8601)
         dateFormatter.timeZone = Date.DefaultTimeZone
-        dateFormatter.dateFormat = "yyMMddHHmmss"
+        dateFormatter.dateFormat = "yyMMddHHmm"
         let response = dateFormatter.string(from: self)
         return response
+    }
+    
+    func generateOrderIdentifier(prefix: String, linkedToTradeRef: String? = nil) -> String {
+        if let linkedToTradeRef = linkedToTradeRef {
+            return prefix + "-" + generateDateAndTimeIdentifier() + "-" + linkedToTradeRef
+        }
+        return prefix + generateDateAndTimeIdentifier()
     }
     
     func isInSameDay(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {

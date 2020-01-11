@@ -36,13 +36,13 @@ class ChartManager {
         let components1 = DateComponents(year: Date().year(),
                                          month: Date().month(),
                                          day: Date().day(),
-                                         hour: 1,
-                                         minute: 30)
+                                         hour: 9,
+                                         minute: 15)
         self.simTime = calendar.date(from: components1)!
     }
     
     func fetchChart(completion: @escaping (_ chart: Chart?) -> Void) {
-        if live || !config.simulateTimePassage {
+        if live && !config.simulateTimePassage {
             var oneMinUrl: String?
             var twoMinUrl: String?
             var threeMinUrl: String?

@@ -109,6 +109,8 @@ class TraderBot {
             }
         }
         
+        // real code starts here:
+        
         guard chart.timeKeys.count > 1,
             let priceBar = priceBar ?? chart.lastBar,
             chart.timeKeys.contains(priceBar.identifier),
@@ -123,7 +125,7 @@ class TraderBot {
         if !sessionManager.hasCurrentPosition {
             return [handleOpeningNewTrade(currentBar: priceBar)]
         }
-        // already have current position, update it or close it if needed
+        // already have current position, update the stoploss or close it if needed
         else {
             // Rule 3: If we reached FlatPositionsTime, exit the trade immediately
             if config.flatPositionsTime(chart: chart) <= priceBar.time && !config.byPassTradingTimeRestrictions {
@@ -354,10 +356,10 @@ class TraderBot {
         
         if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(chart: chart).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
-            var position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
             return position
         } else if risk <= config.maxRisk {
-            var position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
             return position
         }
 
@@ -424,7 +426,7 @@ class TraderBot {
         // Worst case would be method 3 and still having stoploss > MaxRisk, either skip the trade or apply a hard stop at the MaxRisk
         
         // Method 1: previous resistence/support level
-        // Method 2: current resistence/support level plus or minus 1 depending on direction
+        // Method 2: current resistence/support level plus or minus 1 depending on directionx
         // Method 3: current bar's high plus 1 or low, minus 1 depending on direction(min 5 points)
         
         // Method 1 and 2:

@@ -84,7 +84,6 @@ class NinjaTraderManager {
         writeTextToFile(text: orderString)
     }
     
-    
     var counter = 0
     private func writeTextToFile(text: String) {
         let dir = URL(fileURLWithPath: config.ninjaTraderPath)

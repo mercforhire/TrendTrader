@@ -21,9 +21,9 @@ class Config {
     
     let sweetSpotMinDistance: Double  = 1.5 // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
     
-    let greenBarsExit: Double = 5.0 // the min profit the trade must in to use the 2 green bars exit rule
+    let greenBarsExit: Double = 10.0 // the min profit the trade must in to use the 2 green bars exit rule
     
-    let skipGreenBarsExit: Double = 20.0 // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
+    let skipGreenBarsExit: Double = 25.0 // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
     
     let enterOnPullback: Double = 20.0 // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
     
@@ -51,23 +51,23 @@ class Config {
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    let byPassTradingTimeRestrictions = true // DEFAULT: false
+    let byPassTradingTimeRestrictions = false // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
-    func timeIntervalForHighRiskEntry(chart: Chart) -> DateInterval {
+    func timeIntervalForHighRiskEntry(date: Date) -> DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: chart.absLastBarDate?.year(),
-                                         month: chart.absLastBarDate?.month(),
-                                         day: chart.absLastBarDate?.day(),
+        let components1 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
                                          hour: Config.shared.highRiskStart.0,
                                          minute: Config.shared.highRiskStart.1)
         let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: chart.absLastBarDate?.year(),
-                                         month: chart.absLastBarDate?.month(),
-                                         day: chart.absLastBarDate?.day(),
+        let components2 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
                                          hour: Config.shared.highRiskEnd.0,
                                          minute: Config.shared.highRiskEnd.1)
         let endDate: Date = calendar.date(from: components2)!
@@ -75,18 +75,18 @@ class Config {
     }
     
     // the time interval allowed to enter trades, default 9:20 am to 3:55 pm
-    func tradingTimeInterval(chart: Chart) -> DateInterval {
+    func tradingTimeInterval(date: Date) -> DateInterval {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: chart.absLastBarDate?.year(),
-                                         month: chart.absLastBarDate?.month(),
-                                         day: chart.absLastBarDate?.day(),
+        let components1 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
                                          hour: Config.shared.tradingStart.0,
                                          minute: Config.shared.tradingStart.1)
         let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: chart.absLastBarDate?.year(),
-                                         month: chart.absLastBarDate?.month(),
-                                         day: chart.absLastBarDate?.day(),
+        let components2 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
                                          hour: Config.shared.tradingEnd.0,
                                          minute: Config.shared.tradingEnd.1)
         let endDate: Date = calendar.date(from: components2)!
@@ -94,12 +94,12 @@ class Config {
     }
     
     // after this time, aim to sell at the close of any blue/red bar that's in favor of our ongoing trade
-    func clearPositionTime(chart: Chart) -> Date {
+    func clearPositionTime(date: Date) -> Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: chart.absLastBarDate?.year(),
-                                        month: chart.absLastBarDate?.month(),
-                                        day: chart.absLastBarDate?.day(),
+        let components = DateComponents(year: date.year(),
+                                        month: date.month(),
+                                        day: date.day(),
                                         hour: Config.shared.clearTime.0,
                                         minute: Config.shared.clearTime.1)
         let date: Date = calendar.date(from: components)!
@@ -107,12 +107,12 @@ class Config {
     }
     
     // after this time, clear all positions immediately
-    func flatPositionsTime(chart: Chart) -> Date {
+    func flatPositionsTime(date: Date) -> Date {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: chart.absLastBarDate?.year(),
-                                        month: chart.absLastBarDate?.month(),
-                                        day: chart.absLastBarDate?.day(),
+        let components = DateComponents(year: date.year(),
+                                        month: date.month(),
+                                        day: date.day(),
                                         hour: Config.shared.flatTime.0,
                                         minute: Config.shared.flatTime.1)
         let date: Date = calendar.date(from: components)!

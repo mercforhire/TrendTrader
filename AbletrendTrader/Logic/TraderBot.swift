@@ -124,12 +124,12 @@ class TraderBot {
         // already have current position, update the stoploss or close it if needed
         if let currentPosition = sessionManager.currentPosition {
             // Rule 3: If we reached FlatPositionsTime, exit the trade immediately
-            if config.flatPositionsTime(chart: chart) <= priceBar.time && !config.byPassTradingTimeRestrictions {
+            if config.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
             }
             
             // Rule 4: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
-            if config.clearPositionTime(chart: chart) <= priceBar.time && !config.byPassTradingTimeRestrictions {
+            if config.clearPositionTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 switch sessionManager.currentPositionDirection {
                 case .long:
                     if priceBar.barColor == .blue {
@@ -354,7 +354,7 @@ class TraderBot {
             break
         }
         
-        if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(chart: chart).contains(bar.time) {
+        if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(date: bar.time).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
             return position
@@ -373,12 +373,12 @@ class TraderBot {
         }
         
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
-        if !config.tradingTimeInterval(chart: chart).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
+        if !config.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil)
         }
         
         // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
-        if config.timeIntervalForHighRiskEntry(chart: chart).contains(currentBar.time) {
+        if config.timeIntervalForHighRiskEntry(date: currentBar.time).contains(currentBar.time) {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
         // If the a previous trade exists, the direction of the trade matches the current bar:
@@ -557,14 +557,17 @@ class TraderBot {
         
         let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
         
-        var earliest2MinBarConfirmationBar: PriceBar?
+        var earliest2MinConfirmationBar: PriceBar?
         var finishedScanningFor2MinConfirmation = false
         
-        var earliest3MinBarConfirmationBar: PriceBar?
+        var earliest3MinConfirmationBar1: PriceBar?
+        var earliest3MinConfirmationBar2: PriceBar?
         var finishedScanningFor3MinConfirmation = false
         
         for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
             guard let priceBar = chart.priceBars[timeKey], !finishedScanningFor2MinConfirmation && !finishedScanningFor3MinConfirmation else { break }
+            
+            guard earliest2MinConfirmationBar == nil || earliest3MinConfirmationBar1 == nil || earliest3MinConfirmationBar2 == nil else { break }
             
             for signal in priceBar.signals where signal.inteval != .oneMin {
                 if let signalDirection = signal.direction, signalDirection != direction {
@@ -579,9 +582,13 @@ class TraderBot {
                 } else if let signalDirection = signal.direction, signalDirection == direction {
                     switch signal.inteval {
                     case .twoMin:
-                        earliest2MinBarConfirmationBar = priceBar
+                        earliest2MinConfirmationBar = priceBar
                     case .threeMin:
-                        earliest3MinBarConfirmationBar = priceBar
+                        if earliest3MinConfirmationBar1 == nil {
+                            earliest3MinConfirmationBar1 = priceBar
+                        } else {
+                            earliest3MinConfirmationBar2 = priceBar
+                        }
                     default:
                         break
                     }
@@ -589,6 +596,6 @@ class TraderBot {
             }
         }
         
-        return earliest2MinBarConfirmationBar != nil && earliest3MinBarConfirmationBar != nil
+        return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar1 != nil
     }
 }

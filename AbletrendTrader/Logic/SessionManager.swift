@@ -500,7 +500,6 @@ class SessionManager {
                 case .updateStop(let newStop):
                     currentPosition?.stopLoss = newStop
                     
-                    // DEMO CODE:
                     guard let currentPosition = currentPosition, let stopOrderId = newStop.stopOrderId else { continue }
                     
                     ninjaTraderManager?.changeOrder(orderRef: stopOrderId, size: currentPosition.size, price: newStop.stop)

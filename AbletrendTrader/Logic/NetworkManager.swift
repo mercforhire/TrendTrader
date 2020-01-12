@@ -25,6 +25,17 @@ enum OrderType {
             return "STP"
         }
     }
+    
+    func ninjaType() -> String {
+        switch self {
+        case .market, .bracket:
+            return "MARKET"
+        case .limit:
+            return "LIMIT"
+        case .stop:
+            return "STOPMARKET"
+        }
+    }
 }
 
 enum NetworkError: Error {
@@ -370,7 +381,7 @@ class NetworkManager {
                      orderType.typeString(),
                      orderPrice == 0 ? "Market" : String(format: "%.2f", orderPrice)))
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, orderRef, orderType.typeString(), direction.ibTradeString(), orderPrice, config.ticker, size)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, orderRef, orderType.typeString(), direction.tradeString(), orderPrice, config.ticker, size)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -425,7 +436,7 @@ class NetworkManager {
                      direction.description(),
                      String(format: "%.2f", stopPrice)))
         
-        let bodyString = "{ \"orders\": [ { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(config.conId), \"secType\": \"FUT\", \"cOID\": \"\(orderRef)\", \"orderType\": \"MKT\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.ibTradeString())\", \"ticker\": \"\(config.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false }, { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(config.conId), \"secType\": \"FUT\", \"parentId\": \"\(orderRef)\", \"orderType\": \"STP\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.reverse().ibTradeString())\", \"price\": \(stopPrice), \"ticker\": \"\(config.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false } ]}"
+        let bodyString = "{ \"orders\": [ { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(config.conId), \"secType\": \"FUT\", \"cOID\": \"\(orderRef)\", \"orderType\": \"MKT\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.tradeString())\", \"ticker\": \"\(config.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false }, { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(config.conId), \"secType\": \"FUT\", \"parentId\": \"\(orderRef)\", \"orderType\": \"STP\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.reverse().tradeString())\", \"price\": \(stopPrice), \"ticker\": \"\(config.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false } ]}"
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -515,7 +526,7 @@ class NetworkManager {
                      orderId,
                      String(format: "%.2f", price)))
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"orderType\": \"%@\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"orderId\": %d}", selectedAccount.accountId, config.conId, orderType.typeString(), direction.ibTradeString(), price, config.ticker, config.positionSize, orderId)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"orderType\": \"%@\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"orderId\": %d}", selectedAccount.accountId, config.conId, orderType.typeString(), direction.tradeString(), price, config.ticker, config.positionSize, orderId)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody

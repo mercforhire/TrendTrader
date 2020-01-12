@@ -56,6 +56,7 @@ class SimTradingViewController: NSViewController {
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
         dataManager = ChartManager(live: false)
         dataManager?.delegate = self
+        sessionManager.initialize()
     }
     
     @objc

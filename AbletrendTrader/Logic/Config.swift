@@ -41,12 +41,16 @@ class Config {
     
     let maxDailyLoss: Double = -50.0 // stop trading when P/L goes under this number
     
-    let ticker = "NQ"
+    let ticker = "NQ 03-20"
     let conId = 346577750
     let positionSize: Int = 1
     let maxActionRetryTimes = 3
     
+    var ninjaTraderPath = "/Users/lchen/Downloads/NinjaTrader Commands/"
+    var ninjaTraderAccountName = "Sim101"
+    
     // DEMO SETTINGS:
+    let liveTradingMode: LiveTradingMode = .ninjaTrader
     let byPassTradingTimeRestrictions = true // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false

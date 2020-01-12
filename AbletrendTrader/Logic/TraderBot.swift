@@ -68,12 +68,12 @@ class TraderBot {
                 demoCounter = demoCounter + 1
                 print("TraderBotDemo: opened long position")
                 sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.openedPosition(newPosition: longPosition, entryType: .initial)]
+                return [.openPosition(newPosition: longPosition, entryType: .initial)]
             case 1:
                 demoCounter = demoCounter + 1
                 print("TraderBotDemo: update stop")
                 sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.updatedStop(stop: StopLoss(stop: 7500, source: .currentBar, stopOrderId: nil))]
+                return [.updateStop(stop: StopLoss(stop: 7500, source: .currentBar, stopOrderId: nil))]
             case 2:
                 demoCounter = demoCounter + 1
                 print("TraderBotDemo: force close position")
@@ -88,12 +88,12 @@ class TraderBot {
                 demoCounter = demoCounter + 1
                 print("TraderBotDemo: opened short position")
                 sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.openedPosition(newPosition: shortPosition, entryType: .initial)]
+                return [.openPosition(newPosition: shortPosition, entryType: .initial)]
             case 5:
                 demoCounter = demoCounter + 1
                 print("TraderBotDemo: update stop")
                 sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.updatedStop(stop: StopLoss(stop: 9500, source: .currentBar, stopOrderId: nil))]
+                return [.updateStop(stop: StopLoss(stop: 9500, source: .currentBar, stopOrderId: nil))]
             case 6:
                 demoCounter = demoCounter + 1
                 print("TraderBotDemo: force close position")
@@ -152,8 +152,8 @@ class TraderBot {
                     let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position, let entryType):
-                        return [verifyAction, .openedPosition(newPosition: position, entryType: entryType)]
+                    case .openPosition(let position, let entryType):
+                        return [verifyAction, .openPosition(newPosition: position, entryType: entryType)]
                     default:
                         return [verifyAction]
                     }
@@ -166,8 +166,8 @@ class TraderBot {
                     let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position, let entryType):
-                        return [verifyAction, .openedPosition(newPosition: position, entryType: entryType)]
+                    case .openPosition(let position, let entryType):
+                        return [verifyAction, .openPosition(newPosition: position, entryType: entryType)]
                     default:
                         return [verifyAction]
                     }
@@ -181,8 +181,8 @@ class TraderBot {
                     let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position, let entryType):
-                        return [.reversedPosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                    case .openPosition(let position, let entryType):
+                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -192,8 +192,8 @@ class TraderBot {
                    let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openedPosition(let position, let entryType):
-                        return [.reversedPosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                    case .openPosition(let position, let entryType):
+                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
                     default:
                         return [exitAction]
                     }
@@ -267,11 +267,11 @@ class TraderBot {
                 switch sessionManager.currentPosition!.direction {
                 case .long:
                     if let stop = sessionManager.stopLoss?.stop, newStop > stop {
-                        return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
+                        return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                     }
                 default:
                     if let stop = sessionManager.stopLoss?.stop, newStop < stop {
-                        return [.updatedStop(stop: StopLoss(stop: newStop, source: newStopSource))]
+                        return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                     }
                 }
             }
@@ -289,7 +289,7 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
         let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
-        return .openedPosition(newPosition: buyPosition, entryType: .initial)
+        return .openPosition(newPosition: buyPosition, entryType: .initial)
     }
     
     func sellAtMarket() -> TradeActionType {
@@ -297,13 +297,13 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
         let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
-        return .openedPosition(newPosition: sellPosition, entryType: .initial)
+        return .openPosition(newPosition: sellPosition, entryType: .initial)
     }
     
     // Private:
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let position: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
-            return .openedPosition(newPosition: position, entryType: entryType)
+            return .openPosition(newPosition: position, entryType: entryType)
         }
         return .noAction(entryType: entryType)
     }

@@ -23,6 +23,14 @@ class ConfigViewController: NSViewController {
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
     @IBOutlet private weak var dailyLossLimitPicker: NSTextField!
+    @IBOutlet private weak var ninjaPathField: NSTextField!
+    
+    private var selectedFolderPath: String = "" {
+        didSet {
+            config.ninjaTraderPath = selectedFolderPath
+            ninjaPathField.stringValue = selectedFolderPath
+        }
+    }
     
     func setupUI() {
         maxSLField.isEditable = false
@@ -38,6 +46,7 @@ class ConfigViewController: NSViewController {
         liquidateTimePicker.isEnabled = false
         flatTimePicker.isEnabled = false
         dailyLossLimitPicker.isEditable = false
+        ninjaPathField.isEditable = false
     }
     
     func loadConfig() {
@@ -53,6 +62,8 @@ class ConfigViewController: NSViewController {
         liquidateTimePicker.dateValue = Date().getNewDateFromTime(hour: config.clearTime.0, min: config.clearTime.1)
         flatTimePicker.dateValue = Date().getNewDateFromTime(hour: config.flatTime.0, min: config.flatTime.1)
         dailyLossLimitPicker.stringValue = String(format: "%.2f", config.maxDailyLoss)
+        ninjaPathField.stringValue = config.ninjaTraderPath
+        selectedFolderPath = config.ninjaTraderPath
     }
     
     override func viewDidLoad() {
@@ -62,4 +73,18 @@ class ConfigViewController: NSViewController {
         loadConfig()
     }
     
+    @IBAction func selectFolderPressed(_ sender: NSButton) {
+        guard let window = view.window else { return }
+
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.beginSheetModal(for: window) { result in
+            if result == .OK, let selectedPath = panel.url?.path {
+                self.selectedFolderPath = selectedPath
+            }
+            panel.close()
+        }
+    }
 }

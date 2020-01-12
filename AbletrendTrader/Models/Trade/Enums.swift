@@ -28,9 +28,9 @@ enum EntryType {
 
 enum TradeActionType {
     case noAction(entryType: EntryType?)
-    case openedPosition(newPosition: Position, entryType: EntryType)
-    case reversedPosition(oldPosition: Position, newPosition: Position, entryType: EntryType)
-    case updatedStop(stop: StopLoss)
+    case openPosition(newPosition: Position, entryType: EntryType)
+    case reversePosition(oldPosition: Position, newPosition: Position, entryType: EntryType)
+    case updateStop(stop: StopLoss)
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     
@@ -42,19 +42,24 @@ enum TradeActionType {
             } else {
                 return String(format: "%@: No action for the minute %@", Date().hourMinuteSecond(), actionBarTime.hourMinute())
             }
-        case .openedPosition(let newPosition, let entryType):
+            
+        case .openPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
-        case .reversedPosition(let oldPosition, let newPosition, let entryType):
+            
+        case .reversePosition(let oldPosition, let newPosition, let entryType):
             let type: String = oldPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Reversed %@ position at price %.2f with SL %.2f for the minute %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
+            
         case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
+            
         case .forceClosePosition(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Flat %@ position at %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
-        case .updatedStop(let stopLoss):
+            
+        case .updateStop(let stopLoss):
             return String(format: "%@: Updated stop loss to %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), stopLoss.stop, stopLoss.source.reason(), actionBarTime.hourMinute())
         }
     }
@@ -119,7 +124,7 @@ enum TradeDirection {
         }
     }
     
-    func ibTradeString() -> String {
+    func tradeString() -> String {
         switch self {
         case .long:
             return "BUY"
@@ -153,6 +158,11 @@ enum SignalInteval {
             return "3"
         }
     }
+}
+
+enum LiveTradingMode {
+    case interactiveBroker
+    case ninjaTrader
 }
 
 struct TradesTableRowItem {

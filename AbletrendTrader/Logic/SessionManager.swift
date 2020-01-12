@@ -208,116 +208,145 @@ class SessionManager {
         
         
         if live {
-            let queue = DispatchQueue.global()
-            queue.async { [weak self] in
-                guard let self = self else {
-                    return
-                }
-                let semaphore = DispatchSemaphore(value: 0)
-                
-                var inProcessActionIndex: Int = 0
-                var retriedTimes: Int = 1
-                while inProcessActionIndex < actions.count {
-                    let action = actions[inProcessActionIndex]
-                    
-                    if retriedTimes >= self.config.maxActionRetryTimes {
-                        print("Action have been retried more than", self.config.maxActionRetryTimes, "times, skipping...")
-                        inProcessActionIndex += 1
-                        retriedTimes = 1
-                        continue
+            switch config.liveTradingMode {
+            case .interactiveBroker:
+                let queue = DispatchQueue.global()
+                queue.async { [weak self] in
+                    guard let self = self else {
+                        return
                     }
+                    let semaphore = DispatchSemaphore(value: 0)
                     
-                    print(action.description(actionBarTime: priceBarTime))
-                    
-                    switch action {
-                    case .openPosition(let newPosition, _):
-                        self.enterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: newPosition.size)
-                        { result in
-                            switch result {
-                            case .success(let orderConfirmation):
-                                self.currentPosition = newPosition
-                                self.currentPosition?.actualEntryPrice = orderConfirmation.price
-                                self.currentPosition?.entryTime = orderConfirmation.time
-                                self.currentPosition?.entryOrderRef = orderConfirmation.orderRef
-                                self.currentPosition?.stopLoss?.stopOrderId = orderConfirmation.stopOrderId
-                                completion(nil)
-                                inProcessActionIndex += 1
-                            case .failure(let networkError):
-                                completion(networkError)
-                                retriedTimes += 1
-                            }
-                            
-                            semaphore.signal()
-                        }
-                    case .reversePosition(let oldPosition, let newPosition, _):
-                        self.removeStopOrdersAndEnterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: oldPosition.size + newPosition.size)
-                        { result in
-                            switch result {
-                            case .success(let orderConfirmation):
-                                // closed old position
-                                let trade = Trade(direction: oldPosition.direction,
-                                                  entryTime: oldPosition.entryTime,
-                                                  idealEntryPrice: oldPosition.idealEntryPrice,
-                                                  actualEntryPrice: oldPosition.actualEntryPrice,
-                                                  entryOrderRef: oldPosition.entryOrderRef,
-                                                  exitTime: orderConfirmation.time,
-                                                  idealExitPrice: newPosition.idealEntryPrice,
-                                                  actualExitPrice: orderConfirmation.price,
-                                                  exitOrderRef: orderConfirmation.orderRef)
-                                self.trades.append(trade)
-                                
-                                // opened new position
-                                self.currentPosition = newPosition
-                                self.currentPosition?.actualEntryPrice = orderConfirmation.price
-                                self.currentPosition?.entryTime = orderConfirmation.time
-                                self.currentPosition?.entryOrderRef = orderConfirmation.orderRef
-                                self.currentPosition?.stopLoss?.stopOrderId = orderConfirmation.stopOrderId
-                                completion(nil)
-                                inProcessActionIndex += 1
-                            case .failure(let networkError):
-                                completion(networkError)
-                                retriedTimes += 1
-                            }
-                            
-                            semaphore.signal()
-                        }
-                    case .updateStop(let newStop):
-                        guard let stopOrderId = self.currentPosition?.stopLoss?.stopOrderId,
-                            let size = self.currentPosition?.size,
-                            let direction = self.currentPositionDirection else {
-                                DispatchQueue.main.async {
-                                    completion(.modifyOrderFailed)
-                                }
-                                retriedTimes += 1
-                                semaphore.signal()
-                                return
+                    var inProcessActionIndex: Int = 0
+                    var retriedTimes: Int = 1
+                    while inProcessActionIndex < actions.count {
+                        let action = actions[inProcessActionIndex]
+                        
+                        if retriedTimes >= self.config.maxActionRetryTimes {
+                            print("Action have been retried more than", self.config.maxActionRetryTimes, "times, skipping...")
+                            inProcessActionIndex += 1
+                            retriedTimes = 1
+                            continue
                         }
                         
-                        self.modifyStopOrder(stopOrderId: stopOrderId,
-                                             stop: newStop.stop,
-                                             quantity: size,
-                                             direction: direction.reverse()) { networkError in
-                            if networkError == nil {
-                                self.currentPosition?.stopLoss?.stop = newStop.stop
-                            }
-                            DispatchQueue.main.async {
-                                completion(networkError)
-                            }
-                            if networkError == nil {
-                                inProcessActionIndex += 1
-                            } else {
-                                retriedTimes += 1
-                            }
-                            semaphore.signal()
-                        }
-                    case .forceClosePosition(_, let idealExitPrice, _, let reason):
-                        self.exitPositions(priceBarTime: priceBarTime,
-                                           idealExitPrice: idealExitPrice,
-                                           exitReason: reason,
-                                           completion:
+                        print(action.description(actionBarTime: priceBarTime))
+                        
+                        switch action {
+                        case .openPosition(let newPosition, _):
+                            self.enterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: newPosition.size)
                             { result in
                                 switch result {
-                                case .success:
+                                case .success(let orderConfirmation):
+                                    self.currentPosition = newPosition
+                                    self.currentPosition?.actualEntryPrice = orderConfirmation.price
+                                    self.currentPosition?.entryTime = orderConfirmation.time
+                                    self.currentPosition?.entryOrderRef = orderConfirmation.orderRef
+                                    self.currentPosition?.stopLoss?.stopOrderId = orderConfirmation.stopOrderId
+                                    completion(nil)
+                                    inProcessActionIndex += 1
+                                case .failure(let networkError):
+                                    completion(networkError)
+                                    retriedTimes += 1
+                                }
+                                
+                                semaphore.signal()
+                            }
+                        case .reversePosition(let oldPosition, let newPosition, _):
+                            self.removeStopOrdersAndEnterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: oldPosition.size + newPosition.size)
+                            { result in
+                                switch result {
+                                case .success(let orderConfirmation):
+                                    // closed old position
+                                    let trade = Trade(direction: oldPosition.direction,
+                                                      entryTime: oldPosition.entryTime,
+                                                      idealEntryPrice: oldPosition.idealEntryPrice,
+                                                      actualEntryPrice: oldPosition.actualEntryPrice,
+                                                      entryOrderRef: oldPosition.entryOrderRef,
+                                                      exitTime: orderConfirmation.time,
+                                                      idealExitPrice: newPosition.idealEntryPrice,
+                                                      actualExitPrice: orderConfirmation.price,
+                                                      exitOrderRef: orderConfirmation.orderRef)
+                                    self.trades.append(trade)
+                                    
+                                    // opened new position
+                                    self.currentPosition = newPosition
+                                    self.currentPosition?.actualEntryPrice = orderConfirmation.price
+                                    self.currentPosition?.entryTime = orderConfirmation.time
+                                    self.currentPosition?.entryOrderRef = orderConfirmation.orderRef
+                                    self.currentPosition?.stopLoss?.stopOrderId = orderConfirmation.stopOrderId
+                                    completion(nil)
+                                    inProcessActionIndex += 1
+                                case .failure(let networkError):
+                                    completion(networkError)
+                                    retriedTimes += 1
+                                }
+                                
+                                semaphore.signal()
+                            }
+                        case .updateStop(let newStop):
+                            guard let stopOrderId = self.currentPosition?.stopLoss?.stopOrderId,
+                                let size = self.currentPosition?.size,
+                                let direction = self.currentPositionDirection else {
+                                    DispatchQueue.main.async {
+                                        completion(.modifyOrderFailed)
+                                    }
+                                    retriedTimes += 1
+                                    semaphore.signal()
+                                    return
+                            }
+                            
+                            self.modifyStopOrder(stopOrderId: stopOrderId,
+                                                 stop: newStop.stop,
+                                                 quantity: size,
+                                                 direction: direction.reverse()) { networkError in
+                                if networkError == nil {
+                                    self.currentPosition?.stopLoss?.stop = newStop.stop
+                                }
+                                DispatchQueue.main.async {
+                                    completion(networkError)
+                                }
+                                if networkError == nil {
+                                    inProcessActionIndex += 1
+                                } else {
+                                    retriedTimes += 1
+                                }
+                                semaphore.signal()
+                            }
+                        case .forceClosePosition(_, let idealExitPrice, _, let reason):
+                            self.exitPositions(priceBarTime: priceBarTime,
+                                               idealExitPrice: idealExitPrice,
+                                               exitReason: reason,
+                                               completion:
+                                { result in
+                                    switch result {
+                                    case .success:
+                                        DispatchQueue.main.async {
+                                            completion(nil)
+                                        }
+                                        inProcessActionIndex += 1
+                                    case .failure(let networkError):
+                                        DispatchQueue.main.async {
+                                            completion(networkError)
+                                        }
+                                        retriedTimes += 1
+                                    }
+                                    semaphore.signal()
+                            })
+                        case .verifyPositionClosed(let closedPosition, let idealClosingPrice, _, let reason):
+                            self.verifyClosedPosition(closedPosition: closedPosition, reason: reason) { result in
+                                switch result {
+                                case .success(let orderConfirmation):
+                                    let trade = Trade(direction: closedPosition.direction,
+                                                      entryTime: closedPosition.entryTime,
+                                                      idealEntryPrice: closedPosition.idealEntryPrice,
+                                                      actualEntryPrice: closedPosition.actualEntryPrice,
+                                                      entryOrderRef: closedPosition.entryOrderRef,
+                                                      exitTime: orderConfirmation.time,
+                                                      idealExitPrice: idealClosingPrice,
+                                                      actualExitPrice: orderConfirmation.price,
+                                                      exitOrderRef: orderConfirmation.orderRef)
+                                    self.trades.append(trade)
+                                    self.currentPosition = nil
                                     DispatchQueue.main.async {
                                         completion(nil)
                                     }
@@ -328,48 +357,113 @@ class SessionManager {
                                     }
                                     retriedTimes += 1
                                 }
+                                
                                 semaphore.signal()
-                        })
-                    case .verifyPositionClosed(let closedPosition, let idealClosingPrice, _, let reason):
-                        self.verifyClosedPosition(closedPosition: closedPosition, reason: reason) { result in
-                            switch result {
-                            case .success(let orderConfirmation):
-                                let trade = Trade(direction: closedPosition.direction,
-                                                  entryTime: closedPosition.entryTime,
-                                                  idealEntryPrice: closedPosition.idealEntryPrice,
-                                                  actualEntryPrice: closedPosition.actualEntryPrice,
-                                                  entryOrderRef: closedPosition.entryOrderRef,
-                                                  exitTime: orderConfirmation.time,
-                                                  idealExitPrice: idealClosingPrice,
-                                                  actualExitPrice: orderConfirmation.price,
-                                                  exitOrderRef: orderConfirmation.orderRef)
-                                self.trades.append(trade)
-                                self.currentPosition = nil
-                                DispatchQueue.main.async {
-                                    completion(nil)
-                                }
-                                inProcessActionIndex += 1
-                            case .failure(let networkError):
-                                DispatchQueue.main.async {
-                                    completion(networkError)
-                                }
-                                retriedTimes += 1
                             }
-                            
+                        case .noAction(_):
+                            inProcessActionIndex += 1
                             semaphore.signal()
                         }
-                    case .noAction(_):
-                        inProcessActionIndex += 1
-                        semaphore.signal()
-                    }
-                    
-                    semaphore.wait()
-                    
-                    if actions.count > 1, inProcessActionIndex != actions.count - 1 {
-                        print("Wait 1 second before executing the next consecutive order")
-                        sleep(1)
+                        
+                        semaphore.wait()
+                        
+                        if actions.count > 1, inProcessActionIndex != actions.count - 1 {
+                            print("Wait 1 second before executing the next consecutive order")
+                            sleep(1)
+                        }
                     }
                 }
+            case .ninjaTrader:
+                for action in actions {
+                    
+                    switch action {
+                    case .noAction(let entryType):
+                        if entryType == nil {
+                            continue
+                        }
+                    default:
+                        print(action.description(actionBarTime: priceBarTime))
+                    }
+                    
+                    switch action {
+                    case .openPosition(let newPosition, _):
+                        currentPosition = newPosition
+                        currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
+                        
+                        // Buy order:
+                        ninjaTraderManager?.generatePlaceOrder(direction: newPosition.direction,
+                                                               size: newPosition.size,
+                                                               orderType: .market,
+                                                               orderRef: Date().generateOrderIdentifier(prefix: newPosition.direction.description(short: true)))
+                        
+                        // Stop order:
+                        let stopOrderId = Date().generateOrderIdentifier(prefix: newPosition.direction.reverse().description(short: true))
+                        ninjaTraderManager?.generatePlaceOrder(direction: newPosition.direction.reverse(),
+                                                               size: newPosition.size,
+                                                               orderType: .stop(price: newPosition.stopLoss?.stop ?? 0),
+                                                               orderRef: stopOrderId)
+                        currentPosition?.stopLoss?.stopOrderId = stopOrderId
+                    case .reversePosition(let oldPosition, let newPosition, _):
+                        let trade = Trade(direction: oldPosition.direction,
+                                          entryTime: oldPosition.entryTime,
+                                          idealEntryPrice: oldPosition.idealEntryPrice,
+                                          actualEntryPrice: oldPosition.idealEntryPrice,
+                                          exitTime: newPosition.entryTime,
+                                          idealExitPrice: newPosition.idealEntryPrice,
+                                          actualExitPrice: newPosition.idealEntryPrice)
+                        trades.append(trade)
+                        
+                        currentPosition = newPosition
+                        currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
+                        
+                        // Buy order:
+                        ninjaTraderManager?.reversePositionAndPlaceOrder(direction: newPosition.direction,
+                                                                         size: newPosition.size,
+                                                                         orderType: .market,
+                                                                         orderRef: Date().generateOrderIdentifier(prefix: newPosition.direction.description(short: true)))
+                        
+                        // Stop order:
+                        let stopOrderId = Date().generateOrderIdentifier(prefix: newPosition.direction.reverse().description(short: true))
+                        ninjaTraderManager?.generatePlaceOrder(direction: newPosition.direction.reverse(),
+                                                               size: newPosition.size,
+                                                               orderType: .stop(price: newPosition.stopLoss?.stop ?? 0),
+                                                               orderRef: stopOrderId)
+                        currentPosition?.stopLoss?.stopOrderId = stopOrderId
+                    case .updateStop(let newStop):
+                        currentPosition?.stopLoss = newStop
+                        
+                        guard let currentPosition = currentPosition, let stopOrderId = newStop.stopOrderId else { continue }
+                        
+                        ninjaTraderManager?.changeOrder(orderRef: stopOrderId, size: currentPosition.size, price: newStop.stop)
+                    case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, _):
+                        let trade = Trade(direction: closedPosition.direction,
+                                          entryTime: closedPosition.entryTime,
+                                          idealEntryPrice: closedPosition.idealEntryPrice,
+                                          actualEntryPrice: closedPosition.idealEntryPrice,
+                                          exitTime: closingTime,
+                                          idealExitPrice: closingPrice,
+                                          actualExitPrice: closingPrice)
+                        trades.append(trade)
+                        currentPosition = nil
+                        
+                        ninjaTraderManager?.closePosition()
+                    case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
+                        let trade = Trade(direction: closedPosition.direction,
+                                          entryTime: closedPosition.entryTime,
+                                          idealEntryPrice: closedPosition.idealEntryPrice,
+                                          actualEntryPrice: closedPosition.idealEntryPrice,
+                                          exitTime: closingTime,
+                                          idealExitPrice: closingPrice,
+                                          actualExitPrice: closingPrice)
+                        trades.append(trade)
+                        currentPosition = nil
+                        
+                        ninjaTraderManager?.closePosition()
+                    case .noAction(_):
+                        break
+                    }
+                }
+                completion(nil)
             }
         }
         
@@ -391,21 +485,6 @@ class SessionManager {
                 case .openPosition(let newPosition, _):
                     currentPosition = newPosition
                     currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
-                    
-                    // DEMO CODE:
-                    // Buy order:
-                    ninjaTraderManager?.generatePlaceOrder(direction: newPosition.direction,
-                                                           size: newPosition.size,
-                                                           orderType: .market,
-                                                           orderRef: Date().generateOrderIdentifier(prefix: newPosition.direction.description(short: true)))
-                    
-                    // Stop order:
-                    let stopOrderId = Date().generateOrderIdentifier(prefix: newPosition.direction.reverse().description(short: true))
-                    ninjaTraderManager?.generatePlaceOrder(direction: newPosition.direction.reverse(),
-                                                           size: newPosition.size,
-                                                           orderType: .stop(price: newPosition.stopLoss?.stop ?? 0),
-                                                           orderRef: stopOrderId)
-                    currentPosition?.stopLoss?.stopOrderId = stopOrderId
                 case .reversePosition(let oldPosition, let newPosition, _):
                     let trade = Trade(direction: oldPosition.direction,
                                       entryTime: oldPosition.entryTime,
@@ -418,21 +497,6 @@ class SessionManager {
                     
                     currentPosition = newPosition
                     currentPosition?.actualEntryPrice = newPosition.idealEntryPrice
-                    
-                    // DEMO CODE:
-                    // Buy order:
-                    ninjaTraderManager?.reversePositionAndPlaceOrder(direction: newPosition.direction,
-                                                                     size: newPosition.size,
-                                                                     orderType: .market,
-                                                                     orderRef: Date().generateOrderIdentifier(prefix: newPosition.direction.description(short: true)))
-                    
-                    // Stop order:
-                    let stopOrderId = Date().generateOrderIdentifier(prefix: newPosition.direction.reverse().description(short: true))
-                    ninjaTraderManager?.generatePlaceOrder(direction: newPosition.direction.reverse(),
-                                                           size: newPosition.size,
-                                                           orderType: .stop(price: newPosition.stopLoss?.stop ?? 0),
-                                                           orderRef: stopOrderId)
-                    currentPosition?.stopLoss?.stopOrderId = stopOrderId
                 case .updateStop(let newStop):
                     currentPosition?.stopLoss = newStop
                     
@@ -450,9 +514,6 @@ class SessionManager {
                                       actualExitPrice: closingPrice)
                     trades.append(trade)
                     currentPosition = nil
-                    
-                    // DEMO CODE:
-                    ninjaTraderManager?.closePosition()
                 case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
                     let trade = Trade(direction: closedPosition.direction,
                                       entryTime: closedPosition.entryTime,
@@ -463,9 +524,6 @@ class SessionManager {
                                       actualExitPrice: closingPrice)
                     trades.append(trade)
                     currentPosition = nil
-                    
-                    // DEMO CODE:
-                    ninjaTraderManager?.closePosition()
                 case .noAction(_):
                     break
                 }

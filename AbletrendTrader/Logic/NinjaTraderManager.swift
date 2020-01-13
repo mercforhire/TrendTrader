@@ -88,6 +88,7 @@ class NinjaTraderManager {
     private func writeTextToFile(text: String) {
         let dir = URL(fileURLWithPath: config.ninjaTraderPath)
         let fileURL = dir.appendingPathComponent("oif\(counter).txt")
+        print(text)
         do {
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
             counter += 1

@@ -292,7 +292,7 @@
                                 </connections>
                             </comboBox>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="L2q-iU-02Q">
-                                <rect key="frame" x="211" y="190" width="202" height="16"/>
+                                <rect key="frame" x="211" y="190" width="187" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="--" id="jgF-u8-Agl">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -374,9 +374,9 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LOL-yH-v5k">
-                                <rect key="frame" x="428" y="188" width="135" height="21"/>
+                                <rect key="frame" x="413" y="188" width="150" height="21"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="135" id="oDv-Gd-kfS"/>
+                                    <constraint firstAttribute="width" constant="150" id="oDv-Gd-kfS"/>
                                 </constraints>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" drawsBackground="YES" id="xhY-nl-Xso">
                                     <font key="font" metaFont="system"/>

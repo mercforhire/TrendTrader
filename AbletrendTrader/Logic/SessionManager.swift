@@ -337,19 +337,11 @@ class SessionManager {
                                                idealExitPrice: idealExitPrice,
                                                exitReason: reason,
                                                completion:
-                                { result in
-                                    switch result {
-                                    case .success:
-                                        DispatchQueue.main.async {
-                                            completion(nil)
-                                        }
-                                        inProcessActionIndex += 1
-                                    case .failure(let networkError):
-                                        DispatchQueue.main.async {
-                                            completion(networkError)
-                                        }
+                                { networkError in
+                                    if networkError != nil {
                                         retriedTimes += 1
                                     }
+                                    completion(networkError)
                                     semaphore.signal()
                             })
                         case .verifyPositionClosed(let closedPosition, let idealClosingPrice, _, let reason):
@@ -538,7 +530,7 @@ class SessionManager {
     func exitPositions(priceBarTime: Date,
                        idealExitPrice: Double,
                        exitReason: ExitMethod,
-                       completion: @escaping (Swift.Result<OrderConfirmation?, NetworkError>) -> Void) {
+                       completion: @escaping (NetworkError?) -> Void) {
         switch config.liveTradingMode {
         case .interactiveBroker:
             let queue = DispatchQueue.global()
@@ -549,7 +541,6 @@ class SessionManager {
                 
                 let semaphore = DispatchSemaphore(value: 0)
                 var errorSoFar: NetworkError?
-                var orderConfirmation: OrderConfirmation?
                 
                 // cancel stop order
                 self.deleteAllStopOrders { networkError in
@@ -562,25 +553,39 @@ class SessionManager {
                 semaphore.wait()
                 
                 // reverse current position
-                if let currentPosition = self.currentPosition {
+                var ibPosition: IBPosition?
+                self.networkManager.fetchRelevantPositions { result in
+                    switch result {
+                    case .success(let response):
+                        ibPosition = response
+                    case .failure(let error):
+                        errorSoFar = error
+                    }
+                    
+                    semaphore.signal()
+                }
+                semaphore.wait()
+                
+                if let ibPosition = ibPosition {
                     self.enterAtMarket(priceBarTime: priceBarTime,
-                                       direction: currentPosition.direction.reverse(),
-                                       size: currentPosition.size)
+                                       direction: ibPosition.direction.reverse(),
+                                       size: abs(ibPosition.position))
                     { result in
                         switch result {
                         case .success(let exitOrderConfirmation):
-                            let trade = Trade(direction: currentPosition.direction,
-                                              entryTime: currentPosition.entryTime,
-                                              idealEntryPrice: currentPosition.idealEntryPrice,
-                                              actualEntryPrice: currentPosition.actualEntryPrice,
-                                              entryOrderRef: currentPosition.entryOrderRef,
-                                              exitTime: exitOrderConfirmation.time,
-                                              idealExitPrice: idealExitPrice,
-                                              actualExitPrice: exitOrderConfirmation.price,
-                                              exitOrderRef: exitOrderConfirmation.orderRef)
-                            self.trades.append(trade)
-                            self.currentPosition = nil
-                            orderConfirmation = exitOrderConfirmation
+                            if let currentPosition = self.currentPosition {
+                                let trade = Trade(direction: ibPosition.direction,
+                                                  entryTime: currentPosition.entryTime,
+                                                  idealEntryPrice: currentPosition.idealEntryPrice,
+                                                  actualEntryPrice: currentPosition.actualEntryPrice,
+                                                  entryOrderRef: currentPosition.entryOrderRef,
+                                                  exitTime: exitOrderConfirmation.time,
+                                                  idealExitPrice: idealExitPrice,
+                                                  actualExitPrice: exitOrderConfirmation.price,
+                                                  exitOrderRef: exitOrderConfirmation.orderRef)
+                                self.trades.append(trade)
+                                self.currentPosition = nil
+                            }
                         case .failure(let networkError):
                             errorSoFar = networkError
                         }
@@ -596,13 +601,7 @@ class SessionManager {
                     }
                     
                     self.refreshIBSession { result in
-                        if let networkError = errorSoFar {
-                            completion(.failure(networkError))
-                        } else if let orderConfirmation = orderConfirmation {
-                            completion(.success(orderConfirmation))
-                        } else {
-                            completion(.success(nil))
-                        }
+                        completion(errorSoFar)
                     }
                 }
             }
@@ -620,7 +619,7 @@ class SessionManager {
             }
             
             ninjaTraderManager?.closePosition()
-            completion(.success(nil))
+            completion(nil)
         }
     }
     
@@ -888,7 +887,6 @@ class SessionManager {
             
             let semaphore = DispatchSemaphore(value: 0)
             var errorSoFar: NetworkError?
-            var unclosedIBPosition: IBPosition?
         
             self.networkManager.fetchAccounts { result in
                 switch result {
@@ -914,7 +912,6 @@ class SessionManager {
                 case .success(let response):
                     if response != nil {
                         errorSoFar = .positionNotClosed
-                        unclosedIBPosition = response
                     }
                 case .failure(let error):
                     errorSoFar = error

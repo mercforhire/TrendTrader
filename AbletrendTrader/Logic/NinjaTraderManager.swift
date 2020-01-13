@@ -45,7 +45,7 @@ class NinjaTraderManager {
         }
         orderPrice = orderPrice.round(nearest: 0.25)
         
-        let orderString = "PLACE;\(accountId);\(config.ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+        let orderString = "PLACE;\(accountId);\(config.ninjaTraderTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
         writeTextToFile(text: orderString)
     }
     
@@ -65,7 +65,7 @@ class NinjaTraderManager {
         }
         orderPrice = orderPrice.round(nearest: 0.25)
         
-        let orderString = "REVERSEPOSITION;\(accountId);\(config.ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+        let orderString = "REVERSEPOSITION;\(accountId);\(config.ninjaTraderTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
         writeTextToFile(text: orderString)
     }
     
@@ -80,7 +80,7 @@ class NinjaTraderManager {
     // CLOSEPOSITION COMMAND
     // CLOSEPOSITION;<ACCOUNT>;<INSTRUMENT>;;;;;;;;;;
     func closePosition() {
-        let orderString = "CLOSEPOSITION;\(accountId);\(config.ticker);;;;;;;;;;"
+        let orderString = "CLOSEPOSITION;\(accountId);\(config.ninjaTraderTicker);;;;;;;;;;"
         writeTextToFile(text: orderString)
     }
     

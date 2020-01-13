@@ -83,7 +83,6 @@ class SimTradingViewController: NSViewController {
             
             if let chart = chart {
                 self.updateLatestDataTimeLabel(chart: chart)
-                self.sessionManager.resetSession()
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
                 self.startButton.isEnabled = self.config.simulateTimePassage

@@ -110,7 +110,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         fetchingTask.enter()
         dataManager?.fetchChart(completion: { [weak self] chart in
+            fetchingTask.leave()
+            
             guard let self = self else { return }
+            
+            sender.isEnabled = true
             
             if let chart = chart {
                 self.updateLatestDataTimeLabel(chart: chart)
@@ -127,8 +131,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                 self.exitButton.isEnabled = true
                 self.sessionManager.startMonitoringLiveOrders()
             }
-            
-            fetchingTask.leave()
         })
         
         fetchingTask.enter()

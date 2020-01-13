@@ -81,7 +81,7 @@ extension Date {
         if let linkedToTradeRef = linkedToTradeRef {
             return prefix + "-" + generateDateAndTimeIdentifier() + "-" + linkedToTradeRef
         }
-        return prefix + generateDateAndTimeIdentifier()
+        return prefix + "-" + generateDateAndTimeIdentifier()
     }
     
     func isInSameDay(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {

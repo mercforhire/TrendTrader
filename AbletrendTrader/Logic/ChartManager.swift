@@ -16,7 +16,6 @@ protocol DataManagerDelegate: class {
 class ChartManager {
     private let networkManager = NetworkManager.shared
     private let config = Config.shared
-    private var timer: Timer?
     
     weak var delegate: DataManagerDelegate?
     
@@ -42,36 +41,12 @@ class ChartManager {
     }
     
     func fetchChart(completion: @escaping (_ chart: Chart?) -> Void) {
-        if live && !config.simulateTimePassage {
-            var oneMinUrl: String?
-            var twoMinUrl: String?
-            var threeMinUrl: String?
-            
-            let urlFetchingTask = DispatchGroup()
-            
-            urlFetchingTask.enter()
-            networkManager.fetchLatestAvailableUrl(interval: .oneMin, completion: { url in
-                oneMinUrl = url
-                urlFetchingTask.leave()
-            })
-            
-            urlFetchingTask.enter()
-            networkManager.fetchLatestAvailableUrl(interval: .twoMin, completion: { url in
-                twoMinUrl = url
-                urlFetchingTask.leave()
-            })
-            
-            urlFetchingTask.enter()
-            networkManager.fetchLatestAvailableUrl(interval: .threeMin, completion: { url in
-                threeMinUrl = url
-                urlFetchingTask.leave()
-            })
-            
-            urlFetchingTask.notify(queue: DispatchQueue.main) { [weak self] in
+        if live {            
+            self.findLatestAvaiableUrls { [weak self] urls in
                 guard let self = self,
-                    let oneMinUrl = oneMinUrl,
-                    let twoMinUrl = twoMinUrl,
-                    let threeMinUrl = threeMinUrl else {
+                    let oneMinUrl = urls?.0,
+                    let twoMinUrl = urls?.1,
+                    let threeMinUrl = urls?.2 else {
                     return completion(nil)
                 }
                 
@@ -79,7 +54,7 @@ class ChartManager {
             }
         } else {
             if config.simulateTimePassage {
-                findFirstAvailableUrl { [weak self] urls in
+                findFirstAvailableUrls { [weak self] urls in
                     guard let self = self else {
                         return
                     }
@@ -122,7 +97,6 @@ class ChartManager {
     }
     
     func stopMonitoring() {
-        timer?.invalidate()
         monitoring = false
         currentPriceBarTime = nil
     }
@@ -134,8 +108,11 @@ class ChartManager {
         let now = Date()
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
             // call this again 5 seconds after the next minute
-            print("Skipped fetching chart at", now.hourMinuteSecond())
-            startLiveRefreshTimer(timeInterval: 65.0 - Double(now.second()))
+            let waitSeconds = 65.0 - Double(now.second())
+            print("Skipped fetching chart at", now.hourMinuteSecond(), "will fetch again in", waitSeconds, "seconds")
+            DispatchQueue.main.asyncAfter(deadline: .now() + waitSeconds) {
+                self.updateChart()
+            }
             return
         }
         
@@ -147,29 +124,29 @@ class ChartManager {
                 print("Fetched chart at", Date().hourMinuteSecond())
                 self.delegate?.chartUpdated(chart: chart)
                 self.currentPriceBarTime = chart.absLastBarDate
-            }
-            
-            if self.monitoring, self.live {
-                // keep calling this until the latest chart is fetched
-                self.startLiveRefreshTimer(timeInterval: 1)
-            } else if self.monitoring, self.config.simulateTimePassage {
-                guard self.simTime < Date() else {
-                    print("Simulate time is up to date")
-                    self.stopMonitoring()
-                    self.delegate?.requestStopMonitoring()
-                    return
+                
+                if self.monitoring {
+                    if self.live {
+                        // keep calling this until the latest chart is fetched
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            self.updateChart()
+                        }
+                    } else if self.config.simulateTimePassage {
+                        guard self.simTime < Date() else {
+                            print("Simulate time is up to date")
+                            self.stopMonitoring()
+                            self.delegate?.requestStopMonitoring()
+                            return
+                        }
+                        self.updateChart()
+                    }
                 }
-                self.updateChart()
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                    self.updateChart()
+                }
             }
         }
-    }
-    
-    private func startLiveRefreshTimer(timeInterval: TimeInterval) {
-        timer = Timer.scheduledTimer(timeInterval: timeInterval,
-                                     target: self,
-                                     selector: #selector(updateChart),
-                                     userInfo: self,
-                                     repeats: false)
     }
     
     private func downloadChartFromUrls(oneMinUrl: String,
@@ -238,7 +215,41 @@ class ChartManager {
                                          indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
     }
     
-    private func findFirstAvailableUrl(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+    private func findLatestAvaiableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+        var oneMinUrl: String?
+        var twoMinUrl: String?
+        var threeMinUrl: String?
+        let now = Date()
+        let urlFetchingTask = DispatchGroup()
+        
+        urlFetchingTask.enter()
+        networkManager.fetchLatestAvailableUrlDuring(time: now, interval: .oneMin, completion: { url in
+            oneMinUrl = url
+            urlFetchingTask.leave()
+        })
+        
+        urlFetchingTask.enter()
+        networkManager.fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { url in
+            twoMinUrl = url
+            urlFetchingTask.leave()
+        })
+        
+        urlFetchingTask.enter()
+        networkManager.fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { url in
+            threeMinUrl = url
+            urlFetchingTask.leave()
+        })
+        
+        urlFetchingTask.notify(queue: DispatchQueue.main) {
+            guard let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl else {
+                return completion(nil)
+            }
+            
+            completion((oneMinUrl, twoMinUrl, threeMinUrl))
+        }
+    }
+    
+    private func findFirstAvailableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {

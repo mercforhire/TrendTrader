@@ -20,7 +20,7 @@ struct LiveOrder: Codable {
     var side: String
     var auxPrice: String?
     var orderId: Int
-    var order_ref: String
+    var order_ref: String?
     var status: String
     
     var direction: TradeDirection {        

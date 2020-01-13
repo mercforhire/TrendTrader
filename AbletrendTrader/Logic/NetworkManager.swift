@@ -86,7 +86,7 @@ enum NetworkError: Error {
         case .placeOrderFailed:
             return "Place order failed."
         case .modifyOrderFailed:
-            return "Place order failed."
+            return "Modify order failed."
         case .deleteOrderFailed:
             return "delete order failed."
         case .verifyClosedPositionFailed:
@@ -431,7 +431,7 @@ class NetworkManager {
         
         let stopPrice: Double = stopPrice.round(nearest: 0.25)
         
-        print(String(format: "%@: %@ %@ Bracket Order called with stop at %@",
+        print(String(format: "%@: %@ Bracket Order called with stop at %@",
                      orderRef,
                      direction.description(),
                      String(format: "%.2f", stopPrice)))
@@ -592,43 +592,38 @@ class NetworkManager {
         }
     }
     
-    func fetchLatestAvailableUrl(interval: SignalInteval, completion: @escaping (String?) -> ()) {
+    func fetchLatestAvailableUrlDuring(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
         let queue = DispatchQueue.global()
         queue.async {
             let semaphore = DispatchSemaphore(value: 0)
             var existUrl: String?
             
-            while existUrl == nil {
-                let now = Date()
-                let currentSecond = now.second() - 1
-                
-                if currentSecond < 5 {
-                    sleep(1)
-                    continue
+            let now = Date()
+            let currentSecond = now.second() - 1
+            
+            if currentSecond < 5 {
+                sleep(UInt32(5 - currentSecond))
+            }
+            
+            for i in stride(from: currentSecond, through: 0, by: -1) {
+                if existUrl != nil {
+                    break
                 }
                 
-                for i in stride(from: currentSecond, through: 0, by: -1) {
-                    if existUrl != nil {
-                        break
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), i)
+                
+                Alamofire.SessionManager.default.request(urlString).validate().response { response in
+                    if response.response?.statusCode == 200 {
+                        existUrl = urlString
                     }
-                    
-                    let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), now.month(), now.day(), now.hour(), now.minute(), i)
-                    
-                    Alamofire.SessionManager.default.request(urlString).validate().response { response in
-                        if response.response?.statusCode == 200 {
-                            existUrl = urlString
-                        }
-                        semaphore.signal()
-                    }
-                    
-                    semaphore.wait()
+                    semaphore.signal()
                 }
                 
-                DispatchQueue.main.async {
-                    if let existUrl = existUrl {
-                        completion(existUrl)
-                    }
-                }
+                semaphore.wait()
+            }
+            
+            DispatchQueue.main.async {
+                completion(existUrl)
             }
         }
     }

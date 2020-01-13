@@ -341,7 +341,10 @@ class SessionManager {
                                     if networkError != nil {
                                         retriedTimes += 1
                                     }
-                                    completion(networkError)
+                                    DispatchQueue.main.async {
+                                        completion(networkError)
+                                    }
+                                    inProcessActionIndex += 1
                                     semaphore.signal()
                             })
                         case .verifyPositionClosed(let closedPosition, let idealClosingPrice, _, let reason):

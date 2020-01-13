@@ -185,16 +185,15 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         sessionManager.exitPositions(priceBarTime: Date(),
                                      idealExitPrice: latestPrice,
                                      exitReason: .manual)
-        { [weak self] result in
+        { [weak self] networkError in
             guard let self = self else { return }
             
             sender.isEnabled = true
             
-            switch result {
-            case .success:
+            if networkError == nil {
                 self.updateTradesList()
-            case .failure(let networkError):
-                networkError.showDialog()
+            } else {
+                networkError?.showDialog()
             }
         }
     }

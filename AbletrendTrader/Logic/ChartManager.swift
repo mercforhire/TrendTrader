@@ -107,6 +107,12 @@ class ChartManager {
     @objc
     private func updateChart() {
         let now = Date()
+        if now >= config.flatPositionsTime(date: now) {
+            delegate?.requestStopMonitoring()
+            print("Trading session is over at", now.hourMinuteSecond())
+            return
+        }
+        
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
             // call this again 5 seconds after the next minute
             let waitSeconds = 65.0 - Double(now.second())
@@ -128,7 +134,7 @@ class ChartManager {
             
             self.fetchingChart = false
             if let chart = chart {
-                print("Fetched chart for the current minute at", Date().hourMinuteSecond())
+                print("Chart for the current minute fetched at", Date().hourMinuteSecond())
                 self.delegate?.chartUpdated(chart: chart)
                 self.currentPriceBarTime = chart.absLastBarDate
                 
@@ -149,7 +155,7 @@ class ChartManager {
                     }
                 }
             } else if self.monitoring, self.live {
-                print("Fetched chart for current minute yet not found at", Date().hourMinuteSecond())
+                print("Chart for",Date().hourMinuteSecond(), "minute yet not found")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     self.updateChart()
                 }

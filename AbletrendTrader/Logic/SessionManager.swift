@@ -12,8 +12,7 @@ class SessionManager {
     private let networkManager = NetworkManager.shared
     private let config = Config.shared
     private var ninjaTraderManager: NinjaTraderManager?
-    private let liveUpdateFrequency: TimeInterval = 10
-    
+    private let liveUpdateFrequency: TimeInterval = 20
     let live: Bool
     let ninjaTraderMode: Bool = true
     private(set) var currentPosition: Position?
@@ -85,21 +84,36 @@ class SessionManager {
     func refreshLiveOrders(completion: ((NetworkError?) -> ())? = nil) {
         guard config.liveTradingMode == .interactiveBroker else { return }
         
-        self.networkManager.fetchLiveOrders { [weak self] result in
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
             guard let self = self else { return }
             
-            switch result {
-            case .success(let orders):
-                self.liveOrders = orders
-                completion?(nil)
-            case .failure(let error):
-                completion?(error)
-                print(Date().hourMinuteSecond(), "Live orders update failed")
-            }
+            let semaphore = DispatchSemaphore(value: 0)
             
-            if self.monitoringLiveOrders {
-                DispatchQueue.main.asyncAfter(deadline: .now() + self.liveUpdateFrequency) {
-                    self.refreshLiveOrders()
+            self.networkManager.fetchAccounts { _ in
+                semaphore.signal()
+            }
+            semaphore.wait()
+            self.networkManager.fetchLiveOrders { [weak self] result in
+                guard let self = self else { return }
+                
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    
+                    switch result {
+                    case .success(let orders):
+                        self.liveOrders = orders
+                        completion?(nil)
+                    case .failure(let error):
+                        completion?(error)
+                        print(Date().hourMinuteSecond(), "Live orders update failed")
+                    }
+                    
+                    if self.monitoringLiveOrders {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + self.liveUpdateFrequency) {
+                            self.refreshLiveOrders()
+                        }
+                    }
                 }
             }
         }

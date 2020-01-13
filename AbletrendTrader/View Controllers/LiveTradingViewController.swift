@@ -266,7 +266,7 @@ extension LiveTradingViewController: DataManagerDelegate {
     }
     
     func requestStopMonitoring() {
-        
+        pauseTrading(self.pauseButton)
     }
 }
 

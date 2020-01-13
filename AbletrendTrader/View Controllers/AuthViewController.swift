@@ -155,6 +155,9 @@ class AuthViewController: NSViewController {
             switch result {
             case .success(let status):
                 self.authenticated = status.authenticated
+                if status.authenticated {
+                    print("Server authenticated at", Date().hourMinuteSecond())
+                }
                 self.fetchAccounts()
             case .failure:
                 self.authenticated = false

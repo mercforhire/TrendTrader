@@ -51,7 +51,7 @@ class Config {
     var ninjaTraderAccountName = "Sim101"
     
     // DEMO SETTINGS:
-    let liveTradingMode: LiveTradingMode = .interactiveBroker
+    let liveTradingMode: LiveTradingMode = .ninjaTrader
     let byPassTradingTimeRestrictions = true // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false

@@ -35,11 +35,11 @@ class AuthViewController: NSViewController {
             } else if authenticated == false {
                 authStatusLabel.stringValue = "Not authenticated"
                 logOffButton.isEnabled = false
-                goToLiveButton.isEnabled = false
+                goToLiveButton.isEnabled = config.liveTradingMode == .ninjaTrader
             } else {
                 authStatusLabel.stringValue = "--"
                 logOffButton.isEnabled = false
-                goToLiveButton.isEnabled = false
+                goToLiveButton.isEnabled = config.liveTradingMode == .ninjaTrader
             }
         }
     }
@@ -61,7 +61,6 @@ class AuthViewController: NSViewController {
         accountsPicker.usesDataSource = true
         accountsPicker.dataSource = self
         logOffButton.isEnabled = false
-        goToLiveButton.isEnabled = false
         
         tickerField.stringValue = config.ticker
         tickerField.isEditable = false
@@ -71,6 +70,15 @@ class AuthViewController: NSViewController {
         sizeField.isEditable = false
         ipAddressField.stringValue = config.dataServerURL
         ipAddressField.isEditable = false
+        
+        if config.liveTradingMode == .interactiveBroker {
+            goToLiveButton.isEnabled = false
+        } else {
+            validateSSOButton.isEnabled = false
+            reauthButton.isEnabled = false
+            getStatusButton.isEnabled = false
+            goToLiveButton.isEnabled = true
+        }
     }
     
     override func viewDidLoad() {
@@ -78,10 +86,15 @@ class AuthViewController: NSViewController {
         // Do view setup here.
         setupUI()
         
-        validateSSOPressed(validateSSOButton)
-        getStatusPressed(getStatusButton)
-        
-        timer = Timer.scheduledTimer(timeInterval: TimeInterval(30.0), target: self, selector: #selector(pingServer), userInfo: nil, repeats: true)
+        if config.liveTradingMode == .interactiveBroker {
+            validateSSOPressed(validateSSOButton)
+            getStatusPressed(getStatusButton)
+            timer = Timer.scheduledTimer(timeInterval: TimeInterval(30.0),
+                                         target: self,
+                                         selector: #selector(pingServer),
+                                         userInfo: nil,
+                                         repeats: true)
+        }
     }
     
     @objc
@@ -95,7 +108,6 @@ class AuthViewController: NSViewController {
                     print("Pinging server success at", Date().hourMinuteSecond())
                     self.authenticated = true
                 }
-                break
             case .failure:
                 self.authenticated = false
                 print("Pinging server failed, attempting to re-authenticate")
@@ -124,16 +136,13 @@ class AuthViewController: NSViewController {
     
     @IBAction func validateSSOPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        networkManager.validateSSO { [weak self] result in
-            guard let self = self else { return }
-            
+        networkManager.validateSSO { result in
             switch result {
-            case .success(let token):
+            case .success:
                 print("Validate SSO success")
             case .failure:
                 print("Validate SSO failed")
             }
-            
             sender.isEnabled = true
         }
     }

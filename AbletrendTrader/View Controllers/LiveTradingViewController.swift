@@ -58,6 +58,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
         dataManager = ChartManager(live: true)
         dataManager?.delegate = self
+        sessionManager.initialize()
     }
     
     override func viewWillAppear() {
@@ -133,21 +134,23 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             }
         })
         
-        fetchingTask.enter()
-        sessionManager.refreshIBSession(completionHandler: { [weak self] result in
-            fetchingTask.leave()
-            
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let success):
-                if success {
-                    self.updateTradesList()
+        if Config.shared.liveTradingMode == .interactiveBroker {
+            fetchingTask.enter()
+            sessionManager.refreshIBSession(completionHandler: { [weak self] result in
+                fetchingTask.leave()
+                
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let success):
+                    if success {
+                        self.updateTradesList()
+                    }
+                case .failure(let networkError):
+                    networkError.showDialog()
                 }
-            case .failure(let networkError):
-                networkError.showDialog()
-            }
-        })
+            })
+        }
         
         fetchingTask.notify(queue: DispatchQueue.main) {
             sender.isEnabled = true

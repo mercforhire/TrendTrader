@@ -102,6 +102,7 @@ class ChartManager {
     }
     
     var currentPriceBarTime: Date?
+    var fetchingChart = false
     
     @objc
     private func updateChart() {
@@ -116,12 +117,18 @@ class ChartManager {
             return
         }
         
+        if fetchingChart {
+            return
+        }
+        
         print("Start fetching chart at", now.hourMinuteSecond(), terminator:"...")
+        fetchingChart = true
         fetchChart { [weak self] chart in
             guard let self = self else { return }
             
+            self.fetchingChart = false
             if let chart = chart {
-                print("Fetched chart at", Date().hourMinuteSecond())
+                print("Fetched chart for the current minute at", Date().hourMinuteSecond())
                 self.delegate?.chartUpdated(chart: chart)
                 self.currentPriceBarTime = chart.absLastBarDate
                 
@@ -141,8 +148,9 @@ class ChartManager {
                         self.updateChart()
                     }
                 }
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            } else if self.monitoring, self.live {
+                print("Fetched chart for current minute yet not found at", Date().hourMinuteSecond())
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     self.updateChart()
                 }
             }

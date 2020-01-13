@@ -199,7 +199,6 @@ class SessionManager {
         }
         currentPriceBarTime = priceBarTime
         
-        
         if live {
             switch config.liveTradingMode {
             case .interactiveBroker:

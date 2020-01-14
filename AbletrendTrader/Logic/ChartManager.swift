@@ -107,7 +107,7 @@ class ChartManager {
     @objc
     private func updateChart() {
         let now = Date()
-        if now >= config.flatPositionsTime(date: now) {
+        if !config.byPassTradingTimeRestrictions, now >= config.flatPositionsTime(date: now) {
             delegate?.requestStopMonitoring()
             print("Trading session is over at", now.hourMinuteSecond())
             return

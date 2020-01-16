@@ -87,12 +87,9 @@ class ChartManager {
     }
     
     func startMonitoring() {
-        if live {
-            updateChart()
-        } else if config.simulateTimePassage {
-            updateChart()
-        }
+        guard live || config.simulateTimePassage else { return }
         
+        updateChart()
         monitoring = true
     }
     

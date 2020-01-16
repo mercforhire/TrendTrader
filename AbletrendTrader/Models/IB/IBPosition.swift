@@ -29,6 +29,7 @@ struct IBPosition: Codable {
                         entryTime: Date(),
                         idealEntryPrice: avgPrice,
                         actualEntryPrice: avgPrice,
-                        stopLoss: nil)
+                        stopLoss: nil,
+                        commission: Config.shared.defaultCommission)
     }
 }

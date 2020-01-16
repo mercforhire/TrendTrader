@@ -30,4 +30,19 @@ extension Double {
             return ceiling(toNearest: 0.5)
         }
     }
+    
+    func currency(_ withDecimal: Bool = true, showPlusSign: Bool = false) -> String {
+        var string = DisplayNumberFormatter.transform(from: self, style: .currency, setOptions: { formatter in
+            formatter.maximumFractionDigits = withDecimal ? 2 : 0
+            formatter.minimumFractionDigits = withDecimal ? 2 : 0
+        })!
+        
+        if self > 0 {
+            if showPlusSign {
+                string = "+" + string
+            }
+        }
+        
+        return string
+    }
 }

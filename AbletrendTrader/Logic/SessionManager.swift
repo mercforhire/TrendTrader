@@ -262,6 +262,7 @@ class SessionManager {
                                         self.currentPosition?.entryTime = orderConfirmation.time
                                         self.currentPosition?.entryOrderRef = orderConfirmation.orderRef
                                         self.currentPosition?.stopLoss?.stopOrderId = orderConfirmation.stopOrderId
+                                        self.currentPosition?.commission = orderConfirmation.commission
                                         completion(nil)
                                     }
                                     inProcessActionIndex += 1
@@ -296,7 +297,8 @@ class SessionManager {
                                                           exitTime: orderConfirmation.time,
                                                           idealExitPrice: newPosition.idealEntryPrice,
                                                           actualExitPrice: orderConfirmation.price,
-                                                          exitOrderRef: orderConfirmation.orderRef)
+                                                          exitOrderRef: orderConfirmation.orderRef,
+                                                          commission: oldPosition.commission + orderConfirmation.commission)
                                         self.trades.append(trade)
                                         
                                         // opened new position
@@ -305,6 +307,7 @@ class SessionManager {
                                         self.currentPosition?.entryTime = orderConfirmation.time
                                         self.currentPosition?.entryOrderRef = orderConfirmation.orderRef
                                         self.currentPosition?.stopLoss?.stopOrderId = orderConfirmation.stopOrderId
+                                        self.currentPosition?.commission = orderConfirmation.commission
                                         completion(nil)
                                     }
                                     inProcessActionIndex += 1
@@ -379,7 +382,8 @@ class SessionManager {
                                                               exitTime: orderConfirmation.time,
                                                               idealExitPrice: idealClosingPrice,
                                                               actualExitPrice: orderConfirmation.price,
-                                                              exitOrderRef: orderConfirmation.orderRef)
+                                                              exitOrderRef: orderConfirmation.orderRef,
+                                                              commission: closedPosition.commission + orderConfirmation.commission)
                                             self.trades.append(trade)
                                         }
                                         completion(nil)
@@ -435,7 +439,8 @@ class SessionManager {
                                           actualEntryPrice: oldPosition.idealEntryPrice,
                                           exitTime: newPosition.entryTime,
                                           idealExitPrice: newPosition.idealEntryPrice,
-                                          actualExitPrice: newPosition.idealEntryPrice)
+                                          actualExitPrice: newPosition.idealEntryPrice,
+                                          commission: oldPosition.commission * 2)
                         trades.append(trade)
                         
                         currentPosition = newPosition
@@ -467,7 +472,8 @@ class SessionManager {
                                           actualEntryPrice: closedPosition.idealEntryPrice,
                                           exitTime: closingTime,
                                           idealExitPrice: closingPrice,
-                                          actualExitPrice: closingPrice)
+                                          actualExitPrice: closingPrice,
+                                          commission: 4.0)
                         trades.append(trade)
                         currentPosition = nil
                         
@@ -479,7 +485,8 @@ class SessionManager {
                                           actualEntryPrice: closedPosition.idealEntryPrice,
                                           exitTime: closingTime,
                                           idealExitPrice: closingPrice,
-                                          actualExitPrice: closingPrice)
+                                          actualExitPrice: closingPrice,
+                                          commission: 4.0)
                         trades.append(trade)
                         currentPosition = nil
                         
@@ -508,7 +515,8 @@ class SessionManager {
                                       actualEntryPrice: oldPosition.idealEntryPrice,
                                       exitTime: newPosition.entryTime,
                                       idealExitPrice: newPosition.idealEntryPrice,
-                                      actualExitPrice: newPosition.idealEntryPrice)
+                                      actualExitPrice: newPosition.idealEntryPrice,
+                                      commission: oldPosition.commission * 2)
                     trades.append(trade)
                     
                     currentPosition = newPosition
@@ -526,7 +534,8 @@ class SessionManager {
                                       actualEntryPrice: closedPosition.idealEntryPrice,
                                       exitTime: closingTime,
                                       idealExitPrice: closingPrice,
-                                      actualExitPrice: closingPrice)
+                                      actualExitPrice: closingPrice,
+                                      commission: closedPosition.commission * 2)
                     trades.append(trade)
                     currentPosition = nil
                 case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
@@ -536,7 +545,8 @@ class SessionManager {
                                       actualEntryPrice: closedPosition.idealEntryPrice,
                                       exitTime: closingTime,
                                       idealExitPrice: closingPrice,
-                                      actualExitPrice: closingPrice)
+                                      actualExitPrice: closingPrice,
+                                      commission: closedPosition.commission * 2)
                     trades.append(trade)
                     currentPosition = nil
                 case .noAction(_):
@@ -602,7 +612,8 @@ class SessionManager {
                                                   exitTime: exitOrderConfirmation.time,
                                                   idealExitPrice: idealExitPrice,
                                                   actualExitPrice: exitOrderConfirmation.price,
-                                                  exitOrderRef: exitOrderConfirmation.orderRef)
+                                                  exitOrderRef: exitOrderConfirmation.orderRef,
+                                                  commission: currentPosition.commission + exitOrderConfirmation.commission)
                                 self.trades.append(trade)
                                 self.currentPosition = nil
                             }
@@ -633,7 +644,8 @@ class SessionManager {
                                   actualEntryPrice: currentPosition.idealEntryPrice,
                                   exitTime: priceBarTime,
                                   idealExitPrice: idealExitPrice,
-                                  actualExitPrice: idealExitPrice)
+                                  actualExitPrice: idealExitPrice,
+                                  commission: currentPosition.commission * 2)
                 trades.append(trade)
                 self.currentPosition = nil
             }
@@ -651,6 +663,16 @@ class SessionManager {
         }
         
         return pAndL
+    }
+    
+    func getTotalPAndLDollar() -> Double {
+        var pAndLDollar: Double = 0
+        
+        for trade in trades {
+            pAndLDollar = pAndLDollar + (trade.actualProfitDollar ?? 0)
+        }
+        
+        return pAndLDollar
     }
     
     func listOfTrades() -> [TradesTableRowItem] {
@@ -671,7 +693,8 @@ class SessionManager {
                                                  aExit: "--",
                                                  pAndL: "--",
                                                  entryTime: dateFormatter.string(from: currentPosition.entryTime),
-                                                 exitTime: "--"))
+                                                 exitTime: "--",
+                                                 commission: currentPosition.commission.currency(true, showPlusSign: false)))
         }
         
         for trade in trades.reversed() {
@@ -683,7 +706,8 @@ class SessionManager {
                                                  aExit: String(format: "%.3f", trade.actualExitPrice),
                                                  pAndL: String(format: "%.3f", trade.actualProfit ?? 0),
                                                  entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
-                                                 exitTime: dateFormatter.string(from: trade.exitTime)))
+                                                 exitTime: dateFormatter.string(from: trade.exitTime),
+                                                 commission: trade.commission.currency(true)))
         }
         
         return tradesList
@@ -820,7 +844,8 @@ class SessionManager {
                                                                       time: recentTrade.tradeTime,
                                                                       orderId: orderId,
                                                                       orderRef: orderRef,
-                                                                      stopOrderId: stopOrderId)
+                                                                      stopOrderId: stopOrderId,
+                                                                      commission: recentTrade.commission.double ?? self.config.defaultCommission)
                             completion(.success(orderConfirmation))
                         }
                     } else {
@@ -967,7 +992,8 @@ class SessionManager {
                     if let closingTrade = matchingTrades.first, let closingPrice = closingTrade.price.double {
                         let orderConfirmation = OrderConfirmation(price: closingPrice,
                                                                   time: closingTrade.tradeTime,
-                                                                  orderRef: closingTrade.orderRef ?? "STOPORDER")
+                                                                  orderRef: closingTrade.orderRef ?? "STOPORDER",
+                                                                  commission: closingTrade.commission.double ?? self.config.defaultCommission)
                         DispatchQueue.main.async {
                             completion(.success(orderConfirmation))
                         }

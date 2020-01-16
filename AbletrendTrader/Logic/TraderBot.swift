@@ -61,8 +61,8 @@ class TraderBot {
     // Decide trade actions at the given PriceBar object, returns the list of actions need to be performed
     func decide(priceBar: PriceBar? = nil) -> [TradeActionType] {
         if config.traderBotDemoMode {
-            let longPosition = Position(direction: .long, size: 1, entryTime: Date(), idealEntryPrice: 8000, actualEntryPrice: 8000, stopLoss: StopLoss(stop: 7000, source: .currentBar, stopOrderId: nil))
-            let shortPosition = Position(direction: .short, size: 1, entryTime: Date(), idealEntryPrice: 9000, actualEntryPrice: 9000, stopLoss: StopLoss(stop: 10000, source: .currentBar, stopOrderId: nil))
+            let longPosition = Position(direction: .long, size: 1, entryTime: Date(), idealEntryPrice: 8000, actualEntryPrice: 8000, stopLoss: StopLoss(stop: 7000, source: .currentBar, stopOrderId: nil), commission: 2)
+            let shortPosition = Position(direction: .short, size: 1, entryTime: Date(), idealEntryPrice: 9000, actualEntryPrice: 9000, stopLoss: StopLoss(stop: 10000, source: .currentBar, stopOrderId: nil), commission: 2)
             switch demoCounter % 8 {
             case 0:
                 demoCounter = demoCounter + 1
@@ -288,7 +288,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
-        let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
+        let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: config.defaultCommission)
         return .openPosition(newPosition: buyPosition, entryType: .initial)
     }
     
@@ -296,7 +296,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
-        let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
+        let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: config.defaultCommission)
         return .openPosition(newPosition: sellPosition, entryType: .initial)
     }
     
@@ -356,10 +356,10 @@ class TraderBot {
         
         if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(date: bar.time).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
-            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss, commission: config.defaultCommission)
             return position
         } else if risk <= config.maxRisk {
-            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss)
+            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss, commission: config.defaultCommission)
             return position
         }
 

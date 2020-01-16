@@ -22,7 +22,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var buyButton: NSButton!
     @IBOutlet weak var sellButton: NSButton!
     
-    private var dataManager: ChartManager?
+    private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
@@ -56,23 +56,23 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         setupUI()
         
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
-        dataManager = ChartManager(live: true)
-        dataManager?.delegate = self
+        chartManager = ChartManager(live: true)
+        chartManager?.delegate = self
         sessionManager.initialize()
     }
     
     override func viewWillAppear() {
         super.viewWillAppear()
         
-        if dataManager?.monitoring ?? false {
-            dataManager?.startMonitoring()
+        if chartManager?.monitoring ?? false {
+            chartManager?.startMonitoring()
         }
     }
     
     override func viewDidDisappear() {
         super.viewDidDisappear()
         
-        dataManager?.stopMonitoring()
+        chartManager?.stopMonitoring()
     }
     
     @objc func updateSystemTimeLabel() {
@@ -90,7 +90,9 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private func updateTradesList() {
         listOfTrades = sessionManager.listOfTrades()
         tableView.reloadData()
-        totalPLLabel.stringValue = String(format: "Total P/L: %.2f", sessionManager.getTotalPAndL())
+        totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
+                                          sessionManager.getTotalPAndL(),
+                                          sessionManager.getTotalPAndLDollar().currency(true, showPlusSign: false))
         
         if sessionManager.currentPosition != nil {
             self.buyButton.isEnabled = false
@@ -103,14 +105,14 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     
     @IBAction
     private func refreshData(_ sender: NSButton) {
-        dataManager?.stopMonitoring()
+        chartManager?.stopMonitoring()
         updateLatestDataTimeLabel(chart: nil)
         sender.isEnabled = false
         
         let fetchingTask = DispatchGroup()
         
         fetchingTask.enter()
-        dataManager?.fetchChart(completion: { [weak self] chart in
+        chartManager?.fetchChart(completion: { [weak self] chart in
             fetchingTask.leave()
             
             guard let self = self else { return }
@@ -121,7 +123,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                 self.updateLatestDataTimeLabel(chart: chart)
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 
-                if self.dataManager?.monitoring ?? false {
+                if self.chartManager?.monitoring ?? false {
                     self.startButton.isEnabled = false
                     self.pauseButton.isEnabled = true
                 } else {
@@ -164,7 +166,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         startButton.isEnabled = false
         pauseButton.isEnabled = true
-        dataManager?.startMonitoring()
+        chartManager?.startMonitoring()
         sessionManager.startMonitoringLiveOrders()
     }
     
@@ -172,7 +174,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private func pauseTrading(_ sender: NSButton) {
         startButton.isEnabled = true
         pauseButton.isEnabled = false
-        dataManager?.stopMonitoring()
+        chartManager?.stopMonitoring()
         sessionManager.stopMonitoringLiveOrders()
     }
     
@@ -254,7 +256,7 @@ extension LiveTradingViewController: DataManagerDelegate {
         
         trader?.chart = chart
         
-        if let actions = trader?.decide(), dataManager?.monitoring ?? false {
+        if let actions = trader?.decide(), chartManager?.monitoring ?? false {
             sessionManager.processActions(priceBarTime: lastBarTime, actions: actions) { networkError in
                 if let networkError = networkError {
                     networkError.showDialog()
@@ -298,12 +300,15 @@ extension LiveTradingViewController: NSTableViewDelegate {
             text = trade.aExit
             cellIdentifier = .ActualExitCell
         } else if tableColumn == tableView.tableColumns[6] {
+            text = trade.commission
+            cellIdentifier = .CommissionCell
+        } else if tableColumn == tableView.tableColumns[7] {
             text = trade.pAndL
             cellIdentifier = .PAndLCell
-        } else if tableColumn == tableView.tableColumns[7] {
+        } else if tableColumn == tableView.tableColumns[8] {
             text = trade.entryTime
             cellIdentifier = .EntryTimeCell
-        } else if tableColumn == tableView.tableColumns[8] {
+        } else if tableColumn == tableView.tableColumns[9] {
             text = trade.exitTime
             cellIdentifier = .ExitTimeCell
         }

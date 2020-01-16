@@ -132,6 +132,7 @@ class NetworkManager {
     
     init() {
         afManager = Alamofire.SessionManager.default
+        afManager.session.configuration.timeoutIntervalForRequest = 20
         afManager.delegate.sessionDidReceiveChallenge = { session, challenge in
             var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
             var credential: URLCredential?

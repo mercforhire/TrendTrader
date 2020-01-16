@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		711AC8F5D49C3C0C53B19B09 /* Pods_AbletrendTrader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */; };
+		854A56A023CFD8D800904F11 /* DisplayNumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */; };
 		854B14F723C4F9D50098A4E5 /* PlacedOrderResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14F623C4F9D50098A4E5 /* PlacedOrderResponse.swift */; };
 		854B14F923C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14F823C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift */; };
 		854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */; };
@@ -61,6 +62,7 @@
 /* Begin PBXFileReference section */
 		0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AbletrendTrader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7987637B8B2780B3C1E7F8FD /* Pods-AbletrendTrader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.debug.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.debug.xcconfig"; sourceTree = "<group>"; };
+		854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayNumberFormatter.swift; sourceTree = "<group>"; };
 		854B14F623C4F9D50098A4E5 /* PlacedOrderResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrderResponse.swift; sourceTree = "<group>"; };
 		854B14F823C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrderResponseBuilder.swift; sourceTree = "<group>"; };
 		854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmation.swift; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 		8592433B23AC688F004CE61F /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */,
 				856D958A23B87AEF004A4385 /* Builders */,
 				856D957D23B7FE19004A4385 /* IB */,
 				8592435B23B155CC004CE61F /* Pattern */,
@@ -419,6 +422,7 @@
 				8592434F23ADE06E004CE61F /* Trade.swift in Sources */,
 				8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */,
 				8592434223AD403E004CE61F /* Signal.swift in Sources */,
+				854A56A023CFD8D800904F11 /* DisplayNumberFormatter.swift in Sources */,
 				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
 				856D959223B9411F004A4385 /* AuthStatusBuilder.swift in Sources */,
 				85C8CEDC23B7235300E75F76 /* ChartViewController.swift in Sources */,

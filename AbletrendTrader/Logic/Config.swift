@@ -11,11 +11,12 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.0.119/"
+    let dataServerURL: String = "http://192.168.8.105/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
     
+    let defaultCommission = 2.05
     let maxRisk: Double = 10.0
     let minBarStop: Double = 5.0
     let sweetSpotMinDistance: Double  = 1.5 // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
@@ -47,7 +48,7 @@ class Config {
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .interactiveBroker
-    let byPassTradingTimeRestrictions = true // DEFAULT: false
+    let byPassTradingTimeRestrictions = false // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     let traderBotDemoMode = false // DEFAULT: false
     

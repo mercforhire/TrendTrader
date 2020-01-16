@@ -22,7 +22,7 @@ class SimTradingViewController: NSViewController {
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var chartButton: NSButton!
     
-    private var dataManager: ChartManager?
+    private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
@@ -54,8 +54,8 @@ class SimTradingViewController: NSViewController {
         setupUI()
         
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
-        dataManager = ChartManager(live: false)
-        dataManager?.delegate = self
+        chartManager = ChartManager(live: false)
+        chartManager?.delegate = self
         sessionManager.initialize()
     }
     
@@ -74,11 +74,11 @@ class SimTradingViewController: NSViewController {
     
     @IBAction
     private func refreshChartData(_ sender: NSButton) {
-        dataManager?.stopMonitoring()
+        chartManager?.stopMonitoring()
         updateLatestDataTimeLabel(chart: nil)
         sender.isEnabled = false
         
-        dataManager?.fetchChart(completion: {  [weak self] chart in
+        chartManager?.fetchChart(completion: {  [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
@@ -96,13 +96,13 @@ class SimTradingViewController: NSViewController {
     private func startMonitoring(_ sender: NSButton) {
         beginningButton.isEnabled = true
         startButton.isEnabled = false
-        dataManager?.startMonitoring()
+        chartManager?.startMonitoring()
     }
     
     @IBAction
     private func restartSimulation(_ sender: Any) {
-        dataManager?.stopMonitoring()
-        dataManager?.resetSimTime()
+        chartManager?.stopMonitoring()
+        chartManager?.resetSimTime()
         sessionManager.resetSession()
         listOfTrades?.removeAll()
         simTimeLabel.stringValue = "--:--"
@@ -115,14 +115,14 @@ class SimTradingViewController: NSViewController {
     
     @IBAction
     private func goToEndOfDay(_ sender: Any) {
-        guard trader != nil, let completedChart = dataManager?.chart, !completedChart.timeKeys.isEmpty
+        guard trader != nil, let completedChart = chartManager?.chart, !completedChart.timeKeys.isEmpty
         else { return }
         
         beginningButton.isEnabled = true
         endButton.isEnabled = false
         startButton.isEnabled = config.simulateTimePassage
         
-        dataManager?.stopMonitoring()
+        chartManager?.stopMonitoring()
         updateLatestDataTimeLabel(chart: completedChart)
         trader?.chart = completedChart
         trader?.generateSimSession(completion: { [weak self] in
@@ -232,4 +232,5 @@ extension NSUserInterfaceItemIdentifier {
     static let PAndLCell = NSUserInterfaceItemIdentifier("PAndLCellID")
     static let EntryTimeCell = NSUserInterfaceItemIdentifier("EntryCellID")
     static let ExitTimeCell = NSUserInterfaceItemIdentifier("ExitTimeCellID")
+    static let CommissionCell = NSUserInterfaceItemIdentifier("CommissionCellID")
 }

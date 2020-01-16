@@ -175,4 +175,5 @@ struct TradesTableRowItem {
     var pAndL: String
     var entryTime: String
     var exitTime: String
+    var commission: String
 }

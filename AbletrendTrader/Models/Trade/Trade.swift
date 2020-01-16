@@ -20,6 +20,7 @@ struct Trade {
     var idealExitPrice: Double
     var actualExitPrice: Double
     var exitOrderRef: String?
+    var commission: Double
     
     var idealProfit: Double? {
         switch direction {
@@ -36,6 +37,15 @@ struct Trade {
             return actualExitPrice - actualEntryPrice
         default:
             return actualEntryPrice - actualExitPrice
+        }
+    }
+    
+    var actualProfitDollar: Double? {
+        switch direction {
+        case .long:
+            return (actualExitPrice - actualEntryPrice) * 20 - commission
+        default:
+            return (actualEntryPrice - actualExitPrice) * 20 - commission
         }
     }
 }

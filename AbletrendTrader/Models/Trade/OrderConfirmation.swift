@@ -14,4 +14,5 @@ struct OrderConfirmation {
     var orderId: String?
     var orderRef: String
     var stopOrderId: String?
+    var commission: Double
 }

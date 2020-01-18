@@ -15,6 +15,7 @@ protocol NinjaTraderManagerDelegate: class {
 }
 
 class NinjaTraderManager {
+    private let maxTryTimes = 10
     private let config = Config.shared
     private let accountId: String
     
@@ -172,7 +173,7 @@ class NinjaTraderManager {
             let semaphore = DispatchSemaphore(value: 0)
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
-            for _ in 0...30 {
+            for _ in 0...self.maxTryTimes {
                 if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
                     latestOrderResponse = orderResponse
@@ -229,7 +230,7 @@ class NinjaTraderManager {
             let semaphore = DispatchSemaphore(value: 0)
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
-            for _ in 0...30 {
+            for _ in 0...self.maxTryTimes {
                 if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
                     latestOrderResponse = orderResponse
@@ -282,7 +283,7 @@ class NinjaTraderManager {
             let semaphore = DispatchSemaphore(value: 0)
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
-            for _ in 0...30 {
+            for _ in 0...self.maxTryTimes {
                 if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
                     latestOrderResponse = orderResponse
@@ -396,7 +397,7 @@ class NinjaTraderManager {
     
     private func readConnectionStatusFile() -> Bool {
         let dir = URL(fileURLWithPath: config.ntOutgoingPath)
-        let fileURL = dir.appendingPathComponent("\(config.ntName).txt")
+        let fileURL = dir.appendingPathComponent("\(config.ntAccountLongName).txt")
         
         do {
             let text = try String(contentsOf: fileURL, encoding: .utf8)

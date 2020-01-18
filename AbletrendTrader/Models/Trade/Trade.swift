@@ -43,9 +43,9 @@ struct Trade {
     var actualProfitDollar: Double? {
         switch direction {
         case .long:
-            return (actualExitPrice - actualEntryPrice) * 20 - commission
+            return (actualExitPrice - actualEntryPrice) * Config.shared.tickerPointValue - commission
         default:
-            return (actualEntryPrice - actualExitPrice) * 20 - commission
+            return (actualEntryPrice - actualExitPrice) * Config.shared.tickerPointValue - commission
         }
     }
 }

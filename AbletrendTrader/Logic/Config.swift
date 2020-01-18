@@ -36,8 +36,9 @@ class Config {
     let clearTime: (Int, Int) = (15, 59) // Hour/Minute
     let flatTime: (Int, Int) = (16, 5) // Hour/Minute
     
-    let maxDailyLoss: Double = -50.0 // stop trading when P/L goes under this number
+    let maxDailyLoss = -50.0 // stop trading when P/L goes under this number
     let ticker = "NQ"
+    let tickerPointValue = 20.0
     let conId = 346577750
     let positionSize: Int = 1
     let maxActionRetryTimes = 3
@@ -46,15 +47,14 @@ class Config {
     let ntTicker = "NQ 03-20"
     let ntName = "Globex"
     let ntAccountLongName = "NinjaTrader Continuum (Demo)"
-    var ntIncomingPath = "/Users/lchen/Downloads/NinjaTrader Commands/incoming"
-    var ntOutgoingPath = "/Users/lchen/Downloads/NinjaTrader Commands/outgoing"
+    var ntIncomingPath = "/Users/lchen/Downloads/NinjaTrader/incoming"
+    var ntOutgoingPath = "/Users/lchen/Downloads/NinjaTrader/outgoing"
     var ntAccountName = "Sim101"
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    let byPassTradingTimeRestrictions = true // DEFAULT: false
-    let simulateTimePassage = true // DEFAULT: true
-    let traderBotDemoMode = true // DEFAULT: false
+    let byPassTradingTimeRestrictions = false // DEFAULT: false
+    let simulateTimePassage = false // DEFAULT: true
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
     func timeIntervalForHighRiskEntry(date: Date) -> DateInterval {

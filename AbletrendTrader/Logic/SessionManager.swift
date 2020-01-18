@@ -94,6 +94,7 @@ class SessionManager {
                 semaphore.signal()
             }
             semaphore.wait()
+            
             self.networkManager.fetchLiveOrders { [weak self] result in
                 guard let self = self else { return }
                 
@@ -773,7 +774,6 @@ class SessionManager {
                 guard let self = self else {
                     return
                 }
-                
                 switch result {
                 case .success(let orderConfirmation):
                     if let currentPosition = self.currentPosition {
@@ -781,15 +781,15 @@ class SessionManager {
                                           entryTime: currentPosition.entryTime,
                                           idealEntryPrice: currentPosition.idealEntryPrice,
                                           actualEntryPrice: currentPosition.idealEntryPrice,
-                                          exitTime: priceBarTime,
+                                          exitTime: orderConfirmation.time,
                                           idealExitPrice: idealExitPrice,
-                                          actualExitPrice: idealExitPrice,
-                                          commission: currentPosition.commission * 2)
+                                          actualExitPrice: orderConfirmation.price,
+                                          commission: currentPosition.commission + orderConfirmation.commission)
                         self.trades.append(trade)
                         self.currentPosition = nil
                     }
                     completion(nil)
-                case .failure(let error):
+                case .failure:
                     completion(.positionNotClosed)
                 }
             })
@@ -853,6 +853,8 @@ class SessionManager {
         
         return tradesList
     }
+    
+    // IB only functions:
     
     private func removeStopOrdersAndEnterAtMarket(priceBarTime: Date,
                                                   stop: Double? = nil,
@@ -1150,7 +1152,7 @@ class SessionManager {
 
 extension SessionManager: NinjaTraderManagerDelegate {
     func positionUpdated(position: Int, averagePrice: Double) {
-        
+        print("Current position:", position, "Avg price:", averagePrice)
     }
     
     func connectionStateUpdated(connected: Bool) {

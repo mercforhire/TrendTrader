@@ -42,61 +42,8 @@ class TraderBot {
         completion()
     }
     
-    var demoCounter: Int = 0
-    
     // Decide trade actions at the given PriceBar object, returns the list of actions need to be performed
     func decide(priceBar: PriceBar? = nil) -> [TradeActionType] {
-        if config.traderBotDemoMode {
-            let longPosition = Position(direction: .long, size: 1, entryTime: Date(), idealEntryPrice: 8000, actualEntryPrice: 8000, stopLoss: StopLoss(stop: 7000, source: .currentBar, stopOrderId: nil), commission: 2)
-            let shortPosition = Position(direction: .short, size: 1, entryTime: Date(), idealEntryPrice: 9000, actualEntryPrice: 9000, stopLoss: StopLoss(stop: 10000, source: .currentBar, stopOrderId: nil), commission: 2)
-            switch demoCounter % 8 {
-            case 0:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: opened long position")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.openPosition(newPosition: longPosition, entryType: .initial)]
-            case 1:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: update stop")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.updateStop(stop: StopLoss(stop: 7500, source: .currentBar, stopOrderId: nil))]
-            case 2:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: force close position")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.forceClosePosition(closedPosition: longPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed)]
-            case 3:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: verify position closed")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.verifyPositionClosed(closedPosition: longPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed)]
-            case 4:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: opened short position")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.openPosition(newPosition: shortPosition, entryType: .initial)]
-            case 5:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: update stop")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.updateStop(stop: StopLoss(stop: 9500, source: .currentBar, stopOrderId: nil))]
-            case 6:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: force close position")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.forceClosePosition(closedPosition: shortPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed)]
-            case 7:
-                demoCounter = demoCounter + 1
-                print("TraderBotDemo: verify position closed")
-                sessionManager.resetCurrentlyProcessingPriceBar()
-                return [.verifyPositionClosed(closedPosition: shortPosition, closingPrice: 8500, closingTime: Date(), reason: .signalReversed)]
-            default:
-                break
-            }
-        }
-        
-        // real code starts here:
-        
         guard chart.timeKeys.count > 1,
             let priceBar = priceBar ?? chart.lastBar,
             chart.timeKeys.contains(priceBar.identifier),

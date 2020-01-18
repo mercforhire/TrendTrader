@@ -28,32 +28,18 @@ class TraderBot {
         
         sessionManager.resetSession()
         
-        let queue = DispatchQueue.global()
-        queue.async { [weak self] in
-            guard let self = self else {
-                return
+        for timeKey in self.chart.timeKeys {
+            if timeKey == lastBar.identifier {
+                break
             }
             
-            let semaphore = DispatchSemaphore(value: 0)
-            for timeKey in self.chart.timeKeys {
-                if timeKey == lastBar.identifier {
-                    break
-                }
-                
-                guard let currentBar = self.chart.priceBars[timeKey] else { continue }
-                
-                let actions = self.decide(priceBar: currentBar)
-                self.sessionManager.processActions(priceBarTime: currentBar.time, actions: actions) { networkError in
-                    semaphore.signal()
-                }
-                
-                semaphore.wait()
-            }
+            guard let currentBar = self.chart.priceBars[timeKey] else { continue }
             
-            DispatchQueue.main.async {
-                completion()
-            }
+            let actions = self.decide(priceBar: currentBar)
+            self.sessionManager.processActionsSIM(priceBarTime: currentBar.time, actions: actions)
         }
+        
+        completion()
     }
     
     var demoCounter: Int = 0

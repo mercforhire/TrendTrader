@@ -206,9 +206,9 @@ func NSUIMainScreen() -> NSUIScreen?
     return NSUIScreen.main
 }
 
-func NSUIGraphicsBeginImageContextWithOptions(_ size: CGSize, _ opaque: Bool, _ scale: CGFloat)
+func NSUIGraphicsBeginImageContextWithOptions(_ position: CGSize, _ opaque: Bool, _ scale: CGFloat)
 {
-    UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
+    UIGraphicsBeginImageContextWithOptions(position, opaque, scale)
 }
 
 #endif

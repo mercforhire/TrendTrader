@@ -8,6 +8,8 @@
 
 import Foundation
 
+typealias Action = () -> Void
+
 enum EntryType {
     // for all 3 entries, the price must be above 1 min support or under 1 min resistance
     case initial // enter on the first signal of a new triple confirmation
@@ -165,15 +167,16 @@ enum LiveTradingMode {
     case ninjaTrader
 }
 
-struct TradesTableRowItem {
-    var type: String
-    var iEntry: String
-    var aEntry: String
-    var stop: String
-    var iExit: String
-    var aExit: String
-    var pAndL: String
-    var entryTime: String
-    var exitTime: String
-    var commission: String
+enum NTOrderStatus: String {
+    case working = "WORKING"
+    case cancelled = "CANCELLED"
+    case filled = "FILLED"
+    case rejected = "REJECTED"
+    case accepted = "ACCEPTED"
+}
+
+enum NTPositionStatus: String {
+    case flat = "FLAT"
+    case long = "LONG"
+    case short = "SHORT"
 }

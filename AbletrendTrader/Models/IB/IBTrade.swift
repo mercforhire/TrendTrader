@@ -14,7 +14,7 @@ struct IBTrade: Codable {
     var tradeTime_r: Double
     var size: Int
     var price: String
-    var commission: String
+    var commission: String?
     var netAmount: Double
     var account: String
     var secType: String

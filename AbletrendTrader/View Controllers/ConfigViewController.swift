@@ -27,7 +27,7 @@ class ConfigViewController: NSViewController {
     
     private var selectedFolderPath: String = "" {
         didSet {
-            config.ninjaTraderPath = selectedFolderPath
+            config.ntIncomingPath = selectedFolderPath
             ninjaPathField.stringValue = selectedFolderPath
         }
     }
@@ -62,8 +62,8 @@ class ConfigViewController: NSViewController {
         liquidateTimePicker.dateValue = Date().getNewDateFromTime(hour: config.clearTime.0, min: config.clearTime.1)
         flatTimePicker.dateValue = Date().getNewDateFromTime(hour: config.flatTime.0, min: config.flatTime.1)
         dailyLossLimitPicker.stringValue = String(format: "%.2f", config.maxDailyLoss)
-        ninjaPathField.stringValue = config.ninjaTraderPath
-        selectedFolderPath = config.ninjaTraderPath
+        ninjaPathField.stringValue = config.ntIncomingPath
+        selectedFolderPath = config.ntIncomingPath
     }
     
     override func viewDidLoad() {

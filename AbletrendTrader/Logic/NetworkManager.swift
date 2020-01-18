@@ -38,6 +38,39 @@ enum OrderType {
     }
 }
 
+enum NTError: Error {
+    case orderResultNotFound
+    case placedOrderRejected
+    case placedOrderFailed
+    case stopOrderPlacedFailed
+    case positionNotClosed
+    
+    func displayMessage() -> String {
+        switch self {
+        case .orderResultNotFound:
+            return "Order response file not found."
+        case .placedOrderRejected:
+            return "Place order rejected."
+        case .placedOrderFailed:
+            return "Place order failed."
+        case .stopOrderPlacedFailed:
+            return "Place stop order failed."
+        case .positionNotClosed:
+            return "Position not closed."
+        }
+    }
+    
+    func showDialog() {
+        let a: NSAlert = NSAlert()
+        a.messageText = "Error"
+        a.informativeText = self.displayMessage()
+        a.addButton(withTitle: "Okay")
+        a.alertStyle = NSAlert.Style.warning
+        a.runModal()
+        print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
+    }
+}
+
 enum NetworkError: Error {
     case ssoAuthenticationFailed
     case fetchAuthStatusFailed
@@ -103,12 +136,12 @@ enum NetworkError: Error {
     }
     
     func showDialog() {
-//        let a: NSAlert = NSAlert()
-//        a.messageText = "Error"
-//        a.informativeText = self.displayMessage()
-//        a.addButton(withTitle: "Okay")
-//        a.alertStyle = NSAlert.Style.warning
-//        a.runModal()
+        let a: NSAlert = NSAlert()
+        a.messageText = "Error"
+        a.informativeText = self.displayMessage()
+        a.addButton(withTitle: "Okay")
+        a.alertStyle = NSAlert.Style.warning
+        a.runModal()
         print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
     }
 }

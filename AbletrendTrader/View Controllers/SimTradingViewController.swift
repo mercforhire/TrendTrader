@@ -164,9 +164,8 @@ extension SimTradingViewController: DataManagerDelegate {
         trader?.chart = chart
         
         if let actions = trader?.decide() {
-            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions) { networkError in
-                self.updateTradesList()
-            }
+            sessionManager.processActionsSIM(priceBarTime: lastBarTime, actions: actions)
+            updateTradesList()
         }
     }
     

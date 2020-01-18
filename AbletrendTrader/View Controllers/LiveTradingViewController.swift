@@ -200,21 +200,42 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         }
     }
     
+    private func processActions(time: Date = Date(), actions: [TradeActionType], completion: Action? = nil) {
+        switch Config.shared.liveTradingMode {
+        case .interactiveBroker:
+            sessionManager.processActionsIB(priceBarTime: time, actions: actions) { [weak self] networkError in
+                guard let self = self else { return }
+                
+                if let networkError = networkError {
+                    networkError.showDialog()
+                } else {
+                    self.updateTradesList()
+                }
+                
+                completion?()
+            }
+        case .ninjaTrader:
+            sessionManager.processActionsNT(priceBarTime: time, actions: actions) { [weak self] ntError in
+                guard let self = self else { return }
+                
+                if let ntError = ntError {
+                    ntError.showDialog()
+                } else {
+                    self.updateTradesList()
+                }
+                
+                completion?()
+            }
+        }
+    }
+    
     @IBAction func buyPressed(_ sender: NSButton) {
         guard let action = trader?.buyAtMarket() else { return }
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarTime: Date(), actions: [action]) { [weak self] networkError in
-            guard let self = self else { return }
-            
+        processActions(actions: [action]) {
             sender.isEnabled = true
-            
-            if let networkError = networkError {
-                networkError.showDialog()
-            } else {
-                self.updateTradesList()
-            }
         }
     }
     
@@ -223,16 +244,8 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        sessionManager.processActions(priceBarTime: Date(), actions: [action]) { [weak self] networkError in
-            guard let self = self else { return }
-            
+        processActions(actions: [action]) {
             sender.isEnabled = true
-            
-            if let networkError = networkError {
-                print("Network Error: ", networkError)
-            } else {
-                self.updateTradesList()
-            }
         }
     }
     
@@ -257,13 +270,7 @@ extension LiveTradingViewController: DataManagerDelegate {
         trader?.chart = chart
         
         if let actions = trader?.decide(), chartManager?.monitoring ?? false {
-            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions) { networkError in
-                if let networkError = networkError {
-                    networkError.showDialog()
-                } else {
-                    self.updateTradesList()
-                }
-            }
+            processActions(time: lastBarTime, actions: actions)
         }
     }
     

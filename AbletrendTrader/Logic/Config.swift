@@ -11,7 +11,7 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.8.105/"
+    let dataServerURL: String = "http://192.168.1.104/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
@@ -42,15 +42,19 @@ class Config {
     let positionSize: Int = 1
     let maxActionRetryTimes = 3
     
-    let ninjaTraderTicker = "NQ 03-20"
-    var ninjaTraderPath = "/Users/lchen/Downloads/NinjaTrader Commands/"
-    var ninjaTraderAccountName = "Sim101"
+    let ntCommission = 1.60
+    let ntTicker = "NQ 03-20"
+    let ntName = "Globex"
+    let ntAccountLongName = "NinjaTrader Continuum (Demo)"
+    var ntIncomingPath = "/Users/lchen/Downloads/NinjaTrader Commands/incoming"
+    var ntOutgoingPath = "/Users/lchen/Downloads/NinjaTrader Commands/outgoing"
+    var ntAccountName = "Sim101"
     
     // DEMO SETTINGS:
-    let liveTradingMode: LiveTradingMode = .interactiveBroker
-    let byPassTradingTimeRestrictions = false // DEFAULT: false
-    let simulateTimePassage = false // DEFAULT: true
-    let traderBotDemoMode = false // DEFAULT: false
+    let liveTradingMode: LiveTradingMode = .ninjaTrader
+    let byPassTradingTimeRestrictions = true // DEFAULT: false
+    let simulateTimePassage = true // DEFAULT: true
+    let traderBotDemoMode = true // DEFAULT: false
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
     func timeIntervalForHighRiskEntry(date: Date) -> DateInterval {

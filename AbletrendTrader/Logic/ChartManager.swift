@@ -17,12 +17,12 @@ class ChartManager {
     private let networkManager = NetworkManager.shared
     private let config = Config.shared
     
+    var chart: Chart?
+    var monitoring = false
     weak var delegate: DataManagerDelegate?
     
-    let live: Bool
-    var chart: Chart?
-    var simTime: Date!
-    var monitoring = false
+    private let live: Bool
+    private var simTime: Date!
     
     init(live: Bool) {
         self.live = live

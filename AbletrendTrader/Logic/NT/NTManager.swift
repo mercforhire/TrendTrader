@@ -1,5 +1,5 @@
 //
-//  NinjaTraderManager.swift
+//  NTManager.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2020-01-11.
@@ -9,13 +9,12 @@
 import Foundation
 import Cocoa
 
-protocol NinjaTraderManagerDelegate: class {
-    func positionUpdated(position: Int, averagePrice: Double)
+protocol NTManagerDelegate: class {
     func connectionStateUpdated(connected: Bool)
 }
 
-class NinjaTraderManager {
-    private let maxTryTimes = 10
+class NTManager {
+    private let maxTryTimes = 3
     private let config = Config.shared
     private let accountId: String
     
@@ -26,14 +25,7 @@ class NinjaTraderManager {
             }
         }
     }
-    var currentPosition: NTPositionUpdate? {
-        didSet {
-            if let currentPosition = currentPosition {
-                delegate?.positionUpdated(position: currentPosition.position, averagePrice: currentPosition.price)
-            }
-        }
-    }
-    var delegate: NinjaTraderManagerDelegate?
+    var delegate: NTManagerDelegate?
     
     private var timer: Timer?
     
@@ -42,30 +34,26 @@ class NinjaTraderManager {
     }
     
     func initialize() {
-        do {
-            let folderPath = config.ntIncomingPath
-            let paths = try FileManager.default.contentsOfDirectory(atPath: folderPath)
-            for path in paths {
-                try FileManager.default.removeItem(atPath: "\(folderPath)/\(path)")
-            }
-        } catch {
-            print(error.localizedDescription)
-        }
-        
-        timer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
+        cleanUp()
+        startTimer()
+    }
+    
+    func startTimer() {
+        timer = Timer.scheduledTimer(timeInterval: TimeInterval(5.0),
                                      target: self,
                                      selector: #selector(refreshStatus),
                                      userInfo: nil,
                                      repeats: true)
     }
+
+    func resetTimer() {
+        timer?.invalidate()
+        startTimer()
+    }
     
     @objc
     func refreshStatus() {
         connected = readConnectionStatusFile()
-        
-        if connected, let position = readPositionStatusFile() {
-            self.currentPosition = position
-        }
     }
     
     // PLACE COMMAND
@@ -74,7 +62,8 @@ class NinjaTraderManager {
                             size: Int,
                             orderType: OrderType,
                             orderRef: String,
-                            completion: ((Swift.Result<OrderConfirmation, NTError>) -> Void)? = nil) {
+                            completion: ((Swift.Result<OrderConfirmation, TradingError>) -> Void)? = nil) {
+        
         var orderPrice: Double = 0
         switch orderType {
         case .bracket(let price):
@@ -100,20 +89,19 @@ class NinjaTraderManager {
                 return
             }
             
-            let semaphore = DispatchSemaphore(value: 0)
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
-            for _ in 0...10 {
-                if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
+            for _ in 0...self.maxTryTimes {
+                if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
+                    
                     latestOrderResponse = orderResponse
-                    if orderResponse.status == .filled {
+                    if orderResponse.status == .filled || orderResponse.status == .accepted {
                         filledOrderResponse = orderResponse
                         break
                     }
                 }
-                
-                semaphore.signal()
+                sleep(1)
             }
             
             if let orderResponse = filledOrderResponse {
@@ -125,18 +113,23 @@ class NinjaTraderManager {
                                                               stopOrderId: nil,
                                                               commission: self.config.ntCommission)
                     completion?(.success(orderConfirmation))
+                    self.resetTimer()
                 }
-            } else if let _ = latestOrderResponse {
-                DispatchQueue.main.async {
-                    completion?(.failure(.placedOrderFailed))
+            } else if let latestOrderResponse = latestOrderResponse {
+                if latestOrderResponse.status == .rejected {
+                    DispatchQueue.main.async {
+                        completion?(.failure(.orderAlreadyPlaced))
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        completion?(.failure(.orderFailed))
+                    }
                 }
             } else {
                 DispatchQueue.main.async {
-                    completion?(.failure(.orderResultNotFound))
+                    completion?(.failure(.noOrderResponse))
                 }
             }
-            semaphore.wait()
-            sleep(1)
         }
     }
     
@@ -146,7 +139,7 @@ class NinjaTraderManager {
                                       size: Int,
                                       orderType: OrderType,
                                       orderRef: String,
-                                      completion: ((Swift.Result<OrderConfirmation, NTError>) -> Void)? = nil) {
+                                      completion: ((Swift.Result<OrderConfirmation, TradingError>) -> Void)? = nil) {
         var orderPrice: Double = 0
         switch orderType {
         case .bracket(let price):
@@ -170,11 +163,10 @@ class NinjaTraderManager {
                 return
             }
             
-            let semaphore = DispatchSemaphore(value: 0)
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
-                if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
+                if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
                     latestOrderResponse = orderResponse
                     if orderResponse.status == .filled {
@@ -182,8 +174,7 @@ class NinjaTraderManager {
                         break
                     }
                 }
-                
-                semaphore.signal()
+                sleep(1)
             }
             
             if let orderResponse = filledOrderResponse {
@@ -195,18 +186,23 @@ class NinjaTraderManager {
                                                               stopOrderId: nil,
                                                               commission: self.config.ntCommission)
                     completion?(.success(orderConfirmation))
+                    self.resetTimer()
                 }
-            } else if let _ = latestOrderResponse {
-                DispatchQueue.main.async {
-                    completion?(.failure(.placedOrderFailed))
+            } else if let latestOrderResponse = latestOrderResponse {
+                if latestOrderResponse.status == .rejected {
+                    DispatchQueue.main.async {
+                        completion?(.failure(.orderAlreadyPlaced))
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        completion?(.failure(.orderFailed))
+                    }
                 }
             } else {
                 DispatchQueue.main.async {
-                    completion?(.failure(.orderResultNotFound))
+                    completion?(.failure(.noOrderResponse))
                 }
             }
-            semaphore.wait()
-            sleep(1)
         }
     }
     
@@ -215,7 +211,7 @@ class NinjaTraderManager {
     func changeOrder(orderRef: String,
                      size: Int,
                      price: Double,
-                     completion: ((Swift.Result<OrderConfirmation, NTError>) -> Void)? = nil) {
+                     completion: ((Swift.Result<OrderConfirmation, TradingError>) -> Void)? = nil) {
         let orderPrice: Double = price.round(nearest: 0.25)
         let orderString = "CHANGE;;;;\(size);;\(orderPrice);\(orderPrice);;;\(orderRef);;"
         writeTextToFile(text: orderString)
@@ -227,11 +223,10 @@ class NinjaTraderManager {
                 return
             }
             
-            let semaphore = DispatchSemaphore(value: 0)
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
-                if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
+                if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
                     latestOrderResponse = orderResponse
                     if orderResponse.status == .filled {
@@ -239,8 +234,7 @@ class NinjaTraderManager {
                         break
                     }
                 }
-                
-                semaphore.signal()
+                sleep(1)
             }
             
             if let orderResponse = filledOrderResponse {
@@ -255,26 +249,20 @@ class NinjaTraderManager {
                 }
             } else if let _ = latestOrderResponse {
                 DispatchQueue.main.async {
-                    completion?(.failure(.placedOrderFailed))
+                    completion?(.failure(.orderFailed))
                 }
             } else {
                 DispatchQueue.main.async {
-                    completion?(.failure(.orderResultNotFound))
+                    completion?(.failure(.noOrderResponse))
                 }
             }
-            semaphore.wait()
-            sleep(1)
         }
     }
     
     // CLOSEPOSITION COMMAND
     // CLOSEPOSITION;<ACCOUNT>;<INSTRUMENT>;;;;;;;;;;
-    func closePosition(completion: ((Swift.Result<OrderConfirmation?, NTError>) -> Void)? = nil) {
-        if currentPosition?.position == 0 {
-            completion?(.success(nil))
-            return
-        }
-        
+    func closePosition(completion: ((Swift.Result<OrderConfirmation?, TradingError>) -> Void)? = nil) {
+
         let orderString = "CLOSEPOSITION;\(accountId);\(config.ntTicker);;;;;;;;;;"
         writeTextToFile(text: orderString)
         
@@ -285,20 +273,20 @@ class NinjaTraderManager {
                 return
             }
             
-            let semaphore = DispatchSemaphore(value: 0)
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
-            for _ in 0...self.maxTryTimes {
-                if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
-                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
-                    latestOrderResponse = orderResponse
-                    if orderResponse.status == .filled {
-                        filledOrderResponse = orderResponse
-                        break
+            outerLoop: for _ in 0...self.maxTryTimes {
+                if let orderResponsePaths = self.getOrderResponsePaths(), !orderResponsePaths.isEmpty {
+                    for orderResponsePath in orderResponsePaths {
+                        guard let orderResponse = self.readOrderExecutionFile(filePath: orderResponsePath) else { continue }
+                        
+                        latestOrderResponse = orderResponse
+                        if orderResponse.status == .filled {
+                            filledOrderResponse = orderResponse
+                        }
                     }
                 }
-                
-                semaphore.signal()
+                sleep(1)
             }
             
             if let orderResponse = filledOrderResponse {
@@ -310,23 +298,28 @@ class NinjaTraderManager {
                                                               stopOrderId: nil,
                                                               commission: self.config.ntCommission)
                     completion?(.success(orderConfirmation))
+                    self.resetTimer()
                 }
-            } else if let _ = latestOrderResponse {
-                DispatchQueue.main.async {
-                    completion?(.failure(.placedOrderFailed))
+            } else if let latestOrderResponse = latestOrderResponse {
+                if latestOrderResponse.status == .rejected {
+                    DispatchQueue.main.async {
+                        completion?(.failure(.orderAlreadyPlaced))
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        completion?(.failure(.orderFailed))
+                    }
                 }
             } else {
                 DispatchQueue.main.async {
-                    completion?(.failure(.orderResultNotFound))
+                    completion?(.failure(.noOrderResponse))
                 }
             }
-            semaphore.wait()
-            sleep(1)
         }
     }
     
     func getLatestFilledOrderResponse() -> NTOrderResponse? {
-        if let latestOrderResponseFilePath = self.getLatestOrderResponsePath(),
+        if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
             let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath),
             orderResponse.status == .filled {
             return orderResponse
@@ -335,13 +328,54 @@ class NinjaTraderManager {
         return nil
     }
     
+    func readPositionStatusFile() -> PositionStatus? {
+        let dir = URL(fileURLWithPath: config.ntOutgoingPath)
+        let fileURL = dir.appendingPathComponent("\(config.ntTicker) \(config.ntName)_\(accountId)_position.txt")
+        var text: String?
+        do {
+            text = try String(contentsOf: fileURL, encoding: .utf8)
+        }
+        catch {
+            print(fileURL, "doesn't exist")
+            return nil
+        }
+        
+        text = text?.replacingOccurrences(of: "\r\n", with: "")
+        var status: PositionStatus?
+        if let components = text?.components(separatedBy: ";"),
+            components.count == 3,
+            let muliplier = components[0] == "LONG" ? 1 : -1,
+            let size = components[1].int,
+            let avgPrice = components[2].double {
+            
+            status = PositionStatus(position: muliplier * size, price: avgPrice)
+        }
+        return status
+    }
+    
+    func cleanUpOrderResponseFiles() {
+        guard let paths = getOrderResponsePaths() else { return }
+
+        do {
+            for path in paths {
+                try FileManager.default.removeItem(atPath: path)
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
     var counter = 0
     private func writeTextToFile(text: String) {
-        let dir = URL(fileURLWithPath: config.ntIncomingPath)
+        let dir = URL(fileURLWithPath: config.ntBasePath)
+        let dir2 = URL(fileURLWithPath: config.ntIncomingPath)
         let fileURL = dir.appendingPathComponent("oif\(counter).txt")
+        let fileURL2 = dir2.appendingPathComponent("oif\(counter).txt")
         print(text)
         do {
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
+            try FileManager.default.copyItem(at: fileURL, to: fileURL2)
+            try FileManager.default.removeItem(at: fileURL)
             counter += 1
         } catch(let error) {
             print(error)
@@ -360,6 +394,7 @@ class NinjaTraderManager {
             return nil
         }
         
+        text = text?.replacingOccurrences(of: "\r\n", with: "")
         var orderResponse: NTOrderResponse?
         if let components = text?.components(separatedBy: ";"),
             components.count == 3,
@@ -374,38 +409,13 @@ class NinjaTraderManager {
         return orderResponse
     }
     
-    private func readPositionStatusFile() -> NTPositionUpdate? {
-        let dir = URL(fileURLWithPath: config.ntOutgoingPath)
-        let fileURL = dir.appendingPathComponent("\(config.ntTicker) \(config.ntName)_\(accountId)_position.txt")
-        var text: String?
-        do {
-            text = try String(contentsOf: fileURL, encoding: .utf8)
-        }
-        catch {
-            print(fileURL, "doesn't exist")
-            return nil
-        }
-        
-        var positionUpdate: NTPositionUpdate?
-        if let components = text?.components(separatedBy: ";"),
-            components.count == 3,
-            let status = NTPositionStatus(rawValue: components[0]),
-            let size = components[1].int,
-            let avgPrice = components[2].double {
-            positionUpdate = NTPositionUpdate(status: status,
-                                              position: size,
-                                              price: avgPrice)
-        }
-        return positionUpdate
-    }
-    
     private func readConnectionStatusFile() -> Bool {
         let dir = URL(fileURLWithPath: config.ntOutgoingPath)
         let fileURL = dir.appendingPathComponent("\(config.ntAccountLongName).txt")
         
         do {
             let text = try String(contentsOf: fileURL, encoding: .utf8)
-            return text == "CONNECTED"
+            return text.starts(with: "CONNECTED")
         }
         catch {
             print(fileURL, "doesn't exist")
@@ -414,17 +424,36 @@ class NinjaTraderManager {
         return false
     }
     
-    private func getLatestOrderResponsePath() -> String? {
+    private func getOrderResponsePaths() -> [String]? {
         do {
             let folderPath = config.ntOutgoingPath
-            let paths = try FileManager.default.contentsOfDirectory(atPath: folderPath)
-            let orderPaths = paths.filter { path -> Bool in
+            var fileNames = try FileManager.default.contentsOfDirectory(atPath: folderPath)
+            fileNames = fileNames.filter { path -> Bool in
                 return path.starts(with: accountId + "_")
             }
-            return orderPaths.first
+            
+            if !fileNames.isEmpty {
+                var paths: [String] = []
+                for file in fileNames {
+                    paths.append("\(folderPath)/\(file)")
+                }
+                return paths
+            }
+            
         } catch {
-            print("Error: Latest order response file not found")
         }
         return nil
+    }
+    
+    private func cleanUp() {
+        do {
+            let folderPath1 = config.ntIncomingPath
+            let paths1 = try FileManager.default.contentsOfDirectory(atPath: folderPath1)
+            for path in paths1 {
+                try FileManager.default.removeItem(atPath: "\(folderPath1)/\(path)")
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
     }
 }

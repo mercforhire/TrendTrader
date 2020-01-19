@@ -9,7 +9,8 @@
 import Cocoa
 
 class LiveTradingViewController: NSViewController, NSWindowDelegate {
-
+    private let config = Config.shared
+    
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -26,7 +27,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
-    private let sessionManager: SessionManager = SessionManager(live: true)
+    private var sessionManager: BaseSessionManager!
     private var listOfTrades: [TradesTableRowItem]?
     
     weak var delegate: DataManagerDelegate?
@@ -58,7 +59,14 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
         chartManager = ChartManager(live: true)
         chartManager?.delegate = self
-        sessionManager.initialize()
+        
+        switch config.liveTradingMode {
+        case .interactiveBroker:
+            sessionManager = IBSessionManager()
+        case .ninjaTrader:
+            sessionManager = NTSessionManager()
+        }
+        sessionManager.delegate = self
     }
     
     override func viewWillAppear() {
@@ -93,14 +101,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
                                           sessionManager.getTotalPAndL(),
                                           sessionManager.getTotalPAndLDollar().currency(true, showPlusSign: false))
-        
-        if sessionManager.currentPosition != nil {
-            self.buyButton.isEnabled = false
-            self.sellButton.isEnabled = false
-        } else {
-            self.buyButton.isEnabled = true
-            self.sellButton.isEnabled = true
-        }
     }
     
     @IBAction
@@ -108,17 +108,10 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         chartManager?.stopMonitoring()
         updateLatestDataTimeLabel(chart: nil)
         sender.isEnabled = false
-        
-        let fetchingTask = DispatchGroup()
-        
-        fetchingTask.enter()
         chartManager?.fetchChart(completion: { [weak self] chart in
-            fetchingTask.leave()
-            
             guard let self = self else { return }
             
             sender.isEnabled = true
-            
             if let chart = chart {
                 self.updateLatestDataTimeLabel(chart: chart)
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
@@ -132,31 +125,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                 }
                 
                 self.exitButton.isEnabled = true
-                self.sessionManager.startMonitoringLiveOrders()
+                self.buyButton.isEnabled = true
+                self.sellButton.isEnabled = true
+                self.sessionManager.startLiveMonitoring()
             }
         })
-        
-        if Config.shared.liveTradingMode == .interactiveBroker {
-            fetchingTask.enter()
-            sessionManager.refreshIBSession(completionHandler: { [weak self] result in
-                fetchingTask.leave()
-                
-                guard let self = self else { return }
-                
-                switch result {
-                case .success(let success):
-                    if success {
-                        self.updateTradesList()
-                    }
-                case .failure(let networkError):
-                    networkError.showDialog()
-                }
-            })
-        }
-        
-        fetchingTask.notify(queue: DispatchQueue.main) {
-            sender.isEnabled = true
-        }
     }
     
     @IBAction
@@ -167,7 +140,8 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         startButton.isEnabled = false
         pauseButton.isEnabled = true
         chartManager?.startMonitoring()
-        sessionManager.startMonitoringLiveOrders()
+        sessionManager.startLiveMonitoring()
+        updateTradesList()
     }
     
     @IBAction
@@ -175,7 +149,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         startButton.isEnabled = true
         pauseButton.isEnabled = false
         chartManager?.stopMonitoring()
-        sessionManager.stopMonitoringLiveOrders()
+        sessionManager.stopLiveMonitoring()
     }
     
     @IBAction
@@ -201,31 +175,16 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     }
     
     private func processActions(time: Date = Date(), actions: [TradeActionType], completion: Action? = nil) {
-        switch Config.shared.liveTradingMode {
-        case .interactiveBroker:
-            sessionManager.processActionsIB(priceBarTime: time, actions: actions) { [weak self] networkError in
-                guard let self = self else { return }
-                
-                if let networkError = networkError {
-                    networkError.showDialog()
-                } else {
-                    self.updateTradesList()
-                }
-                
-                completion?()
+        sessionManager.processActions(priceBarTime: time, actions: actions) { [weak self] networkError in
+            guard let self = self else { return }
+            
+            if let networkError = networkError {
+                networkError.showDialog()
+            } else {
+                self.updateTradesList()
             }
-        case .ninjaTrader:
-            sessionManager.processActionsNT(priceBarTime: time, actions: actions) { [weak self] ntError in
-                guard let self = self else { return }
-                
-                if let ntError = ntError {
-                    ntError.showDialog()
-                } else {
-                    self.updateTradesList()
-                }
-                
-                completion?()
-            }
+            
+            completion?()
         }
     }
     
@@ -332,5 +291,11 @@ extension LiveTradingViewController: NSTableViewDelegate {
 extension LiveTradingViewController: NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
         return listOfTrades?.count ?? 0
+    }
+}
+
+extension LiveTradingViewController: SessionManagerDelegate {
+    func positionStatusChanged() {
+        updateTradesList()
     }
 }

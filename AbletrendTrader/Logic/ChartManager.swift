@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Alamofire
 
 protocol DataManagerDelegate: class {
     func chartUpdated(chart: Chart)
@@ -14,7 +15,7 @@ protocol DataManagerDelegate: class {
 }
 
 class ChartManager {
-    private let networkManager = NetworkManager.shared
+    private let networkManager = IBNetworkManager.shared
     private let config = Config.shared
     
     var chart: Chart?
@@ -170,7 +171,7 @@ class ChartManager {
         
         let chartFetchingTask = DispatchGroup()
         chartFetchingTask.enter()
-        networkManager.downloadData(from: oneMinUrl, fileName: config.fileName1) { string, response, error in
+        downloadData(from: oneMinUrl, fileName: config.fileName1) { string, response, error in
             DispatchQueue.main.async() {
                 if let string = string {
                     oneMinText = string
@@ -180,7 +181,7 @@ class ChartManager {
         }
         
         chartFetchingTask.enter()
-        networkManager.downloadData(from: twoMinUrl, fileName: config.fileName2) { string, response, error in
+        downloadData(from: twoMinUrl, fileName: config.fileName2) { string, response, error in
             DispatchQueue.main.async() {
                 if let string = string {
                     twoMinText = string
@@ -190,7 +191,7 @@ class ChartManager {
         }
         
         chartFetchingTask.enter()
-        networkManager.downloadData(from: threeMinUrl, fileName: config.fileName3) { string, response, error in
+        downloadData(from: threeMinUrl, fileName: config.fileName3) { string, response, error in
             DispatchQueue.main.async() {
                 if let string = string {
                     threeMinText = string
@@ -234,19 +235,19 @@ class ChartManager {
         let urlFetchingTask = DispatchGroup()
         
         urlFetchingTask.enter()
-        networkManager.fetchLatestAvailableUrlDuring(time: now, interval: .oneMin, completion: { url in
+        fetchLatestAvailableUrlDuring(time: now, interval: .oneMin, completion: { url in
             oneMinUrl = url
             urlFetchingTask.leave()
         })
         
         urlFetchingTask.enter()
-        networkManager.fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { url in
+        fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { url in
             twoMinUrl = url
             urlFetchingTask.leave()
         })
         
         urlFetchingTask.enter()
-        networkManager.fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { url in
+        fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { url in
             threeMinUrl = url
             urlFetchingTask.leave()
         })
@@ -288,19 +289,19 @@ class ChartManager {
                 let urlFetchingTask = DispatchGroup()
                 
                 urlFetchingTask.enter()
-                self.networkManager.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .oneMin, completion: { url in
+                self.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .oneMin, completion: { url in
                     oneMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.networkManager.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .twoMin, completion: { url in
+                self.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .twoMin, completion: { url in
                     twoMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.networkManager.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .threeMin, completion: { url in
+                self.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .threeMin, completion: { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()
                 })
@@ -314,6 +315,89 @@ class ChartManager {
             
             DispatchQueue.main.async {
                 completion(nil)
+            }
+        }
+    }
+    
+    private func downloadData(from url: String, fileName: String, completion: @escaping (String?, URLResponse?, Error?) -> ()) {
+        let destination: DownloadRequest.DownloadFileDestination = { _, _ in
+            var documentsURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            documentsURL = documentsURL.appendingPathComponent(fileName)
+            return (documentsURL, [.removePreviousFile])
+        }
+
+        Alamofire.download(url, to: destination).responseData { response in
+            if let destinationUrl = response.destinationURL, let string = try? String(contentsOf: destinationUrl, encoding: .utf8) {
+               completion(string, nil, nil)
+            } else {
+                completion(nil, nil, nil)
+            }
+        }
+    }
+    
+    private func fetchLatestAvailableUrlDuring(time: Date,
+                                               interval: SignalInteval,
+                                               completion: @escaping (String?) -> ()) {
+        let queue = DispatchQueue.global()
+        queue.async {
+            let semaphore = DispatchSemaphore(value: 0)
+            var existUrl: String?
+            
+            let now = Date()
+            let currentSecond = now.second() - 1
+            
+            if currentSecond < 5 {
+                sleep(UInt32(5 - currentSecond))
+            }
+            
+            for i in stride(from: currentSecond, through: 0, by: -1) {
+                if existUrl != nil {
+                    break
+                }
+                
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), i)
+                
+                Alamofire.SessionManager.default.request(urlString).validate().response { response in
+                    if response.response?.statusCode == 200 {
+                        existUrl = urlString
+                    }
+                    semaphore.signal()
+                }
+                
+                semaphore.wait()
+            }
+            
+            DispatchQueue.main.async {
+                completion(existUrl)
+            }
+        }
+    }
+    
+    private func fetchFirstAvailableUrlInMinute(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
+        let queue = DispatchQueue.global()
+        queue.async {
+            let semaphore = DispatchSemaphore(value: 0)
+            var existUrl: String?
+            
+            for second in 0...59 {
+                if existUrl != nil {
+                    break
+                }
+                
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
+                
+                Alamofire.SessionManager.default.request(urlString).validate().response { response in
+                    if response.response?.statusCode == 200 {
+                        existUrl = urlString
+                    }
+                    semaphore.signal()
+                }
+                
+                semaphore.wait()
+            }
+            
+            DispatchQueue.main.async {
+                completion(existUrl)
             }
         }
     }

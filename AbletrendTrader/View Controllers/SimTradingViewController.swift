@@ -26,7 +26,7 @@ class SimTradingViewController: NSViewController {
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
-    private let sessionManager = SessionManager(live: false)
+    private let sessionManager = SimSessionManager()
     private var listOfTrades: [TradesTableRowItem]?
     
     weak var delegate: DataManagerDelegate?
@@ -163,8 +163,9 @@ extension SimTradingViewController: DataManagerDelegate {
         trader?.chart = chart
         
         if let actions = trader?.decide() {
-            sessionManager.processActionsSIM(priceBarTime: lastBarTime, actions: actions)
-            updateTradesList()
+            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions, completion: { _ in
+                self.updateTradesList()
+            })
         }
     }
     

@@ -8,8 +8,11 @@
 
 import Foundation
 
-struct NTPositionUpdate {
-    var status: NTPositionStatus
+struct PositionStatus {
     var position: Int
     var price: Double
+    
+    func status() -> String {
+        return "Position Status: \(position), \(price.currency())"
+    }
 }

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Cocoa
 
 typealias Action = () -> Void
 
@@ -162,6 +163,35 @@ enum SignalInteval {
     }
 }
 
+enum OrderType {
+    case market
+    case bracket(stop: Double)
+    case stop(price: Double)
+    case limit(price: Double)
+    
+    func typeString() -> String {
+        switch self {
+        case .market, .bracket:
+            return "MKT"
+        case .limit:
+            return "LMT"
+        case .stop:
+            return "STP"
+        }
+    }
+    
+    func ninjaType() -> String {
+        switch self {
+        case .market, .bracket:
+            return "MARKET"
+        case .limit:
+            return "LIMIT"
+        case .stop:
+            return "STOPMARKET"
+        }
+    }
+}
+
 enum LiveTradingMode {
     case interactiveBroker
     case ninjaTrader
@@ -175,8 +205,59 @@ enum NTOrderStatus: String {
     case accepted = "ACCEPTED"
 }
 
-enum NTPositionStatus: String {
-    case flat = "FLAT"
-    case long = "LONG"
-    case short = "SHORT"
+enum TradingError: Error {
+    case brokerNotConnected
+    case fetchAccountsFailed
+    case fetchTradesFailed
+    case fetchPositionsFailed
+    case fetchOrdersFailed
+    case orderReplyFailed
+    case orderAlreadyPlaced
+    case orderFailed
+    case noOrderResponse
+    case modifyOrderFailed
+    case deleteOrderFailed
+    case verifyClosedPositionFailed
+    case positionNotClosed
+    
+    func displayMessage() -> String {
+        switch self {
+        case .brokerNotConnected:
+            return "Broker not connected"
+        case .fetchAccountsFailed:
+            return "Fetch accounts failed."
+        case .fetchTradesFailed:
+            return "Fetch trades failed."
+        case .fetchPositionsFailed:
+            return "Fetch positions failed."
+        case .fetchOrdersFailed:
+             return "Fetch live orders failed."
+        case .orderReplyFailed:
+            return "Answer question failed."
+        case .orderAlreadyPlaced:
+            return "Order already placed."
+        case .orderFailed:
+            return "Place order failed."
+        case .modifyOrderFailed:
+            return "Modify order failed."
+        case .deleteOrderFailed:
+            return "Delete order failed."
+        case .verifyClosedPositionFailed:
+            return "Verify closed position failed."
+        case .positionNotClosed:
+            return "Position not closed."
+        case .noOrderResponse:
+            return "No order response."
+        }
+    }
+    
+    func showDialog() {
+//        let a: NSAlert = NSAlert()
+//        a.messageText = "Error"
+//        a.informativeText = self.displayMessage()
+//        a.addButton(withTitle: "Okay")
+//        a.alertStyle = NSAlert.Style.warning
+//        a.runModal()
+        print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
+    }
 }

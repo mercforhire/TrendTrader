@@ -11,7 +11,7 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.1.104/"
+    let dataServerURL: String = "http://192.168.43.190/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
@@ -47,13 +47,14 @@ class Config {
     let ntTicker = "NQ 03-20"
     let ntName = "Globex"
     let ntAccountLongName = "NinjaTrader Continuum (Demo)"
+    var ntBasePath = "/Users/lchen/Downloads/NinjaTrader/"
     var ntIncomingPath = "/Users/lchen/Downloads/NinjaTrader/incoming"
     var ntOutgoingPath = "/Users/lchen/Downloads/NinjaTrader/outgoing"
     var ntAccountName = "Sim101"
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    let byPassTradingTimeRestrictions = false // DEFAULT: false
+    let byPassTradingTimeRestrictions = true // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am

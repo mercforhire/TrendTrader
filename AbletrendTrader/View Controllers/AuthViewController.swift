@@ -10,13 +10,12 @@ import Cocoa
 
 class AuthViewController: NSViewController {
     private let config = Config.shared
-    private let networkManager = NetworkManager.shared
+    private let networkManager = IBNetworkManager.shared
     
     @IBOutlet weak var authStatusLabel: NSTextField!
     @IBOutlet weak var validateSSOButton: NSButton!
     @IBOutlet weak var getStatusButton: NSButton!
     @IBOutlet weak var reauthButton: NSButton!
-    @IBOutlet weak var logOffButton: NSButton!
     @IBOutlet weak var accountsPicker: NSComboBox!
     @IBOutlet weak var accountInfoLabel: NSTextField!
     @IBOutlet weak var tickerField: NSTextField!
@@ -30,15 +29,12 @@ class AuthViewController: NSViewController {
         didSet {
             if authenticated == true {
                 authStatusLabel.stringValue = "Authenticated"
-                logOffButton.isEnabled = true
                 goToLiveButton.isEnabled = true
             } else if authenticated == false {
                 authStatusLabel.stringValue = "Not authenticated"
-                logOffButton.isEnabled = false
                 goToLiveButton.isEnabled = config.liveTradingMode == .ninjaTrader
             } else {
                 authStatusLabel.stringValue = "--"
-                logOffButton.isEnabled = false
                 goToLiveButton.isEnabled = config.liveTradingMode == .ninjaTrader
             }
         }
@@ -60,7 +56,6 @@ class AuthViewController: NSViewController {
     func setupUI() {
         accountsPicker.usesDataSource = true
         accountsPicker.dataSource = self
-        logOffButton.isEnabled = false
         
         tickerField.stringValue = config.ticker
         tickerField.isEditable = false
@@ -99,16 +94,15 @@ class AuthViewController: NSViewController {
     
     @objc
     private func pingServer() {
-        networkManager.pingServer { [weak self] result in
+        networkManager.pingServer { [weak self] success in
             guard let self = self else { return }
             
-            switch result {
-            case .success:
+            if success {
                 if self.authenticated != true {
                     print("Pinging server success at", Date().hourMinuteSecond())
                     self.authenticated = true
                 }
-            case .failure:
+            } else {
                 self.authenticated = false
                 print("Pinging server failed, attempting to re-authenticate")
                 self.reAuthPressed(self.reauthButton)
@@ -117,30 +111,27 @@ class AuthViewController: NSViewController {
     }
     
     func fetchAccounts() {
-        networkManager.fetchAccounts { [weak self] result in
+        networkManager.fetchAccounts { [weak self] accounts in
             guard let self = self else { return }
             
-            switch result {
-            case .success(let accounts):
+            if let accounts = accounts {
                 self.accounts = accounts
                 if let defaultAccount = accounts.first {
                     self.accountsPicker.selectItem(at: 0)
                     self.selectedAccount = defaultAccount
                     NSApp.keyWindow?.makeFirstResponder(nil)
                 }
-            case .failure:
-                break
             }
         }
     }
     
     @IBAction func validateSSOPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        networkManager.validateSSO { result in
-            switch result {
-            case .success:
+        networkManager.validateSSO { token in
+            
+            if token != nil {
                 print("Validate SSO success")
-            case .failure:
+            } else {
                 print("Validate SSO failed")
             }
             sender.isEnabled = true
@@ -149,52 +140,26 @@ class AuthViewController: NSViewController {
     
     @IBAction func getStatusPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        networkManager.fetchAuthenticationStatus { [weak self] result in
+        networkManager.fetchAuthenticationStatus { [weak self] status in
             guard let self = self else { return }
             
-            switch result {
-            case .success(let status):
-                self.authenticated = status.authenticated
-                if status.authenticated {
-                    print("Server authenticated at", Date().hourMinuteSecond())
-                }
+            self.authenticated = status?.authenticated
+            if self.authenticated ?? false {
+                print("Server authenticated at", Date().hourMinuteSecond())
                 self.fetchAccounts()
-            case .failure:
-                self.authenticated = false
             }
-            
             sender.isEnabled = true
         }
     }
     
     @IBAction func reAuthPressed(_ sender: NSButton) {
         sender.isEnabled = false
-        networkManager.reauthenticate { [weak self] result in
+        networkManager.reauthenticate { [weak self] success in
             guard let self = self else { return }
             
-            switch result {
-            case .success:
+            if success {
                 self.getStatusPressed(self.getStatusButton)
-            case .failure:
-                break
             }
-            
-            sender.isEnabled = true
-        }
-    }
-    
-    @IBAction func logOffPressed(_ sender: NSButton) {
-        sender.isEnabled = false
-        networkManager.logOut { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success:
-                self.authenticated = false
-            case .failure:
-                break
-            }
-            
             sender.isEnabled = true
         }
     }

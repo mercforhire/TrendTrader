@@ -9,148 +9,8 @@
 import Foundation
 import Alamofire
 
-enum OrderType {
-    case market
-    case bracket(stop: Double)
-    case stop(price: Double)
-    case limit(price: Double)
-    
-    func typeString() -> String {
-        switch self {
-        case .market, .bracket:
-            return "MKT"
-        case .limit:
-            return "LMT"
-        case .stop:
-            return "STP"
-        }
-    }
-    
-    func ninjaType() -> String {
-        switch self {
-        case .market, .bracket:
-            return "MARKET"
-        case .limit:
-            return "LIMIT"
-        case .stop:
-            return "STOPMARKET"
-        }
-    }
-}
-
-enum NTError: Error {
-    case orderResultNotFound
-    case placedOrderRejected
-    case placedOrderFailed
-    case stopOrderPlacedFailed
-    case stopOrderModifyFailed
-    case positionNotClosed
-    
-    func displayMessage() -> String {
-        switch self {
-        case .orderResultNotFound:
-            return "Order response file not found."
-        case .placedOrderRejected:
-            return "Place order rejected."
-        case .placedOrderFailed:
-            return "Place order failed."
-        case .stopOrderPlacedFailed:
-            return "Place stop order failed."
-        case .stopOrderModifyFailed:
-            return "Modify stop order failed."
-        case .positionNotClosed:
-            return "Position not closed."
-        }
-    }
-    
-    func showDialog() {
-        let a: NSAlert = NSAlert()
-        a.messageText = "Error"
-        a.informativeText = self.displayMessage()
-        a.addButton(withTitle: "Okay")
-        a.alertStyle = NSAlert.Style.warning
-        a.runModal()
-        print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
-    }
-}
-
-enum NetworkError: Error {
-    case ssoAuthenticationFailed
-    case fetchAuthStatusFailed
-    case tickleFailed
-    case logoffFailed
-    case fetchAccountsFailed
-    case fetchTradesFailed
-    case fetchPositionsFailed
-    case fetchLiveOrdersFailed
-    case orderReplyFailed
-    case orderAlreadyPlaced
-    case placeOrderFailed
-    case noOrderIdReturned
-    case modifyOrderFailed
-    case deleteOrderFailed
-    case verifyClosedPositionFailed
-    case noPositionToClose
-    case noCurrentPositionToPlaceStopLoss
-    case positionNotClosed
-    case resetPortfolioPositionsFailed
-    
-    func displayMessage() -> String {
-        switch self {
-        case .ssoAuthenticationFailed:
-            return "SSO authentication failed."
-        case .fetchAuthStatusFailed:
-            return "Fetch authentication status failed."
-        case .tickleFailed:
-            return "Ping server failed."
-        case .logoffFailed:
-            return "Log off failed."
-        case .fetchAccountsFailed:
-            return "Fetch accounts failed."
-        case .fetchTradesFailed:
-            return "Fetch trades failed."
-        case .fetchPositionsFailed:
-            return "Fetch positions failed."
-        case .fetchLiveOrdersFailed:
-             return "Fetch live orders failed."
-        case .orderReplyFailed:
-            return "Answer question failed."
-        case .orderAlreadyPlaced:
-            return "Order already placed."
-        case .noOrderIdReturned:
-            return "No orderId returned"
-        case .placeOrderFailed:
-            return "Place order failed."
-        case .modifyOrderFailed:
-            return "Modify order failed."
-        case .deleteOrderFailed:
-            return "delete order failed."
-        case .verifyClosedPositionFailed:
-            return "verify closed position failed."
-        case .noPositionToClose:
-            return "No position to close."
-        case .noCurrentPositionToPlaceStopLoss:
-            return "No current position to place stop loss."
-        case .positionNotClosed:
-            return "Position not closed."
-        case .resetPortfolioPositionsFailed:
-            return "Reset portfolio positions failed."
-        }
-    }
-    
-    func showDialog() {
-        let a: NSAlert = NSAlert()
-        a.messageText = "Error"
-        a.informativeText = self.displayMessage()
-        a.addButton(withTitle: "Okay")
-        a.alertStyle = NSAlert.Style.warning
-        a.runModal()
-        print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
-    }
-}
-
-class NetworkManager {
-    static let shared = NetworkManager()
+class IBNetworkManager {
+    static let shared = IBNetworkManager()
     
     private let afManager: Alamofire.SessionManager
     private let config = Config.shared
@@ -192,82 +52,72 @@ class NetworkManager {
     }
     
     // Validate SSO
-    func validateSSO(completionHandler: @escaping (Swift.Result<SSOToken, NetworkError>) -> Void) {
+    func validateSSO(completion: @escaping (SSOToken?) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/sso/validate").responseData { [weak self] response in
             guard let self = self else { return }
             
             if let data = response.data, let ssoToken = self.ssoTokenBuilder.buildSSOTokenFrom(data) {
-                completionHandler(.success(ssoToken))
+                completion(ssoToken)
             } else {
-                completionHandler(.failure(.ssoAuthenticationFailed))
+                completion(nil)
             }
         }
     }
     
     // Authentication Status
-    func fetchAuthenticationStatus(completionHandler: @escaping (Swift.Result<AuthStatus, NetworkError>) -> Void) {
+    func fetchAuthenticationStatus(completion: @escaping (AuthStatus?) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/auth/status", method: .post).responseData { [weak self] response in
             guard let self = self else { return }
             
             if let data = response.data, let authStatus = self.authStatusBuilder.buildAuthStatusFrom(data) {
-                completionHandler(.success(authStatus))
+                completion(authStatus)
             } else {
-                completionHandler(.failure(.fetchAuthStatusFailed))
+                completion(nil)
             }
         }
     }
     
     // Tries to re-authenticate to Brokerage
-    func reauthenticate(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+    func reauthenticate(completion: @escaping (Bool) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/iserver/reauthenticate", method: .post).responseData { response in
             
             if response.response?.statusCode == 200 {
-                completionHandler(.success(true))
+                completion(true)
             } else {
-                completionHandler(.failure(.tickleFailed))
+                completion(false)
             }
         }
     }
     
     // Ping the server to keep the session open
-    func pingServer(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+    func pingServer(completion: @escaping (Bool) -> Void) {
         afManager.request("https://localhost:5000/v1/portal/tickle", method: .post).responseJSON { response in
             if response.response?.statusCode == 200 {
-                completionHandler(.success(true))
+                completion(true)
             } else {
-                completionHandler(.failure(.tickleFailed))
-            }
-        }
-    }
-    
-    // Ends the current session
-    func logOut(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
-        afManager.request("https://localhost:5000/v1/portal/logout", method: .post).responseJSON { response in
-            if response.response?.statusCode == 200 {
-                completionHandler(.success(true))
-            } else {
-                completionHandler(.failure(.logoffFailed))
+                completion(false)
             }
         }
     }
     
     // Portfolio Accounts
-    func fetchAccounts(completionHandler: @escaping (Swift.Result<[Account], NetworkError>) -> Void) {
-        afManager.request("https://localhost:5000/v1/portal/portfolio/accounts").responseData { [weak self] response in
-            guard let self = self else { return }
-            
-            if let data = response.data, let accounts = self.accountsBuilder.buildAccountsFrom(data) {
-                completionHandler(.success(accounts))
-            } else {
-                completionHandler(.failure(.fetchAccountsFailed))
-            }
+    func fetchAccounts(completion: @escaping ([Account]?) -> Void) {
+        afManager.request("https://localhost:5000/v1/portal/portfolio/accounts").responseData
+            { [weak self] response in
+                guard let self = self else { return }
+                
+                if let data = response.data, let accounts = self.accountsBuilder.buildAccountsFrom(data) {
+                    completion(accounts)
+                } else {
+                    completion(nil)
+                }
         }
     }
     
     // List of Trades
-    func fetchTrades(completionHandler: @escaping (Swift.Result<[IBTrade], NetworkError>) -> Void) {
+    func fetchTrades(completion: @escaping (Swift.Result<[IBTrade], TradingError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
-            completionHandler(.failure(.fetchTradesFailed))
+            completion(.failure(.fetchTradesFailed))
             return
         }
         let url = "https://localhost:5000/v1/portal/iserver/account/trades"
@@ -281,17 +131,16 @@ class NetworkManager {
                 relevantTrades.sort { (left, right) -> Bool in
                     return left.tradeTime_r > right.tradeTime_r
                 }
-                completionHandler(.success(relevantTrades))
+                completion(.success(relevantTrades))
             } else {
-                completionHandler(.failure(.fetchTradesFailed))
+                completion(.failure(.fetchTradesFailed))
             }
         }
     }
     
-    // All Live Orders
-    func fetchLiveOrders(completionHandler: @escaping (Swift.Result<[LiveOrder], NetworkError>) -> Void) {
+    func fetchLiveStopOrders(completion: @escaping (Swift.Result<[LiveOrder], TradingError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
-            completionHandler(.failure(.fetchLiveOrdersFailed))
+            completion(.failure(.fetchOrdersFailed))
             return
         }
         
@@ -302,41 +151,41 @@ class NetworkManager {
                 let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
                 let orders = liveOrdersResponse.orders {
                 var relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
-                    return (liveOrder.status == "PreSubmitted" || liveOrder.status == "Filled") && liveOrder.conid == self.config.conId && liveOrder.acct == selectedAccount.accountId
+                    return liveOrder.status == "PreSubmitted" && liveOrder.conid == self.config.conId && liveOrder.acct == selectedAccount.accountId && liveOrder.orderType == "Stop"
                 }
                 relevantOrders.sort { (left, right) -> Bool in
                     return left.lastExecutionTime_r > right.lastExecutionTime_r
                 }
-                completionHandler(.success(relevantOrders))
+                completion(.success(relevantOrders))
             } else {
                 print("Fetch Live Orders Failed:")
                 print(String(data: response.data!, encoding: .utf8)!)
-                completionHandler(.failure(.fetchLiveOrdersFailed))
+                completion(.failure(.fetchOrdersFailed))
             }
         }
     }
     
     // Reset Portfolio Positions Cache
-    private func resetPositionsCache(completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+    private func resetPositionsCache(completion: @escaping (Bool) -> Void) {
         guard let selectedAccount = selectedAccount else {
-            completionHandler(.failure(.resetPortfolioPositionsFailed))
+            completion(false)
             return
         }
         let url = "https://localhost:5000/v1/portal/portfolio/" + selectedAccount.accountId + "/positions/invalidate)"
         afManager.request(url).responseData
             { response in
                 if response.response?.statusCode == 200 {
-                    completionHandler(.success(true))
+                    completion(true)
                 } else {
-                    completionHandler(.failure(.resetPortfolioPositionsFailed))
+                    completion(false)
                 }
         }
     }
     
     // Portfolio Positions
-    func fetchRelevantPositions(completionHandler: @escaping (Swift.Result<IBPosition?, NetworkError>) -> Void) {
+    func fetchRelevantPositions(completion: @escaping (Swift.Result<IBPosition?, TradingError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
-            completionHandler(.failure(.fetchPositionsFailed))
+            completion(.failure(.fetchPositionsFailed))
             return
             
         }
@@ -347,14 +196,11 @@ class NetworkManager {
             }
             
             let semaphore = DispatchSemaphore(value: 0)
-            var networkErrors: [NetworkError] = []
+            var networkErrors: [TradingError] = []
             
-            self.resetPositionsCache { result in
-                switch result {
-                case .failure(let networkError):
-                    networkErrors.append(networkError)
-                default:
-                    break
+            self.resetPositionsCache { success in
+                if !success {
+                    networkErrors.append(.fetchPositionsFailed)
                 }
                 semaphore.signal()
             }
@@ -364,7 +210,7 @@ class NetworkManager {
             
             if !networkErrors.isEmpty {
                 DispatchQueue.main.async {
-                    completionHandler(.failure(.fetchPositionsFailed))
+                    completion(.failure(.fetchPositionsFailed))
                 }
                 return
             }
@@ -378,11 +224,11 @@ class NetworkManager {
                         return position.acctId == selectedAccount.accountId && position.conid == self.config.conId && position.position != 0
                     }
                     DispatchQueue.main.async {
-                        completionHandler(.success(relevantPositions.first))
+                        completion(.success(relevantPositions.first))
                     }
                 } else {
                     DispatchQueue.main.async {
-                        completionHandler(.failure(.fetchPositionsFailed))
+                        completion(.failure(.fetchPositionsFailed))
                     }
                 }
             }
@@ -394,10 +240,10 @@ class NetworkManager {
                     orderType: OrderType,
                     direction: TradeDirection,
                     size: Int,
-                    completionHandler: @escaping (Swift.Result<[PlacedOrderResponse], NetworkError>) -> Void) {
+                    completion: @escaping (Swift.Result<[PlacedOrderResponse], TradingError>) -> Void) {
         guard let selectedAccount = selectedAccount,
             let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/account/" + selectedAccount.accountId + "/order") else {
-            completionHandler(.failure(.placeOrderFailed))
+                completion(.failure(.orderFailed))
             return
         }
         
@@ -429,28 +275,28 @@ class NetworkManager {
                     self.placeOrderReply(question: question, answer: true) { result in
                         switch result {
                         case .success(let response) :
-                            completionHandler(.success(response))
+                            completion(.success(response))
                         case .failure(let networkError):
-                            completionHandler(.failure(networkError))
+                            completion(.failure(networkError))
                         }
                     }
                 } else if let data = response.data, let errorResponse = self.errorResponseBuilder.buildErrorResponseFrom(data) {
                     if errorResponse.error == "Order couldn't be submitted:Local order ID=\(orderRef) is already registered." {
-                        completionHandler(.failure(.orderAlreadyPlaced))
+                        completion(.failure(.orderAlreadyPlaced))
                     } else {
-                        completionHandler(.failure(.placeOrderFailed))
+                        completion(.failure(.orderFailed))
                     }
                 } else if response.response?.statusCode == 200 {
                     print("Warning: order placed successfully but no response body")
-                    completionHandler(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
+                    completion(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
                 } else {
                     print("PlaceOrder failed:")
                     print(String(data: response.data!, encoding: .utf8)!)
-                    completionHandler(.failure(.placeOrderFailed))
+                    completion(.failure(.orderFailed))
                 }
             }
         } else {
-            completionHandler(.failure(.placeOrderFailed))
+            completion(.failure(.orderFailed))
         }
     }
     
@@ -459,10 +305,10 @@ class NetworkManager {
                          stopPrice: Double,
                          direction: TradeDirection,
                          size: Int,
-                         completionHandler: @escaping (Swift.Result<[PlacedOrderResponse], NetworkError>) -> Void) {
+                         completion: @escaping (Swift.Result<[PlacedOrderResponse], TradingError>) -> Void) {
         guard let selectedAccount = selectedAccount,
             let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/account/" + selectedAccount.accountId + "/orders") else {
-            completionHandler(.failure(.placeOrderFailed))
+            completion(.failure(.orderFailed))
             return
         }
         
@@ -484,37 +330,37 @@ class NetworkManager {
                     self.placeOrderReply(question: question, answer: true) { result in
                         switch result {
                         case .success(let response) :
-                            completionHandler(.success(response))
+                            completion(.success(response))
                         case .failure(let networkError):
-                            completionHandler(.failure(networkError))
+                            completion(.failure(networkError))
                         }
                     }
                 } else if let data = response.data, let errorResponse = self.errorResponseBuilder.buildErrorResponseFrom(data) {
                     if errorResponse.error?.contains("is already registered") ?? false {
-                        completionHandler(.failure(.orderAlreadyPlaced))
+                        completion(.failure(.orderAlreadyPlaced))
                     } else {
-                        completionHandler(.failure(.placeOrderFailed))
+                        completion(.failure(.orderFailed))
                     }
                 } else if response.response?.statusCode == 200 {
                     print("Warning: order placed successfully but no response body")
-                    completionHandler(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
+                    completion(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
                 } else {
                     print("PlaceOrder failed:")
                     print(String(data: response.data!, encoding: .utf8)!)
-                    completionHandler(.failure(.placeOrderFailed))
+                    completion(.failure(.orderFailed))
                 }
             }
         } else {
-            completionHandler(.failure(.placeOrderFailed))
+            completion(.failure(.orderFailed))
         }
     }
     
     
     // Place Order Reply
-    func placeOrderReply(question: Question, answer: Bool, completionHandler: @escaping (Swift.Result<[PlacedOrderResponse], NetworkError>) -> Void) {
+    func placeOrderReply(question: Question, answer: Bool, completion: @escaping (Swift.Result<[PlacedOrderResponse], TradingError>) -> Void) {
 
         guard let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/reply/" + question.identifier) else {
-            completionHandler(.failure(.orderReplyFailed))
+            completion(.failure(.orderReplyFailed))
             return
         }
         
@@ -525,19 +371,19 @@ class NetworkManager {
             afManager.request(request).responseData { response in
                 
                 if let data = response.data, let placedOrderResponses = self.placedOrderResponseBuilder.buildPlacedOrderResponseFrom(data) {
-                    completionHandler(.success(placedOrderResponses))
+                    completion(.success(placedOrderResponses))
                 } else if let data = response.data, let question = self.orderQuestionsBuilder.buildQuestionsFrom(data)?.first {
-                    self.placeOrderReply(question: question, answer: true, completionHandler: completionHandler)
+                    self.placeOrderReply(question: question, answer: true, completion: completion)
                 } else if response.response?.statusCode == 200 {
-                    completionHandler(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
+                    completion(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
                 } else {
                     print("PlaceOrderReply Failed:")
                     print(String(data: response.data!, encoding: .utf8)!)
-                    completionHandler(.failure(.orderReplyFailed))
+                    completion(.failure(.orderReplyFailed))
                 }
             }
         } else {
-            completionHandler(.failure(.orderReplyFailed))
+            completion(.failure(.orderReplyFailed))
         }
     }
     
@@ -547,11 +393,11 @@ class NetworkManager {
                      price: Double,
                      quantity: Int,
                      orderId: String,
-                     completionHandler: @escaping (Swift.Result<PlacedOrderResponse, NetworkError>) -> Void) {
+                     completion: @escaping (Swift.Result<PlacedOrderResponse, TradingError>) -> Void) {
         
         guard let selectedAccount = selectedAccount,
             let url: URL = URL(string: String(format: "https://localhost:5000/v1/portal/iserver/account/%@/order/%@", selectedAccount.accountId, orderId)) else {
-                completionHandler(.failure(.modifyOrderFailed))
+                completion(.failure(.modifyOrderFailed))
             return
         }
         
@@ -574,31 +420,31 @@ class NetworkManager {
                     self.placeOrderReply(question: question, answer: true) { result in
                         switch result {
                         case .success(let response) :
-                            completionHandler(.success(response.first!))
+                            completion(.success(response.first!))
                         case .failure(let networkError):
-                            completionHandler(.failure(networkError))
+                            completion(.failure(networkError))
                         }
                     }
                 } else if let data = response.data,
                     let placedOrderResponse = self.placedOrderResponseBuilder.buildPlacedOrderResponseFrom(data)?.first {
-                    completionHandler(.success(placedOrderResponse))
+                    completion(.success(placedOrderResponse))
                 } else if response.response?.statusCode == 200 {
-                    completionHandler(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
+                    completion(.success(PlacedOrderResponse(orderId: "", orderStatus: "")))
                 } else {
                     print("ModifyOrder Failed:")
                     print(String(data: response.data!, encoding: .utf8)!)
-                    completionHandler(.failure(.modifyOrderFailed))
+                    completion(.failure(.modifyOrderFailed))
                 }
             }
         } else {
-            completionHandler(.failure(.modifyOrderFailed))
+            completion(.failure(.modifyOrderFailed))
         }
     }
     
     // Delete Order
-    func deleteOrder(orderId: String, completionHandler: @escaping (Swift.Result<Bool, NetworkError>) -> Void) {
+    func deleteOrder(orderId: String, completion: @escaping (Swift.Result<Bool, TradingError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
-            completionHandler(.failure(.deleteOrderFailed))
+            completion(.failure(.deleteOrderFailed))
             return
         }
         
@@ -606,90 +452,9 @@ class NetworkManager {
         
         afManager.request(String(format: "https://localhost:5000/v1/portal/iserver/account/%@/order/%@", selectedAccount.accountId, orderId), method: .delete).responseData { response in
             if response.response?.statusCode == 200 {
-                completionHandler(.success(true))
+                completion(.success(true))
             } else {
-                completionHandler(.failure(.deleteOrderFailed))
-            }
-        }
-    }
-    
-    func downloadData(from url: String, fileName: String, completion: @escaping (String?, URLResponse?, Error?) -> ()) {
-        let destination: DownloadRequest.DownloadFileDestination = { _, _ in
-            var documentsURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-            documentsURL = documentsURL.appendingPathComponent(fileName)
-            return (documentsURL, [.removePreviousFile])
-        }
-
-        Alamofire.download(url, to: destination).responseData { response in
-            if let destinationUrl = response.destinationURL, let string = try? String(contentsOf: destinationUrl, encoding: .utf8) {
-               completion(string, nil, nil)
-            } else {
-                completion(nil, nil, nil)
-            }
-        }
-    }
-    
-    func fetchLatestAvailableUrlDuring(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
-        let queue = DispatchQueue.global()
-        queue.async {
-            let semaphore = DispatchSemaphore(value: 0)
-            var existUrl: String?
-            
-            let now = Date()
-            let currentSecond = now.second() - 1
-            
-            if currentSecond < 5 {
-                sleep(UInt32(5 - currentSecond))
-            }
-            
-            for i in stride(from: currentSecond, through: 0, by: -1) {
-                if existUrl != nil {
-                    break
-                }
-                
-                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), i)
-                
-                Alamofire.SessionManager.default.request(urlString).validate().response { response in
-                    if response.response?.statusCode == 200 {
-                        existUrl = urlString
-                    }
-                    semaphore.signal()
-                }
-                
-                semaphore.wait()
-            }
-            
-            DispatchQueue.main.async {
-                completion(existUrl)
-            }
-        }
-    }
-    
-    func fetchFirstAvailableUrlInMinute(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
-        let queue = DispatchQueue.global()
-        queue.async {
-            let semaphore = DispatchSemaphore(value: 0)
-            var existUrl: String?
-            
-            for second in 0...59 {
-                if existUrl != nil {
-                    break
-                }
-                
-                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
-                
-                Alamofire.SessionManager.default.request(urlString).validate().response { response in
-                    if response.response?.statusCode == 200 {
-                        existUrl = urlString
-                    }
-                    semaphore.signal()
-                }
-                
-                semaphore.wait()
-            }
-            
-            DispatchQueue.main.async {
-                completion(existUrl)
+                completion(.failure(.deleteOrderFailed))
             }
         }
     }

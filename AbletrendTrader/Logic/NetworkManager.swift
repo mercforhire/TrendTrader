@@ -43,6 +43,7 @@ enum NTError: Error {
     case placedOrderRejected
     case placedOrderFailed
     case stopOrderPlacedFailed
+    case stopOrderModifyFailed
     case positionNotClosed
     
     func displayMessage() -> String {
@@ -55,6 +56,8 @@ enum NTError: Error {
             return "Place order failed."
         case .stopOrderPlacedFailed:
             return "Place stop order failed."
+        case .stopOrderModifyFailed:
+            return "Modify stop order failed."
         case .positionNotClosed:
             return "Position not closed."
         }

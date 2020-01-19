@@ -269,7 +269,12 @@ class NinjaTraderManager {
     
     // CLOSEPOSITION COMMAND
     // CLOSEPOSITION;<ACCOUNT>;<INSTRUMENT>;;;;;;;;;;
-    func closePosition(completion: ((Swift.Result<OrderConfirmation, NTError>) -> Void)? = nil) {
+    func closePosition(completion: ((Swift.Result<OrderConfirmation?, NTError>) -> Void)? = nil) {
+        if currentPosition?.position == 0 {
+            completion?(.success(nil))
+            return
+        }
+        
         let orderString = "CLOSEPOSITION;\(accountId);\(config.ntTicker);;;;;;;;;;"
         writeTextToFile(text: orderString)
         
@@ -391,7 +396,6 @@ class NinjaTraderManager {
                                               position: size,
                                               price: avgPrice)
         }
-        
         return positionUpdate
     }
     

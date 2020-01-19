@@ -169,12 +169,12 @@
             </objects>
             <point key="canvasLocation" x="75" y="250"/>
         </scene>
-        <!--IB Authentication-->
+        <!--Authentication-->
         <scene sceneID="Y6e-Xi-hhg">
             <objects>
-                <viewController title="IB Authentication" id="jng-zD-Lj4" customClass="AuthViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Authentication" id="jng-zD-Lj4" customClass="AuthViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="Dz3-ns-1Y2">
-                        <rect key="frame" x="0.0" y="0.0" width="583" height="351"/>
+                        <rect key="frame" x="0.0" y="0.0" width="565" height="351"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xdl-O7-Emg">
@@ -210,7 +210,7 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="u98-Aj-sbn">
-                                <rect key="frame" x="18" y="288" width="547" height="16"/>
+                                <rect key="frame" x="18" y="288" width="529" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="--" id="BfG-Ds-abB">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -231,7 +231,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jQb-88-B9S">
-                                <rect key="frame" x="305" y="249" width="132" height="32"/>
+                                <rect key="frame" x="281" y="249" width="132" height="32"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="120" id="dWX-ki-3Tc"/>
                                 </constraints>
@@ -279,7 +279,7 @@
                                 </connections>
                             </comboBox>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="L2q-iU-02Q">
-                                <rect key="frame" x="211" y="190" width="187" height="16"/>
+                                <rect key="frame" x="211" y="190" width="169" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="--" id="jgF-u8-Agl">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -295,7 +295,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8EI-Oe-qqJ">
-                                <rect key="frame" x="430" y="107" width="30" height="16"/>
+                                <rect key="frame" x="412" y="107" width="30" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Size" id="xlw-Wr-Cmq">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -303,7 +303,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4Jj-Eb-bYO">
-                                <rect key="frame" x="463" y="105" width="100" height="21"/>
+                                <rect key="frame" x="445" y="105" width="100" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="sgb-VI-6d2"/>
                                 </constraints>
@@ -314,8 +314,8 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CZM-JZ-dJn">
-                                <rect key="frame" x="14" y="18" width="139" height="32"/>
-                                <buttonCell key="cell" type="push" title="Go to simulation" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="R2k-C3-fMU">
+                                <rect key="frame" x="14" y="18" width="104" height="32"/>
+                                <buttonCell key="cell" type="push" title="Simulation" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="R2k-C3-fMU">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -324,8 +324,8 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Elw-CY-Cnz">
-                                <rect key="frame" x="472" y="18" width="97" height="32"/>
-                                <buttonCell key="cell" type="push" title="Go to live" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="nVl-RI-vQm">
+                                <rect key="frame" x="486" y="18" width="65" height="32"/>
+                                <buttonCell key="cell" type="push" title="Live" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="nVl-RI-vQm">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -353,7 +353,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4eF-by-11c">
-                                <rect key="frame" x="451" y="217" width="114" height="19"/>
+                                <rect key="frame" x="433" y="217" width="114" height="19"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Chart server IP" id="9W7-px-k8p">
                                     <font key="font" metaFont="systemBold" size="15"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -361,7 +361,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LOL-yH-v5k">
-                                <rect key="frame" x="413" y="188" width="150" height="21"/>
+                                <rect key="frame" x="395" y="188" width="150" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="150" id="oDv-Gd-kfS"/>
                                 </constraints>
@@ -390,7 +390,7 @@
                             <constraint firstItem="oMt-vs-Ibx" firstAttribute="top" secondItem="u98-Aj-sbn" secondAttribute="bottom" constant="11" id="ICq-zE-U64"/>
                             <constraint firstItem="VqS-7Y-Kb7" firstAttribute="leading" secondItem="Dz3-ns-1Y2" secondAttribute="leading" constant="20" id="LLr-dD-bew"/>
                             <constraint firstItem="pAJ-x1-LMY" firstAttribute="top" secondItem="VqS-7Y-Kb7" secondAttribute="bottom" constant="10" id="Maa-qZ-cj5"/>
-                            <constraint firstItem="jQb-88-B9S" firstAttribute="leading" secondItem="WNk-Yo-z52" secondAttribute="trailing" constant="39" id="MoD-8L-I0i"/>
+                            <constraint firstItem="jQb-88-B9S" firstAttribute="leading" secondItem="WNk-Yo-z52" secondAttribute="trailing" constant="15" id="MoD-8L-I0i"/>
                             <constraint firstItem="Yul-1V-3aa" firstAttribute="leading" secondItem="Dz3-ns-1Y2" secondAttribute="leading" constant="20" id="OW7-bX-aek"/>
                             <constraint firstItem="L2q-iU-02Q" firstAttribute="centerY" secondItem="pAJ-x1-LMY" secondAttribute="centerY" id="P9P-9y-0eL"/>
                             <constraint firstItem="VqS-7Y-Kb7" firstAttribute="top" secondItem="oMt-vs-Ibx" secondAttribute="bottom" constant="20" id="SHl-nL-ud2"/>
@@ -432,7 +432,7 @@
                 </viewController>
                 <customObject id="JWa-5f-H9S" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="672.5" y="290.5"/>
+            <point key="canvasLocation" x="663.5" y="290.5"/>
         </scene>
         <!--Chart-->
         <scene sceneID="Nw5-bD-icl">

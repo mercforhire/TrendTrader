@@ -144,7 +144,7 @@ class NTSessionManager: BaseSessionManager {
                     self.ntManager.closePosition(completion: { result in
                         switch result {
                         case .success(let confirmation):
-                            print("confirmation:", confirmation)
+                            print("Order confirmation:", confirmation)
                             let trade = Trade(direction: closedPosition.direction,
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
@@ -167,7 +167,7 @@ class NTSessionManager: BaseSessionManager {
                     })
                 case .verifyPositionClosed(let closedPosition, let closingPrice, _, _):
                     if let latestFilledOrderResponse = self.ntManager.getLatestFilledOrderResponse() {
-                        print("latestFilledOrderResponse:", latestFilledOrderResponse)
+                        print("Latest filled order response:", latestFilledOrderResponse)
                         let trade = Trade(direction: closedPosition.direction,
                                           entryTime: closedPosition.entryTime,
                                           idealEntryPrice: closedPosition.idealEntryPrice,
@@ -280,8 +280,8 @@ class NTSessionManager: BaseSessionManager {
             }
             
             DispatchQueue.main.async {
-                print("confirmation:", orderConfirmation)
-                print("stopConfirmation:", stopConfirmation)
+                print("Order confirmation:", orderConfirmation)
+                print("Stop confirmation:", stopConfirmation)
                 
                 if var confirmation = orderConfirmation {
                     confirmation.stopOrderId = stopConfirmation?.orderRef
@@ -300,7 +300,7 @@ class NTSessionManager: BaseSessionManager {
             }
             switch result {
             case .success(let orderConfirmation):
-                print("confirmation:", orderConfirmation)
+                print("Order confirmation:", orderConfirmation)
                 
                 if let currentPosition = self.pos {
                     let trade = Trade(direction: currentPosition.direction,

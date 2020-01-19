@@ -319,12 +319,13 @@ class NTManager {
     }
     
     func getLatestFilledOrderResponse() -> NTOrderResponse? {
-        if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
-            let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath),
-            orderResponse.status == .filled {
-            return orderResponse
+        if let orderResponsePaths = self.getOrderResponsePaths(), !orderResponsePaths.isEmpty {
+            for path in orderResponsePaths {
+                if let orderResponse = self.readOrderExecutionFile(filePath: path), orderResponse.status == .filled {
+                    return orderResponse
+                }
+            }
         }
-        
         return nil
     }
     

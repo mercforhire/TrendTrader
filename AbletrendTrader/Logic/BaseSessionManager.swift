@@ -20,12 +20,6 @@ class BaseSessionManager {
     var pos: Position?
     var status: PositionStatus? {
         didSet {
-            if let status = status, status.position == 0, pos != nil {
-                print("Warning: Current position is not nil but position status showing otherwise, clearing current position.")
-                pos = nil
-                delegate?.positionStatusChanged()
-            }
-            
             if oldValue?.position != status?.position {
                 delegate?.positionStatusChanged()
                 if let status = status {

@@ -77,7 +77,15 @@ class NTManager {
         }
         orderPrice = orderPrice.round(nearest: 0.25)
         
-        let orderString = "PLACE;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+        var orderString: String = ""
+        switch orderType {
+        case .market:
+            orderString = "PLACE;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());;;GTC;\(orderRef);\(orderRef);;"
+        case .stop:
+            orderString = "PLACE;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());;\(orderPrice);GTC;\(orderRef);\(orderRef);;"
+        default:
+            orderString = "PLACE;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+        }
         
         // place the order to NT
         writeTextToFile(text: orderString)
@@ -213,7 +221,7 @@ class NTManager {
                      price: Double,
                      completion: ((Swift.Result<OrderConfirmation, TradingError>) -> Void)? = nil) {
         let orderPrice: Double = price.round(nearest: 0.25)
-        let orderString = "CHANGE;;;;\(size);;\(orderPrice);\(orderPrice);;;\(orderRef);;"
+        let orderString = "CHANGE;;;;\(size);;;\(orderPrice);;;\(orderRef);;"
         writeTextToFile(text: orderString)
         
         // wait for NT to return with a result file

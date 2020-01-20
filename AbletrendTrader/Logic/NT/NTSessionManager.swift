@@ -31,7 +31,6 @@ class NTSessionManager: BaseSessionManager {
                                  actions: [TradeActionType],
                                  completion: @escaping (TradingError?) -> ()) {
         if !connected {
-            print("NinjaTrader not connected, skipping this action(s).")
             completion(.brokerNotConnected)
             return
         }
@@ -116,14 +115,13 @@ class NTSessionManager: BaseSessionManager {
                         semaphore.signal()
                     }
                 case .updateStop(let newStop):
-                    guard let currentPosition = self.pos, let stopOrderId = newStop.stopOrderId else {
+                    guard let currentPosition = self.pos, let stopOrderId = currentPosition.stopLoss?.stopOrderId else {
                         DispatchQueue.main.async {
                             completion(.modifyOrderFailed)
                         }
                         semaphore.signal()
                         continue
                     }
-                    self.ntManager.cleanUpOrderResponseFiles()
                     self.ntManager.changeOrder(orderRef: stopOrderId, size: currentPosition.size, price: newStop.stop, completion:
                     { result in
                         switch result {
@@ -166,7 +164,7 @@ class NTSessionManager: BaseSessionManager {
                         semaphore.signal()
                     })
                 case .verifyPositionClosed(let closedPosition, let closingPrice, _, _):
-                    if let latestFilledOrderResponse = self.ntManager.getLatestFilledOrderResponse() {
+                    if self.pos != nil, let latestFilledOrderResponse = self.ntManager.getLatestFilledOrderResponse() {
                         print("Latest filled order response:", latestFilledOrderResponse)
                         let trade = Trade(direction: closedPosition.direction,
                                           entryTime: closedPosition.entryTime,
@@ -284,7 +282,7 @@ class NTSessionManager: BaseSessionManager {
                 print("Stop confirmation:", stopConfirmation)
                 
                 if var confirmation = orderConfirmation {
-                    confirmation.stopOrderId = stopConfirmation?.orderRef
+                    confirmation.stopOrderId = stopConfirmation?.orderId
                     completion(.success(confirmation))
                 } else {
                     completion(.failure(errorSoFar ?? .orderFailed))

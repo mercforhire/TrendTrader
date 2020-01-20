@@ -97,11 +97,19 @@ class NTManager {
                 return
             }
             
+            var deleteFile = true
+            switch orderType {
+                case .stop:
+                    deleteFile = false
+                default:
+                    deleteFile = true
+            }
+            
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
                 if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
-                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
+                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: deleteFile) {
                     
                     latestOrderResponse = orderResponse
                     if orderResponse.status == .filled || orderResponse.status == .accepted {
@@ -391,12 +399,14 @@ class NTManager {
         }
     }
     
-    private func readOrderExecutionFile(filePath: String) -> NTOrderResponse? {
+    private func readOrderExecutionFile(filePath: String, deleteFile: Bool = true) -> NTOrderResponse? {
         let fileURL = URL(fileURLWithPath: filePath)
         var text: String?
         do {
             text = try String(contentsOf: fileURL, encoding: .utf8)
-            try? FileManager.default.removeItem(at: fileURL)
+            if deleteFile {
+                try? FileManager.default.removeItem(at: fileURL)
+            }
         }
         catch {
             print(fileURL, "doesn't exist")

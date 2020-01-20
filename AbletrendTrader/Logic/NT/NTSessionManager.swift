@@ -179,6 +179,7 @@ class NTSessionManager: BaseSessionManager {
                         DispatchQueue.main.async {
                             completion(nil)
                         }
+                        self.ntManager.cleanUpOrderResponseFiles()
                     } else {
                         DispatchQueue.main.async {
                             completion(.positionNotClosed)

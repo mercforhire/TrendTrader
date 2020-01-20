@@ -13,7 +13,7 @@ struct PositionStatus {
     var price: Double
     
     func status() -> String {
-        return "Position Status: \(position), \(price.currency())"
+        return "Position Status: \(position), \(price)"
     }
     
     func toInitialPosition() -> Position? {

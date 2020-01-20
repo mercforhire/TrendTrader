@@ -179,11 +179,19 @@ class NTManager {
                 return
             }
             
+            var deleteFile = true
+            switch orderType {
+                case .stop:
+                    deleteFile = false
+                default:
+                    deleteFile = true
+            }
+            
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
                 if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
-                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
+                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: deleteFile) {
                     latestOrderResponse = orderResponse
                     if orderResponse.status == .filled {
                         filledOrderResponse = orderResponse
@@ -243,7 +251,7 @@ class NTManager {
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
                 if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
-                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath) {
+                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: false) {
                     latestOrderResponse = orderResponse
                     if orderResponse.status == .filled {
                         filledOrderResponse = orderResponse

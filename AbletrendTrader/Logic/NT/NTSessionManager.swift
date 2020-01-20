@@ -122,6 +122,7 @@ class NTSessionManager: BaseSessionManager {
                         semaphore.signal()
                         continue
                     }
+                    self.ntManager.cleanUpOrderResponseFiles()
                     self.ntManager.changeOrder(orderRef: stopOrderId, size: currentPosition.size, price: newStop.stop, completion:
                     { result in
                         switch result {

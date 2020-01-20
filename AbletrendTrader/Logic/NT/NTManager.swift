@@ -14,7 +14,7 @@ protocol NTManagerDelegate: class {
 }
 
 class NTManager {
-    private let maxTryTimes = 3
+    private let maxTryTimes = 5
     private let config = Config.shared
     private let accountId: String
     
@@ -34,12 +34,11 @@ class NTManager {
     }
     
     func initialize() {
-        cleanUp()
         startTimer()
     }
     
     func startTimer() {
-        timer = Timer.scheduledTimer(timeInterval: TimeInterval(5.0),
+        timer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                      target: self,
                                      selector: #selector(refreshStatus),
                                      userInfo: nil,
@@ -97,27 +96,25 @@ class NTManager {
                 return
             }
             
-            var deleteFile = true
+            var desiredStatus: NTOrderStatus = .filled
             switch orderType {
-                case .stop:
-                    deleteFile = false
+            case .stop, .limit:
+                    desiredStatus = .accepted
                 default:
-                    deleteFile = true
+                    desiredStatus = .filled
             }
             
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
-                if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
-                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: deleteFile) {
-                    
+                sleep(1)
+                if let orderResponse = self.getOrderResponse(orderId: orderRef) {
                     latestOrderResponse = orderResponse
-                    if orderResponse.status == .filled || orderResponse.status == .accepted {
+                    if orderResponse.status == desiredStatus {
                         filledOrderResponse = orderResponse
                         break
                     }
                 }
-                sleep(1)
             }
             
             if let orderResponse = filledOrderResponse {
@@ -179,26 +176,25 @@ class NTManager {
                 return
             }
             
-            var deleteFile = true
+            var desiredStatus: NTOrderStatus = .filled
             switch orderType {
-                case .stop:
-                    deleteFile = false
+            case .stop, .limit:
+                    desiredStatus = .accepted
                 default:
-                    deleteFile = true
+                    desiredStatus = .filled
             }
             
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
-                if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
-                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: deleteFile) {
+                sleep(1)
+                if let orderResponse = self.getOrderResponse(orderId: orderRef) {
                     latestOrderResponse = orderResponse
-                    if orderResponse.status == .filled || orderResponse.status == .accepted {
+                    if orderResponse.status == desiredStatus {
                         filledOrderResponse = orderResponse
                         break
                     }
                 }
-                sleep(1)
             }
             
             if let orderResponse = filledOrderResponse {
@@ -250,15 +246,14 @@ class NTManager {
             var latestOrderResponse: NTOrderResponse?
             var filledOrderResponse: NTOrderResponse?
             for _ in 0...self.maxTryTimes {
-                if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
-                    let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: false) {
+                sleep(1)
+                if let orderResponse = self.getOrderResponse(orderId: orderRef) {
                     latestOrderResponse = orderResponse
                     if orderResponse.status == .accepted {
                         filledOrderResponse = orderResponse
                         break
                     }
                 }
-                sleep(1)
             }
             
             if let orderResponse = filledOrderResponse {
@@ -283,72 +278,17 @@ class NTManager {
         }
     }
     
-    // CLOSEPOSITION COMMAND
-    // CLOSEPOSITION;<ACCOUNT>;<INSTRUMENT>;;;;;;;;;;
-    func closePosition(completion: ((Swift.Result<OrderConfirmation?, TradingError>) -> Void)? = nil) {
-
-        let orderString = "CLOSEPOSITION;\(accountId);\(config.ntTicker);;;;;;;;;;"
+    // CANCELALLORDERS COMMAND
+    // CANCELALLORDERS;;;;;;;;;;;;
+    func cancelAllOrders() {
+        let orderString = "CANCELALLORDERS;;;;;;;;;;;;"
         writeTextToFile(text: orderString)
-        
-        // wait for NT to return with a result file
-        let queue = DispatchQueue.global()
-        queue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            
-            var latestOrderResponse: NTOrderResponse?
-            var filledOrderResponse: NTOrderResponse?
-            outerLoop: for _ in 0...self.maxTryTimes {
-                if let orderResponsePaths = self.getOrderResponsePaths(), !orderResponsePaths.isEmpty {
-                    for orderResponsePath in orderResponsePaths {
-                        guard let orderResponse = self.readOrderExecutionFile(filePath: orderResponsePath) else { continue }
-                        
-                        latestOrderResponse = orderResponse
-                        if orderResponse.status == .filled {
-                            filledOrderResponse = orderResponse
-                        }
-                    }
-                }
-                sleep(1)
-            }
-            
-            if let orderResponse = filledOrderResponse {
-                DispatchQueue.main.async {
-                    let orderConfirmation = OrderConfirmation(price: orderResponse.price,
-                                                              time: Date(),
-                                                              orderId: "",
-                                                              orderRef: "",
-                                                              stopOrderId: nil,
-                                                              commission: self.config.ntCommission)
-                    completion?(.success(orderConfirmation))
-                    self.resetTimer()
-                }
-            } else if let latestOrderResponse = latestOrderResponse {
-                if latestOrderResponse.status == .rejected {
-                    DispatchQueue.main.async {
-                        completion?(.failure(.orderAlreadyPlaced))
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        completion?(.failure(.orderFailed))
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    completion?(.failure(.noOrderResponse))
-                }
-            }
-        }
     }
     
-    func getLatestFilledOrderResponse() -> NTOrderResponse? {
-        if let orderResponsePaths = self.getOrderResponsePaths(), !orderResponsePaths.isEmpty {
-            for path in orderResponsePaths {
-                if let orderResponse = self.readOrderExecutionFile(filePath: path), orderResponse.status == .filled {
-                    return orderResponse
-                }
-            }
+    func getOrderResponse(orderId: String) -> NTOrderResponse? {
+        let path = "\(config.ntOutgoingPath)/\(accountId)_\(orderId).txt"
+        if let orderResponse = self.readOrderExecutionFile(filePath: path) {
+            return orderResponse
         }
         return nil
     }
@@ -378,18 +318,6 @@ class NTManager {
         return status
     }
     
-    func cleanUpOrderResponseFiles() {
-        guard let paths = getOrderResponsePaths() else { return }
-
-        do {
-            for path in paths {
-                try FileManager.default.removeItem(atPath: path)
-            }
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
-    
     var counter = 0
     private func writeTextToFile(text: String) {
         let dir = URL(fileURLWithPath: config.ntBasePath)
@@ -407,14 +335,11 @@ class NTManager {
         }
     }
     
-    private func readOrderExecutionFile(filePath: String, deleteFile: Bool = true) -> NTOrderResponse? {
+    private func readOrderExecutionFile(filePath: String) -> NTOrderResponse? {
         let fileURL = URL(fileURLWithPath: filePath)
         var text: String?
         do {
             text = try String(contentsOf: fileURL, encoding: .utf8)
-            if deleteFile {
-                try? FileManager.default.removeItem(at: fileURL)
-            }
         }
         catch {
             print(fileURL, "doesn't exist")
@@ -449,38 +374,5 @@ class NTManager {
         }
         
         return false
-    }
-    
-    private func getOrderResponsePaths() -> [String]? {
-        do {
-            let folderPath = config.ntOutgoingPath
-            var fileNames = try FileManager.default.contentsOfDirectory(atPath: folderPath)
-            fileNames = fileNames.filter { path -> Bool in
-                return path.starts(with: accountId + "_")
-            }
-            
-            if !fileNames.isEmpty {
-                var paths: [String] = []
-                for file in fileNames {
-                    paths.append("\(folderPath)/\(file)")
-                }
-                return paths
-            }
-            
-        } catch {
-        }
-        return nil
-    }
-    
-    private func cleanUp() {
-        do {
-            let folderPath1 = config.ntIncomingPath
-            let paths1 = try FileManager.default.contentsOfDirectory(atPath: folderPath1)
-            for path in paths1 {
-                try FileManager.default.removeItem(atPath: "\(folderPath1)/\(path)")
-            }
-        } catch {
-            print(error.localizedDescription)
-        }
     }
 }

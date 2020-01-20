@@ -174,8 +174,8 @@ class IBSessionManager: BaseSessionManager {
             while inProcessActionIndex < actions.count {
                 let action = actions[inProcessActionIndex]
                 
-                if retriedTimes >= self.config.maxActionRetryTimes {
-                    print("Action have been retried more than", self.config.maxActionRetryTimes, "times, skipping...")
+                if retriedTimes >= self.config.maxIBActionRetryTimes {
+                    print("Action have been retried more than", self.config.maxIBActionRetryTimes, "times, skipping...")
                     inProcessActionIndex += 1
                     retriedTimes = 1
                     continue
@@ -482,7 +482,7 @@ class IBSessionManager: BaseSessionManager {
                                                                       orderId: orderId,
                                                                       orderRef: orderRef,
                                                                       stopOrderId: stopOrderId,
-                                                                      commission: recentTrade.commission?.double ?? self.config.defaultCommission)
+                                                                      commission: recentTrade.commission?.double ?? self.config.ibCommission)
                             completion(.success(orderConfirmation))
                         }
                     } else {
@@ -623,7 +623,7 @@ class IBSessionManager: BaseSessionManager {
                         let orderConfirmation = OrderConfirmation(price: closingPrice,
                                                                   time: closingTrade.tradeTime,
                                                                   orderRef: closingTrade.orderRef ?? "STOPORDER",
-                                                                  commission: closingTrade.commission?.double ?? self.config.defaultCommission)
+                                                                  commission: closingTrade.commission?.double ?? self.config.ibCommission)
                         DispatchQueue.main.async {
                             completion(.success(orderConfirmation))
                         }

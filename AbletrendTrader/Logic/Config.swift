@@ -11,12 +11,11 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.1.105/"
+    let dataServerURL: String = "http://192.168.43.190/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
     
-    let defaultCommission = 2.05
     let maxRisk: Double = 10.0
     let minBarStop: Double = 5.0
     let sweetSpotMinDistance: Double  = 1.5 // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
@@ -36,12 +35,15 @@ class Config {
     let clearTime: (Int, Int) = (15, 59) // Hour/Minute
     let flatTime: (Int, Int) = (16, 5) // Hour/Minute
     
-    let maxDailyLoss = -50.0 // stop trading when P/L goes under this number
-    let ticker = "NQ"
     let tickerPointValue = 20.0
-    let conId = 346577750
     let positionSize: Int = 1
-    let maxActionRetryTimes = 3
+    let maxDailyLoss = -50.0 // stop trading when P/L goes under this number
+    
+    let ticker = "NQ"
+    let conId = 346577750
+    
+    let maxIBActionRetryTimes = 3
+    let ibCommission = 2.05
     
     let ntCommission = 1.60
     let ntTicker = "NQ 03-20"
@@ -54,7 +56,7 @@ class Config {
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    let byPassTradingTimeRestrictions = true // DEFAULT: false
+    let byPassTradingTimeRestrictions = false // DEFAULT: false
     let simulateTimePassage = false // DEFAULT: true
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am

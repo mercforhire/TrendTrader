@@ -30,6 +30,6 @@ struct IBPosition: Codable {
                         idealEntryPrice: avgPrice,
                         actualEntryPrice: avgPrice,
                         stopLoss: nil,
-                        commission: Config.shared.defaultCommission)
+                        commission: Config.shared.ibCommission)
     }
 }

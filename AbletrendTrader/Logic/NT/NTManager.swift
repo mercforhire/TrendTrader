@@ -193,7 +193,7 @@ class NTManager {
                 if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: deleteFile) {
                     latestOrderResponse = orderResponse
-                    if orderResponse.status == .filled {
+                    if orderResponse.status == .filled || orderResponse.status == .accepted {
                         filledOrderResponse = orderResponse
                         break
                     }
@@ -253,7 +253,7 @@ class NTManager {
                 if let latestOrderResponseFilePath = self.getOrderResponsePaths()?.first,
                     let orderResponse = self.readOrderExecutionFile(filePath: latestOrderResponseFilePath, deleteFile: false) {
                     latestOrderResponse = orderResponse
-                    if orderResponse.status == .filled {
+                    if orderResponse.status == .accepted {
                         filledOrderResponse = orderResponse
                         break
                     }

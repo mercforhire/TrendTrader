@@ -195,6 +195,15 @@ enum OrderType {
 enum LiveTradingMode {
     case interactiveBroker
     case ninjaTrader
+    
+    func name() -> String {
+        switch self {
+        case .interactiveBroker:
+            return "Interactive Broker"
+        case .ninjaTrader:
+            return "NinjaTrader"
+        }
+    }
 }
 
 enum NTOrderStatus: String {

@@ -59,8 +59,8 @@ class Config {
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    let byPassTradingTimeRestrictions = true // DEFAULT: false
-    let noEntryDuringLunch = true
+    var byPassTradingTimeRestrictions = true // DEFAULT: false
+    var noEntryDuringLunch = true
     let simulateTimePassage = false // DEFAULT: true
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am

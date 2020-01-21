@@ -136,10 +136,18 @@ class TraderBot {
             // If not exited the trade yet, update the current trade's stop loss:
             
             // Calculate the SL based on the 2 green bars(if applicable)
-            var twoGreenBarsSL: Double = sessionManager.pos?.direction == .long ? 0 : Double.greatestFiniteMagnitude
-
-            if let securedProfit = sessionManager.pos?.securedProfit,
-                securedProfit < config.skipGreenBarsExit,
+            var twoGreenBarsSL: Double = 0
+            var securedProfit: Double = 0
+            switch sessionManager.pos?.direction {
+            case .long:
+                twoGreenBarsSL = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
+                securedProfit = twoGreenBarsSL - currentPosition.idealEntryPrice
+            default:
+                twoGreenBarsSL = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
+                securedProfit = currentPosition.idealEntryPrice - twoGreenBarsSL
+            }
+            
+            if securedProfit < config.skipGreenBarsExit,
                 let entryPrice = sessionManager.pos?.idealEntryPrice,
                 previousPriceBar.barColor == .green,
                 priceBar.barColor == .green,

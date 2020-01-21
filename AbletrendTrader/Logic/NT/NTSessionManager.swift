@@ -339,7 +339,9 @@ class NTSessionManager: BaseSessionManager {
                                 completion: @escaping (TradingError?) -> Void) {
         ntManager.cancelAllOrders()
         if let status = status, status.position != 0 {
-            enterAtMarket(priceBarTime: priceBarTime, direction: status.position > 0 ? .short : .long, size: abs(status.position))
+            enterAtMarket(priceBarTime: priceBarTime,
+                          direction: status.position > 0 ? .short : .long,
+                          size: abs(status.position))
             { [weak self] result in
                 guard let self = self else {
                     return
@@ -347,7 +349,6 @@ class NTSessionManager: BaseSessionManager {
                 switch result {
                 case .success(let orderConfirmation):
                     print("Order confirmation:", orderConfirmation)
-                    
                     if let currentPosition = self.pos {
                         let trade = Trade(direction: currentPosition.direction,
                                           entryTime: currentPosition.entryTime,

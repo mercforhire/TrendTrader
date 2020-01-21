@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Cocoa
 
 protocol NTManagerDelegate: class {
     func connectionStateUpdated(connected: Bool)

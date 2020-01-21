@@ -249,7 +249,7 @@ class NTManager {
                 sleep(1)
                 if let orderResponse = self.getOrderResponse(orderId: orderRef) {
                     latestOrderResponse = orderResponse
-                    if orderResponse.status == .accepted {
+                    if orderResponse.status == .accepted || orderResponse.status == .changeSubmitted {
                         filledOrderResponse = orderResponse
                         break
                     }

@@ -203,6 +203,7 @@ enum NTOrderStatus: String {
     case filled = "FILLED"
     case rejected = "REJECTED"
     case accepted = "ACCEPTED"
+    case changeSubmitted = "CHANGESUBMITTED"
 }
 
 enum TradingError: Error {

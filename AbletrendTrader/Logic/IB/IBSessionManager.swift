@@ -38,14 +38,9 @@ class IBSessionManager: BaseSessionManager {
                 switch result {
                 case .success(let response):
                     if let ibPosition = response {
-                        let position = ibPosition.toPosition()
-                        if self.pos == nil || self.pos?.direction != position.direction {
-                            self.pos = position
-                        }
                         self.status = PositionStatus(position: ibPosition.position, price: ibPosition.avgPrice)
                     } else {
-                        self.pos = nil
-                        self.status = nil
+                        self.status = PositionStatus(position: 0, price: 0)
                     }
                 case .failure:
                     break
@@ -57,22 +52,15 @@ class IBSessionManager: BaseSessionManager {
             self.networkManager.fetchLiveStopOrders { [weak self] result in
                 guard let self = self else { return }
                 
+                switch result {
+                case .success(let orders):
+                    self.stopOrders = orders
+                case .failure:
+                    break
+                }
+                
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
-                    
-                    switch result {
-                    case .success(let orders):
-                        self.stopOrders = orders
-                        if let order = self.stopOrders.first,
-                            let stopPrice = order.auxPrice?.double,
-                            order.direction != self.pos?.direction {
-                            self.pos?.stopLoss = StopLoss(stop: stopPrice,
-                                                          source: .currentBar,
-                                                          stopOrderId: String(format: "%d", order.orderId))
-                        }
-                    case .failure:
-                        print(Date().hourMinuteSecond(), "Live orders update failed")
-                    }
                     
                     if self.liveMonitoring {
                         self.resetTimer()

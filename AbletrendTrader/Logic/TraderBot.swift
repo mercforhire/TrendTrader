@@ -136,15 +136,16 @@ class TraderBot {
             // If not exited the trade yet, update the current trade's stop loss:
             
             // Calculate the SL based on the 2 green bars(if applicable)
-            var twoGreenBarsSL: Double = 0
+            var twoGreenBarsSL: Double = sessionManager.pos?.direction == .long ? 0 : Double.greatestFiniteMagnitude
+            var stopLossFromGreenBars: Double = 0
             var securedProfit: Double = 0
             switch sessionManager.pos?.direction {
             case .long:
-                twoGreenBarsSL = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
-                securedProfit = twoGreenBarsSL - currentPosition.idealEntryPrice
+                stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
+                securedProfit = stopLossFromGreenBars - currentPosition.idealEntryPrice
             default:
-                twoGreenBarsSL = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
-                securedProfit = currentPosition.idealEntryPrice - twoGreenBarsSL
+                stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
+                securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
             }
             
             if securedProfit < config.skipGreenBarsExit,
@@ -155,8 +156,6 @@ class TraderBot {
                 
                 switch sessionManager.pos?.direction {
                 case .long:
-                    let stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
-                    
                     if stopLossFromGreenBars > currentStop,
                         stopLossFromGreenBars - entryPrice >= config.greenBarsExit,
                         previousPriceBar.candleStick.close >= currentStop,
@@ -170,8 +169,6 @@ class TraderBot {
                         }
                     }
                 default:
-                    let stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
-                    
                     if stopLossFromGreenBars < currentStop,
                         sessionManager.pos!.idealEntryPrice - stopLossFromGreenBars >= config.greenBarsExit,
                         previousPriceBar.candleStick.close <= currentStop,
@@ -186,7 +183,6 @@ class TraderBot {
                     }
                 }
             }
-            
             
             if var newStop: Double = sessionManager.pos?.stopLoss?.stop,
                 var newStopSource: StopLossSource = sessionManager.pos?.stopLoss?.source {

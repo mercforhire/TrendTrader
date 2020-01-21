@@ -87,6 +87,10 @@ class ChartViewController: NSViewController {
 }
 
 extension ChartViewController: DataManagerDelegate {
+    func chartStatusChanged(statusText: String) {
+
+    }
+    
     func chartUpdated(chart: Chart) {
         self.chart = chart
         generateCandleStickChartDate()

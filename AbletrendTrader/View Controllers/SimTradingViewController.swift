@@ -63,25 +63,15 @@ class SimTradingViewController: NSViewController {
         systemTimeLabel.stringValue = dateFormatter.string(from: Date())
     }
     
-    private func updateLatestDataTimeLabel(chart: Chart?) {
-        if let chart = chart, let lastDate = chart.absLastBarDate {
-            latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
-        } else {
-            latestDataTimeLabel.stringValue = "Latest data time: --:--"
-        }
-    }
-    
     @IBAction
     private func refreshChartData(_ sender: NSButton) {
         chartManager?.stopMonitoring()
-        updateLatestDataTimeLabel(chart: nil)
         sender.isEnabled = false
         
         chartManager?.fetchChart(completion: {  [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
-                self.updateLatestDataTimeLabel(chart: chart)
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
                 self.startButton.isEnabled = self.config.simulateTimePassage
@@ -122,7 +112,6 @@ class SimTradingViewController: NSViewController {
         startButton.isEnabled = config.simulateTimePassage
         
         chartManager?.stopMonitoring()
-        updateLatestDataTimeLabel(chart: completedChart)
         trader?.chart = completedChart
         trader?.generateSimSession(completion: { [weak self] in
             guard let self = self else { return }
@@ -151,8 +140,11 @@ class SimTradingViewController: NSViewController {
 }
 
 extension SimTradingViewController: DataManagerDelegate {
+    func chartStatusChanged(statusText: String) {
+        latestDataTimeLabel.stringValue = statusText
+    }
+    
     func chartUpdated(chart: Chart) {
-        updateLatestDataTimeLabel(chart: chart)
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,

@@ -806,8 +806,8 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YHY-kb-BJS">
-                                <rect key="frame" x="18" y="327" width="49" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Trades" id="d77-7k-eyx">
+                                <rect key="frame" x="18" y="327" width="61" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Position:" id="d77-7k-eyx">
                                     <font key="font" metaFont="systemBold"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -883,8 +883,8 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jdZ-WN-2Ok">
-                                <rect key="frame" x="585" y="410" width="150" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Latest data time: [TIME]" id="bYy-mD-u3y">
+                                <rect key="frame" x="613" y="410" width="122" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Latest data time: --" id="bYy-mD-u3y">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1306,6 +1306,7 @@
                         <outlet property="exitButton" destination="i66-Zv-rsj" id="Ktg-BI-urb"/>
                         <outlet property="latestDataTimeLabel" destination="jdZ-WN-2Ok" id="OI8-1T-QWT"/>
                         <outlet property="pauseButton" destination="YrC-Ec-i9K" id="VDD-It-D3P"/>
+                        <outlet property="positionStatusLabel" destination="YHY-kb-BJS" id="LUj-er-2H1"/>
                         <outlet property="refreshDataButton" destination="qPe-gd-HwE" id="X5o-kT-cUN"/>
                         <outlet property="sellButton" destination="ucq-Vb-N7V" id="ZKg-zn-Hok"/>
                         <outlet property="startButton" destination="qBw-zu-FaF" id="xZN-2z-l0N"/>

@@ -12,6 +12,7 @@ import Alamofire
 protocol DataManagerDelegate: class {
     func chartUpdated(chart: Chart)
     func requestStopMonitoring()
+    func chartStatusChanged(statusText: String)
 }
 
 class ChartManager {
@@ -23,6 +24,8 @@ class ChartManager {
     
     private let live: Bool
     private var simTime: Date!
+    private var currentPriceBarTime: Date?
+    private var fetchingChart = false
     
     init(live: Bool) {
         self.live = live
@@ -79,7 +82,7 @@ class ChartManager {
                     generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText)
                     completion(self.chart)
                 } else {
-                    print("Chart data reading failed")
+                    self.delegate?.chartStatusChanged(statusText: "Chart data reading failed")
                     completion(nil)
                 }
             }
@@ -98,23 +101,21 @@ class ChartManager {
         currentPriceBarTime = nil
     }
     
-    var currentPriceBarTime: Date?
-    var fetchingChart = false
-    
     @objc
     private func updateChart() {
         let now = Date()
         if !config.byPassTradingTimeRestrictions, now >= config.flatPositionsTime(date: now) {
             delegate?.requestStopMonitoring()
-            print("Trading session is over at", now.hourMinuteSecond())
+            self.delegate?.chartStatusChanged(statusText: "Trading session is over at " + now.hourMinute())
             return
         }
         
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
             // call this again 5 seconds after the next minute
-            let waitSeconds = 65.0 - Double(now.second())
-            print("Skipped fetching chart at", now.hourMinuteSecond(), "will fetch again in", waitSeconds, "seconds")
-            DispatchQueue.main.asyncAfter(deadline: .now() + waitSeconds) {
+            let waitSeconds = 65 - now.second()
+            let statusText: String = "Skipped fetching at \(now.hourMinuteSecond()) will fetch again in \(waitSeconds) seconds"
+            self.delegate?.chartStatusChanged(statusText: statusText)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(waitSeconds)) {
                 self.updateChart()
             }
             return
@@ -124,14 +125,13 @@ class ChartManager {
             return
         }
         
-        print("Start fetching chart at", now.hourMinuteSecond(), terminator:"...")
+        self.delegate?.chartStatusChanged(statusText: "Start fetching at " + now.hourMinuteSecond())
         fetchingChart = true
         fetchChart { [weak self] chart in
             guard let self = self else { return }
             
             self.fetchingChart = false
             if let chart = chart {
-                print("Chart for the current minute fetched at", Date().hourMinuteSecond())
                 self.delegate?.chartUpdated(chart: chart)
                 self.currentPriceBarTime = chart.absLastBarDate
                 
@@ -143,7 +143,7 @@ class ChartManager {
                         }
                     } else if self.config.simulateTimePassage {
                         guard self.simTime < Date() else {
-                            print("Simulate time is up to date")
+                            self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
                             self.stopMonitoring()
                             self.delegate?.requestStopMonitoring()
                             return
@@ -152,7 +152,7 @@ class ChartManager {
                     }
                 }
             } else if self.monitoring, self.live {
-                print("Chart for",Date().hourMinuteSecond(), "minute yet not found")
+                self.delegate?.chartStatusChanged(statusText: "Data for " + Date().hourMinuteSecond() + " yet not found")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     self.updateChart()
                 }
@@ -204,9 +204,10 @@ class ChartManager {
             
             if let oneMinText = oneMinText, let twoMinText = twoMinText, let threeMinText = threeMinText {
                 self.generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText)
+                self.delegate?.chartStatusChanged(statusText: "Latest data: " + (self.chart?.lastBar?.candleStick.time.hourMinuteSecond() ?? "--"))
                 completion(self.chart)
             } else {
-                print("Chart fetching failed")
+                self.delegate?.chartStatusChanged(statusText: "Chart fetching failed")
                 completion(nil)
             }
         }

@@ -22,6 +22,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var chartButton: NSButton!
     @IBOutlet weak var buyButton: NSButton!
     @IBOutlet weak var sellButton: NSButton!
+    @IBOutlet weak var positionStatusLabel: NSTextField!
     
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
@@ -87,14 +88,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         systemTimeLabel.stringValue = dateFormatter.string(from: Date())
     }
     
-    private func updateLatestDataTimeLabel(chart: Chart?) {
-        if let chart = chart, let lastDate = chart.absLastBarDate {
-            latestDataTimeLabel.stringValue = "Latest data time: " + dateFormatter.string(from: lastDate)
-        } else {
-            latestDataTimeLabel.stringValue = "Latest data time: --:--"
-        }
-    }
-    
     private func updateTradesList() {
         listOfTrades = sessionManager.listOfTrades()
         tableView.reloadData()
@@ -106,14 +99,12 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBAction
     private func refreshData(_ sender: NSButton) {
         chartManager?.stopMonitoring()
-        updateLatestDataTimeLabel(chart: nil)
         sender.isEnabled = false
         chartManager?.fetchChart(completion: { [weak self] chart in
             guard let self = self else { return }
             
             sender.isEnabled = true
             if let chart = chart {
-                self.updateLatestDataTimeLabel(chart: chart)
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 
                 if self.chartManager?.monitoring ?? false {
@@ -217,8 +208,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
 }
 
 extension LiveTradingViewController: DataManagerDelegate {
+    func chartStatusChanged(statusText: String) {
+        latestDataTimeLabel.stringValue = statusText
+    }
+    
     func chartUpdated(chart: Chart) {
-        updateLatestDataTimeLabel(chart: chart)
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty,
@@ -297,5 +291,6 @@ extension LiveTradingViewController: NSTableViewDataSource {
 extension LiveTradingViewController: SessionManagerDelegate {
     func positionStatusChanged() {
         updateTradesList()
+        positionStatusLabel.stringValue = sessionManager.status?.status() ?? "Position: --"
     }
 }

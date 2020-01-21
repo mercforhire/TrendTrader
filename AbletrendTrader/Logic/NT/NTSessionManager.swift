@@ -322,7 +322,9 @@ class NTSessionManager: BaseSessionManager {
             
             DispatchQueue.main.async {
                 print("Order confirmation:", orderConfirmation)
-                print("Stop confirmation:", stopConfirmation)
+                if stop != nil {
+                    print("Stop confirmation:", stopConfirmation)
+                }
                 if var confirmation = orderConfirmation {
                     confirmation.stopOrderId = stopConfirmation?.orderId
                     completion(.success(confirmation))

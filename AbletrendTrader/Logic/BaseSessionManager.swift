@@ -22,9 +22,6 @@ class BaseSessionManager {
         didSet {
             if oldValue?.position != status?.position {
                 delegate?.positionStatusChanged()
-                if let status = status {
-                    print(status.status())
-                }
             }
         }
     }

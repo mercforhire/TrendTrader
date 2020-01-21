@@ -9,8 +9,8 @@
 import Foundation
 import Alamofire
 
-class IBNetworkManager {
-    static let shared = IBNetworkManager()
+class IBManager {
+    static let shared = IBManager()
     
     private let afManager: Alamofire.SessionManager
     private let config = Config.shared

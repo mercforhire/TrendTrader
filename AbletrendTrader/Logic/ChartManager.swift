@@ -15,7 +15,6 @@ protocol DataManagerDelegate: class {
 }
 
 class ChartManager {
-    private let networkManager = IBNetworkManager.shared
     private let config = Config.shared
     
     var chart: Chart?

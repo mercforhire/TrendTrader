@@ -16,7 +16,7 @@
 		854B14F923C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14F823C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift */; };
 		854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */; };
 		85582AB323B5E97800DC16AC /* ChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85582AB223B5E97800DC16AC /* ChartManager.swift */; };
-		856D957C23B73B04004A4385 /* IBNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957B23B73B04004A4385 /* IBNetworkManager.swift */; };
+		856D957C23B73B04004A4385 /* IBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957B23B73B04004A4385 /* IBManager.swift */; };
 		856D957F23B7FE32004A4385 /* SSOToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D957E23B7FE32004A4385 /* SSOToken.swift */; };
 		856D958123B7FED3004A4385 /* AuthStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958023B7FED3004A4385 /* AuthStatus.swift */; };
 		856D958323B8518A004A4385 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D958223B8518A004A4385 /* Account.swift */; };
@@ -76,7 +76,7 @@
 		854B14F823C4FA780098A4E5 /* PlacedOrderResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacedOrderResponseBuilder.swift; sourceTree = "<group>"; };
 		854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmation.swift; sourceTree = "<group>"; };
 		85582AB223B5E97800DC16AC /* ChartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartManager.swift; sourceTree = "<group>"; };
-		856D957B23B73B04004A4385 /* IBNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBNetworkManager.swift; sourceTree = "<group>"; };
+		856D957B23B73B04004A4385 /* IBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBManager.swift; sourceTree = "<group>"; };
 		856D957E23B7FE32004A4385 /* SSOToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSOToken.swift; sourceTree = "<group>"; };
 		856D958023B7FED3004A4385 /* AuthStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStatus.swift; sourceTree = "<group>"; };
 		856D958223B8518A004A4385 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -305,7 +305,7 @@
 			isa = PBXGroup;
 			children = (
 				856D95B423BBE180004A4385 /* IBSessionManager.swift */,
-				856D957B23B73B04004A4385 /* IBNetworkManager.swift */,
+				856D957B23B73B04004A4385 /* IBManager.swift */,
 			);
 			path = IB;
 			sourceTree = "<group>";
@@ -487,7 +487,7 @@
 				856D95A923BB0635004A4385 /* Question.swift in Sources */,
 				8592436123B55270004CE61F /* Double+Extensions.swift in Sources */,
 				8592433D23AC689E004CE61F /* CandleStick.swift in Sources */,
-				856D957C23B73B04004A4385 /* IBNetworkManager.swift in Sources */,
+				856D957C23B73B04004A4385 /* IBManager.swift in Sources */,
 				85582AB323B5E97800DC16AC /* ChartManager.swift in Sources */,
 				856D959423B94154004A4385 /* AccountsBuilder.swift in Sources */,
 				856D959023B898FC004A4385 /* AuthViewController.swift in Sources */,

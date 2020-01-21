@@ -13,7 +13,6 @@ class TraderBot {
     var chart: Chart
     
     private let config = Config.shared
-    private let networkManager = IBNetworkManager.shared
     
     init(chart: Chart, sessionManager: BaseSessionManager) {
         self.chart = chart
@@ -288,7 +287,7 @@ class TraderBot {
             break
         }
         
-        if risk > config.maxRisk && config.timeIntervalForHighRiskEntry(date: bar.time).contains(bar.time) {
+        if risk > config.maxRisk && config.highRiskEntryInteval(date: bar.time).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss, commission: config.ibCommission)
             return position
@@ -312,7 +311,7 @@ class TraderBot {
         }
         
         // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
-        if config.timeIntervalForHighRiskEntry(date: currentBar.time).contains(currentBar.time) {
+        if config.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time) {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
         // If the a previous trade exists, the direction of the trade matches the current bar:

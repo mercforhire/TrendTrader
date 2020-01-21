@@ -10,7 +10,7 @@ import Cocoa
 
 class AuthViewController: NSViewController {
     private let config = Config.shared
-    private let networkManager = IBNetworkManager.shared
+    private let networkManager = IBManager.shared
     
     @IBOutlet weak var authStatusLabel: NSTextField!
     @IBOutlet weak var validateSSOButton: NSButton!

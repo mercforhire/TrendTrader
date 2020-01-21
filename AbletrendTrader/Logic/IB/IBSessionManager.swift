@@ -9,7 +9,7 @@
 import Foundation
 
 class IBSessionManager: BaseSessionManager {
-    private let networkManager = IBNetworkManager.shared
+    private let networkManager = IBManager.shared
     private var stopOrders: [LiveOrder] = []
     
     override func resetSession() {

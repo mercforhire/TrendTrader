@@ -134,7 +134,7 @@ class BaseSessionManager {
                                                  iExit: String(format: "%.3f", trade.idealExitPrice),
                                                  aExit: String(format: "%.3f", trade.actualExitPrice),
                                                  pAndL: String(format: "%.3f", trade.actualProfit ?? 0),
-                                                 entryTime: trade.entryTime != nil ? dateFormatter.string(from: trade.entryTime!) : "--",
+                                                 entryTime: dateFormatter.string(from: trade.entryTime),
                                                  exitTime: dateFormatter.string(from: trade.exitTime),
                                                  commission: trade.commission.currency(true)))
         }

@@ -310,12 +310,28 @@ class TraderBot {
             return .noAction(entryType: nil)
         }
         
+        // no entrying trades during lunch hour
+        if config.noEntryDuringLunch,
+            config.lunchInterval(date: currentBar.time).contains(currentBar.time), !config.byPassTradingTimeRestrictions {
+            return .noAction(entryType: nil)
+        }
+        
         // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
         if config.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time) {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
-        // If the a previous trade exists, the direction of the trade matches the current bar:
-        else if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
+        // If the a previous trade exists:
+        else if let lastTrade = sessionManager.trades.last,
+            let currentBarDirection = currentBar.oneMinSignal?.direction {
+            
+            // seek a sweetspot entry for the first trade after the lunch hour
+            if !config.byPassTradingTimeRestrictions,
+                config.noEntryDuringLunch,
+                config.lunchInterval(date: currentBar.time).end < currentBar.time,
+                lastTrade.exitTime < config.lunchInterval(date: currentBar.time).end {
+                return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
+            }
+            
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
                 return seekToOpenPosition(bar: currentBar, entryType: .initial)

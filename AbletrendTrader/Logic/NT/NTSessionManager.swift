@@ -184,7 +184,7 @@ class NTSessionManager: BaseSessionManager {
                             semaphore.signal()
                         }
                     }
-                case .verifyPositionClosed(let closedPosition, let closingPrice, _, _):
+                case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
                     if let stopOrderId = self.pos?.stopLoss?.stopOrderId {
                         if let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                         latestFilledOrderResponse.status == .filled {
@@ -193,7 +193,7 @@ class NTSessionManager: BaseSessionManager {
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
                                               actualEntryPrice: closedPosition.idealEntryPrice,
-                                              exitTime: Date(),
+                                              exitTime: closingTime, // TODO: get file creation time
                                               idealExitPrice: closingPrice,
                                               actualExitPrice: latestFilledOrderResponse.price,
                                               commission: closedPosition.commission * 2)
@@ -208,7 +208,7 @@ class NTSessionManager: BaseSessionManager {
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
                                               actualEntryPrice: closedPosition.idealEntryPrice,
-                                              exitTime: Date(),
+                                              exitTime: closingTime,
                                               idealExitPrice: closingPrice,
                                               actualExitPrice: closingPrice,
                                               commission: closedPosition.commission * 2)

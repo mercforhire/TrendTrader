@@ -11,7 +11,7 @@ import Foundation
 struct Trade {
     var direction: TradeDirection
     
-    var entryTime: Date?
+    var entryTime: Date
     var idealEntryPrice: Double
     var actualEntryPrice: Double
     var entryOrderRef: String?

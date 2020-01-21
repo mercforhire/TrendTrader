@@ -32,6 +32,9 @@ class Config {
     let tradingStart: (Int, Int) = (9, 20) // Hour/Minute
     let tradingEnd: (Int, Int) = (15, 55) // Hour/Minute
     
+    let lunchStart: (Int, Int) = (12, 0) // Hour/Minute
+    let lunchEnd: (Int, Int) = (13, 30) // Hour/Minute
+    
     let clearTime: (Int, Int) = (15, 59) // Hour/Minute
     let flatTime: (Int, Int) = (16, 5) // Hour/Minute
     
@@ -57,6 +60,7 @@ class Config {
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
     let byPassTradingTimeRestrictions = true // DEFAULT: false
+    let noEntryDuringLunch = true
     let simulateTimePassage = false // DEFAULT: true
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
@@ -93,6 +97,24 @@ class Config {
                                          day: date.day(),
                                          hour: Config.shared.tradingEnd.0,
                                          minute: Config.shared.tradingEnd.1)
+        let endDate: Date = calendar.date(from: components2)!
+        return DateInterval(start: startDate, end: endDate)
+    }
+    
+    func lunchInterval(date: Date) -> DateInterval {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components1 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.lunchStart.0,
+                                         minute: Config.shared.lunchStart.1)
+        let startDate: Date = calendar.date(from: components1)!
+        let components2 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.lunchStart.0,
+                                         minute: Config.shared.lunchStart.1)
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }

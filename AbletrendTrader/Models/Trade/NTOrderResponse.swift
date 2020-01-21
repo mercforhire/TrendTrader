@@ -12,4 +12,5 @@ struct NTOrderResponse {
     var status: NTOrderStatus
     var size: Int
     var price: Double
+    var time: Date
 }

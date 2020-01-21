@@ -86,7 +86,7 @@ class NTSessionManager: BaseSessionManager {
                                           entryTime: oldPosition.entryTime,
                                           idealEntryPrice: oldPosition.idealEntryPrice,
                                           actualEntryPrice: oldPosition.actualEntryPrice,
-                                          exitTime: newPosition.entryTime, // TODO: get file creation time
+                                          exitTime: latestFilledOrderResponse.time,
                                           idealExitPrice: self.pos?.stopLoss?.stop ?? latestFilledOrderResponse.price,
                                           actualExitPrice: latestFilledOrderResponse.price,
                                           commission: oldPosition.commission * 2)
@@ -162,7 +162,7 @@ class NTSessionManager: BaseSessionManager {
                                           entryTime: closedPosition.entryTime,
                                           idealEntryPrice: closedPosition.idealEntryPrice,
                                           actualEntryPrice: closedPosition.actualEntryPrice,
-                                          exitTime: closingTime, // TODO: get file creation time
+                                          exitTime: latestFilledOrderResponse.time,
                                           idealExitPrice: closingPrice,
                                           actualExitPrice: latestFilledOrderResponse.price,
                                           commission: closedPosition.commission * 2)
@@ -210,7 +210,7 @@ class NTSessionManager: BaseSessionManager {
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
                                               actualEntryPrice: closedPosition.actualEntryPrice,
-                                              exitTime: closingTime, // TODO: get file creation time
+                                              exitTime: latestFilledOrderResponse.time,
                                               idealExitPrice: closingPrice,
                                               actualExitPrice: latestFilledOrderResponse.price,
                                               commission: closedPosition.commission * 2)
@@ -225,7 +225,7 @@ class NTSessionManager: BaseSessionManager {
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
                                               actualEntryPrice: closedPosition.idealEntryPrice,
-                                              exitTime: closingTime, // TODO: get file creation time
+                                              exitTime: closingTime,
                                               idealExitPrice: closingPrice,
                                               actualExitPrice: closingPrice,
                                               commission: closedPosition.commission * 2)

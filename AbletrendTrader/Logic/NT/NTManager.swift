@@ -351,10 +351,13 @@ class NTManager {
             components.count == 3,
             let orderState = NTOrderStatus(rawValue: components[0]),
             let size = components[1].int,
-            let filledPrice = components[2].double {
+            let filledPrice = components[2].double,
+            let lastModifiedDate = getLastModifiedDate(url: fileURL) {
+            
             orderResponse = NTOrderResponse(status: orderState,
                                             size: size,
-                                            price: filledPrice)
+                                            price: filledPrice,
+                                            time: lastModifiedDate)
         }
         
         return orderResponse
@@ -373,5 +376,13 @@ class NTManager {
         }
         
         return false
+    }
+    
+    private func getLastModifiedDate(url: URL) -> Date? {
+        if let attr = try? url.resourceValues(forKeys: [URLResourceKey.contentModificationDateKey]) {
+            return attr.contentModificationDate
+        }
+        
+        return nil
     }
 }

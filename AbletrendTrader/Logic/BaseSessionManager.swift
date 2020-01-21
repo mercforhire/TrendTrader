@@ -22,6 +22,12 @@ class BaseSessionManager {
         didSet {
             if oldValue?.position != status?.position {
                 delegate?.positionStatusChanged()
+                if let status = status {
+                    print(status.status())
+                }
+            }
+            if oldValue?.position != 0 && status?.position == 0 {
+                updateCurrentPositionToBeClosed()
             }
         }
     }
@@ -81,6 +87,10 @@ class BaseSessionManager {
                        idealExitPrice: Double,
                        exitReason: ExitMethod,
                        completion: @escaping (TradingError?) -> Void) {
+        // Override
+    }
+    
+    func updateCurrentPositionToBeClosed() {
         // Override
     }
     

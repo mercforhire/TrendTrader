@@ -119,7 +119,7 @@ class NTManager {
             if let orderResponse = filledOrderResponse {
                 DispatchQueue.main.async {
                     let orderConfirmation = OrderConfirmation(price: orderResponse.price,
-                                                              time: Date(),
+                                                              time: Date(), // TODO: get file creation time
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
@@ -199,7 +199,7 @@ class NTManager {
             if let orderResponse = filledOrderResponse {
                 DispatchQueue.main.async {
                     let orderConfirmation = OrderConfirmation(price: orderResponse.price,
-                                                              time: Date(),
+                                                              time: Date(), // TODO: get file creation time
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
@@ -258,7 +258,7 @@ class NTManager {
             if let orderResponse = filledOrderResponse {
                 DispatchQueue.main.async {
                     let orderConfirmation = OrderConfirmation(price: orderResponse.price,
-                                                              time: Date(),
+                                                              time: Date(), // TODO: get file creation time
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,

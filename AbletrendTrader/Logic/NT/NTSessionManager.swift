@@ -77,7 +77,24 @@ class NTSessionManager: BaseSessionManager {
                         semaphore.signal()
                     }
                 case .reversePosition(let oldPosition, let newPosition, _):
-                    self.enterAtMarket(reverseOrder: true,
+                    var tradeAlreadyClosed = false
+                    if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
+                        let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
+                        latestFilledOrderResponse.status == .filled {
+                        print("Position already closed, last filled order response:", latestFilledOrderResponse)
+                        let trade = Trade(direction: oldPosition.direction,
+                                          entryTime: oldPosition.entryTime,
+                                          idealEntryPrice: oldPosition.idealEntryPrice,
+                                          actualEntryPrice: oldPosition.actualEntryPrice,
+                                          exitTime: newPosition.entryTime, // TODO: get file creation time
+                                          idealExitPrice: self.pos?.stopLoss?.stop ?? latestFilledOrderResponse.price,
+                                          actualExitPrice: latestFilledOrderResponse.price,
+                                          commission: oldPosition.commission * 2)
+                        self.trades.append(trade)
+                        self.pos = nil
+                        tradeAlreadyClosed = true
+                    }
+                    self.enterAtMarket(reverseOrder: !tradeAlreadyClosed,
                                        priceBarTime: priceBarTime,
                                        stop: newPosition.stopLoss?.stop,
                                        direction: newPosition.direction,
@@ -86,16 +103,17 @@ class NTSessionManager: BaseSessionManager {
                         switch result {
                         case .success(let confirmation):
                             DispatchQueue.main.async {
-                                let trade = Trade(direction: oldPosition.direction,
-                                                  entryTime: oldPosition.entryTime,
-                                                  idealEntryPrice: oldPosition.idealEntryPrice,
-                                                  actualEntryPrice: oldPosition.actualEntryPrice,
-                                                  exitTime: confirmation.time,
-                                                  idealExitPrice: newPosition.idealEntryPrice,
-                                                  actualExitPrice: confirmation.price,
-                                                  commission: oldPosition.commission + confirmation.commission)
-                                self.trades.append(trade)
-                                
+                                if !tradeAlreadyClosed {
+                                    let trade = Trade(direction: oldPosition.direction,
+                                                      entryTime: oldPosition.entryTime,
+                                                      idealEntryPrice: oldPosition.idealEntryPrice,
+                                                      actualEntryPrice: oldPosition.actualEntryPrice,
+                                                      exitTime: confirmation.time,
+                                                      idealExitPrice: newPosition.idealEntryPrice,
+                                                      actualExitPrice: confirmation.price,
+                                                      commission: oldPosition.commission + confirmation.commission)
+                                    self.trades.append(trade)
+                                }
                                 self.pos = newPosition
                                 self.pos?.entryOrderRef = confirmation.orderRef
                                 self.pos?.entryTime = confirmation.time
@@ -135,17 +153,16 @@ class NTSessionManager: BaseSessionManager {
                         }
                         semaphore.signal()
                     })
-                case .forceClosePosition(let closedPosition, let closingPrice, _, _):
+                case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, _):
                     if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
-                        self.status?.position == 0,
                         let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                         latestFilledOrderResponse.status == .filled {
                         print("Force close position already closed, last filled order response:", latestFilledOrderResponse)
                         let trade = Trade(direction: closedPosition.direction,
                                           entryTime: closedPosition.entryTime,
                                           idealEntryPrice: closedPosition.idealEntryPrice,
-                                          actualEntryPrice: closedPosition.idealEntryPrice,
-                                          exitTime: Date(),
+                                          actualEntryPrice: closedPosition.actualEntryPrice,
+                                          exitTime: closingTime, // TODO: get file creation time
                                           idealExitPrice: closingPrice,
                                           actualExitPrice: latestFilledOrderResponse.price,
                                           commission: closedPosition.commission * 2)
@@ -192,7 +209,7 @@ class NTSessionManager: BaseSessionManager {
                             let trade = Trade(direction: closedPosition.direction,
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
-                                              actualEntryPrice: closedPosition.idealEntryPrice,
+                                              actualEntryPrice: closedPosition.actualEntryPrice,
                                               exitTime: closingTime, // TODO: get file creation time
                                               idealExitPrice: closingPrice,
                                               actualExitPrice: latestFilledOrderResponse.price,
@@ -208,7 +225,7 @@ class NTSessionManager: BaseSessionManager {
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
                                               actualEntryPrice: closedPosition.idealEntryPrice,
-                                              exitTime: closingTime,
+                                              exitTime: closingTime, // TODO: get file creation time
                                               idealExitPrice: closingPrice,
                                               actualExitPrice: closingPrice,
                                               commission: closedPosition.commission * 2)
@@ -304,10 +321,10 @@ class NTSessionManager: BaseSessionManager {
             if let stop = stop {
                 let stopOrderId = priceBarTime.generateOrderIdentifier(prefix: direction.reverse().description(short: true))
                 self.ntManager.generatePlaceOrder(direction: direction.reverse(),
-                                                            size: size,
-                                                            orderType: .stop(price: stop),
-                                                            orderRef: stopOrderId,
-                                                            completion:
+                                                  size: size,
+                                                  orderType: .stop(price: stop),
+                                                  orderRef: stopOrderId,
+                                                  completion:
                 { result in
                     switch result {
                     case .success(let confirmation):
@@ -368,6 +385,15 @@ class NTSessionManager: BaseSessionManager {
                     completion(.positionNotClosed)
                 }
             }
+        }
+    }
+    
+    override func updateCurrentPositionToBeClosed() {
+        if let closedPosition = self.pos,
+            let stopOrderId = closedPosition.stopLoss?.stopOrderId,
+            let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
+            latestFilledOrderResponse.status == .filled {
+            print("Detected position closed, last filled order response:", latestFilledOrderResponse)
         }
     }
 }

@@ -13,6 +13,9 @@ struct PositionStatus {
     var price: Double
     
     func status() -> String {
+        if position == 0 {
+            return "Position: \(position)"
+        }
         return "Position: \(position), \(price)"
     }
     

@@ -189,10 +189,10 @@ class TraderBot {
                     
                     switch sessionManager.pos?.direction {
                     case .long:
-                        newStop = max(twoGreenBarsSL, previousLevelSL)
+                        newStop = max(twoGreenBarsSL, previousLevelSL).round(nearest: 0.25)
                         newStopSource = twoGreenBarsSL > previousLevelSL ? .twoGreenBars : .supportResistanceLevel
                     default:
-                        newStop = min(twoGreenBarsSL, previousLevelSL)
+                        newStop = min(twoGreenBarsSL, previousLevelSL).round(nearest: 0.25)
                         newStopSource = twoGreenBarsSL < previousLevelSL ? .twoGreenBars : .supportResistanceLevel
                     }
                 }

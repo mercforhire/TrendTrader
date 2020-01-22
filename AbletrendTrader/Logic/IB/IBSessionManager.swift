@@ -211,7 +211,7 @@ class IBSessionManager: BaseSessionManager {
                         continue
                     }
                     
-                    self.removeStopOrdersAndEnterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: oldPosition.size + newPosition.size)
+                    self.removeStopOrdersAndEnterAtMarket(priceBarTime: priceBarTime, stop: newPosition.stopLoss?.stop, direction: newPosition.direction, size: oldPosition.size)
                     { result in
                         switch result {
                         case .success(let orderConfirmation):
@@ -368,8 +368,34 @@ class IBSessionManager: BaseSessionManager {
                 return
             }
             
+            // reverse current position
+            var ibPosition: IBPosition?
+            self.networkManager.fetchRelevantPositions { result in
+                switch result {
+                case .success(let response):
+                    ibPosition = response
+                case .failure(let error):
+                    errorSoFar = error
+                }
+                
+                semaphore.signal()
+            }
+            semaphore.wait()
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completion(.failure(errorSoFar))
+                }
+                return
+            }
+            
+            let totalSize: Int = ibPosition != nil ? abs(ibPosition!.position) + size : size
+            
             DispatchQueue.main.async {
-                self.enterAtMarket(priceBarTime: priceBarTime, stop: stop, direction: direction, size: size, completion: completion)
+                self.enterAtMarket(priceBarTime: priceBarTime,
+                                   stop: stop, direction: direction,
+                                   size: totalSize,
+                                   completion: completion)
             }
         }
     }

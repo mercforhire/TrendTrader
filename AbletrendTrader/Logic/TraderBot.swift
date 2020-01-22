@@ -265,12 +265,12 @@ class TraderBot {
         switch entryType {
         case .pullBack:
             guard let pullBack = checkForPullback(direction: direction, start: bar), !pullBack.greenBars.isEmpty,
-                pullBack.coloredBars.count == 1 else {
+                pullBack.coloredBars.count >= 1 else {
                 return nil
             }
         case .sweetSpot:
             guard let pullBack = checkForPullback(direction: direction, start: bar),
-                pullBack.coloredBars.count == 1 else {
+                pullBack.coloredBars.count >= 1 else {
                 return nil
             }
             

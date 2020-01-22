@@ -11,7 +11,7 @@ import Foundation
 class Config {
     static let shared = Config()
     
-//    let dataServerURL: String = "http://192.168.1.107/"
+//    let dataServerURL: String = "http://192.168.1.105/"
     let dataServerURL: String = "http://192.168.43.190/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
@@ -59,9 +59,9 @@ class Config {
     var ntAccountName = "Sim101"
     
     // DEMO SETTINGS:
-    let liveTradingMode: LiveTradingMode = .ninjaTrader
-    var byPassTradingTimeRestrictions = false // DEFAULT: false
-    var noEntryDuringLunch = true
+    let liveTradingMode: LiveTradingMode = .interactiveBroker
+    var byPassTradingTimeRestrictions = true // DEFAULT: false
+    var noEntryDuringLunch = false
     let simulateTimePassage = false // DEFAULT: true
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
@@ -114,8 +114,8 @@ class Config {
         let components2 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: Config.shared.lunchStart.0,
-                                         minute: Config.shared.lunchStart.1)
+                                         hour: Config.shared.lunchEnd.0,
+                                         minute: Config.shared.lunchEnd.1)
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }

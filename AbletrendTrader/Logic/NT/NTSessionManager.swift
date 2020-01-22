@@ -153,7 +153,7 @@ class NTSessionManager: BaseSessionManager {
                         }
                         semaphore.signal()
                     })
-                case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, _):
+                case .forceClosePosition(let closedPosition, let closingPrice, _, _):
                     if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
                         let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                         latestFilledOrderResponse.status == .filled {

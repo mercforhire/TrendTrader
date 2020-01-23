@@ -16,9 +16,9 @@ class AccountsBuilder {
             return accounts
         }
         catch(let error) {
-//            print("AccountsBuilder:")
-//            print(error)
-//            print(String(data: jsonData, encoding: .utf8))
+            print("AccountsBuilder:")
+            print(error)
+            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

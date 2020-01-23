@@ -15,10 +15,7 @@ class AuthStatusBuilder {
             let status: AuthStatus? = try decoder.decode(AuthStatus.self, from: jsonData)
             return status
         }
-        catch(let error) {
-//            print("AuthStatusBuilder:")
-//            print(error)
-//            print(String(data: jsonData, encoding: .utf8))
+        catch {
         }
         return nil
     }

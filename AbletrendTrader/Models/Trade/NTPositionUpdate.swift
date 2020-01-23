@@ -14,21 +14,8 @@ struct PositionStatus {
     
     func status() -> String {
         if position == 0 {
-            return "Position: \(position)"
+            return "Position: --"
         }
         return "Position: \(position), \(price)"
-    }
-    
-    func toInitialPosition() -> Position? {
-        if position == 0 { return nil }
-        
-        return Position(direction: position > 0 ? .long : .short,
-                        size: abs(position),
-                        entryTime: Date(),
-                        idealEntryPrice: price,
-                        actualEntryPrice: price,
-                        stopLoss: nil,
-                        entryOrderRef: nil,
-                        commission: Config.shared.ntCommission)
     }
 }

@@ -42,7 +42,6 @@ class ConfigViewController: NSViewController {
         minProfitGreenBarField.isEditable = false
         minProfitByPass.isEditable = false
         minProfitPullbackField.isEditable = false
-        
         highRiskEntryStartPicker.isEnabled = false
         highRiskEntryEndPicker.isEnabled = false
         sessionStartTimePicker.isEnabled = false

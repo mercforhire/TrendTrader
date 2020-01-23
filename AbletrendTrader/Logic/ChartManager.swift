@@ -105,7 +105,7 @@ class ChartManager {
     private func updateChart() {
         let now = Date()
         if live,
-            !config.byPassTradingTimeRestrictions, now >= config.flatPositionsTime(date: now) {
+            !config.byPassTradingTimeRestrictions, now >= Date.flatPositionsTime(date: now) {
             delegate?.requestStopMonitoring()
             self.delegate?.chartStatusChanged(statusText: "Trading session is over at " + now.hourMinute())
             return
@@ -285,8 +285,6 @@ class ChartManager {
                     }
                     return
                 }
-                
-                print("Sim time:", self.simTime.hourMinuteSecond())
                 let urlFetchingTask = DispatchGroup()
                 
                 urlFetchingTask.enter()
@@ -308,6 +306,9 @@ class ChartManager {
                 })
                 
                 urlFetchingTask.notify(queue: DispatchQueue.main) {
+                    if oneMinUrl == nil || twoMinUrl == nil || threeMinUrl == nil {
+                        print("Missing chart data for time:", self.simTime.hourMinuteSecond())
+                    }
                     semaphore.signal()
                 }
                 semaphore.wait()

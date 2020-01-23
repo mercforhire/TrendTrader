@@ -15,10 +15,7 @@ class SSOTokenBuilder {
             let ssoToken: SSOToken? = try decoder.decode(SSOToken.self, from: jsonData)
             return ssoToken
         }
-        catch(let error) {
-//            print("SSOTokenBuilder:")
-//            print(error)
-//            print(String(data: jsonData, encoding: .utf8))
+        catch {
         }
         return nil
     }

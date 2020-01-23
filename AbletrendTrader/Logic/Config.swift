@@ -34,7 +34,7 @@ class Config {
     let tradingEnd: (Int, Int) = (15, 55) // Hour/Minute
     
     let lunchStart: (Int, Int) = (12, 0) // Hour/Minute
-    let lunchEnd: (Int, Int) = (13, 30) // Hour/Minute
+    let lunchEnd: (Int, Int) = (13, 20) // Hour/Minute
     
     let clearTime: (Int, Int) = (15, 59) // Hour/Minute
     let flatTime: (Int, Int) = (16, 5) // Hour/Minute
@@ -63,86 +63,4 @@ class Config {
     var byPassTradingTimeRestrictions = false // DEFAULT: false
     var noEntryDuringLunch = true
     let simulateTimePassage = true // DEFAULT: true
-    
-    // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
-    func highRiskEntryInteval(date: Date) -> DateInterval {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: Config.shared.highRiskStart.0,
-                                         minute: Config.shared.highRiskStart.1)
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: Config.shared.highRiskEnd.0,
-                                         minute: Config.shared.highRiskEnd.1)
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
-    }
-    
-    // the time interval allowed to enter trades, default 9:20 am to 3:55 pm
-    func tradingTimeInterval(date: Date) -> DateInterval {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: Config.shared.tradingStart.0,
-                                         minute: Config.shared.tradingStart.1)
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: Config.shared.tradingEnd.0,
-                                         minute: Config.shared.tradingEnd.1)
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
-    }
-    
-    func lunchInterval(date: Date) -> DateInterval {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: Config.shared.lunchStart.0,
-                                         minute: Config.shared.lunchStart.1)
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: Config.shared.lunchEnd.0,
-                                         minute: Config.shared.lunchEnd.1)
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
-    }
-    
-    // after this time, aim to sell at the close of any blue/red bar that's in favor of our ongoing trade
-    func clearPositionTime(date: Date) -> Date {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: date.year(),
-                                        month: date.month(),
-                                        day: date.day(),
-                                        hour: Config.shared.clearTime.0,
-                                        minute: Config.shared.clearTime.1)
-        let date: Date = calendar.date(from: components)!
-        return date
-    }
-    
-    // after this time, clear all positions immediately
-    func flatPositionsTime(date: Date) -> Date {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: date.year(),
-                                        month: date.month(),
-                                        day: date.day(),
-                                        hour: Config.shared.flatTime.0,
-                                        minute: Config.shared.flatTime.1)
-        let date: Date = calendar.date(from: components)!
-        return date
-    }
 }

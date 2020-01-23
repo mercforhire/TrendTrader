@@ -147,4 +147,83 @@ extension Date {
         let offsetDate = Calendar.current.date(byAdding: components, to: self)!
         return offsetDate
     }
+    
+    static func highRiskEntryInteval(date: Date) -> DateInterval {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components1 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.highRiskStart.0,
+                                         minute: Config.shared.highRiskStart.1)
+        let startDate: Date = calendar.date(from: components1)!
+        let components2 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.highRiskEnd.0,
+                                         minute: Config.shared.highRiskEnd.1)
+        let endDate: Date = calendar.date(from: components2)!
+        return DateInterval(start: startDate, end: endDate)
+    }
+    
+    static func tradingTimeInterval(date: Date) -> DateInterval {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components1 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.tradingStart.0,
+                                         minute: Config.shared.tradingStart.1)
+        let startDate: Date = calendar.date(from: components1)!
+        let components2 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.tradingEnd.0,
+                                         minute: Config.shared.tradingEnd.1)
+        let endDate: Date = calendar.date(from: components2)!
+        return DateInterval(start: startDate, end: endDate)
+    }
+    
+    static func lunchInterval(date: Date) -> DateInterval {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components1 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.lunchStart.0,
+                                         minute: Config.shared.lunchStart.1)
+        let startDate: Date = calendar.date(from: components1)!
+        let components2 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: Config.shared.lunchEnd.0,
+                                         minute: Config.shared.lunchEnd.1)
+        let endDate: Date = calendar.date(from: components2)!
+        return DateInterval(start: startDate, end: endDate)
+    }
+    
+    static func clearPositionTime(date: Date) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components = DateComponents(year: date.year(),
+                                        month: date.month(),
+                                        day: date.day(),
+                                        hour: Config.shared.clearTime.0,
+                                        minute: Config.shared.clearTime.1)
+        let date: Date = calendar.date(from: components)!
+        return date
+    }
+    
+
+    static func flatPositionsTime(date: Date) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components = DateComponents(year: date.year(),
+                                        month: date.month(),
+                                        day: date.day(),
+                                        hour: Config.shared.flatTime.0,
+                                        minute: Config.shared.flatTime.1)
+        let date: Date = calendar.date(from: components)!
+        return date
+    }
 }

@@ -165,23 +165,6 @@ class IBManager {
         }
     }
     
-    // Reset Portfolio Positions Cache
-    private func resetPositionsCache(completion: @escaping (Bool) -> Void) {
-        guard let selectedAccount = selectedAccount else {
-            completion(false)
-            return
-        }
-        let url = "https://localhost:5000/v1/portal/portfolio/" + selectedAccount.accountId + "/positions/invalidate)"
-        afManager.request(url).responseData
-            { response in
-                if response.response?.statusCode == 200 {
-                    completion(true)
-                } else {
-                    completion(false)
-                }
-        }
-    }
-    
     // Portfolio Positions
     func fetchRelevantPositions(completion: @escaping (Swift.Result<IBPosition?, TradingError>) -> Void) {
         guard let selectedAccount = selectedAccount else {
@@ -357,38 +340,6 @@ class IBManager {
         }
     }
     
-    
-    // Place Order Reply
-    func placeOrderReply(question: Question, answer: Bool, completion: @escaping (Swift.Result<[PlacedOrderResponse], TradingError>) -> Void) {
-
-        guard let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/reply/" + question.identifier) else {
-            completion(.failure(.orderReplyFailed))
-            return
-        }
-        
-        let bodyString = String(format: "{ \"confirmed\": %@}", answer ? "true" : "false")
-        if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
-            let httpBody: Data = bodyString.data(using: .utf8) {
-            request.httpBody = httpBody
-            afManager.request(request).responseData { response in
-                
-                if let data = response.data, let placedOrderResponses = self.placedOrderResponseBuilder.buildPlacedOrderResponseFrom(data) {
-                    completion(.success(placedOrderResponses))
-                } else if let data = response.data, let question = self.orderQuestionsBuilder.buildQuestionsFrom(data)?.first {
-                    self.placeOrderReply(question: question, answer: true, completion: completion)
-                } else if response.response?.statusCode == 200 {
-                    completion(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
-                } else {
-                    print("PlaceOrderReply Failed:")
-                    print(String(data: response.data!, encoding: .utf8)!)
-                    completion(.failure(.orderReplyFailed))
-                }
-            }
-        } else {
-            completion(.failure(.orderReplyFailed))
-        }
-    }
-    
     // Modify Order
     func modifyOrder(orderType: OrderType,
                      direction: TradeDirection,
@@ -459,6 +410,54 @@ class IBManager {
             } else {
                 completion(.failure(.deleteOrderFailed))
             }
+        }
+    }
+    
+    // Place Order Reply
+    private func placeOrderReply(question: Question, answer: Bool, completion: @escaping (Swift.Result<[PlacedOrderResponse], TradingError>) -> Void) {
+
+        guard let url: URL = URL(string: "https://localhost:5000/v1/portal/iserver/reply/" + question.identifier) else {
+            completion(.failure(.orderReplyFailed))
+            return
+        }
+        
+        let bodyString = String(format: "{ \"confirmed\": %@}", answer ? "true" : "false")
+        if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
+            let httpBody: Data = bodyString.data(using: .utf8) {
+            request.httpBody = httpBody
+            afManager.request(request).responseData { response in
+                
+                if let data = response.data, let placedOrderResponses = self.placedOrderResponseBuilder.buildPlacedOrderResponseFrom(data) {
+                    completion(.success(placedOrderResponses))
+                } else if let data = response.data, let question = self.orderQuestionsBuilder.buildQuestionsFrom(data)?.first {
+                    self.placeOrderReply(question: question, answer: true, completion: completion)
+                } else if response.response?.statusCode == 200 {
+                    completion(.success([PlacedOrderResponse(orderId: "", orderStatus: "")]))
+                } else {
+                    print("PlaceOrderReply Failed:")
+                    print(String(data: response.data!, encoding: .utf8)!)
+                    completion(.failure(.orderReplyFailed))
+                }
+            }
+        } else {
+            completion(.failure(.orderReplyFailed))
+        }
+    }
+    
+    // Reset Portfolio Positions Cache
+    private func resetPositionsCache(completion: @escaping (Bool) -> Void) {
+        guard let selectedAccount = selectedAccount else {
+            completion(false)
+            return
+        }
+        let url = "https://localhost:5000/v1/portal/portfolio/" + selectedAccount.accountId + "/positions/invalidate)"
+        afManager.request(url).responseData
+            { response in
+                if response.response?.statusCode == 200 {
+                    completion(true)
+                } else {
+                    completion(false)
+                }
         }
     }
 }

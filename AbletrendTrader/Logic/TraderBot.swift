@@ -57,12 +57,12 @@ class TraderBot {
         // already have current position, update the stoploss or close it if needed
         if let currentPosition = sessionManager.pos {
             // Rule 3: If we reached FlatPositionsTime, exit the trade immediately
-            if config.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
+            if Date.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
             }
             
             // Rule 4: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
-            if config.clearPositionTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
+            if Date.clearPositionTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 switch sessionManager.pos?.direction {
                 case .long:
                     if priceBar.barColor == .blue {
@@ -291,7 +291,7 @@ class TraderBot {
             break
         }
         
-        if risk > config.maxRisk && config.highRiskEntryInteval(date: bar.time).contains(bar.time) {
+        if risk > config.maxRisk && Date.highRiskEntryInteval(date: bar.time).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss, commission: config.ibCommission)
             return position
@@ -310,18 +310,18 @@ class TraderBot {
         }
         
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
-        if !config.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
+        if !Date.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil)
         }
         
         // no entrying trades during lunch hour
         if config.noEntryDuringLunch,
-            config.lunchInterval(date: currentBar.time).contains(currentBar.time), !config.byPassTradingTimeRestrictions {
+            Date.lunchInterval(date: currentBar.time).contains(currentBar.time), !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil)
         }
         
         // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
-        if config.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time) {
+        if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time) {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
         
@@ -330,8 +330,8 @@ class TraderBot {
             // seek a sweet spot entry for the first trade after the lunch hour
             if !config.byPassTradingTimeRestrictions,
                 config.noEntryDuringLunch,
-                config.lunchInterval(date: currentBar.time).end < currentBar.time,
-                lastTrade.exitTime < config.lunchInterval(date: currentBar.time).end {
+                Date.lunchInterval(date: currentBar.time).end < currentBar.time,
+                lastTrade.exitTime < Date.lunchInterval(date: currentBar.time).end {
                 return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
             }
             

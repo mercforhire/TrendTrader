@@ -10,6 +10,7 @@ import Foundation
 
 protocol SessionManagerDelegate: class {
     func positionStatusChanged()
+    func newLogAdded(log: String)
 }
 
 class BaseSessionManager {
@@ -23,7 +24,7 @@ class BaseSessionManager {
             if oldValue?.position != status?.position {
                 delegate?.positionStatusChanged()
                 if let status = status {
-                    print(status.status())
+                    delegate?.newLogAdded(log: status.status())
                 }
             }
             if oldValue?.position != 0 && status?.position == 0 {
@@ -125,8 +126,8 @@ class BaseSessionManager {
             let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.3f", currentPosition.stopLoss!.stop) : "--"
             
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
-                                                 iEntry: String(format: "%.3f", currentPosition.idealEntryPrice),
-                                                 aEntry: String(format: "%.3f", currentPosition.actualEntryPrice),
+                                                 iEntry: String(format: "%.2f", currentPosition.idealEntryPrice),
+                                                 aEntry: String(format: "%.2f", currentPosition.actualEntryPrice),
                                                  stop: currentStop,
                                                  iExit: "--",
                                                  aExit: "--",
@@ -138,12 +139,12 @@ class BaseSessionManager {
         
         for trade in trades.reversed() {
             tradesList.append(TradesTableRowItem(type: trade.direction.description(),
-                                                 iEntry: String(format: "%.3f", trade.idealEntryPrice),
-                                                 aEntry: String(format: "%.3f", trade.actualEntryPrice),
+                                                 iEntry: String(format: "%.2f", trade.idealEntryPrice),
+                                                 aEntry: String(format: "%.2f", trade.actualEntryPrice),
                                                  stop: "--",
-                                                 iExit: String(format: "%.3f", trade.idealExitPrice),
-                                                 aExit: String(format: "%.3f", trade.actualExitPrice),
-                                                 pAndL: String(format: "%.3f", trade.actualProfit ?? 0),
+                                                 iExit: String(format: "%.2f", trade.idealExitPrice),
+                                                 aExit: String(format: "%.2f", trade.actualExitPrice),
+                                                 pAndL: String(format: "%.2f", trade.actualProfit ?? 0),
                                                  entryTime: dateFormatter.string(from: trade.entryTime),
                                                  exitTime: dateFormatter.string(from: trade.exitTime),
                                                  commission: trade.commission.currency(true)))

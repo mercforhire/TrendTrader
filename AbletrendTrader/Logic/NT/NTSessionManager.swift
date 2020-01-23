@@ -36,7 +36,7 @@ class NTSessionManager: BaseSessionManager {
         }
         if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
-            print(Date().hourMinuteSecond() + ": Actions for " + priceBarTime.hourMinuteSecond() + " already processed")
+            delegate?.newLogAdded(log: "\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
             return
         }
         currentPriceBarTime = priceBarTime
@@ -49,7 +49,7 @@ class NTSessionManager: BaseSessionManager {
             let semaphore = DispatchSemaphore(value: 0)
             var inProcessActionIndex: Int = 0
             for action in actions {
-                print(action.description(actionBarTime: priceBarTime))
+                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
                 
                 switch action {
                 case .openPosition(let newPosition, _):
@@ -81,7 +81,7 @@ class NTSessionManager: BaseSessionManager {
                     if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
                         let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                         latestFilledOrderResponse.status == .filled {
-                        print("Position already closed, last filled order response:", latestFilledOrderResponse)
+                        self.delegate?.newLogAdded(log: "Position already closed, last filled order response: \(latestFilledOrderResponse)")
                         let trade = Trade(direction: oldPosition.direction,
                                           entryTime: oldPosition.entryTime,
                                           idealEntryPrice: oldPosition.idealEntryPrice,
@@ -138,6 +138,7 @@ class NTSessionManager: BaseSessionManager {
                         semaphore.signal()
                         continue
                     }
+                    _ = self.ntManager.deleteOrderResponse(orderId: stopOrderId)
                     self.ntManager.changeOrder(orderRef: stopOrderId, size: currentPosition.size, price: newStop.stop, completion:
                     { result in
                         switch result {
@@ -157,7 +158,7 @@ class NTSessionManager: BaseSessionManager {
                     if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
                         let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                         latestFilledOrderResponse.status == .filled {
-                        print("Force close position already closed, last filled order response:", latestFilledOrderResponse)
+                        self.delegate?.newLogAdded(log: "Force close position already closed, last filled order response: \(latestFilledOrderResponse)")
                         let trade = Trade(direction: closedPosition.direction,
                                           entryTime: closedPosition.entryTime,
                                           idealEntryPrice: closedPosition.idealEntryPrice,
@@ -179,7 +180,7 @@ class NTSessionManager: BaseSessionManager {
                         { result in
                             switch result {
                             case .success(let confirmation):
-                                print("Order confirmation:", confirmation)
+                                self.delegate?.newLogAdded(log: "Order confirmation: \(confirmation.description)")
                                 let trade = Trade(direction: closedPosition.direction,
                                                   entryTime: closedPosition.entryTime,
                                                   idealEntryPrice: closedPosition.idealEntryPrice,
@@ -205,7 +206,7 @@ class NTSessionManager: BaseSessionManager {
                     if let stopOrderId = self.pos?.stopLoss?.stopOrderId {
                         if let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                         latestFilledOrderResponse.status == .filled {
-                            print("Latest filled order response:", latestFilledOrderResponse)
+                            self.delegate?.newLogAdded(log: "Latest filled order response: \(latestFilledOrderResponse.description)")
                             let trade = Trade(direction: closedPosition.direction,
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
@@ -220,7 +221,7 @@ class NTSessionManager: BaseSessionManager {
                                 completion(nil)
                             }
                         } else if self.status?.position == 0 {
-                            print("Position status is 0 but no last filled order response found")
+                            self.delegate?.newLogAdded(log: "Position status is 0 but no last filled order response found")
                             let trade = Trade(direction: closedPosition.direction,
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
@@ -250,7 +251,7 @@ class NTSessionManager: BaseSessionManager {
                 }
                 inProcessActionIndex += 1
                 if actions.count > 1, inProcessActionIndex < actions.count {
-                    print("Wait 1 second before executing the next consecutive order")
+                    self.delegate?.newLogAdded(log: "Wait 1 second before executing the next consecutive order")
                     sleep(1)
                 }
             }
@@ -338,9 +339,9 @@ class NTSessionManager: BaseSessionManager {
             }
             
             DispatchQueue.main.async {
-                print("Order confirmation:", orderConfirmation)
+                self.delegate?.newLogAdded(log: "Order confirmation: \(orderConfirmation?.description)")
                 if stop != nil {
-                    print("Stop confirmation:", stopConfirmation)
+                    self.delegate?.newLogAdded(log: "Stop confirmation: \(stopConfirmation?.description)")
                 }
                 if var confirmation = orderConfirmation {
                     confirmation.stopOrderId = stopConfirmation?.orderId
@@ -367,7 +368,7 @@ class NTSessionManager: BaseSessionManager {
                 }
                 switch result {
                 case .success(let orderConfirmation):
-                    print("Order confirmation:", orderConfirmation)
+                    self.delegate?.newLogAdded(log: "Order confirmation: \(orderConfirmation.description)")
                     if let currentPosition = self.pos {
                         let trade = Trade(direction: currentPosition.direction,
                                           entryTime: currentPosition.entryTime,
@@ -393,7 +394,7 @@ class NTSessionManager: BaseSessionManager {
             let stopOrderId = closedPosition.stopLoss?.stopOrderId,
             let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
             latestFilledOrderResponse.status == .filled {
-            print("Detected position closed, last filled order response:", latestFilledOrderResponse)
+            self.delegate?.newLogAdded(log: "Detected position closed, last filled order response: \(latestFilledOrderResponse.description)")
         }
     }
 }

@@ -28,6 +28,14 @@ class SimTradingViewController: NSViewController {
     private var trader: TraderBot?
     private let sessionManager = SimSessionManager()
     private var listOfTrades: [TradesTableRowItem]?
+    private var logViewController: TradingLogViewController?
+    private var log: String = "" {
+        didSet {
+            DispatchQueue.main.async {
+                self.logViewController?.logTextView.string = self.log
+            }
+        }
+    }
     
     weak var delegate: DataManagerDelegate?
     
@@ -56,6 +64,7 @@ class SimTradingViewController: NSViewController {
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
         chartManager = ChartManager(live: false)
         chartManager?.delegate = self
+        sessionManager.delegate = self
     }
     
     @objc
@@ -135,6 +144,8 @@ class SimTradingViewController: NSViewController {
         if let chartVC = segue.destinationController as? ChartViewController, let chart = trader?.chart {
             chartVC.chart = chart
             delegate = chartVC
+        } else if let logVc = segue.destinationController as? TradingLogViewController {
+            self.logViewController = logVc
         }
     }
 }
@@ -163,6 +174,7 @@ extension SimTradingViewController: DataManagerDelegate {
     
     func requestStopMonitoring() {
         startButton.isEnabled = true
+        chartManager?.stopMonitoring()
     }
 }
 
@@ -210,6 +222,19 @@ extension SimTradingViewController: NSTableViewDelegate {
 extension SimTradingViewController: NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
         return listOfTrades?.count ?? 0
+    }
+}
+
+extension SimTradingViewController: SessionManagerDelegate {
+    func newLogAdded(log: String) {
+        if self.log.count == 0 {
+            self.log = log
+        } else {
+            self.log = "\(log)\n\(self.log)"
+        }
+    }
+    
+    func positionStatusChanged() {
     }
 }
 

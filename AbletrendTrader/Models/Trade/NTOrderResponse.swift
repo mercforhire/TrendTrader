@@ -13,4 +13,8 @@ struct NTOrderResponse {
     var size: Int
     var price: Double
     var time: Date
+    
+    var description: String {
+        return "\(status): \(time), \(size) X \(price.currency())"
+    }
 }

@@ -11,7 +11,7 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.1.105/"
+    let dataServerURL: String = "http://192.168.1.103/"
 //    let dataServerURL: String = "http://192.168.43.190/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
@@ -60,9 +60,9 @@ class Config {
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    var byPassTradingTimeRestrictions = true // DEFAULT: false
-    var noEntryDuringLunch = false
-    let simulateTimePassage = false // DEFAULT: true
+    var byPassTradingTimeRestrictions = false // DEFAULT: false
+    var noEntryDuringLunch = true
+    let simulateTimePassage = true // DEFAULT: true
     
     // the time interval where it's allowed to enter trades that has a stop > 10, Default: 9:30 am to 10 am
     func highRiskEntryInteval(date: Date) -> DateInterval {

@@ -258,7 +258,8 @@ class IBManager {
         }
         orderPrice = orderPrice.round(nearest: 0.25)
         
-        print(String(format: "%@: %@ %@ Order called at %@",
+        print(String(format: "%@ - %@: %@ %@ Order called at %@",
+                     Date().hourMinuteSecond(),
                      orderRef,
                      direction.description(),
                      orderType.typeString(),
@@ -314,7 +315,8 @@ class IBManager {
         
         let stopPrice: Double = stopPrice.round(nearest: 0.25)
         
-        print(String(format: "%@: %@ Bracket Order called with stop at %@",
+        print(String(format: "%@ - %@: %@ Bracket Order called with stop at %@",
+                     Date().hourMinuteSecond(),
                      orderRef,
                      direction.description(),
                      String(format: "%.2f", stopPrice)))
@@ -403,7 +405,8 @@ class IBManager {
         
         let price = price.round(nearest: 0.25)
         
-        print(String(format: "Modify %@ %@ Order %@ to %@ called",
+        print(String(format: "%@ - Modify %@ %@ Order %@ to %@ called",
+                     Date().hourMinuteSecond(),
                      direction.description(),
                      orderType.typeString(),
                      orderId,

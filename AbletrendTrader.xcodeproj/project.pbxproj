@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		711AC8F5D49C3C0C53B19B09 /* Pods_AbletrendTrader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */; };
+		851BAB7323D92788000BC720 /* TradingLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851BAB7223D92788000BC720 /* TradingLogViewController.swift */; };
 		854A56A023CFD8D800904F11 /* DisplayNumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */; };
 		854A56A423D17F7E00904F11 /* TradesTableRowItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A323D17F7E00904F11 /* TradesTableRowItem.swift */; };
 		854A56A523D183FD00904F11 /* NTOrderResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A123D1745400904F11 /* NTOrderResponse.swift */; };
@@ -68,6 +69,7 @@
 /* Begin PBXFileReference section */
 		0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AbletrendTrader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7987637B8B2780B3C1E7F8FD /* Pods-AbletrendTrader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.debug.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.debug.xcconfig"; sourceTree = "<group>"; };
+		851BAB7223D92788000BC720 /* TradingLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingLogViewController.swift; sourceTree = "<group>"; };
 		854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayNumberFormatter.swift; sourceTree = "<group>"; };
 		854A56A123D1745400904F11 /* NTOrderResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTOrderResponse.swift; sourceTree = "<group>"; };
 		854A56A323D17F7E00904F11 /* TradesTableRowItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradesTableRowItem.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 				856D95A323BA8524004A4385 /* LiveTradingViewController.swift */,
 				85C8CED723B7130B00E75F76 /* ConfigViewController.swift */,
 				85C8CEDB23B7235300E75F76 /* ChartViewController.swift */,
+				851BAB7223D92788000BC720 /* TradingLogViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -473,6 +476,7 @@
 				85C8CEDC23B7235300E75F76 /* ChartViewController.swift in Sources */,
 				8592432C23AC3EAF004CE61F /* SimTradingViewController.swift in Sources */,
 				8592435623B00CC6004CE61F /* Position.swift in Sources */,
+				851BAB7323D92788000BC720 /* TradingLogViewController.swift in Sources */,
 				8592435F23B1E59E004CE61F /* Config.swift in Sources */,
 				856D95A423BA8525004A4385 /* LiveTradingViewController.swift in Sources */,
 				856D95A023BA8152004A4385 /* Enums.swift in Sources */,

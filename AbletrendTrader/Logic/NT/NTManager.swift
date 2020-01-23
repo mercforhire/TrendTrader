@@ -292,6 +292,18 @@ class NTManager {
         return nil
     }
     
+    func deleteOrderResponse(orderId: String) -> Bool {
+        let path = "\(config.ntOutgoingPath)/\(accountId)_\(orderId).txt"
+        do {
+            try FileManager.default.removeItem(atPath: path)
+            return true
+        } catch {
+            print(path, "doesn't exist")
+            
+        }
+        return false
+    }
+    
     func readPositionStatusFile() -> PositionStatus? {
         let dir = URL(fileURLWithPath: config.ntOutgoingPath)
         let fileURL = dir.appendingPathComponent("\(config.ntTicker) \(config.ntName)_\(accountId)_position.txt")
@@ -300,7 +312,7 @@ class NTManager {
             text = try String(contentsOf: fileURL, encoding: .utf8)
         }
         catch {
-            print(fileURL, "doesn't exist")
+//            print(fileURL, "doesn't exist")
             return nil
         }
         
@@ -334,11 +346,14 @@ class NTManager {
         }
     }
     
-    private func readOrderExecutionFile(filePath: String) -> NTOrderResponse? {
+    private func readOrderExecutionFile(filePath: String, deleteAfterRead: Bool = false) -> NTOrderResponse? {
         let fileURL = URL(fileURLWithPath: filePath)
         var text: String?
         do {
             text = try String(contentsOf: fileURL, encoding: .utf8)
+            if deleteAfterRead {
+                try FileManager.default.removeItem(at: fileURL)
+            }
         }
         catch {
             print(fileURL, "doesn't exist")

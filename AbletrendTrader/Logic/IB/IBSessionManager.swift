@@ -148,7 +148,7 @@ class IBSessionManager: BaseSessionManager {
                                  completion: @escaping (TradingError?) -> ()) {
         if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
-            print(Date().hourMinuteSecond() + ": Actions for " + priceBarTime.hourMinuteSecond() + " already processed")
+            delegate?.newLogAdded(log: "\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
             return
         }
         currentPriceBarTime = priceBarTime
@@ -166,19 +166,19 @@ class IBSessionManager: BaseSessionManager {
                 let action = actions[inProcessActionIndex]
                 
                 if retriedTimes >= self.config.maxIBActionRetryTimes {
-                    print("Action have been retried more than", self.config.maxIBActionRetryTimes, "times, skipping...")
+                    self.delegate?.newLogAdded(log: "Action have been retried more than \(self.config.maxIBActionRetryTimes) times, skipping...")
                     inProcessActionIndex += 1
                     retriedTimes = 1
                     continue
                 }
                 
-                print(action.description(actionBarTime: priceBarTime))
+                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
                 
                 switch action {
                 case .openPosition(let newPosition, _):
                     let previousMinute = Date().getOffByMinutes(minutes: -1)
                     if !previousMinute.isInSameMinute(date: priceBarTime) {
-                        print("Open Position action expired, skipping...")
+                        self.delegate?.newLogAdded(log: "Open position action expired, skipping...")
                         inProcessActionIndex += 1
                         continue
                     }
@@ -209,7 +209,7 @@ class IBSessionManager: BaseSessionManager {
                 case .reversePosition(let oldPosition, let newPosition, _):
                     let previousMinute = Date().getOffByMinutes(minutes: -1)
                     if !previousMinute.isInSameMinute(date: priceBarTime) {
-                        print("Reverse Position action expired, skipping...")
+                        self.delegate?.newLogAdded(log: "Reverse position action expired, skipping...")
                         inProcessActionIndex += 1
                         continue
                     }
@@ -329,7 +329,7 @@ class IBSessionManager: BaseSessionManager {
                 semaphore.wait()
                 
                 if actions.count > 1, inProcessActionIndex < actions.count {
-                    print("Wait 1 second before executing the next consecutive order")
+                    self.delegate?.newLogAdded(log: "Wait 1 second before executing the next consecutive order")
                     sleep(1)
                 }
             }

@@ -9,10 +9,10 @@
 import Foundation
 
 class TraderBot {
+    private let config = Config.shared
+    
     var sessionManager: BaseSessionManager
     var chart: Chart
-    
-    private let config = Config.shared
     
     init(chart: Chart, sessionManager: BaseSessionManager) {
         self.chart = chart
@@ -324,11 +324,10 @@ class TraderBot {
         if config.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time) {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
+        
         // If the a previous trade exists:
-        else if let lastTrade = sessionManager.trades.last,
-            let currentBarDirection = currentBar.oneMinSignal?.direction {
-            
-            // seek a sweetspot entry for the first trade after the lunch hour
+        if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
+            // seek a sweet spot entry for the first trade after the lunch hour
             if !config.byPassTradingTimeRestrictions,
                 config.noEntryDuringLunch,
                 config.lunchInterval(date: currentBar.time).end < currentBar.time,
@@ -340,12 +339,13 @@ class TraderBot {
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
                 return seekToOpenPosition(bar: currentBar, entryType: .initial)
             }
+            
             // Check if signals from the end of the last trade to current bar are all of the same color as current
             // If yes, we need to decide if we want to enter on any Pullback or only Sweepspot
             // Otherwise, then enter aggressively on any entry
-            else if chart.checkAllSameDirection(direction: currentBarDirection,
-                                                fromKey: lastTrade.exitTime.generateDateIdentifier(),
-                                                toKey: currentBar.time.generateDateIdentifier()) {
+            if chart.checkAllSameDirection(direction: currentBarDirection,
+                                           fromKey: lastTrade.exitTime.generateDateIdentifier(),
+                                           toKey: currentBar.time.generateDateIdentifier()) {
                 // If the previous trade profit is higher than ProfitRequiredToReenterTradeonPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
                 if (lastTrade.idealProfit ?? 0) > config.enterOnPullback {

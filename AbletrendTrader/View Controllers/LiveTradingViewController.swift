@@ -30,6 +30,14 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private var trader: TraderBot?
     private var sessionManager: BaseSessionManager!
     private var listOfTrades: [TradesTableRowItem]?
+    private var logViewController: TradingLogViewController?
+    private var log: String = "" {
+        didSet {
+            DispatchQueue.main.async {
+                self.logViewController?.logTextView.string = self.log
+            }
+        }
+    }
     
     weak var delegate: DataManagerDelegate?
     
@@ -203,6 +211,8 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         if let chartVC = segue.destinationController as? ChartViewController, let chart = trader?.chart {
             chartVC.chart = chart
             delegate = chartVC
+        } else if let logVc = segue.destinationController as? TradingLogViewController {
+            self.logViewController = logVc
         }
     }
 }
@@ -289,6 +299,14 @@ extension LiveTradingViewController: NSTableViewDataSource {
 }
 
 extension LiveTradingViewController: SessionManagerDelegate {
+    func newLogAdded(log: String) {
+        if self.log.count == 0 {
+            self.log = log
+        } else {
+            self.log = "\(log)\n\(self.log)"
+        }
+    }
+    
     func positionStatusChanged() {
         updateTradesList()
         positionStatusLabel.stringValue = sessionManager.status?.status() ?? "Position: --"

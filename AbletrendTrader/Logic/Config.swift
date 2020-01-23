@@ -62,5 +62,5 @@ class Config {
     let liveTradingMode: LiveTradingMode = .ninjaTrader
     var byPassTradingTimeRestrictions = false // DEFAULT: false
     var noEntryDuringLunch = true
-    let simulateTimePassage = true // DEFAULT: true
+    let simulateTimePassage = false // DEFAULT: true
 }

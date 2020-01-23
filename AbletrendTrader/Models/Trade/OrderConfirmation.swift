@@ -17,6 +17,6 @@ struct OrderConfirmation {
     var commission: Double
     
     var description: String {
-        return "\(orderId): \(time), \(price.currency())"
+        return "\(orderRef), \(time.hourMinuteSecond()), \(price)"
     }
 }

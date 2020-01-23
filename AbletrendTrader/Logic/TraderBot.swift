@@ -112,7 +112,6 @@ class TraderBot {
             case .long:
                 if priceBar.barColor == .red {
                     let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
-                    
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openPosition(let position, let entryType):
                         return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]

@@ -288,19 +288,19 @@ class ChartManager {
                 let urlFetchingTask = DispatchGroup()
                 
                 urlFetchingTask.enter()
-                self.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .oneMin, completion: { url in
+                self.fetchLastAvailableUrlInMinute(time: self.simTime, interval: .oneMin, completion: { url in
                     oneMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .twoMin, completion: { url in
+                self.fetchLastAvailableUrlInMinute(time: self.simTime, interval: .twoMin, completion: { url in
                     twoMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.fetchFirstAvailableUrlInMinute(time: self.simTime, interval: .threeMin, completion: { url in
+                self.fetchLastAvailableUrlInMinute(time: self.simTime, interval: .threeMin, completion: { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()
                 })
@@ -375,13 +375,13 @@ class ChartManager {
         }
     }
     
-    private func fetchFirstAvailableUrlInMinute(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
+    private func fetchLastAvailableUrlInMinute(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
         let queue = DispatchQueue.global()
         queue.async {
             let semaphore = DispatchSemaphore(value: 0)
             var existUrl: String?
             
-            for second in 0...59 {
+            for second in stride(from: 59, through: 0, by: -1) {
                 if existUrl != nil {
                     break
                 }

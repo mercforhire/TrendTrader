@@ -86,20 +86,23 @@ enum StopLossSource {
 }
 
 enum ExitMethod {
-    case brokeSupportResistence
+    case hitStoploss
     case twoGreenBars
     case signalReversed
+    case signalInvalid
     case endOfDay
     case manual
     
     func reason() -> String {
         switch self {
-        case .brokeSupportResistence:
-            return "Broke s/r"
+        case .hitStoploss:
+            return "Hit stop loss"
         case .twoGreenBars:
             return "Two green bars"
         case .signalReversed:
             return "Signal reversed"
+        case .signalInvalid:
+            return "Signal invalid"
         case .endOfDay:
             return "End of day"
         case .manual:

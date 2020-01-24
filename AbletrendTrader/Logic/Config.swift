@@ -25,7 +25,7 @@ class Config {
     let enterOnPullback: Double = 20.0 // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
     
     let highRiskStart: (Int, Int) = (9, 30) // Hour/Minute
-    let highRiskEnd: (Int, Int) = (10, 0) // Hour/Minute
+    let highRiskEnd: (Int, Int) = (9, 59) // Hour/Minute
     
     let chartStart: (Int, Int) = (0, 0) // Hour/Minute
     let chartEnd: (Int, Int) = (23, 59) // Hour/Minute
@@ -33,8 +33,8 @@ class Config {
     let tradingStart: (Int, Int) = (9, 20) // Hour/Minute
     let tradingEnd: (Int, Int) = (15, 55) // Hour/Minute
     
-    let lunchStart: (Int, Int) = (12, 0) // Hour/Minute
-    let lunchEnd: (Int, Int) = (13, 20) // Hour/Minute
+    let lunchStart: (Int, Int) = (11, 59) // Hour/Minute
+    let lunchEnd: (Int, Int) = (13, 29) // Hour/Minute
     
     let clearTime: (Int, Int) = (15, 59) // Hour/Minute
     let flatTime: (Int, Int) = (16, 5) // Hour/Minute
@@ -62,5 +62,5 @@ class Config {
     let liveTradingMode: LiveTradingMode = .ninjaTrader
     var byPassTradingTimeRestrictions = false // DEFAULT: false
     var noEntryDuringLunch = true
-    let simulateTimePassage = false // DEFAULT: true
+    let simulateTimePassage = true // DEFAULT: true
 }

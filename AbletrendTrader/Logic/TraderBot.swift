@@ -81,7 +81,7 @@ class TraderBot {
                 if let stop = sessionManager.pos?.stopLoss?.stop,
                     priceBar.candleStick.low <= stop {
                     let exitMethod: ExitMethod = sessionManager.pos?.stopLoss?.source == .supportResistanceLevel ||
-                        sessionManager.pos?.stopLoss?.source == .currentBar ? .brokeSupportResistence : .twoGreenBars
+                        sessionManager.pos?.stopLoss?.source == .currentBar ? .hitStoploss : .twoGreenBars
                     let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
@@ -95,7 +95,7 @@ class TraderBot {
                 if let stop = sessionManager.pos?.stopLoss?.stop,
                     let stopSource = sessionManager.pos?.stopLoss?.source,
                     priceBar.candleStick.high >= stop {
-                    let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .brokeSupportResistence : .twoGreenBars
+                    let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .hitStoploss : .twoGreenBars
                     let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
@@ -108,27 +108,14 @@ class TraderBot {
             }
             
             // Rule 2: exit when bar of opposite color bar appears
-            switch sessionManager.pos?.direction {
-            case .long:
-                if priceBar.barColor == .red {
-                    let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
-                    switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openPosition(let position, let entryType):
-                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
-                    default:
-                        return [exitAction]
-                    }
-                }
-            default:
-                if priceBar.barColor == .blue {
-                   let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
-                    
-                    switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openPosition(let position, let entryType):
-                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
-                    default:
-                        return [exitAction]
-                    }
+            if let exitMethod = checkForSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
+                let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: exitMethod)
+                
+                switch handleOpeningNewTrade(currentBar: priceBar) {
+                case .openPosition(let position, let entryType):
+                    return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                default:
+                    return [exitAction]
                 }
             }
             
@@ -249,7 +236,7 @@ class TraderBot {
         let color: SignalColor = direction == .long ? .blue : .red
         
         guard bar.barColor == color,
-            checkForSignalConfirmation(direction: direction, bar: bar),
+            checkForSignalConfirmation(direction: direction, bar: bar) == nil,
             let oneMinStop = bar.oneMinSignal?.stop,
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,
             var stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
@@ -339,13 +326,13 @@ class TraderBot {
                 return seekToOpenPosition(bar: currentBar, entryType: .initial)
             }
             
-            // Check if signals from the end of the last trade to current bar are all of the same color as current
-            // If yes, we need to decide if we want to enter on any Pullback or only Sweepspot
+            // Check if the direction from the start of the last trade to current bar are same as current
+            // If yes, we need to decide if we want to enter on any Pullback or only SweetSpot
             // Otherwise, then enter aggressively on any entry
             if chart.checkAllSameDirection(direction: currentBarDirection,
-                                           fromKey: lastTrade.exitTime.generateDateIdentifier(),
+                                           fromKey: lastTrade.entryTime.generateDateIdentifier(),
                                            toKey: currentBar.time.generateDateIdentifier()) {
-                // If the previous trade profit is higher than ProfitRequiredToReenterTradeonPullback,
+                // If the previous trade profit is higher than enterOnPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
                 if (lastTrade.idealProfit ?? 0) > config.enterOnPullback {
                     return seekToOpenPosition(bar: currentBar, entryType: .pullBack)
@@ -500,11 +487,11 @@ class TraderBot {
     }
     
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)
-    private func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
+    private func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> ExitMethod? {
         guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier),
             bar.oneMinSignal?.stop != nil,
             bar.oneMinSignal?.direction == direction else {
-            return false
+                return .signalReversed
         }
         
         let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
@@ -548,6 +535,10 @@ class TraderBot {
             }
         }
         
-        return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar1 != nil
+        if earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar1 != nil {
+            return nil
+        }
+        
+        return .signalInvalid
     }
 }

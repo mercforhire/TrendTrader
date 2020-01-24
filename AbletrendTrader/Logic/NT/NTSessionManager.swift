@@ -49,7 +49,12 @@ class NTSessionManager: BaseSessionManager {
             let semaphore = DispatchSemaphore(value: 0)
             var inProcessActionIndex: Int = 0
             for action in actions {
-                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
+                switch action {
+                case .noAction:
+                    print(action.description(actionBarTime: priceBarTime))
+                default:
+                    self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
+                }
                 
                 switch action {
                 case .openPosition(let newPosition, _):

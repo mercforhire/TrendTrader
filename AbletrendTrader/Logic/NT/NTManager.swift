@@ -298,7 +298,7 @@ class NTManager {
             try FileManager.default.removeItem(atPath: path)
             return true
         } catch {
-            print(path, "doesn't exist")
+            print(path, "doesn't exist, already deleted")
             
         }
         return false

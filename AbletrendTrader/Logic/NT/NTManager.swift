@@ -112,6 +112,8 @@ class NTManager {
                     if orderResponse.status == desiredStatus {
                         filledOrderResponse = orderResponse
                         break
+                    } else if orderResponse.status == .rejected {
+                        break
                     }
                 }
             }
@@ -127,15 +129,9 @@ class NTManager {
                     completion?(.success(orderConfirmation))
                     self.resetTimer()
                 }
-            } else if let latestOrderResponse = latestOrderResponse {
-                if latestOrderResponse.status == .rejected {
-                    DispatchQueue.main.async {
-                        completion?(.failure(.orderAlreadyPlaced))
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        completion?(.failure(.orderFailed))
-                    }
+            } else if let _ = latestOrderResponse {
+                DispatchQueue.main.async {
+                    completion?(.failure(.orderFailed))
                 }
             } else {
                 DispatchQueue.main.async {
@@ -281,6 +277,11 @@ class NTManager {
     // CANCELALLORDERS;;;;;;;;;;;;
     func cancelAllOrders() {
         let orderString = "CANCELALLORDERS;;;;;;;;;;;;"
+        writeTextToFile(text: orderString)
+    }
+    
+    func flatEverything() {
+        let orderString = "FLATTENEVERYTHING;;;;;;;;;;;;"
         writeTextToFile(text: orderString)
     }
     

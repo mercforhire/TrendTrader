@@ -123,48 +123,50 @@ class TraderBot {
             
             // Calculate the SL based on the 2 green bars(if applicable)
             var twoGreenBarsSL: Double = sessionManager.pos?.direction == .long ? 0 : Double.greatestFiniteMagnitude
-            var stopLossFromGreenBars: Double = 0
-            var securedProfit: Double = 0
-            switch sessionManager.pos?.direction {
-            case .long:
-                stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
-                securedProfit = stopLossFromGreenBars - currentPosition.idealEntryPrice
-            default:
-                stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
-                securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
-            }
             
-            if securedProfit < config.skipGreenBarsExit,
-                let entryPrice = sessionManager.pos?.idealEntryPrice,
+            if let entryPrice = sessionManager.pos?.idealEntryPrice,
                 previousPriceBar.barColor == .green,
                 priceBar.barColor == .green,
                 let currentStop = priceBar.oneMinSignal?.stop {
                 
+                let stopLossFromGreenBars: Double
+                let securedProfit: Double
                 switch sessionManager.pos?.direction {
                 case .long:
-                    if stopLossFromGreenBars > currentStop,
-                        stopLossFromGreenBars - entryPrice >= config.greenBarsExit,
-                        previousPriceBar.candleStick.close >= currentStop,
-                        priceBar.candleStick.close >= currentStop {
-                        
-                        // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
-                        if stopLossFromGreenBars - currentStop > config.sweetSpotMinDistance {
-                            twoGreenBarsSL = stopLossFromGreenBars
-                        } else {
-                            twoGreenBarsSL = currentStop - 1
-                        }
-                    }
+                    stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
+                    securedProfit = stopLossFromGreenBars - currentPosition.idealEntryPrice
                 default:
-                    if stopLossFromGreenBars < currentStop,
-                        sessionManager.pos!.idealEntryPrice - stopLossFromGreenBars >= config.greenBarsExit,
-                        previousPriceBar.candleStick.close <= currentStop,
-                        priceBar.candleStick.close <= currentStop {
-                        
-                        // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
-                        if currentStop - stopLossFromGreenBars > config.sweetSpotMinDistance {
-                            twoGreenBarsSL = stopLossFromGreenBars
-                        } else {
-                            twoGreenBarsSL = currentStop + 1
+                    stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
+                    securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
+                }
+                
+                if securedProfit < config.skipGreenBarsExit {
+                    switch sessionManager.pos?.direction {
+                    case .long:
+                        if stopLossFromGreenBars > currentStop,
+                            stopLossFromGreenBars - entryPrice >= config.greenBarsExit,
+                            previousPriceBar.candleStick.close >= currentStop,
+                            priceBar.candleStick.close >= currentStop {
+                            
+                            // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
+                            if stopLossFromGreenBars - currentStop > config.sweetSpotMinDistance {
+                                twoGreenBarsSL = stopLossFromGreenBars
+                            } else {
+                                twoGreenBarsSL = currentStop - 1
+                            }
+                        }
+                    default:
+                        if stopLossFromGreenBars < currentStop,
+                            sessionManager.pos!.idealEntryPrice - stopLossFromGreenBars >= config.greenBarsExit,
+                            previousPriceBar.candleStick.close <= currentStop,
+                            priceBar.candleStick.close <= currentStop {
+                            
+                            // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
+                            if currentStop - stopLossFromGreenBars > config.sweetSpotMinDistance {
+                                twoGreenBarsSL = stopLossFromGreenBars
+                            } else {
+                                twoGreenBarsSL = currentStop + 1
+                            }
                         }
                     }
                 }

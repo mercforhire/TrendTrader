@@ -36,7 +36,7 @@ class NTSessionManager: BaseSessionManager {
         }
         if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
-            delegate?.newLogAdded(log: "\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
+            print("\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
             return
         }
         currentPriceBarTime = priceBarTime
@@ -58,6 +58,11 @@ class NTSessionManager: BaseSessionManager {
                 
                 switch action {
                 case .openPosition(let newPosition, _):
+                    if self.status?.position != 0 {
+                        self.ntManager.flatEverything()
+                        self.pos = nil
+                    }
+                    
                     self.enterAtMarket(priceBarTime: priceBarTime,
                                        stop: newPosition.stopLoss?.stop,
                                        direction: newPosition.direction,
@@ -281,6 +286,33 @@ class NTSessionManager: BaseSessionManager {
             var orderConfirmation: OrderConfirmation?
             var stopConfirmation: OrderConfirmation?
             
+            // Stop order:
+            if let stop = stop {
+                let stopOrderId = priceBarTime.generateOrderIdentifier(prefix: direction.reverse().description(short: true))
+                self.ntManager.generatePlaceOrder(direction: direction.reverse(),
+                                                  size: size,
+                                                  orderType: .stop(price: stop),
+                                                  orderRef: stopOrderId,
+                                                  completion:
+                { result in
+                    switch result {
+                    case .success(let confirmation):
+                        stopConfirmation = confirmation
+                    case .failure(let ntError):
+                        errorSoFar = ntError
+                    }
+                    semaphore.signal()
+                })
+                semaphore.wait()
+            }
+            
+            if let errorSoFar = errorSoFar {
+                DispatchQueue.main.async {
+                    completion(.failure(errorSoFar))
+                }
+                return
+            }
+            
             // Buy/sell order:
             if reverseOrder {
                 let orderRef = priceBarTime.generateOrderIdentifier(prefix: direction.description(short: true))
@@ -310,33 +342,6 @@ class NTSessionManager: BaseSessionManager {
                         if ntError != .orderAlreadyPlaced {
                             errorSoFar = ntError
                         }
-                    }
-                    semaphore.signal()
-                })
-                semaphore.wait()
-            }
-            
-            if let errorSoFar = errorSoFar {
-                DispatchQueue.main.async {
-                    completion(.failure(errorSoFar))
-                }
-                return
-            }
-            
-            // Stop order:
-            if let stop = stop {
-                let stopOrderId = priceBarTime.generateOrderIdentifier(prefix: direction.reverse().description(short: true))
-                self.ntManager.generatePlaceOrder(direction: direction.reverse(),
-                                                  size: size,
-                                                  orderType: .stop(price: stop),
-                                                  orderRef: stopOrderId,
-                                                  completion:
-                { result in
-                    switch result {
-                    case .success(let confirmation):
-                        stopConfirmation = confirmation
-                    case .failure(let ntError):
-                        errorSoFar = ntError
                     }
                     semaphore.signal()
                 })

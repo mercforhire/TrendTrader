@@ -143,7 +143,7 @@ class ChartManager {
                             self.updateChart()
                         }
                     } else if self.config.simulateTimePassage {
-                        guard self.simTime < Date() else {
+                        guard self.simTime < Date.flatPositionsTime(date: self.simTime ) else {
                             self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
                             self.stopMonitoring()
                             self.delegate?.requestStopMonitoring()

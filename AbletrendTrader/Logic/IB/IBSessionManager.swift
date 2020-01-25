@@ -148,7 +148,7 @@ class IBSessionManager: BaseSessionManager {
                                  completion: @escaping (TradingError?) -> ()) {
         if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
-            delegate?.newLogAdded(log: "\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
+            print("\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
             return
         }
         currentPriceBarTime = priceBarTime

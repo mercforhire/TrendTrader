@@ -11,8 +11,8 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.1.103/"
-//    let dataServerURL: String = "http://192.168.43.190/"
+//    let dataServerURL: String = "http://192.168.1.103/"
+    let dataServerURL: String = "http://192.168.43.190/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
@@ -20,17 +20,14 @@ class Config {
     let maxRisk: Double = 10.0
     let minBarStop: Double = 5.0
     let sweetSpotMinDistance: Double  = 1.5 // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
-    let greenBarsExit: Double = 10.0 // the min profit the trade must in to use the 2 green bars exit rule
+    let greenBarsExit: Double = 5.0 // the min profit the trade must in to use the 2 green bars exit rule
     let skipGreenBarsExit: Double = 25.0 // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
     let enterOnPullback: Double = 20.0 // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
     
     let highRiskStart: (Int, Int) = (9, 30) // Hour/Minute
     let highRiskEnd: (Int, Int) = (9, 59) // Hour/Minute
     
-    let chartStart: (Int, Int) = (0, 0) // Hour/Minute
-    let chartEnd: (Int, Int) = (23, 59) // Hour/Minute
-    
-    let tradingStart: (Int, Int) = (9, 20) // Hour/Minute
+    let tradingStart: (Int, Int) = (9, 30) // Hour/Minute
     let tradingEnd: (Int, Int) = (15, 55) // Hour/Minute
     
     let lunchStart: (Int, Int) = (11, 59) // Hour/Minute

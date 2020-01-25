@@ -168,7 +168,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             if networkError == nil {
                 self.updateTradesList()
             } else {
-                networkError?.showDialog()
+                networkError?.printError()
             }
         }
     }
@@ -178,7 +178,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             guard let self = self else { return }
             
             if let networkError = networkError {
-                networkError.showDialog()
+                networkError.printError()
             } else {
                 self.updateTradesList()
             }

@@ -1,5 +1,5 @@
 //
-//  NTPositionUpdate.swift
+//  PositionStatus.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2020-01-17.
@@ -14,7 +14,7 @@ struct PositionStatus {
     
     func status() -> String {
         if position == 0 {
-            return "Position: --"
+            return "No position"
         }
         return "Position: \(position), \(price)"
     }

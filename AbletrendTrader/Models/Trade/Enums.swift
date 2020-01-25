@@ -41,29 +41,56 @@ enum TradeActionType {
         switch self {
         case .noAction(let entryType):
             if let entryType = entryType {
-                return String(format: "%@: No action for the minute %@ (enter method: %@)", Date().hourMinuteSecond(), actionBarTime.hourMinute(), entryType.description())
+                return String(format: "%@: No action for the minute %@ (enter method: %@)",
+                              Date().hourMinuteSecond(),
+                              actionBarTime.hourMinute(),
+                              entryType.description())
             } else {
-                return String(format: "%@: No action for the minute %@", Date().hourMinuteSecond(), actionBarTime.hourMinute())
+                return String(format: "%@: No action for the minute %@",
+                              Date().hourMinuteSecond(),
+                              actionBarTime.hourMinute())
             }
             
         case .openPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
+            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ for the minute %@",
+                          Date().hourMinuteSecond(),
+                          type, newPosition.idealEntryPrice,
+                          newPosition.stopLoss?.stop ?? -1.0,
+                          entryType.description(),
+                          actionBarTime.hourMinute())
             
         case .reversePosition(let oldPosition, let newPosition, let entryType):
             let type: String = oldPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Reversed %@ position at price %.2f with SL %.2f for the minute %@", Date().hourMinuteSecond(), type, newPosition.idealEntryPrice, newPosition.stopLoss?.stop ?? -1.0, entryType.description(), actionBarTime.hourMinute())
+            return String(format: "%@: Reversed %@ position at price %.2f with SL %.2f for the minute %@",
+                          Date().hourMinuteSecond(),
+                          type, newPosition.idealEntryPrice,
+                          newPosition.stopLoss?.stop ?? -1.0,
+                          entryType.description(),
+                          actionBarTime.hourMinute())
             
         case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
+            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for the minute %@",
+                          Date().hourMinuteSecond(),
+                          type, closingPrice,
+                          reason.reason(),
+                          actionBarTime.hourMinute())
             
         case .forceClosePosition(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Flat %@ position at %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), type, closingPrice, reason.reason(), actionBarTime.hourMinute())
+            return String(format: "%@: Flat %@ position at %.2f reason: %@ for the minute %@",
+                          Date().hourMinuteSecond(),
+                          type, closingPrice,
+                          reason.reason(),
+                          actionBarTime.hourMinute())
             
         case .updateStop(let stopLoss):
-            return String(format: "%@: Updated stop loss to %.2f reason: %@ for the minute %@", Date().hourMinuteSecond(), stopLoss.stop, stopLoss.source.reason(), actionBarTime.hourMinute())
+            return String(format: "%@: Updated stop loss to %.2f reason: %@ for the minute %@",
+                          Date().hourMinuteSecond(),
+                          stopLoss.stop,
+                          stopLoss.source.reason(),
+                          actionBarTime.hourMinute())
         }
     }
 }
@@ -264,13 +291,7 @@ enum TradingError: Error {
         }
     }
     
-    func showDialog() {
-//        let a: NSAlert = NSAlert()
-//        a.messageText = "Error"
-//        a.informativeText = self.displayMessage()
-//        a.addButton(withTitle: "Okay")
-//        a.alertStyle = NSAlert.Style.warning
-//        a.runModal()
+    func printError() {
         print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
     }
 }

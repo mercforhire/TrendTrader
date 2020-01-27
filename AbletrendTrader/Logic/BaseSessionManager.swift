@@ -17,7 +17,7 @@ class BaseSessionManager {
     private var timer: Timer?
     
     let config = Config.shared
-    let liveUpdateFrequency: TimeInterval = 10
+    var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
     var status: PositionStatus? {
         didSet {
@@ -123,7 +123,7 @@ class BaseSessionManager {
         var tradesList: [TradesTableRowItem] = []
         
         if let currentPosition = pos {
-            let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.3f", currentPosition.stopLoss!.stop) : "--"
+            let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.2f", currentPosition.stopLoss!.stop) : "--"
             
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
                                                  iEntry: String(format: "%.2f", currentPosition.idealEntryPrice),

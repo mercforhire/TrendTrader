@@ -17,6 +17,7 @@ protocol DataManagerDelegate: class {
 
 class ChartManager {
     private let config = Config.shared
+    private let delayBeforeFetchingAtNewMinute = 12
     
     var chart: Chart?
     var monitoring = false
@@ -112,8 +113,8 @@ class ChartManager {
         }
         
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
-            // call this again 5 seconds after the next minute
-            let waitSeconds = 65 - now.second()
+            // call this again 15 seconds after the next minute
+            let waitSeconds = 60 + delayBeforeFetchingAtNewMinute - now.second()
             let statusText: String = "Skipped fetching at \(now.hourMinuteSecond()) will fetch again in \(waitSeconds) seconds"
             self.delegate?.chartStatusChanged(statusText: statusText)
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(waitSeconds)) {
@@ -143,7 +144,7 @@ class ChartManager {
                             self.updateChart()
                         }
                     } else if self.config.simulateTimePassage {
-                        guard self.simTime < Date.flatPositionsTime(date: self.simTime ) else {
+                        guard self.simTime < Date.flatPositionsTime(date: self.simTime) || self.simTime < Date() else {
                             self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
                             self.stopMonitoring()
                             self.delegate?.requestStopMonitoring()
@@ -348,8 +349,8 @@ class ChartManager {
             let now = Date()
             let currentSecond = now.second() - 1
             
-            if currentSecond < 5 {
-                sleep(UInt32(5 - currentSecond))
+            if currentSecond < self.delayBeforeFetchingAtNewMinute {
+                sleep(UInt32(self.delayBeforeFetchingAtNewMinute - currentSecond))
             }
             
             for i in stride(from: currentSecond, through: 0, by: -1) {
@@ -357,7 +358,14 @@ class ChartManager {
                     break
                 }
                 
-                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), i)
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt",
+                                               self.config.dataServerURL,
+                                               interval.text(),
+                                               time.month(),
+                                               time.day(),
+                                               time.hour(),
+                                               time.minute(),
+                                               i)
                 
                 Alamofire.SessionManager.default.request(urlString).validate().response { response in
                     if response.response?.statusCode == 200 {
@@ -381,7 +389,7 @@ class ChartManager {
             let semaphore = DispatchSemaphore(value: 0)
             var existUrl: String?
             
-            for second in stride(from: 59, through: 0, by: -1) {
+            for second in self.delayBeforeFetchingAtNewMinute...59 {
                 if existUrl != nil {
                     break
                 }

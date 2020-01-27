@@ -60,8 +60,11 @@ class SimTradingViewController: NSViewController {
 
         // Do any additional setup after loading the view.
         setupUI()
-        
-        systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
+        systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
+                                                target: self,
+                                                selector: #selector(updateSystemTimeLabel),
+                                                userInfo: nil,
+                                                repeats: true)
         chartManager = ChartManager(live: false)
         chartManager?.delegate = self
         sessionManager.delegate = self
@@ -158,8 +161,7 @@ extension SimTradingViewController: DataManagerDelegate {
     func chartUpdated(chart: Chart) {
         delegate?.chartUpdated(chart: chart)
         
-        guard !chart.timeKeys.isEmpty,
-            let lastBarTime = chart.lastBar?.time else {
+        guard !chart.timeKeys.isEmpty, let lastBarTime = chart.lastBar?.time else {
                 return
         }
         
@@ -184,7 +186,6 @@ extension SimTradingViewController: NSTableViewDelegate {
         
         var text: String = ""
         var cellIdentifier: NSUserInterfaceItemIdentifier = .TypeCell
-         
         let trade: TradesTableRowItem = listOfTrades[row]
         
         if tableColumn == tableView.tableColumns[0] {

@@ -56,7 +56,6 @@ class AuthViewController: NSViewController {
     func setupUI() {
         accountsPicker.usesDataSource = true
         accountsPicker.dataSource = self
-        
         tickerField.stringValue = config.ticker
         tickerField.isEditable = false
         conIdField.stringValue = String(format: "%d", config.conId)
@@ -80,7 +79,6 @@ class AuthViewController: NSViewController {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
-        
         if config.liveTradingMode == .interactiveBroker {
             validateSSOPressed(validateSSOButton)
             getStatusPressed(getStatusButton)
@@ -128,7 +126,6 @@ class AuthViewController: NSViewController {
     @IBAction func validateSSOPressed(_ sender: NSButton) {
         sender.isEnabled = false
         networkManager.validateSSO { token in
-            
             if token != nil {
                 print("Validate SSO success")
             } else {

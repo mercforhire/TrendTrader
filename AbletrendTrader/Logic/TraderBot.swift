@@ -108,8 +108,33 @@ class TraderBot {
             }
             
             // Rule 2: exit when bar of opposite color bar appears
-            if let exitMethod = checkForSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
-                let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: exitMethod)
+            switch sessionManager.pos?.direction {
+            case .long:
+                if priceBar.barColor == .red {
+                    let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
+                    switch handleOpeningNewTrade(currentBar: priceBar) {
+                    case .openPosition(let position, let entryType):
+                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                    default:
+                        return [exitAction]
+                    }
+                }
+            default:
+                if priceBar.barColor == .blue {
+                   let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
+                    
+                    switch handleOpeningNewTrade(currentBar: priceBar) {
+                    case .openPosition(let position, let entryType):
+                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                    default:
+                        return [exitAction]
+                    }
+                }
+            }
+            
+            // Rule 3: exit 3 min signal reversed
+            if !checkFor3MinSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
+                let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalInvalid)
                 
                 switch handleOpeningNewTrade(currentBar: priceBar) {
                 case .openPosition(let position, let entryType):
@@ -238,7 +263,7 @@ class TraderBot {
         let color: SignalColor = direction == .long ? .blue : .red
         
         guard bar.barColor == color,
-            checkForSignalConfirmation(direction: direction, bar: bar) == nil,
+            checkForSignalConfirmation(direction: direction, bar: bar),
             let oneMinStop = bar.oneMinSignal?.stop,
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,
             var stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
@@ -346,7 +371,7 @@ class TraderBot {
             }
         }
         else {
-            return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
+            return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
     }
     
@@ -489,11 +514,11 @@ class TraderBot {
     }
     
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)
-    private func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> ExitMethod? {
+    private func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
         guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier),
             bar.oneMinSignal?.stop != nil,
             bar.oneMinSignal?.direction == direction else {
-                return .signalReversed
+                return false
         }
         
         let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
@@ -501,17 +526,17 @@ class TraderBot {
         var earliest2MinConfirmationBar: PriceBar?
         var finishedScanningFor2MinConfirmation = false
         
-        var earliest3MinConfirmationBar1: PriceBar?
-        var earliest3MinConfirmationBar2: PriceBar?
+        var earliest3MinConfirmationBar: PriceBar?
         var finishedScanningFor3MinConfirmation = false
         
         for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
-            guard let priceBar = chart.priceBars[timeKey], !finishedScanningFor2MinConfirmation && !finishedScanningFor3MinConfirmation else { break }
-            
-            guard earliest2MinConfirmationBar == nil || earliest3MinConfirmationBar1 == nil || earliest3MinConfirmationBar2 == nil else { break }
+            guard let priceBar = chart.priceBars[timeKey],
+                !finishedScanningFor2MinConfirmation && !finishedScanningFor3MinConfirmation else { break }
             
             for signal in priceBar.signals where signal.inteval != .oneMin {
-                if let signalDirection = signal.direction, signalDirection != direction {
+                guard let signalDirection = signal.direction else { continue }
+                
+                if signalDirection == direction.reverse() {
                     switch signal.inteval {
                     case .twoMin:
                         finishedScanningFor2MinConfirmation = true
@@ -520,27 +545,45 @@ class TraderBot {
                     default:
                         break
                     }
-                } else if let signalDirection = signal.direction, signalDirection == direction {
+                } else if signalDirection == direction {
                     switch signal.inteval {
                     case .twoMin:
                         earliest2MinConfirmationBar = priceBar
                     case .threeMin:
-                        if earliest3MinConfirmationBar1 == nil {
-                            earliest3MinConfirmationBar1 = priceBar
-                        } else {
-                            earliest3MinConfirmationBar2 = priceBar
-                        }
+                        earliest3MinConfirmationBar = priceBar
                     default:
                         break
                     }
                 }
             }
+            
+            if earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil {
+                break
+            }
         }
         
-        if earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar1 != nil {
-            return nil
+        return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil
+    }
+    
+    
+    private func checkFor3MinSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
+        guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
+            return false
         }
-        
-        return .signalInvalid
+        let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
+        for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
+            guard let priceBar = chart.priceBars[timeKey] else { break }
+            
+            for signal in priceBar.signals where signal.inteval == .threeMin {
+                guard let signalDirection = signal.direction else { continue }
+                
+                if signalDirection == direction {
+                    return true
+                } else if signalDirection == direction.reverse() {
+                    return false
+                }
+            }
+        }
+        return false
     }
 }

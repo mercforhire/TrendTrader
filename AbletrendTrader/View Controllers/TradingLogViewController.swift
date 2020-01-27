@@ -10,9 +10,17 @@ import Cocoa
 
 class TradingLogViewController: NSViewController {
     @IBOutlet var logTextView: NSTextView!
+    var log: String = "" {
+        didSet {
+            if logTextView != nil {
+                logTextView.string = log
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
+        logTextView.string = log
     }
 }

@@ -11,6 +11,8 @@ import Foundation
 class NTSessionManager: BaseSessionManager {
     private var ntManager: NTManager!
     
+    override var liveUpdateFrequency: TimeInterval { 2 }
+    
     var connected = false
     
     override init() {
@@ -61,6 +63,7 @@ class NTSessionManager: BaseSessionManager {
                     if self.status?.position != 0 {
                         self.ntManager.flatEverything()
                         self.pos = nil
+                        sleep(1)
                     }
                     
                     self.enterAtMarket(priceBarTime: priceBarTime,
@@ -190,7 +193,7 @@ class NTSessionManager: BaseSessionManager {
                         { result in
                             switch result {
                             case .success(let confirmation):
-                                self.delegate?.newLogAdded(log: "Order confirmation: \(confirmation.description)")
+                                print("Order confirmation: \(confirmation.description)")
                                 let trade = Trade(direction: closedPosition.direction,
                                                   entryTime: closedPosition.entryTime,
                                                   idealEntryPrice: closedPosition.idealEntryPrice,
@@ -209,6 +212,7 @@ class NTSessionManager: BaseSessionManager {
                                     completion(error)
                                 }
                             }
+                            self.ntManager.flatEverything()
                             semaphore.signal()
                         }
                     }
@@ -316,7 +320,11 @@ class NTSessionManager: BaseSessionManager {
             // Buy/sell order:
             if reverseOrder {
                 let orderRef = priceBarTime.generateOrderIdentifier(prefix: direction.description(short: true))
-                self.ntManager.reversePositionAndPlaceOrder(direction: direction, size: size, orderType: .market, orderRef: orderRef, completion:
+                self.ntManager.reversePositionAndPlaceOrder(direction: direction,
+                                                            size: size,
+                                                            orderType: .market,
+                                                            orderRef: orderRef,
+                                                            completion:
                 { result in
                     switch result {
                     case .success(let confirmation):
@@ -349,9 +357,9 @@ class NTSessionManager: BaseSessionManager {
             }
             
             DispatchQueue.main.async {
-                self.delegate?.newLogAdded(log: "Order confirmation: \(orderConfirmation?.description)")
+                print("Order confirmation: \(orderConfirmation?.description ?? "nil")")
                 if stop != nil {
-                    self.delegate?.newLogAdded(log: "Stop confirmation: \(stopConfirmation?.description)")
+                    print("Stop confirmation: \(stopConfirmation?.description ?? "nil")")
                 }
                 if var confirmation = orderConfirmation {
                     confirmation.stopOrderId = stopConfirmation?.orderId
@@ -378,7 +386,7 @@ class NTSessionManager: BaseSessionManager {
                 }
                 switch result {
                 case .success(let orderConfirmation):
-                    self.delegate?.newLogAdded(log: "Order confirmation: \(orderConfirmation.description)")
+                    print("Order confirmation: \(orderConfirmation.description)")
                     if let currentPosition = self.pos {
                         let trade = Trade(direction: currentPosition.direction,
                                           entryTime: currentPosition.entryTime,

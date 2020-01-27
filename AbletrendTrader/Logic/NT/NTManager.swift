@@ -13,7 +13,7 @@ protocol NTManagerDelegate: class {
 }
 
 class NTManager {
-    private let maxTryTimes = 5
+    private let maxTryTimes = 10
     private let config = Config.shared
     private let accountId: String
     

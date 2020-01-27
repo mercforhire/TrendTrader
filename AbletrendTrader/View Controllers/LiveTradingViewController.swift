@@ -34,7 +34,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private var log: String = "" {
         didSet {
             DispatchQueue.main.async {
-                self.logViewController?.logTextView.string = self.log
+                self.logViewController?.log = self.log
             }
         }
     }
@@ -64,11 +64,13 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
-        
-        systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0), target: self, selector: #selector(updateSystemTimeLabel), userInfo: nil, repeats: true)
+        systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
+                                                target: self,
+                                                selector: #selector(updateSystemTimeLabel),
+                                                userInfo: nil,
+                                                repeats: true)
         chartManager = ChartManager(live: true)
         chartManager?.delegate = self
-        
         switch config.liveTradingMode {
         case .interactiveBroker:
             sessionManager = IBSessionManager()
@@ -213,6 +215,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             delegate = chartVC
         } else if let logVc = segue.destinationController as? TradingLogViewController {
             self.logViewController = logVc
+            self.logViewController?.log = log
         }
     }
 }

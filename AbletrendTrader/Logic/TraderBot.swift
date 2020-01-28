@@ -149,8 +149,7 @@ class TraderBot {
             // Calculate the SL based on the 2 green bars(if applicable)
             var twoGreenBarsSL: Double = sessionManager.pos?.direction == .long ? 0 : Double.greatestFiniteMagnitude
             
-            if let entryPrice = sessionManager.pos?.idealEntryPrice,
-                previousPriceBar.barColor == .green,
+            if previousPriceBar.barColor == .green,
                 priceBar.barColor == .green,
                 let currentStop = priceBar.oneMinSignal?.stop {
                 
@@ -165,14 +164,10 @@ class TraderBot {
                     securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
                 }
                 
-                if securedProfit < config.skipGreenBarsExit {
+                if securedProfit < config.skipGreenBarsExit, securedProfit >= config.greenBarsExit {
                     switch sessionManager.pos?.direction {
                     case .long:
-                        if stopLossFromGreenBars > currentStop,
-                            stopLossFromGreenBars - entryPrice >= config.greenBarsExit,
-                            previousPriceBar.candleStick.close >= currentStop,
-                            priceBar.candleStick.close >= currentStop {
-                            
+                        if stopLossFromGreenBars > currentStop {
                             // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
                             if stopLossFromGreenBars - currentStop > config.sweetSpotMinDistance {
                                 twoGreenBarsSL = stopLossFromGreenBars
@@ -181,11 +176,7 @@ class TraderBot {
                             }
                         }
                     default:
-                        if stopLossFromGreenBars < currentStop,
-                            sessionManager.pos!.idealEntryPrice - stopLossFromGreenBars >= config.greenBarsExit,
-                            previousPriceBar.candleStick.close <= currentStop,
-                            priceBar.candleStick.close <= currentStop {
-                            
+                        if stopLossFromGreenBars < currentStop {
                             // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
                             if currentStop - stopLossFromGreenBars > config.sweetSpotMinDistance {
                                 twoGreenBarsSL = stopLossFromGreenBars

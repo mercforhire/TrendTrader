@@ -133,7 +133,7 @@ class TraderBot {
             }
             
             // Rule 3: exit 3 min signal reversed
-            if !checkFor3MinSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
+            if !checkForSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
                 let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalInvalid)
                 
                 switch handleOpeningNewTrade(currentBar: priceBar) {
@@ -264,6 +264,7 @@ class TraderBot {
         
         guard bar.barColor == color,
             checkForSignalConfirmation(direction: direction, bar: bar),
+            bar.oneMinSignal?.direction == direction,
             let oneMinStop = bar.oneMinSignal?.stop,
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,
             var stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
@@ -392,7 +393,7 @@ class TraderBot {
         // Worst case would be method 3 and still having stoploss > MaxRisk, either skip the trade or apply a hard stop at the MaxRisk
         
         // Method 1: previous resistence/support level
-        // Method 2: current resistence/support level plus or minus 1 depending on directionx
+        // Method 2: current resistence/support level plus or minus 1 depending on direction
         // Method 3: current bar's high plus 1 or low, minus 1 depending on direction(min 5 points)
         
         // Method 1 and 2:
@@ -401,10 +402,16 @@ class TraderBot {
         case .long:
             if entryBar.candleStick.close - previousLevel <= config.maxRisk {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
+            } else if let currentStop = entryBar.oneMinSignal?.stop,
+                entryBar.candleStick.close - (currentStop - 1) <= config.maxRisk {
+                return StopLoss(stop: (currentStop - 1), source: .supportResistanceLevel)
             }
         default:
             if previousLevel - entryBar.candleStick.close <= config.maxRisk {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
+            } else if let currentStop = entryBar.oneMinSignal?.stop,
+                (currentStop + 1) - entryBar.candleStick.close <= config.maxRisk {
+                return StopLoss(stop: (currentStop + 1), source: .supportResistanceLevel)
             }
         }
         
@@ -515,10 +522,8 @@ class TraderBot {
     
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)
     private func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
-        guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier),
-            bar.oneMinSignal?.stop != nil,
-            bar.oneMinSignal?.direction == direction else {
-                return false
+        guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
+            return false
         }
         
         let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
@@ -563,27 +568,5 @@ class TraderBot {
         }
         
         return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil
-    }
-    
-    
-    private func checkFor3MinSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
-        guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
-            return false
-        }
-        let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
-        for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
-            guard let priceBar = chart.priceBars[timeKey] else { break }
-            
-            for signal in priceBar.signals where signal.inteval == .threeMin {
-                guard let signalDirection = signal.direction else { continue }
-                
-                if signalDirection == direction {
-                    return true
-                } else if signalDirection == direction.reverse() {
-                    return false
-                }
-            }
-        }
-        return false
     }
 }

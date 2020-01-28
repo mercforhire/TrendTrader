@@ -77,7 +77,7 @@ class Parser {
     static func generatePriceBar(priceBarString: String, number: Int) -> CandleStick? {
         let components = priceBarString.components(separatedBy: "\t")
         
-        guard components.count >= 7 else { return nil }
+        guard components.count >= 6 else { return nil }
         
         // generate the time from [0] and [1]
         let dateComponent: String = components[0]
@@ -96,10 +96,7 @@ class Parser {
         // generate the close from [5]
         let close: Double = components[5].double ?? 00
         
-        // generate the volume from [6]
-        let volume: Int = components[6].int ?? 00
-        
-        let priceBar = CandleStick(time: date, open: open, high: high, low: low, close: close, volume: volume)
+        let priceBar = CandleStick(time: date, open: open, high: high, low: low, close: close)
         return priceBar
     }
     

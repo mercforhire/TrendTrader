@@ -133,7 +133,36 @@ class IBSessionManager: BaseSessionManager {
                     }
                     semaphore.signal()
                 }
-                
+                semaphore.wait()
+            } else if let outdatedPosition = self.pos {
+                self.networkManager.fetchTrades { result in
+                    switch result {
+                    case .success(let trades):
+                        let matchingTrades = trades.filter { trade -> Bool in
+                            return trade.tradeTime > outdatedPosition.entryTime &&
+                                trade.direction != outdatedPosition.direction &&
+                                trade.size == outdatedPosition.size &&
+                                trade.position == "0"
+                        }
+                        if let closingTrade = matchingTrades.first, let closingPrice = closingTrade.price.double {
+                            let trade = Trade(direction: outdatedPosition.direction,
+                                              entryTime: outdatedPosition.entryTime,
+                                              idealEntryPrice: outdatedPosition.idealEntryPrice,
+                                              actualEntryPrice: outdatedPosition.actualEntryPrice,
+                                              entryOrderRef: outdatedPosition.entryOrderRef,
+                                              exitTime: closingTrade.tradeTime,
+                                              idealExitPrice: outdatedPosition.stopLoss?.stop ?? closingPrice,
+                                              actualExitPrice: closingPrice,
+                                              exitOrderRef: closingTrade.orderRef ?? "STOPORDER",
+                                              commission: outdatedPosition.commission + (closingTrade.commission?.double ?? outdatedPosition.commission))
+                            self.trades.append(trade)
+                            self.pos = nil
+                        }
+                    case .failure(let networkError):
+                        errorSoFar = networkError
+                    }
+                    semaphore.signal()
+                }
                 semaphore.wait()
             }
             
@@ -338,6 +367,12 @@ class IBSessionManager: BaseSessionManager {
                     sleep(1)
                 }
             }
+        }
+    }
+    
+    override func updateCurrentPositionToBeClosed() {
+        if let _ = self.pos {
+            self.delegate?.newLogAdded(log: "Detected position closed")
         }
     }
     

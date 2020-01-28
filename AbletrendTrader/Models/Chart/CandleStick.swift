@@ -14,5 +14,4 @@ struct CandleStick {
     var high: Double
     var low: Double
     var close: Double
-    var volume: Int
 }

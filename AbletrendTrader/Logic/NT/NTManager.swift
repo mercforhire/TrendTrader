@@ -273,8 +273,6 @@ class NTManager {
         }
     }
     
-    // CANCELALLORDERS COMMAND
-    // CANCELALLORDERS;;;;;;;;;;;;
     func cancelAllOrders() {
         let orderString = "CANCELALLORDERS;;;;;;;;;;;;"
         writeTextToFile(text: orderString)

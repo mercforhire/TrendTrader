@@ -10,6 +10,7 @@ import Cocoa
 
 class TradingLogViewController: NSViewController {
     @IBOutlet var logTextView: NSTextView!
+    
     var log: String = "" {
         didSet {
             if logTextView != nil {

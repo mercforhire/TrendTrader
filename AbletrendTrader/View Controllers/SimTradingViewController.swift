@@ -231,7 +231,7 @@ extension SimTradingViewController: SessionManagerDelegate {
         if self.log.count == 0 {
             self.log = log
         } else {
-            self.log = "\(log)\n\(self.log)"
+            self.log = "\(self.log)\n\(log)"
         }
     }
     

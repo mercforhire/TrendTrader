@@ -17,7 +17,7 @@ protocol DataManagerDelegate: class {
 
 class ChartManager {
     private let config = Config.shared
-    private let delayBeforeFetchingAtNewMinute = 12
+    private let delayBeforeFetchingAtNewMinute = 10
     
     var chart: Chart?
     var monitoring = false
@@ -106,14 +106,14 @@ class ChartManager {
     private func updateChart() {
         let now = Date()
         if live,
-            !config.byPassTradingTimeRestrictions, now >= Date.flatPositionsTime(date: now) {
+            !config.byPassTradingTimeRestrictions, now > Date.flatPositionsTime(date: now).getOffByMinutes(minutes: 5) {
             delegate?.requestStopMonitoring()
             self.delegate?.chartStatusChanged(statusText: "Trading session is over at " + now.hourMinute())
             return
         }
         
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
-            // call this again 15 seconds after the next minute
+            // call this again 10 seconds after the next minute
             let waitSeconds = 60 + delayBeforeFetchingAtNewMinute - now.second()
             let statusText: String = "Skipped fetching at \(now.hourMinuteSecond()) will fetch again in \(waitSeconds) seconds"
             self.delegate?.chartStatusChanged(statusText: statusText)

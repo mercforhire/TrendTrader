@@ -15,6 +15,6 @@ struct NTOrderResponse {
     var time: Date
     
     var description: String {
-        return "\(status.rawValue): \(time), \(size) X \(price.currency())"
+        return "\(status.rawValue): \(time.hourMinuteSecond()), \(size) x \(price)"
     }
 }

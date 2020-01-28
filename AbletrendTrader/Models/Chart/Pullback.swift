@@ -15,20 +15,20 @@ import Foundation
 struct Pullback {
     var direction: TradeDirection
     var greenBars: [PriceBar] // can be empty
-    var coloredBars: [PriceBar] // cannot be empty
+    var coloredBar: PriceBar
     
     var start: String {
-        return greenBars.first?.identifier ?? coloredBars.first!.identifier
+        return greenBars.first?.identifier ?? coloredBar.identifier
     }
     
     var end: String {
-        return coloredBars.last!.identifier
+        return coloredBar.identifier
     }
     
     func getHighestPoint() -> Double? {
         var allBars: [PriceBar] = []
         allBars.append(contentsOf: greenBars)
-        allBars.append(contentsOf: coloredBars)
+        allBars.append(coloredBar)
         let highestBar: PriceBar? = allBars.max { a, b in a.candleStick.high < b.candleStick.high }
         return highestBar?.candleStick.high
     }
@@ -36,7 +36,7 @@ struct Pullback {
     func getLowestPoint() -> Double? {
         var allBars: [PriceBar] = []
         allBars.append(contentsOf: greenBars)
-        allBars.append(contentsOf: coloredBars)
+        allBars.append(coloredBar)
         let lowestBar: PriceBar? = allBars.max { a, b in a.candleStick.low > b.candleStick.low }
         return lowestBar?.candleStick.low
     }

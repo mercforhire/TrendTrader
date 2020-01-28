@@ -173,7 +173,7 @@ class IBSessionManager: BaseSessionManager {
     }
     
     override func processActions(priceBarTime: Date,
-                                 actions: [TradeActionType],
+                                 action: TradeActionType,
                                  completion: @escaping (TradingError?) -> ()) {
         if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
@@ -189,16 +189,14 @@ class IBSessionManager: BaseSessionManager {
             }
             let semaphore = DispatchSemaphore(value: 0)
             
-            var inProcessActionIndex: Int = 0
+            var actionCompleted: Bool = false
             var retriedTimes: Int = 1
-            while inProcessActionIndex < actions.count {
-                let action = actions[inProcessActionIndex]
-                
+            while !actionCompleted {
                 if retriedTimes >= self.config.maxIBActionRetryTimes {
                     self.delegate?.newLogAdded(log: "Action have been retried more than \(self.config.maxIBActionRetryTimes) times, skipping...")
-                    inProcessActionIndex += 1
+                    actionCompleted = false
                     retriedTimes = 1
-                    continue
+                    break
                 }
                 
                 switch action {
@@ -213,7 +211,7 @@ class IBSessionManager: BaseSessionManager {
                     let previousMinute = Date().getOffByMinutes(minutes: -1)
                     if !previousMinute.isInSameMinute(date: priceBarTime) {
                         self.delegate?.newLogAdded(log: "Open position action expired, skipping...")
-                        inProcessActionIndex += 1
+                        actionCompleted = true
                         continue
                     }
                     
@@ -230,7 +228,7 @@ class IBSessionManager: BaseSessionManager {
                                 self.pos?.commission = orderConfirmation.commission
                                 completion(nil)
                             }
-                            inProcessActionIndex += 1
+                            actionCompleted = true
                         case .failure(let networkError):
                             DispatchQueue.main.async {
                                 completion(networkError)
@@ -244,7 +242,7 @@ class IBSessionManager: BaseSessionManager {
                     let previousMinute = Date().getOffByMinutes(minutes: -1)
                     if !previousMinute.isInSameMinute(date: priceBarTime) {
                         self.delegate?.newLogAdded(log: "Reverse position action expired, skipping...")
-                        inProcessActionIndex += 1
+                        actionCompleted = true
                         continue
                     }
                     
@@ -265,7 +263,7 @@ class IBSessionManager: BaseSessionManager {
                                 self.pos?.commission = orderConfirmation.commission
                                 completion(nil)
                             }
-                            inProcessActionIndex += 1
+                            actionCompleted = true
                         case .failure(let networkError):
                             DispatchQueue.main.async {
                                 completion(networkError)
@@ -299,7 +297,7 @@ class IBSessionManager: BaseSessionManager {
                             completion(networkError)
                         }
                         if networkError == nil {
-                            inProcessActionIndex += 1
+                            actionCompleted = true
                         } else {
                             retriedTimes += 1
                         }
@@ -318,7 +316,7 @@ class IBSessionManager: BaseSessionManager {
                         if networkError != nil {
                             retriedTimes += 1
                         } else {
-                            inProcessActionIndex += 1
+                            actionCompleted = true
                         }
                         
                         semaphore.signal()
@@ -345,7 +343,7 @@ class IBSessionManager: BaseSessionManager {
                                 }
                                 completion(nil)
                             }
-                            inProcessActionIndex += 1
+                            actionCompleted = true
                         case .failure(let networkError):
                             DispatchQueue.main.async {
                                 completion(networkError)
@@ -356,16 +354,11 @@ class IBSessionManager: BaseSessionManager {
                         semaphore.signal()
                     }
                 case .noAction(_):
-                    inProcessActionIndex += 1
+                    actionCompleted = true
                     semaphore.signal()
                 }
                 
                 semaphore.wait()
-                
-                if actions.count > 1, inProcessActionIndex < actions.count {
-                    self.delegate?.newLogAdded(log: "Wait 1 second before executing the next consecutive order")
-                    sleep(1)
-                }
             }
         }
     }

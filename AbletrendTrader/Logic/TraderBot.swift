@@ -34,8 +34,8 @@ class TraderBot {
             
             guard let currentBar = self.chart.priceBars[timeKey] else { continue }
             
-            let actions = self.decide(priceBar: currentBar)
-            self.sessionManager.processActions(priceBarTime: currentBar.time, actions: actions, completion: { _ in
+            let action = self.decide(priceBar: currentBar)
+            self.sessionManager.processActions(priceBarTime: currentBar.time, action: action, completion: { _ in
             })
         }
         
@@ -43,7 +43,7 @@ class TraderBot {
     }
     
     // Decide trade actions at the given PriceBar object, returns the list of actions need to be performed
-    func decide(priceBar: PriceBar? = nil) -> [TradeActionType] {
+    func decide(priceBar: PriceBar? = nil) -> TradeActionType {
         guard chart.timeKeys.count > 1,
             let priceBar = priceBar ?? chart.lastBar,
             chart.timeKeys.contains(priceBar.identifier),
@@ -51,14 +51,14 @@ class TraderBot {
             priceBarIndex > 0,
             let previousPriceBar = chart.priceBars[chart.timeKeys[priceBarIndex - 1]]
             else {
-                return [.noAction(entryType: nil)]
+                return .noAction(entryType: nil)
         }
         
         // already have current position, update the stoploss or close it if needed
         if let currentPosition = sessionManager.pos {
             // Rule 3: If we reached FlatPositionsTime, exit the trade immediately
             if Date.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
-                return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
+                return forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)
             }
             
             // Rule 4: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
@@ -66,11 +66,11 @@ class TraderBot {
                 switch sessionManager.pos?.direction {
                 case .long:
                     if priceBar.barColor == .blue {
-                        return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
+                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)
                     }
                 default:
                     if priceBar.barColor == .red {
-                        return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
+                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)
                     }
                 }
             }
@@ -86,9 +86,9 @@ class TraderBot {
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openPosition(let position, let entryType):
-                        return [verifyAction, .openPosition(newPosition: position, entryType: entryType)]
+                        return .openPosition(newPosition: position, entryType: entryType)
                     default:
-                        return [verifyAction]
+                        return verifyAction
                     }
                 }
             default:
@@ -100,9 +100,9 @@ class TraderBot {
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openPosition(let position, let entryType):
-                        return [verifyAction, .openPosition(newPosition: position, entryType: entryType)]
+                        return .openPosition(newPosition: position, entryType: entryType)
                     default:
-                        return [verifyAction]
+                        return verifyAction
                     }
                 }
             }
@@ -114,9 +114,9 @@ class TraderBot {
                     let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openPosition(let position, let entryType):
-                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                        return .reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)
                     default:
-                        return [exitAction]
+                        return exitAction
                     }
                 }
             default:
@@ -125,22 +125,22 @@ class TraderBot {
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openPosition(let position, let entryType):
-                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                        return .reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)
                     default:
-                        return [exitAction]
+                        return exitAction
                     }
                 }
             }
             
-            // Rule 3: exit 3 min signal reversed
+            // Rule 3: exit 2/3 min signal reversed
             if !checkForSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
                 let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalInvalid)
                 
                 switch handleOpeningNewTrade(currentBar: priceBar) {
                 case .openPosition(let position, let entryType):
-                    return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
+                    return .reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)
                 default:
-                    return [exitAction]
+                    return exitAction
                 }
             }
             
@@ -208,21 +208,21 @@ class TraderBot {
                 switch sessionManager.pos!.direction {
                 case .long:
                     if let stop = sessionManager.pos?.stopLoss?.stop, newStop > stop {
-                        return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
+                        return .updateStop(stop: StopLoss(stop: newStop, source: newStopSource))
                     }
                 default:
                     if let stop = sessionManager.pos?.stopLoss?.stop, newStop < stop {
-                        return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
+                        return .updateStop(stop: StopLoss(stop: newStop, source: newStopSource))
                     }
                 }
             }
         }
         // no current position, check if we should enter on the current bar
         else if sessionManager.pos == nil {
-            return [handleOpeningNewTrade(currentBar: priceBar)]
+            return handleOpeningNewTrade(currentBar: priceBar)
         }
         
-        return [.noAction(entryType: nil)]
+        return .noAction(entryType: nil)
     }
 
     func buyAtMarket() -> TradeActionType {
@@ -269,13 +269,11 @@ class TraderBot {
         
         switch entryType {
         case .pullBack:
-            guard let pullBack = checkForPullback(direction: direction, start: bar), !pullBack.greenBars.isEmpty,
-                pullBack.coloredBars.count >= 1 else {
+            guard let pullBack = checkForPullback(direction: direction, start: bar), !pullBack.greenBars.isEmpty else {
                 return nil
             }
         case .sweetSpot:
-            guard let pullBack = checkForPullback(direction: direction, start: bar),
-                pullBack.coloredBars.count >= 1 else {
+            guard let pullBack = checkForPullback(direction: direction, start: bar) else {
                 return nil
             }
             
@@ -476,35 +474,26 @@ class TraderBot {
         let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
         let color: SignalColor = direction == .long ? .blue : .red
         var greenBars: [PriceBar] = []
-        var coloredBars: [PriceBar] = []
-        var coloredBarsIsComplete: Bool = false
+        var coloredBar: PriceBar?
         
         for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
             guard let priceBar = chart.priceBars[timeKey], priceBar.oneMinSignal?.direction == direction else {
                 break
             }
             
-            // if the current bar is green or an opposite color, it's not a sweetspot
-            if coloredBars.isEmpty, priceBar.barColor != color {
-                return nil
-            }
-            // if the current bar is the correct color, add it to 'coloredBars'
-            else if !coloredBarsIsComplete, priceBar.barColor == color {
-                coloredBars.insert(priceBar, at: 0)
-            }
-            // if the current bar is green, 'coloredBars' array is complete, start adding to 'greenBars'
-            else if !coloredBars.isEmpty, priceBar.barColor == .green {
-                coloredBarsIsComplete = true
+            if coloredBar == nil {
+                if priceBar.barColor == color {
+                    coloredBar = priceBar
+                }
+            } else if let coloredBar = coloredBar, priceBar.oneMinSignal?.stop == coloredBar.oneMinSignal?.stop {
                 greenBars.insert(priceBar, at: 0)
-            }
-            // if the current bar is not green anymore, 'greenBars' array is complete, the sweet spot is formed
-            else if coloredBarsIsComplete, priceBar.barColor != .green {
+            } else {
                 break
             }
         }
         
-        if !coloredBars.isEmpty {
-            let sweetSpot = Pullback(direction: direction, greenBars: greenBars, coloredBars: coloredBars)
+        if let coloredBar = coloredBar {
+            let sweetSpot = Pullback(direction: direction, greenBars: greenBars, coloredBar: coloredBar)
             return sweetSpot
         }
         

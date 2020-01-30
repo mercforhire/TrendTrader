@@ -22,7 +22,7 @@ struct Trade {
     var exitOrderRef: String?
     var commission: Double
     
-    var idealProfit: Double? {
+    var idealProfit: Double {
         switch direction {
         case .long:
             return idealExitPrice - idealEntryPrice
@@ -31,7 +31,7 @@ struct Trade {
         }
     }
     
-    var actualProfit: Double? {
+    var actualProfit: Double {
         switch direction {
         case .long:
             return actualExitPrice - actualEntryPrice
@@ -40,7 +40,7 @@ struct Trade {
         }
     }
     
-    var actualProfitDollar: Double? {
+    var actualProfitDollar: Double {
         switch direction {
         case .long:
             return (actualExitPrice - actualEntryPrice) * Config.shared.tickerPointValue - commission

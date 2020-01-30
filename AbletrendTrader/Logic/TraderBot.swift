@@ -13,6 +13,7 @@ class TraderBot {
     
     var sessionManager: BaseSessionManager
     var chart: Chart
+    var highRiskEntriesTaken: Int = 0
     
     init(chart: Chart, sessionManager: BaseSessionManager) {
         self.chart = chart
@@ -292,7 +293,10 @@ class TraderBot {
             break
         }
         
-        if risk > config.maxRisk && Date.highRiskEntryInteval(date: bar.time).contains(bar.time) {
+        if risk > config.maxRisk,
+            Date.highRiskEntryInteval(date: bar.time).contains(bar.time),
+            highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
+            highRiskEntriesTaken += 1
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction,
                                     size: config.positionSize,
@@ -333,21 +337,14 @@ class TraderBot {
             return .noAction(entryType: nil)
         }
         
-        // If we are in TimeIntervalForHighRiskEntry, we want to enter aggressively on any entry.
-        if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time) {
+        // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter aggressively on any entry.
+        if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
+            highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
             return seekToOpenPosition(bar: currentBar, entryType: .initial)
         }
         
         // If the a previous trade exists:
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
-            // seek a sweet spot entry for the first trade after the lunch hour
-            if !config.byPassTradingTimeRestrictions,
-                config.noEntryDuringLunch,
-                Date.lunchInterval(date: currentBar.time).end < currentBar.time,
-                lastTrade.exitTime < Date.lunchInterval(date: currentBar.time).end {
-                return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
-            }
-            
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
                 return seekToOpenPosition(bar: currentBar, entryType: .initial)
@@ -361,7 +358,7 @@ class TraderBot {
                                            toKey: currentBar.time.generateDateIdentifier()) {
                 // If the previous trade profit is higher than enterOnPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-                if (lastTrade.idealProfit ?? 0) > config.enterOnPullback {
+                if lastTrade.idealProfit > config.enterOnPullback {
                     return seekToOpenPosition(bar: currentBar, entryType: .pullBack)
                 } else {
                     return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
@@ -370,9 +367,8 @@ class TraderBot {
                 return seekToOpenPosition(bar: currentBar, entryType: .initial)
             }
         }
-        else {
-            return seekToOpenPosition(bar: currentBar, entryType: .initial)
-        }
+        
+        return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
     }
     
     private func forceExitPosition(atEndOfBar: PriceBar, exitMethod: ExitMethod) -> TradeActionType {

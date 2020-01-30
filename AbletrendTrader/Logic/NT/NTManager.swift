@@ -386,7 +386,7 @@ class NTManager {
             return text.starts(with: "CONNECTED")
         }
         catch {
-            print(fileURL, "doesn't exist")
+//            print(fileURL, "doesn't exist")
         }
         
         return false

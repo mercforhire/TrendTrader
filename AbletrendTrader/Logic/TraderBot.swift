@@ -132,8 +132,8 @@ class TraderBot {
                 }
             }
             
-            // Rule 3: exit 2/3 min signal reversed
-            if !checkForSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
+            // Rule 3: exit 3 min signal reversed
+            if false && !checkFor3MinSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
                 let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalInvalid)
                 
                 switch handleOpeningNewTrade(currentBar: priceBar) {
@@ -193,7 +193,6 @@ class TraderBot {
                 
                 // Calculate the SL based on the previous S/R level and decide which of the two SLs should we use
                 if let previousLevelSL: Double = findPreviousLevel(direction: sessionManager.pos!.direction, entryBar: priceBar) {
-                    
                     switch sessionManager.pos?.direction {
                     case .long:
                         newStop = max(twoGreenBarsSL, previousLevelSL).round(nearest: 0.25)
@@ -260,8 +259,7 @@ class TraderBot {
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,
             var stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
             let barIndex: Int = chart.timeKeys.firstIndex(of: bar.identifier),
-            barIndex < chart.timeKeys.count - 1,
-            let nextBar = chart.priceBars[chart.timeKeys[barIndex + 1]] else {
+            barIndex < chart.timeKeys.count - 1 else {
             return nil
         }
         
@@ -296,10 +294,22 @@ class TraderBot {
         
         if risk > config.maxRisk && Date.highRiskEntryInteval(date: bar.time).contains(bar.time) {
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
-            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss, commission: config.ibCommission)
+            let position = Position(direction: direction,
+                                    size: config.positionSize,
+                                    entryTime: bar.time.getOffByMinutes(minutes: 1),
+                                    idealEntryPrice: bar.candleStick.close,
+                                    actualEntryPrice: bar.candleStick.close,
+                                    stopLoss: stopLoss,
+                                    commission: config.ibCommission)
             return position
         } else if risk <= config.maxRisk {
-            let position = Position(direction: direction, size: config.positionSize, entryTime: nextBar.time, idealEntryPrice: bar.candleStick.close, actualEntryPrice: bar.candleStick.close, stopLoss: stopLoss, commission: config.ibCommission)
+            let position = Position(direction: direction,
+                                    size: config.positionSize,
+                                    entryTime: bar.time.getOffByMinutes(minutes: 1),
+                                    idealEntryPrice: bar.candleStick.close,
+                                    actualEntryPrice: bar.candleStick.close,
+                                    stopLoss: stopLoss,
+                                    commission: config.ibCommission)
             return position
         }
 
@@ -372,7 +382,9 @@ class TraderBot {
     }
     
     private func verifyStopWasHit(duringBar: PriceBar, exitMethod: ExitMethod) -> TradeActionType {
-        guard let currentPosition = sessionManager.pos, let stop = currentPosition.stopLoss?.stop else { return .noAction(entryType: nil) }
+        guard let currentPosition = sessionManager.pos, let stop = currentPosition.stopLoss?.stop else {
+            return .noAction(entryType: nil)
+        }
         
         return .verifyPositionClosed(closedPosition: currentPosition, closingPrice: stop, closingTime: duringBar.time, reason: exitMethod)
     }
@@ -387,16 +399,17 @@ class TraderBot {
         
         // Method 1 and 2:
         guard let previousLevel: Double = findPreviousLevel(direction: direction, entryBar: entryBar) else { return nil }
+        
         switch direction {
         case .long:
-            if entryBar.candleStick.close - previousLevel <= config.maxRisk {
+            if entryBar.candleStick.close - previousLevel <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
                 entryBar.candleStick.close - (currentStop - 1) <= config.maxRisk {
                 return StopLoss(stop: (currentStop - 1), source: .supportResistanceLevel)
             }
         default:
-            if previousLevel - entryBar.candleStick.close <= config.maxRisk {
+            if previousLevel - entryBar.candleStick.close <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
                 (currentStop + 1) - entryBar.candleStick.close <= config.maxRisk {
@@ -481,10 +494,8 @@ class TraderBot {
                 break
             }
             
-            if coloredBar == nil {
-                if priceBar.barColor == color {
-                    coloredBar = priceBar
-                }
+            if coloredBar == nil, priceBar.barColor == color {
+                coloredBar = priceBar
             } else if let coloredBar = coloredBar, priceBar.oneMinSignal?.stop == coloredBar.oneMinSignal?.stop {
                 greenBars.insert(priceBar, at: 0)
             } else {
@@ -516,26 +527,26 @@ class TraderBot {
         
         for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
             guard let priceBar = chart.priceBars[timeKey],
-                !finishedScanningFor2MinConfirmation && !finishedScanningFor3MinConfirmation else { break }
+                !finishedScanningFor2MinConfirmation || !finishedScanningFor3MinConfirmation else { break }
             
             for signal in priceBar.signals where signal.inteval != .oneMin {
                 guard let signalDirection = signal.direction else { continue }
                 
-                if signalDirection == direction.reverse() {
-                    switch signal.inteval {
-                    case .twoMin:
-                        finishedScanningFor2MinConfirmation = true
-                    case .threeMin:
-                        finishedScanningFor3MinConfirmation = true
-                    default:
-                        break
-                    }
-                } else if signalDirection == direction {
+                if signalDirection == direction {
                     switch signal.inteval {
                     case .twoMin:
                         earliest2MinConfirmationBar = priceBar
                     case .threeMin:
                         earliest3MinConfirmationBar = priceBar
+                    default:
+                        break
+                    }
+                } else {
+                    switch signal.inteval {
+                    case .twoMin:
+                        finishedScanningFor2MinConfirmation = true
+                    case .threeMin:
+                        finishedScanningFor3MinConfirmation = true
                     default:
                         break
                     }
@@ -548,5 +559,29 @@ class TraderBot {
         }
         
         return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil
+    }
+    
+    private func checkFor3MinSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
+        guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
+            return false
+        }
+        
+        let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
+        
+        for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
+            guard let priceBar = chart.priceBars[timeKey] else { break }
+            
+            for signal in priceBar.signals where signal.inteval == .threeMin {
+                guard let signalDirection = signal.direction else { continue }
+                
+                if signalDirection == direction {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+        
+        return false
     }
 }

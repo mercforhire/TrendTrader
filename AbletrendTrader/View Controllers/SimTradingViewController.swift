@@ -149,6 +149,7 @@ class SimTradingViewController: NSViewController {
             delegate = chartVC
         } else if let logVc = segue.destinationController as? TradingLogViewController {
             self.logViewController = logVc
+            self.logViewController?.log = log
         }
     }
 }

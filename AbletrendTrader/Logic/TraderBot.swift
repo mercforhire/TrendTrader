@@ -487,7 +487,8 @@ class TraderBot {
             
             if coloredBar == nil, priceBar.barColor == color {
                 coloredBar = priceBar
-            } else if let coloredBar = coloredBar, priceBar.oneMinSignal?.stop == coloredBar.oneMinSignal?.stop {
+            } else if let coloredBar = coloredBar,
+                abs((priceBar.oneMinSignal?.stop ?? 0) - (coloredBar.oneMinSignal?.stop ?? 0)) <= 0.25 {
                 greenBars.insert(priceBar, at: 0)
             } else {
                 break

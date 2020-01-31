@@ -40,7 +40,7 @@ class ChartManager {
                                          month: Date().month(),
                                          day: Date().day(),
                                          hour: 9,
-                                         minute: 20)
+                                         minute: 25)
         self.simTime = calendar.date(from: components1)!
     }
     

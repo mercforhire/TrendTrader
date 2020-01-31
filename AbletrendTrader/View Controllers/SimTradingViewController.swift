@@ -32,7 +32,7 @@ class SimTradingViewController: NSViewController {
     private var log: String = "" {
         didSet {
             DispatchQueue.main.async {
-                self.logViewController?.logTextView.string = self.log
+                self.logViewController?.log = self.log
             }
         }
     }

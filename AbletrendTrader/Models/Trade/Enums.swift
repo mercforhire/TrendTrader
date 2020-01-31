@@ -12,19 +12,22 @@ import Cocoa
 typealias Action = () -> Void
 
 enum EntryType {
-    // for all 3 entries, the price must be above 1 min support or under 1 min resistance
-    case initial // enter on the first signal of a new triple confirmation
-    case pullBack // enter on any blue/red bar followed by one or more green bars
-    case sweetSpot // enter on pullback that bounced/almost bounced off the S/R level
+    // for all entries, the price must be above 1 min support or under 1 min resistance
+    case any // any bar of a triple confirmation
+    case pullBack // any blue/red bar followed by one or more green bars
+    case sweetSpot // pullback that bounced/almost bounced off the S/R level
+    case reversal // opposite entry signal of a previous substantial trend
     
     func description() -> String {
         switch self {
-        case .initial:
-            return "Initial"
+        case .any:
+            return "Any"
         case .pullBack:
             return "PullBack"
         case .sweetSpot:
             return "SweetSpot"
+        case .reversal:
+            return "Reversal"
         }
     }
 }

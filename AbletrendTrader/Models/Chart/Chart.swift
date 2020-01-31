@@ -78,6 +78,19 @@ struct Chart {
         return true
     }
     
+    func isReversalBar(bar: PriceBar) -> Bool {
+        guard let toKeyIndex = timeKeys.firstIndex(of: bar.identifier) else { return false }
+        
+        var indexOfEndOfOppositeTrend: Int?
+        for key in stride(from: toKeyIndex, through: 0, by: -1) {
+            let key = timeKeys[key]
+            guard let bar = priceBars[key] else { continue }
+            
+        }
+        
+        return false
+    }
+    
     func generateCandleStickData() -> [CandleChartDataEntry] {
         var candleSticks: [CandleChartDataEntry] = []
         

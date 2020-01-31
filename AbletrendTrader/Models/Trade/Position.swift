@@ -28,4 +28,13 @@ struct Position {
             return idealEntryPrice - stopLoss.stop
         }
     }
+    
+    func calulateProfit(currentPrice: Double) -> Double {
+        switch direction {
+        case .long:
+            return currentPrice - idealEntryPrice
+        default:
+            return idealEntryPrice - currentPrice
+        }
+    }
 }

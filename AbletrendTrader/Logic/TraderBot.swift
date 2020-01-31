@@ -133,16 +133,11 @@ class TraderBot {
                 }
             }
             
-            // Rule 3: exit 3 min signal reversed
-            if false && !checkFor3MinSignalConfirmation(direction: currentPosition.direction, bar: priceBar) {
-                let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalInvalid)
-                
-                switch handleOpeningNewTrade(currentBar: priceBar) {
-                case .openPosition(let position, let entryType):
-                    return .reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)
-                default:
-                    return exitAction
-                }
+            // Rule 3 exit when the bar is over 20 points long
+            if !Date.highRiskEntryInteval(date: priceBar.time).contains(priceBar.time),
+                abs(priceBar.candleStick.close - priceBar.candleStick.open) >= 20,
+                currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= 20 {
+                return forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)
             }
             
             // If not exited the trade yet, update the current trade's stop loss:
@@ -230,7 +225,7 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
         let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: config.ibCommission)
-        return .openPosition(newPosition: buyPosition, entryType: .initial)
+        return .openPosition(newPosition: buyPosition, entryType: .any)
     }
     
     func sellAtMarket() -> TradeActionType {
@@ -238,7 +233,7 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
         let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: config.ibCommission)
-        return .openPosition(newPosition: sellPosition, entryType: .initial)
+        return .openPosition(newPosition: sellPosition, entryType: .any)
     }
     
     // Private:
@@ -340,14 +335,14 @@ class TraderBot {
         // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter aggressively on any entry.
         if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
             highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
-            return seekToOpenPosition(bar: currentBar, entryType: .initial)
+            return seekToOpenPosition(bar: currentBar, entryType: .any)
         }
         
         // If the a previous trade exists:
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
-                return seekToOpenPosition(bar: currentBar, entryType: .initial)
+                return seekToOpenPosition(bar: currentBar, entryType: .any)
             }
             
             // Check if the direction from the start of the last trade to current bar are same as current
@@ -364,7 +359,7 @@ class TraderBot {
                     return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
                 }
             } else {
-                return seekToOpenPosition(bar: currentBar, entryType: .initial)
+                return seekToOpenPosition(bar: currentBar, entryType: .any)
             }
         }
         

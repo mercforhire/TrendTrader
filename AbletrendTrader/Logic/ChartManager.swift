@@ -40,7 +40,7 @@ class ChartManager {
                                          month: Date().month(),
                                          day: Date().day(),
                                          hour: 9,
-                                         minute: 15)
+                                         minute: 20)
         self.simTime = calendar.date(from: components1)!
     }
     
@@ -144,7 +144,7 @@ class ChartManager {
                             self.updateChart()
                         }
                     } else if self.config.simulateTimePassage {
-                        guard self.simTime < Date.flatPositionsTime(date: self.simTime) || self.simTime < Date() else {
+                        guard self.simTime < Date.flatPositionsTime(date: self.simTime), self.simTime < Date() else {
                             self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
                             self.stopMonitoring()
                             self.delegate?.requestStopMonitoring()

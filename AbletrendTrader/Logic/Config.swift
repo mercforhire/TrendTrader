@@ -19,7 +19,7 @@ class Config {
     
     let maxRisk: Double = 10.0
     let minBarStop: Double = 5.0
-    let sweetSpotMinDistance: Double  = 1.5 // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
+    let sweetSpotMinDistance: Double  = 3 // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
     let greenBarsExit: Double = 10.0 // the min profit the trade must in to use the 2 green bars exit rule
     let skipGreenBarsExit: Double = 30.0 // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
     let enterOnPullback: Double = 15.0 // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
@@ -60,5 +60,5 @@ class Config {
     let liveTradingMode: LiveTradingMode = .ninjaTrader
     var byPassTradingTimeRestrictions = false // DEFAULT: false
     var noEntryDuringLunch = true // DEFAULT: true
-    let simulateTimePassage = true // DEFAULT: true
+    let simulateTimePassage = false // DEFAULT: true
 }

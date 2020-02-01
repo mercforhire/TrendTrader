@@ -263,9 +263,23 @@ class TraderBot {
         
         switch entryType {
         case .pullBack:
-            guard let pullBack = checkForPullback(direction: direction, start: bar), !pullBack.greenBars.isEmpty else {
+            guard let pullBack = checkForPullback(direction: direction, start: bar) else {
                 return nil
             }
+            
+            switch direction {
+            case .long:
+                guard let pullbackLow = pullBack.getLowestPoint(),
+                    pullbackLow < oneMinStop || !pullBack.greenBars.isEmpty else {
+                    return nil
+                }
+            default:
+                guard let pullbackHigh = pullBack.getHighestPoint(),
+                    pullbackHigh > oneMinStop || !pullBack.greenBars.isEmpty else {
+                    return nil
+                }
+            }
+            
         case .sweetSpot:
             guard let pullBack = checkForPullback(direction: direction, start: bar) else {
                 return nil

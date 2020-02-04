@@ -11,7 +11,7 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.1.106/"
+    let dataServerURL: String = "http://192.168.1.100/"
 //    let dataServerURL: String = "http://192.168.43.190/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder

@@ -541,9 +541,13 @@ class TraderBot {
                 if signalDirection == direction {
                     switch signal.inteval {
                     case .twoMin:
-                        earliest2MinConfirmationBar = priceBar
+                        if !finishedScanningFor2MinConfirmation {
+                            earliest2MinConfirmationBar = priceBar
+                        }
                     case .threeMin:
-                        earliest3MinConfirmationBar = priceBar
+                        if !finishedScanningFor3MinConfirmation {
+                            earliest3MinConfirmationBar = priceBar
+                        }
                     default:
                         break
                     }

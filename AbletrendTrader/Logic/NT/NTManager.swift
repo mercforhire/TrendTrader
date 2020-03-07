@@ -244,9 +244,14 @@ class NTManager {
                 sleep(1)
                 if let orderResponse = self.getOrderResponse(orderId: orderRef) {
                     latestOrderResponse = orderResponse
-                    if orderResponse.status == .accepted || orderResponse.status == .changeSubmitted {
+                    if orderResponse.status == .accepted || orderResponse.status == .changeSubmitted || orderResponse.status == .filled {
                         filledOrderResponse = orderResponse
                         break
+                    } else if orderResponse.status == .rejected {
+                        DispatchQueue.main.async {
+                            completion?(.failure(.orderFailed))
+                        }
+                        return
                     }
                 }
             }

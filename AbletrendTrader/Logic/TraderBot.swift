@@ -133,11 +133,20 @@ class TraderBot {
                 }
             }
             
-            // Rule 3 exit when the bar is over 20 points long
+            // Rule 3 exit when the bar is over 'config.takeProfitBarLength' points long
             if !Date.highRiskEntryInteval(date: priceBar.time).contains(priceBar.time),
-                abs(priceBar.candleStick.close - priceBar.candleStick.open) >= 20,
-                currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= 20 {
-                return forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)
+                currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= config.takeProfitBarLength {
+                
+                switch currentPosition.direction {
+                case .long:
+                    if priceBar.candleStick.close - priceBar.candleStick.open >= config.takeProfitBarLength {
+                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)
+                    }
+                case .short:
+                    if priceBar.candleStick.open - priceBar.candleStick.close >= config.takeProfitBarLength {
+                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)
+                    }
+                }
             }
             
             // If not exited the trade yet, update the current trade's stop loss:
@@ -153,10 +162,10 @@ class TraderBot {
                 let securedProfit: Double
                 switch sessionManager.pos?.direction {
                 case .long:
-                    stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
+                    stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - config.riskMultiplier
                     securedProfit = stopLossFromGreenBars - currentPosition.idealEntryPrice
                 default:
-                    stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
+                    stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + config.riskMultiplier
                     securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
                 }
                 
@@ -168,7 +177,7 @@ class TraderBot {
                             if stopLossFromGreenBars - currentStop > config.sweetSpotMinDistance {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
-                                twoGreenBarsSL = currentStop - 1
+                                twoGreenBarsSL = currentStop - config.riskMultiplier
                             }
                         }
                     default:
@@ -177,7 +186,7 @@ class TraderBot {
                             if currentStop - stopLossFromGreenBars > config.sweetSpotMinDistance {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
-                                twoGreenBarsSL = currentStop + 1
+                                twoGreenBarsSL = currentStop + config.riskMultiplier
                             }
                         }
                     }
@@ -410,15 +419,15 @@ class TraderBot {
             if entryBar.candleStick.close - previousLevel <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
-                entryBar.candleStick.close - (currentStop - 1) <= config.maxRisk {
-                return StopLoss(stop: (currentStop - 1), source: .supportResistanceLevel)
+                entryBar.candleStick.close - (currentStop - config.riskMultiplier) <= config.maxRisk {
+                return StopLoss(stop: (currentStop - config.riskMultiplier), source: .supportResistanceLevel)
             }
         default:
             if previousLevel - entryBar.candleStick.close <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
-                (currentStop + 1) - entryBar.candleStick.close <= config.maxRisk {
-                return StopLoss(stop: (currentStop + 1), source: .supportResistanceLevel)
+                (currentStop + config.riskMultiplier) - entryBar.candleStick.close <= config.maxRisk {
+                return StopLoss(stop: (currentStop + config.riskMultiplier), source: .supportResistanceLevel)
             }
         }
         
@@ -429,14 +438,14 @@ class TraderBot {
         
         switch direction {
         case .long:
-            return StopLoss(stop: min(lowRounded - 1, closeRounded - config.minBarStop), source: .currentBar)
+            return StopLoss(stop: min(lowRounded - config.riskMultiplier, closeRounded - config.minBarStop), source: .currentBar)
         default:
-            return StopLoss(stop: max(highRounded + 1, closeRounded + config.minBarStop), source: .currentBar)
+            return StopLoss(stop: max(highRounded + config.riskMultiplier, closeRounded + config.minBarStop), source: .currentBar)
         }
     }
     
     // given an entry bar and direction of the trade, find the previous resistence/support level, if none exists, use the current one +-1
-    private func findPreviousLevel(direction: TradeDirection, entryBar: PriceBar, minimalDistance: Double = 1) -> Double? {
+    private func findPreviousLevel(direction: TradeDirection, entryBar: PriceBar) -> Double? {
         guard let startIndex = chart.timeKeys.firstIndex(of: entryBar.identifier),
             let initialBarStop = entryBar.oneMinSignal?.stop,
             entryBar.oneMinSignal?.direction == direction else {
@@ -457,12 +466,12 @@ class TraderBot {
                 
                 switch direction {
                 case .long:
-                    if previousLevel - levelRounded > minimalDistance {
+                    if previousLevel - levelRounded > config.riskMultiplier {
                         previousLevel = levelRounded
                         break outerLoop
                     }
                 default:
-                    if levelRounded - previousLevel > minimalDistance {
+                    if levelRounded - previousLevel > config.riskMultiplier {
                         previousLevel = levelRounded
                         break outerLoop
                     }
@@ -473,9 +482,9 @@ class TraderBot {
         if previousLevel == initialBarStopRounded {
             switch direction {
             case .long:
-                previousLevel = previousLevel - 1
+                previousLevel = previousLevel - config.riskMultiplier
             default:
-                previousLevel = previousLevel + 1
+                previousLevel = previousLevel + config.riskMultiplier
             }
         }
         

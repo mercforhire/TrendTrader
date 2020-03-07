@@ -170,12 +170,33 @@ class NTSessionManager: BaseSessionManager {
                             DispatchQueue.main.async {
                                 completion(nil)
                             }
+                            semaphore.signal()
                         case .failure(let error):
-                            DispatchQueue.main.async {
-                                completion(error)
+                            switch error {
+                            case .orderFailed:
+                                self.exitPositions(priceBarTime: priceBarTime,
+                                                   idealExitPrice: newStop.stop,
+                                                   exitReason: .hitStoploss)
+                                { error in
+                                    if let ntError = error {
+                                        DispatchQueue.main.async {
+                                            completion(ntError)
+                                        }
+                                    } else {
+                                        self.pos = nil
+                                        DispatchQueue.main.async {
+                                            completion(nil)
+                                        }
+                                    }
+                                    semaphore.signal()
+                                }
+                            default:
+                                DispatchQueue.main.async {
+                                    completion(error)
+                                }
+                                semaphore.signal()
                             }
                         }
-                        semaphore.signal()
                     })
                     semaphore.wait()
                 } else {

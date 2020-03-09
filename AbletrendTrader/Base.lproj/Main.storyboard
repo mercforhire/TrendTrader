@@ -2201,7 +2201,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4" y="696"/>
+            <point key="canvasLocation" x="42" y="648"/>
         </scene>
     </scenes>
     <resources>
@@ -2212,8 +2212,8 @@
         <image name="NSTouchBarSkipBackTemplate" width="22" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="u3b-PS-Rg7"/>
-        <segue reference="Dua-i6-PWC"/>
-        <segue reference="YpO-Ih-4re"/>
+        <segue reference="6hB-4C-Dcy"/>
+        <segue reference="2OK-pd-1Rj"/>
+        <segue reference="bNi-9r-EBK"/>
     </inferredMetricsTieBreakers>
 </document>

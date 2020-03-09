@@ -11,7 +11,7 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.0.107/"
+    let dataServerURL: String = "http://192.168.0.112/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
@@ -72,7 +72,7 @@ class Config {
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    var byPassTradingTimeRestrictions = false // DEFAULT: false
-    var noEntryDuringLunch = true // DEFAULT: true
+    var byPassTradingTimeRestrictions = true // DEFAULT: false
+    var noEntryDuringLunch = false // DEFAULT: true
     let simulateTimePassage = false // DEFAULT: true
 }

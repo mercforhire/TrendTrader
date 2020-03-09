@@ -9,7 +9,7 @@
 import Cocoa
 
 class ConfigViewController: NSViewController {
-    let config = Config.shared
+    let config = ConfigurationManager.shared
     
     @IBOutlet private weak var maxSLField: NSTextField!
     @IBOutlet private weak var minSTPField: NSTextField!
@@ -56,7 +56,7 @@ class ConfigViewController: NSViewController {
     
     func loadConfig() {
         maxSLField.stringValue = String(format: "%.2f", config.maxRisk)
-        minSTPField.stringValue = String(format: "%.2f", config.minBarStop)
+        minSTPField.stringValue = String(format: "%.2f", config.minStop)
         sweetspotDistanceField.stringValue = String(format: "%.2f", config.sweetSpotMinDistance)
         minProfitGreenBarField.stringValue = String(format: "%.2f", config.greenBarsExit)
         minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenBarsExit)

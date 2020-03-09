@@ -13,7 +13,7 @@ class IBManager {
     static let shared = IBManager()
     
     private let afManager: Alamofire.SessionManager
-    private let config = Config.shared
+    private let config = ConfigurationManager.shared
     private let ssoTokenBuilder: SSOTokenBuilder = SSOTokenBuilder()
     private let authStatusBuilder: AuthStatusBuilder = AuthStatusBuilder()
     private let accountsBuilder: AccountsBuilder = AccountsBuilder()

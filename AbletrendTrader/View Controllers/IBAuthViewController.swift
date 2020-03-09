@@ -9,7 +9,7 @@
 import Cocoa
 
 class IBAuthViewController: NSViewController {
-    private let config = Config.shared
+    private let config = ConfigurationManager.shared
     private let networkManager = IBManager.shared
     
     @IBOutlet weak var authStatusLabel: NSTextField!

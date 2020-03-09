@@ -16,7 +16,7 @@ protocol SessionManagerDelegate: class {
 class BaseSessionManager {
     private var timer: Timer?
     
-    let config = Config.shared
+    let config = ConfigurationManager.shared
     var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
     var status: PositionStatus? {

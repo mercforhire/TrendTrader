@@ -9,7 +9,7 @@
 import Cocoa
 
 class SimTradingViewController: NSViewController {
-    private let config = Config.shared
+    private let config = ConfigurationManager.shared
     
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!

@@ -16,7 +16,11 @@ protocol DataManagerDelegate: class {
 }
 
 class ChartManager {
-    private let config = Config.shared
+    private let fileName1: String = "1m.txt" // filename for local sandbox folder
+    private let fileName2: String = "2m.txt" // filename for local sandbox folder
+    private let fileName3: String = "3m.txt" // filename for local sandbox folder
+    
+    private let config = ConfigurationManager.shared
     private let delayBeforeFetchingAtNewMinute = 10
     
     var chart: Chart?
@@ -76,9 +80,9 @@ class ChartManager {
                     }
                 }
             } else {
-                if let oneMinText = Parser.readFile(fileName: config.fileName1),
-                    let twoMinText = Parser.readFile(fileName: config.fileName2),
-                    let threeMinText = Parser.readFile(fileName: config.fileName3) {
+                if let oneMinText = Parser.readFile(fileName: fileName1),
+                    let twoMinText = Parser.readFile(fileName: fileName2),
+                    let threeMinText = Parser.readFile(fileName: fileName3) {
                     
                     generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText)
                     completion(self.chart)
@@ -172,7 +176,7 @@ class ChartManager {
         
         let chartFetchingTask = DispatchGroup()
         chartFetchingTask.enter()
-        downloadData(from: oneMinUrl, fileName: config.fileName1) { string, response, error in
+        downloadData(from: oneMinUrl, fileName: fileName1) { string, response, error in
             DispatchQueue.main.async() {
                 if let string = string {
                     oneMinText = string
@@ -182,7 +186,7 @@ class ChartManager {
         }
         
         chartFetchingTask.enter()
-        downloadData(from: twoMinUrl, fileName: config.fileName2) { string, response, error in
+        downloadData(from: twoMinUrl, fileName: fileName2) { string, response, error in
             DispatchQueue.main.async() {
                 if let string = string {
                     twoMinText = string
@@ -192,7 +196,7 @@ class ChartManager {
         }
         
         chartFetchingTask.enter()
-        downloadData(from: threeMinUrl, fileName: config.fileName3) { string, response, error in
+        downloadData(from: threeMinUrl, fileName: fileName3) { string, response, error in
             DispatchQueue.main.async() {
                 if let string = string {
                     threeMinText = string

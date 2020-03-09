@@ -1,5 +1,5 @@
 //
-//  AuthViewController.swift
+//  IBAuthViewController.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2019-12-29.
@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class AuthViewController: NSViewController {
+class IBAuthViewController: NSViewController {
     private let config = Config.shared
     private let networkManager = IBManager.shared
     
@@ -168,7 +168,7 @@ class AuthViewController: NSViewController {
     }
 }
 
-extension AuthViewController: NSComboBoxDataSource {
+extension IBAuthViewController: NSComboBoxDataSource {
     func numberOfItems(in comboBox: NSComboBox) -> Int {
         return accounts?.count ?? 0
     }

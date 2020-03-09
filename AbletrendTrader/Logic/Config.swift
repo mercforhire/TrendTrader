@@ -16,7 +16,7 @@ class Config {
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
     
-    let riskMultiplier: Double = 1.5
+    let riskMultiplier: Double = 1.0
     
     var maxRisk: Double { 10.0 * riskMultiplier }
     
@@ -30,7 +30,7 @@ class Config {
     
     // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
     var skipGreenBarsExit: Double { 30.0 * riskMultiplier }
-    
+
     // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
     var enterOnPullback: Double  { 15.0 * riskMultiplier }
     

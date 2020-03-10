@@ -21,7 +21,8 @@ class ChartManager {
     private let fileName3: String = "3m.txt" // filename for local sandbox folder
     
     private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 10
+    private let delayBeforeFetchingAtNewMinute = 7
+
     
     var chart: Chart?
     var monitoring = false

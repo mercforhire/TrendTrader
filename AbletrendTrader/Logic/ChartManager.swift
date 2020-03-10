@@ -17,7 +17,7 @@ protocol DataManagerDelegate: class {
 
 class ChartManager {
     private let config = Config.shared
-    private let delayBeforeFetchingAtNewMinute = 7
+    private let delayBeforeFetchingAtNewMinute = 10
     
     var chart: Chart?
     var monitoring = false
@@ -139,8 +139,7 @@ class ChartManager {
                 
                 if self.monitoring {
                     if self.live {
-                        // keep calling this until the latest chart is fetched
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                             self.updateChart()
                         }
                     } else if self.config.simulateTimePassage {

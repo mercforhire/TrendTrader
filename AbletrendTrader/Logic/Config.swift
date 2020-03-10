@@ -11,12 +11,12 @@ import Foundation
 class Config {
     static let shared = Config()
     
-    let dataServerURL: String = "http://192.168.0.112/"
+    let dataServerURL: String = "http://192.168.0.121/"
     let fileName1: String = "1m.txt" // filename for local sandbox folder
     let fileName2: String = "2m.txt" // filename for local sandbox folder
     let fileName3: String = "3m.txt" // filename for local sandbox folder
     
-    let riskMultiplier: Double = 1.0
+    let riskMultiplier: Double = 1.5
     
     var maxRisk: Double { 10.0 * riskMultiplier }
     
@@ -45,7 +45,7 @@ class Config {
     let tradingEnd: (Int, Int) = (15, 55) // Hour/Minute
     
     let lunchStart: (Int, Int) = (12, 00) // Hour/Minute
-    let lunchEnd: (Int, Int) = (13, 55) // Hour/Minute
+    let lunchEnd: (Int, Int) = (13, 50) // Hour/Minute
     
     let clearTime: (Int, Int) = (15, 59) // Hour/Minute
     let flatTime: (Int, Int) = (16, 5) // Hour/Minute
@@ -72,7 +72,7 @@ class Config {
     
     // DEMO SETTINGS:
     let liveTradingMode: LiveTradingMode = .ninjaTrader
-    var byPassTradingTimeRestrictions = true // DEFAULT: false
-    var noEntryDuringLunch = false // DEFAULT: true
+    var byPassTradingTimeRestrictions = false // DEFAULT: false
+    var noEntryDuringLunch = true // DEFAULT: true
     let simulateTimePassage = false // DEFAULT: true
 }

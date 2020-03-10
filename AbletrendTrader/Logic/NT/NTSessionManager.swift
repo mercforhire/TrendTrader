@@ -104,6 +104,7 @@ class NTSessionManager: BaseSessionManager {
                             completion(nil)
                         }
                     case .failure(let ntError):
+                        self.ntManager.flatEverything()
                         DispatchQueue.main.async {
                             completion(ntError)
                         }
@@ -142,6 +143,7 @@ class NTSessionManager: BaseSessionManager {
                             completion(nil)
                         }
                     case .failure(let ntError):
+                        self.ntManager.flatEverything()
                         DispatchQueue.main.async {
                             completion(ntError)
                         }

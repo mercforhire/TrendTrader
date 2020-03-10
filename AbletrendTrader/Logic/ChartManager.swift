@@ -17,7 +17,7 @@ protocol DataManagerDelegate: class {
 
 class ChartManager {
     private let config = Config.shared
-    private let delayBeforeFetchingAtNewMinute = 10
+    private let delayBeforeFetchingAtNewMinute = 7
     
     var chart: Chart?
     var monitoring = false

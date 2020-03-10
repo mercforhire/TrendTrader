@@ -535,7 +535,7 @@
         <scene sceneID="Y6e-Xi-hhg">
             <objects>
                 <viewController title="IB Authentication" id="jng-zD-Lj4" customClass="IBAuthViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" misplaced="YES" id="Dz3-ns-1Y2">
+                    <view key="view" id="Dz3-ns-1Y2">
                         <rect key="frame" x="0.0" y="0.0" width="565" height="340"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
@@ -2202,7 +2202,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="42" y="648"/>
+            <point key="canvasLocation" x="23" y="768"/>
         </scene>
     </scenes>
     <resources>
@@ -2214,7 +2214,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="u3b-PS-Rg7"/>
-        <segue reference="2OK-pd-1Rj"/>
-        <segue reference="bNi-9r-EBK"/>
+        <segue reference="Dua-i6-PWC"/>
+        <segue reference="YpO-Ih-4re"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -36,16 +36,8 @@ class ConfigurationManager {
     private let MinStopKey : String = "min_stop"
     private let MaxRiskKey : String = "max_risk"
     private let RiskMultiplierKey : String = "risk_multiplier"
-    
     private let defaultSettings : NSDictionary
 
-    init()
-    {
-        defaultSettings = NSDictionary(contentsOfFile: Bundle.main.path(forResource: DefaultSettingsPlistFileName, ofType: "plist")!)!
-    }
-    
-    let dataServerURL: String = "http://192.168.0.107/"
-    
     var riskMultiplier: Double { defaultSettings[RiskMultiplierKey] as! Double }
     
     var maxRisk: Double { defaultSettings[MaxRiskKey] as! Double * riskMultiplier }
@@ -66,10 +58,10 @@ class ConfigurationManager {
     
     var takeProfitBarLength: Double { defaultSettings[TakeProfitBarLengthKey] as! Double * riskMultiplier }
     
+    var maxHighRiskEntryAllowed: Int { defaultSettings[MaxHighRiskEntryAllowedKey] as! Int }
+    
     let highRiskStart: (Int, Int) = (9, 30) // Hour/Minute
     let highRiskEnd: (Int, Int) = (9, 55) // Hour/Minute
-    
-    var maxHighRiskEntryAllowed: Int { defaultSettings[MaxHighRiskEntryAllowedKey] as! Int }
     
     let tradingStart: (Int, Int) = (9, 30) // Hour/Minute
     let tradingEnd: (Int, Int) = (15, 55) // Hour/Minute
@@ -80,29 +72,31 @@ class ConfigurationManager {
     let clearTime: (Int, Int) = (15, 59) // Hour/Minute
     let flatTime: (Int, Int) = (16, 5) // Hour/Minute
     
-    let tickerPointValue = 20.0
-    let positionSize: Int = 1
+    var positionSize: Int { defaultSettings[PositionSizeKey] as! Int }
     
     // stop trading when P/L goes under this number
     var maxDailyLoss: Double { defaultSettings[MaxHighRiskEntryAllowedKey] as! Double * riskMultiplier }
     
-    let ticker = "NQ"
-    let conId = 346577750
+//    let ticker = "NQ"
+//    let tickerPointValue = 20.0
+//    let conId = 346577750
+//    let ibCommission = 2.05
+//    let maxIBActionRetryTimes = 3
     
-    let maxIBActionRetryTimes = 3
-    let ibCommission = 2.05
+//    let ntCommission = 1.60
+//    let ntTicker = "NQ 03-20"
+//    let ntName = "Globex"
+//    let ntAccountLongName = "NinjaTrader Continuum (Demo)"
+//    var ntBasePath = "/Users/lchen/Downloads/NinjaTrader/"
+//    var ntIncomingPath = "/Users/lchen/Downloads/NinjaTrader/incoming"
+//    var ntOutgoingPath = "/Users/lchen/Downloads/NinjaTrader/outgoing"
+//    var ntAccountName = "Sim101"
     
-    let ntCommission = 1.60
-    let ntTicker = "NQ 03-20"
-    let ntName = "Globex"
-    let ntAccountLongName = "NinjaTrader Continuum (Demo)"
-    var ntBasePath = "/Users/lchen/Downloads/NinjaTrader/"
-    var ntIncomingPath = "/Users/lchen/Downloads/NinjaTrader/incoming"
-    var ntOutgoingPath = "/Users/lchen/Downloads/NinjaTrader/outgoing"
-    var ntAccountName = "Sim101"
+    var byPassTradingTimeRestrictions : Bool { defaultSettings[BypassTradingTimeRestrictionsKey] as! Bool }
+    var noEntryDuringLunch : Bool { defaultSettings[NoEntryDuringLunchKey] as! Bool }
+    var simulateTimePassage : Bool { defaultSettings[SimulateTimePassageKey] as! Bool }
     
-    let liveTradingMode: LiveTradingMode = .ninjaTrader
-    var byPassTradingTimeRestrictions = false // DEFAULT: false
-    var noEntryDuringLunch = true // DEFAULT: true
-    let simulateTimePassage = false // DEFAULT: true
+    init() {
+        defaultSettings = NSDictionary(contentsOfFile: Bundle.main.path(forResource: DefaultSettingsPlistFileName, ofType: "plist")!)!
+    }
 }

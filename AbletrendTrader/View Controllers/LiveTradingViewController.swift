@@ -11,6 +11,8 @@ import Cocoa
 class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private let config = ConfigurationManager.shared
     
+    var tradingMode: LiveTradingMode!
+    
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -64,19 +66,25 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
+        
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                                 target: self,
                                                 selector: #selector(updateSystemTimeLabel),
                                                 userInfo: nil,
                                                 repeats: true)
+        
         chartManager = ChartManager(live: true)
         chartManager?.delegate = self
-        switch config.liveTradingMode {
+        
+        switch tradingMode {
         case .interactiveBroker:
             sessionManager = IBSessionManager()
         case .ninjaTrader:
             sessionManager = NTSessionManager()
+        default:
+            break
         }
+        
         sessionManager.delegate = self
     }
     

@@ -62,7 +62,7 @@ struct Chart {
     func checkAllSameDirection(direction: TradeDirection, fromKey: String, toKey: String) -> Bool {
         guard let fromKeyIndex = timeKeys.firstIndex(of: fromKey),
             let toKeyIndex = timeKeys.firstIndex(of: toKey),
-            fromKeyIndex <= toKeyIndex else { return false }
+            fromKeyIndex < toKeyIndex else { return true }
         
         for i in fromKeyIndex...toKeyIndex {
             let key = timeKeys[i]
@@ -76,19 +76,6 @@ struct Chart {
         }
         
         return true
-    }
-    
-    func isReversalBar(bar: PriceBar) -> Bool {
-        guard let toKeyIndex = timeKeys.firstIndex(of: bar.identifier) else { return false }
-        
-        var indexOfEndOfOppositeTrend: Int?
-        for key in stride(from: toKeyIndex, through: 0, by: -1) {
-            let key = timeKeys[key]
-            guard let bar = priceBars[key] else { continue }
-            
-        }
-        
-        return false
     }
     
     func generateCandleStickData() -> [CandleChartDataEntry] {

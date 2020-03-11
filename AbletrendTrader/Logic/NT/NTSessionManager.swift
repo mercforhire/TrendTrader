@@ -298,11 +298,15 @@ class NTSessionManager: BaseSessionManager {
                             completion(nil)
                         }
                     } else {
+                        self.delegate?.newLogAdded(log: "Position not closed, flat all positions immediately")
+                        self.ntManager.flatEverything()
                         DispatchQueue.main.async {
                             completion(.positionNotClosed)
                         }
                     }
                 } else {
+                    self.delegate?.newLogAdded(log: "Position not closed, flat all positions immediately")
+                    self.ntManager.flatEverything()
                     DispatchQueue.main.async {
                         completion(.positionNotClosed)
                     }

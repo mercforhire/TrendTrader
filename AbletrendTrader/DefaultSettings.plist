@@ -16,24 +16,22 @@
 	<integer>1</integer>
 	<key>ticker_value</key>
 	<integer>20</integer>
-	<key>clear_time</key>
-	<date>2020-03-09T19:59:00Z</date>
-	<key>flat_time</key>
-	<date>2020-03-09T20:05:00Z</date>
-	<key>lunch_start</key>
-	<date>2020-03-09T16:00:00Z</date>
-	<key>lunch_end</key>
-	<date>2020-03-09T17:50:00Z</date>
 	<key>trading_start</key>
 	<date>2020-03-09T13:30:00Z</date>
 	<key>trading_end</key>
 	<date>2020-03-09T19:55:00Z</date>
-	<key>max_high_risk_entry_allowed</key>
-	<integer>1</integer>
 	<key>high_risk_start</key>
 	<date>2020-03-09T13:30:00Z</date>
 	<key>high_risk_end</key>
 	<date>2020-03-09T13:55:00Z</date>
+	<key>lunch_start</key>
+	<date>2020-03-09T16:00:00Z</date>
+	<key>lunch_end</key>
+	<date>2020-03-09T17:50:00Z</date>
+	<key>clear_time</key>
+	<date>2020-03-09T19:59:00Z</date>
+	<key>flat_time</key>
+	<date>2020-03-09T20:05:00Z</date>
 	<key>take_profit_bar_length</key>
 	<integer>25</integer>
 	<key>enter_on_pullback</key>
@@ -49,6 +47,8 @@
 	<key>max_risk</key>
 	<integer>10</integer>
 	<key>risk_multiplier</key>
+	<integer>1</integer>
+	<key>max_high_risk_entry_allowed</key>
 	<integer>1</integer>
 </dict>
 </plist>

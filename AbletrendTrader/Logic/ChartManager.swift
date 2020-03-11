@@ -21,7 +21,7 @@ class ChartManager {
     private let fileName3: String = "3m.txt" // filename for local sandbox folder
     
     private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 7
+    private let delayBeforeFetchingAtNewMinute = 10
 
     
     var chart: Chart?
@@ -29,12 +29,14 @@ class ChartManager {
     weak var delegate: DataManagerDelegate?
     
     private let live: Bool
+    private let serverURL: String
     private var simTime: Date!
     private var currentPriceBarTime: Date?
     private var fetchingChart = false
     
-    init(live: Bool) {
+    init(live: Bool, serverURL: String) {
         self.live = live
+        self.serverURL = serverURL
         resetSimTime()
     }
     
@@ -364,7 +366,7 @@ class ChartManager {
                 }
                 
                 let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt",
-                                               self.config.dataServerURL,
+                                               self.serverURL,
                                                interval.text(),
                                                time.month(),
                                                time.day(),
@@ -399,7 +401,7 @@ class ChartManager {
                     break
                 }
                 
-                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.config.dataServerURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.serverURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
                 
                 Alamofire.SessionManager.default.request(urlString).validate().response { response in
                     if response.response?.statusCode == 200 {

@@ -13,11 +13,14 @@ class TraderBot {
     
     var sessionManager: BaseSessionManager
     var chart: Chart
-    var highRiskEntriesTaken: Int = 0
+    var commmission: Double
     
-    init(chart: Chart, sessionManager: BaseSessionManager) {
+    private var highRiskEntriesTaken: Int = 0
+    
+    init(chart: Chart, sessionManager: BaseSessionManager, commmission: Double) {
         self.chart = chart
         self.sessionManager = sessionManager
+        self.commmission = commmission
     }
     
     // Public:
@@ -233,7 +236,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
-        let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: config.ibCommission)
+        let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
         return .openPosition(newPosition: buyPosition, entryType: .any)
     }
     
@@ -241,7 +244,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil) }
         
-        let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: config.ibCommission)
+        let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
         return .openPosition(newPosition: sellPosition, entryType: .any)
     }
     
@@ -322,7 +325,7 @@ class TraderBot {
                                     idealEntryPrice: bar.candleStick.close,
                                     actualEntryPrice: bar.candleStick.close,
                                     stopLoss: stopLoss,
-                                    commission: config.ibCommission)
+                                    commission: commmission)
             return position
         } else if risk <= config.maxRisk {
             let position = Position(direction: direction,
@@ -331,7 +334,7 @@ class TraderBot {
                                     idealEntryPrice: bar.candleStick.close,
                                     actualEntryPrice: bar.candleStick.close,
                                     stopLoss: stopLoss,
-                                    commission: config.ibCommission)
+                                    commission: commmission)
             return position
         }
 

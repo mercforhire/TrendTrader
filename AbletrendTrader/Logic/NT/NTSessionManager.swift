@@ -10,13 +10,32 @@ import Foundation
 
 class NTSessionManager: BaseSessionManager {
     private var ntManager: NTManager!
+    private let commission: Double
     
     override var liveUpdateFrequency: TimeInterval { 1 }
     var connected = false
     
-    override init() {
+    init(accountId: String,
+         commission: Double,
+         ticker: String,
+         name: String,
+         accountLongName: String,
+         accountName: String,
+         basePath: String,
+         incomingPath: String,
+         outgoingPath: String) {
+        self.commission = commission
         super.init()
-        self.ntManager = NTManager(accountId: config.ntAccountName)
+        
+        self.ntManager = NTManager(accountId: accountId,
+                                   commission: commission,
+                                   ticker: ticker,
+                                   name: name,
+                                   accountLongName: accountLongName,
+                                   accountName: accountName,
+                                   basePath: basePath,
+                                   incomingPath: incomingPath,
+                                   outgoingPath: outgoingPath)
         self.ntManager.initialize()
         self.ntManager.delegate = self
     }
@@ -483,7 +502,7 @@ class NTSessionManager: BaseSessionManager {
                            actualEntryPrice: existingPrice,
                            stopLoss: nil,
                            entryOrderRef: nil,
-                           commission: config.ntCommission)
+                           commission: self.commission)
         }
     }
 }

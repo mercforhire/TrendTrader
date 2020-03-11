@@ -10,6 +10,12 @@ import Foundation
 
 class IBSessionManager: BaseSessionManager {
     private let networkManager = IBManager.shared
+    private let ticker = "NQ"
+    private let tickerPointValue = 20.0
+    private let conId = 346577750
+    private let ibCommission = 2.05
+    private let maxIBActionRetryTimes = 3
+    
     private var stopOrders: [LiveOrder] = []
     
     override func resetSession() {
@@ -90,8 +96,8 @@ class IBSessionManager: BaseSessionManager {
             var actionCompleted: Bool = false
             var retriedTimes: Int = 1
             while !actionCompleted {
-                if retriedTimes >= self.config.maxIBActionRetryTimes {
-                    self.delegate?.newLogAdded(log: "Action have been retried more than \(self.config.maxIBActionRetryTimes) times, skipping...")
+                if retriedTimes >= self.maxIBActionRetryTimes {
+                    self.delegate?.newLogAdded(log: "Action have been retried more than \(self.maxIBActionRetryTimes) times, skipping...")
                     break
                 }
                 
@@ -567,7 +573,7 @@ class IBSessionManager: BaseSessionManager {
                                                                       orderId: orderId,
                                                                       orderRef: orderRef,
                                                                       stopOrderId: stopOrderId,
-                                                                      commission: recentTrade.commission?.double ?? self.config.ibCommission)
+                                                                      commission: recentTrade.commission?.double ?? self.ibCommission)
                             completion(.success(orderConfirmation))
                         }
                     } else {
@@ -713,7 +719,7 @@ class IBSessionManager: BaseSessionManager {
                         let orderConfirmation = OrderConfirmation(price: closingPrice,
                                                                   time: closingTrade.tradeTime,
                                                                   orderRef: closingTrade.orderRef ?? "STOPORDER",
-                                                                  commission: closingTrade.commission?.double ?? self.config.ibCommission)
+                                                                  commission: closingTrade.commission?.double ?? self.ibCommission)
                         DispatchQueue.main.async {
                             completion(.success(orderConfirmation))
                         }

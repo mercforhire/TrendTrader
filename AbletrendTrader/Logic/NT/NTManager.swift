@@ -14,8 +14,16 @@ protocol NTManagerDelegate: class {
 
 class NTManager {
     private let maxTryTimes = 10
-    private let config = ConfigurationManager.shared
+    
     private let accountId: String
+    private let commission: Double
+    private let ticker: String
+    private let name: String
+    private let accountLongName: String
+    private let accountName: String
+    private let basePath: String
+    private let incomingPath: String
+    private let outgoingPath: String
     
     var connected = false {
         didSet {
@@ -28,8 +36,25 @@ class NTManager {
     
     private var timer: Timer?
     
-    init(accountId: String) {
+    init(accountId: String,
+         commission: Double,
+         ticker: String,
+         name: String,
+         accountLongName: String,
+         accountName: String,
+         basePath: String,
+         incomingPath: String,
+         outgoingPath: String) {
+        
         self.accountId = accountId
+        self.commission = commission
+        self.ticker = ticker
+        self.name = name
+        self.accountLongName = accountLongName
+        self.accountName = accountName
+        self.basePath = basePath
+        self.incomingPath = incomingPath
+        self.outgoingPath = outgoingPath
     }
     
     func initialize() {
@@ -78,11 +103,11 @@ class NTManager {
         var orderString: String = ""
         switch orderType {
         case .market:
-            orderString = "PLACE;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());;;GTC;\(orderRef);\(orderRef);;"
+            orderString = "PLACE;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());;;GTC;\(orderRef);\(orderRef);;"
         case .stop:
-            orderString = "PLACE;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());;\(orderPrice);GTC;\(orderRef);\(orderRef);;"
+            orderString = "PLACE;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());;\(orderPrice);GTC;\(orderRef);\(orderRef);;"
         default:
-            orderString = "PLACE;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+            orderString = "PLACE;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
         }
         
         // place the order to NT
@@ -125,7 +150,7 @@ class NTManager {
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
-                                                              commission: self.config.ntCommission)
+                                                              commission: self.commission)
                     completion?(.success(orderConfirmation))
                     self.resetTimer()
                 }
@@ -161,7 +186,7 @@ class NTManager {
         }
         orderPrice = orderPrice.round(nearest: 0.25)
         
-        let orderString = "REVERSEPOSITION;\(accountId);\(config.ntTicker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+        let orderString = "REVERSEPOSITION;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
         writeTextToFile(text: orderString)
         
         // wait for NT to return with a result file
@@ -199,7 +224,7 @@ class NTManager {
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
-                                                              commission: self.config.ntCommission)
+                                                              commission: self.commission)
                     completion?(.success(orderConfirmation))
                     self.resetTimer()
                 }
@@ -263,7 +288,7 @@ class NTManager {
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
-                                                              commission: self.config.ntCommission)
+                                                              commission: self.commission)
                     completion?(.success(orderConfirmation))
                 }
             } else if let _ = latestOrderResponse {
@@ -289,7 +314,7 @@ class NTManager {
     }
     
     func getOrderResponse(orderId: String) -> NTOrderResponse? {
-        let path = "\(config.ntOutgoingPath)/\(accountId)_\(orderId).txt"
+        let path = "\(outgoingPath)/\(accountId)_\(orderId).txt"
         if let orderResponse = self.readOrderExecutionFile(filePath: path) {
             return orderResponse
         }
@@ -297,7 +322,7 @@ class NTManager {
     }
     
     func deleteOrderResponse(orderId: String) -> Bool {
-        let path = "\(config.ntOutgoingPath)/\(accountId)_\(orderId).txt"
+        let path = "\(outgoingPath)/\(accountId)_\(orderId).txt"
         do {
             try FileManager.default.removeItem(atPath: path)
             return true
@@ -309,8 +334,8 @@ class NTManager {
     }
     
     func readPositionStatusFile() -> PositionStatus? {
-        let dir = URL(fileURLWithPath: config.ntOutgoingPath)
-        let fileURL = dir.appendingPathComponent("\(config.ntTicker) \(config.ntName)_\(accountId)_position.txt")
+        let dir = URL(fileURLWithPath: outgoingPath)
+        let fileURL = dir.appendingPathComponent("\(ticker) \(name)_\(accountId)_position.txt")
         var text: String?
         do {
             text = try String(contentsOf: fileURL, encoding: .utf8)
@@ -335,8 +360,8 @@ class NTManager {
     
     var counter = 0
     private func writeTextToFile(text: String) {
-        let dir = URL(fileURLWithPath: config.ntBasePath)
-        let dir2 = URL(fileURLWithPath: config.ntIncomingPath)
+        let dir = URL(fileURLWithPath: basePath)
+        let dir2 = URL(fileURLWithPath: incomingPath)
         let fileURL = dir.appendingPathComponent("oif\(counter).txt")
         let fileURL2 = dir2.appendingPathComponent("oif\(counter).txt")
         print(text)
@@ -383,8 +408,8 @@ class NTManager {
     }
     
     private func readConnectionStatusFile() -> Bool {
-        let dir = URL(fileURLWithPath: config.ntOutgoingPath)
-        let fileURL = dir.appendingPathComponent("\(config.ntAccountLongName).txt")
+        let dir = URL(fileURLWithPath: outgoingPath)
+        let fileURL = dir.appendingPathComponent("\(accountLongName).txt")
         
         do {
             let text = try String(contentsOf: fileURL, encoding: .utf8)

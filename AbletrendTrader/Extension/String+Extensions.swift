@@ -48,10 +48,6 @@ extension String {
     func character(_ at: Int) -> Character {
         return self[self.index(self.startIndex, offsetBy: at)]
     }
-
-    func lastIndexOfCharacter(_ c: Character) -> Int? {
-        return range(of: String(c), options: .backwards)?.lowerBound.encodedOffset
-    }
 }
 
 extension String {

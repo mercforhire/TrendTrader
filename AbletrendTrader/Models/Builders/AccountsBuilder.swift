@@ -15,10 +15,7 @@ class AccountsBuilder {
             let accounts: [Account]? = try decoder.decode([Account]?.self, from: jsonData)
             return accounts
         }
-        catch(let error) {
-            print("AccountsBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+        catch {
         }
         return nil
     }

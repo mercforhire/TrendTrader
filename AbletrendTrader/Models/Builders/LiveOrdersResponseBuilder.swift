@@ -16,9 +16,6 @@ class LiveOrdersResponseBuilder {
             return liveOrdersResponse
         }
         catch(let error) {
-            print("LiveOrdersResponseBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
         }
         return nil
     }

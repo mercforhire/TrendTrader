@@ -15,10 +15,7 @@ class IBPositionsBuilder {
             let ibPositions = try decoder.decode([IBPosition]?.self, from: jsonData)
             return ibPositions
         }
-        catch(let error) {
-            print("IBPositionsBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+        catch {
         }
         return nil
     }

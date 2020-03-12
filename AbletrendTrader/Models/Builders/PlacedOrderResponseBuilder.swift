@@ -15,10 +15,7 @@ class PlacedOrderResponseBuilder {
             let placedOrderResponses = try decoder.decode([PlacedOrderResponse].self, from: jsonData)
             return placedOrderResponses
         }
-        catch(let error) {
-            print("PlacedOrderResponseBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+        catch {
         }
         return nil
     }

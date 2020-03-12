@@ -15,10 +15,7 @@ class OrderQuestionsBuilder {
             let orderQuestions = try decoder.decode([Question]?.self, from: jsonData)
             return orderQuestions
         }
-        catch(let error) {
-            print("OrderQuestionsBuilder:")
-            print(error)
-            print(String(data: jsonData, encoding: .utf8))
+        catch {
         }
         return nil
     }

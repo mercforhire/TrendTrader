@@ -22,7 +22,6 @@ class ChartManager {
     
     private let config = ConfigurationManager.shared
     private let delayBeforeFetchingAtNewMinute = 10
-
     
     var chart: Chart?
     var monitoring = false
@@ -122,9 +121,10 @@ class ChartManager {
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
             // call this again 10 seconds after the next minute
             let waitSeconds = 60 + delayBeforeFetchingAtNewMinute - now.second()
-            let statusText: String = "Skipped fetching at \(now.hourMinuteSecond()) will fetch again in \(waitSeconds) seconds"
+            let nextFetchTime: Date = now.addingTimeInterval(TimeInterval(waitSeconds))
+            let statusText: String = "Latest data: \((currentPriceBarTime?.hourMinute() ?? "--")), will fetch again at \(nextFetchTime.hourMinuteSecond())"
             self.delegate?.chartStatusChanged(statusText: statusText)
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(waitSeconds)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(waitSeconds - 2)) {
                 self.updateChart()
             }
             return
@@ -146,8 +146,7 @@ class ChartManager {
                 
                 if self.monitoring {
                     if self.live {
-                        // keep calling this until the latest chart is fetched
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                             self.updateChart()
                         }
                     } else if self.config.simulateTimePassage {

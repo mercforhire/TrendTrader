@@ -99,7 +99,7 @@ class BaseSessionManager {
         var pAndL: Double = 0
         
         for trade in trades {
-            pAndL = pAndL + (trade.actualProfit ?? 0)
+            pAndL = pAndL + trade.actualProfit
         }
         
         return pAndL
@@ -109,7 +109,7 @@ class BaseSessionManager {
         var pAndLDollar: Double = 0
         
         for trade in trades {
-            pAndLDollar = pAndLDollar + (trade.actualProfitDollar ?? 0)
+            pAndLDollar = pAndLDollar + trade.actualProfitDollar
         }
         
         return pAndLDollar
@@ -144,7 +144,7 @@ class BaseSessionManager {
                                                  stop: "--",
                                                  iExit: String(format: "%.2f", trade.idealExitPrice),
                                                  aExit: String(format: "%.2f", trade.actualExitPrice),
-                                                 pAndL: String(format: "%.2f", trade.actualProfit ?? 0),
+                                                 pAndL: String(format: "%.2f", trade.actualProfit),
                                                  entryTime: dateFormatter.string(from: trade.entryTime),
                                                  exitTime: dateFormatter.string(from: trade.exitTime),
                                                  commission: trade.commission.currency(true)))

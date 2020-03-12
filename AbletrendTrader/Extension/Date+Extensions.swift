@@ -96,12 +96,13 @@ extension Date {
         return calender.isDate(self, equalTo: date, toGranularity: .minute)
     }
     
-    func getNewDateFromTime(hour: Int, min: Int) -> Date {
+    static func getNewDateFromTime(hour: Int, min: Int) -> Date {
+        let now = Date()
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: self.year(),
-                                         month: self.month(),
-                                         day: self.day(),
+        let components1 = DateComponents(year: now.year(),
+                                         month: now.month(),
+                                         day: now.day(),
                                          hour: hour,
                                          minute: min)
         let startDate: Date = calendar.date(from: components1)!
@@ -154,14 +155,14 @@ extension Date {
         let components1 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.highRiskStart.0,
-                                         minute: ConfigurationManager.shared.highRiskStart.1)
+                                         hour: ConfigurationManager.shared.highRiskStart.hour(),
+                                         minute: ConfigurationManager.shared.highRiskStart.minute())
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.highRiskEnd.0,
-                                         minute: ConfigurationManager.shared.highRiskEnd.1)
+                                         hour: ConfigurationManager.shared.highRiskEnd.hour(),
+                                         minute: ConfigurationManager.shared.highRiskEnd.minute())
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
@@ -172,14 +173,14 @@ extension Date {
         let components1 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.tradingStart.0,
-                                         minute: ConfigurationManager.shared.tradingStart.1)
+                                         hour: ConfigurationManager.shared.tradingStart.hour(),
+                                         minute: ConfigurationManager.shared.tradingStart.minute())
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.tradingEnd.0,
-                                         minute: ConfigurationManager.shared.tradingEnd.1)
+                                         hour: ConfigurationManager.shared.tradingEnd.hour(),
+                                         minute: ConfigurationManager.shared.tradingEnd.minute())
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
@@ -190,14 +191,14 @@ extension Date {
         let components1 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.lunchStart.0,
-                                         minute: ConfigurationManager.shared.lunchStart.1)
+                                         hour: ConfigurationManager.shared.lunchStart.hour(),
+                                         minute: ConfigurationManager.shared.lunchStart.minute())
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.lunchEnd.0,
-                                         minute: ConfigurationManager.shared.lunchEnd.1)
+                                         hour: ConfigurationManager.shared.lunchEnd.hour(),
+                                         minute: ConfigurationManager.shared.lunchEnd.minute())
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
@@ -208,8 +209,8 @@ extension Date {
         let components = DateComponents(year: date.year(),
                                         month: date.month(),
                                         day: date.day(),
-                                        hour: ConfigurationManager.shared.clearTime.0,
-                                        minute: ConfigurationManager.shared.clearTime.1)
+                                        hour: ConfigurationManager.shared.clearTime.hour(),
+                                        minute: ConfigurationManager.shared.clearTime.minute())
         let date: Date = calendar.date(from: components)!
         return date
     }
@@ -221,8 +222,8 @@ extension Date {
         let components = DateComponents(year: date.year(),
                                         month: date.month(),
                                         day: date.day(),
-                                        hour: ConfigurationManager.shared.flatTime.0,
-                                        minute: ConfigurationManager.shared.flatTime.1)
+                                        hour: ConfigurationManager.shared.flatTime.hour(),
+                                        minute: ConfigurationManager.shared.flatTime.minute())
         let date: Date = calendar.date(from: components)!
         return date
     }

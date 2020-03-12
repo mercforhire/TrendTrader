@@ -11,6 +11,8 @@ import Cocoa
 class SimTradingViewController: NSViewController {
     private let config = ConfigurationManager.shared
     
+    var serverURL: String!
+    
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -65,7 +67,7 @@ class SimTradingViewController: NSViewController {
                                                 selector: #selector(updateSystemTimeLabel),
                                                 userInfo: nil,
                                                 repeats: true)
-        chartManager = ChartManager(live: false)
+        chartManager = ChartManager(live: false, serverURL: serverURL)
         chartManager?.delegate = self
         sessionManager.delegate = self
     }
@@ -84,7 +86,7 @@ class SimTradingViewController: NSViewController {
             guard let self = self else { return }
             
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, commmission: 2.0)
                 self.endButton.isEnabled = true
                 self.startButton.isEnabled = self.config.simulateTimePassage
             }

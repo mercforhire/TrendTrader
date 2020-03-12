@@ -22,14 +22,4 @@ struct IBPosition: Codable {
     var direction: TradeDirection {
         return position > 0 ? .long : .short
     }
-    
-    func toPosition() -> Position {
-        return Position(direction: direction,
-                        size: abs(position),
-                        entryTime: Date(),
-                        idealEntryPrice: avgPrice,
-                        actualEntryPrice: avgPrice,
-                        stopLoss: nil,
-                        commission: ConfigurationManager.shared.ibCommission)
-    }
 }

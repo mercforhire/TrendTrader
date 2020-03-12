@@ -23,17 +23,8 @@ class ConfigViewController: NSViewController {
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
     @IBOutlet private weak var dailyLossLimitPicker: NSTextField!
-    @IBOutlet private weak var platformCombo: NSComboBox!
     @IBOutlet private weak var byPassTradingTimeCheckbox: NSButton!
     @IBOutlet private weak var noEntryDuringLunchCheckbox: NSButton!
-    @IBOutlet private weak var ninjaPathField: NSTextField!
-    
-    private var selectedFolderPath: String = "" {
-        didSet {
-            config.ntIncomingPath = selectedFolderPath
-            ninjaPathField.stringValue = selectedFolderPath
-        }
-    }
     
     func setupUI() {
         maxSLField.isEditable = false
@@ -48,10 +39,6 @@ class ConfigViewController: NSViewController {
         liquidateTimePicker.isEnabled = false
         flatTimePicker.isEnabled = false
         dailyLossLimitPicker.isEditable = false
-        ninjaPathField.isEditable = false
-        platformCombo.isEnabled = false
-        platformCombo.usesDataSource = true
-        platformCombo.dataSource = self
     }
     
     func loadConfig() {
@@ -61,23 +48,23 @@ class ConfigViewController: NSViewController {
         minProfitGreenBarField.stringValue = String(format: "%.2f", config.greenBarsExit)
         minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenBarsExit)
         minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnPullback)
-        highRiskEntryStartPicker.dateValue = Date().getNewDateFromTime(hour: config.highRiskStart.0, min: config.highRiskStart.1)
-        highRiskEntryEndPicker.dateValue = Date().getNewDateFromTime(hour: config.highRiskEnd.0, min: config.highRiskEnd.1)
-        sessionStartTimePicker.dateValue = Date().getNewDateFromTime(hour: config.tradingStart.0, min: config.tradingStart.1)
-        liquidateTimePicker.dateValue = Date().getNewDateFromTime(hour: config.clearTime.0, min: config.clearTime.1)
-        flatTimePicker.dateValue = Date().getNewDateFromTime(hour: config.flatTime.0, min: config.flatTime.1)
+        
+        highRiskEntryStartPicker.dateValue = Date.getNewDateFromTime(hour: config.highRiskStart.hour(),
+                                                                       min: config.highRiskStart.minute())
+        
+        highRiskEntryEndPicker.dateValue = Date.getNewDateFromTime(hour: config.highRiskEnd.hour(),
+                                                                     min: config.highRiskEnd.minute())
+        
+        sessionStartTimePicker.dateValue = Date.getNewDateFromTime(hour: config.tradingStart.hour(),
+                                                                     min: config.tradingStart.minute())
+        
+        liquidateTimePicker.dateValue = Date.getNewDateFromTime(hour: config.clearTime.hour(),
+                                                                min: config.clearTime.minute())
+        
+        flatTimePicker.dateValue = Date.getNewDateFromTime(hour: config.flatTime.hour(),
+                                                           min: config.flatTime.minute())
+        
         dailyLossLimitPicker.stringValue = String(format: "%.2f", config.maxDailyLoss)
-        ninjaPathField.stringValue = config.ntIncomingPath
-        selectedFolderPath = config.ntIncomingPath
-        
-        switch config.liveTradingMode {
-        case .interactiveBroker:
-            platformCombo.selectItem(at: 0)
-        case .ninjaTrader:
-            platformCombo.selectItem(at: 1)
-        }
-        NSApp.keyWindow?.makeFirstResponder(nil)
-        
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
         noEntryDuringLunchCheckbox.state = config.noEntryDuringLunch ? .on : .off
     }
@@ -92,9 +79,9 @@ class ConfigViewController: NSViewController {
     @IBAction func byPassTimeChecked(_ sender: NSButton) {
         switch sender.state {
         case .on:
-            config.byPassTradingTimeRestrictions = true
+            config.setByPassTradingTimeRestrictions(newValue: true)
         case .off:
-            config.byPassTradingTimeRestrictions = false
+            config.setByPassTradingTimeRestrictions(newValue: false)
         default:
             break
         }
@@ -103,45 +90,11 @@ class ConfigViewController: NSViewController {
     @IBAction func noEntryChecked(_ sender: NSButton) {
         switch sender.state {
         case .on:
-            config.noEntryDuringLunch = true
+            config.setNoEntryDuringLunch(newValue: true)
         case .off:
-            config.noEntryDuringLunch = false
+            config.setNoEntryDuringLunch(newValue: false)
         default:
             break
         }
-    }
-    
-    @IBAction func selectFolderPressed(_ sender: NSButton) {
-        guard let window = view.window else { return }
-
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.beginSheetModal(for: window) { result in
-            if result == .OK, let selectedPath = panel.url?.path {
-                self.selectedFolderPath = selectedPath
-            }
-            panel.close()
-        }
-    }
-}
-
-extension ConfigViewController: NSComboBoxDataSource {
-    func numberOfItems(in comboBox: NSComboBox) -> Int {
-        return 2
-    }
-
-    func comboBox(_ comboBox: NSComboBox, objectValueForItemAt index: Int) -> Any? {
-        switch index {
-        case 0:
-            return LiveTradingMode.interactiveBroker.name()
-        case 1:
-            return LiveTradingMode.ninjaTrader.name()
-        default:
-            break
-        }
-        
-        return nil
     }
 }

@@ -12,6 +12,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private let config = ConfigurationManager.shared
     
     var tradingMode: LiveTradingMode!
+    var serverURL: String!
     
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
@@ -40,6 +41,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             }
         }
     }
+    private var commission: Double = 0
     
     weak var delegate: DataManagerDelegate?
     
@@ -73,14 +75,24 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                                                 userInfo: nil,
                                                 repeats: true)
         
-        chartManager = ChartManager(live: true)
+        chartManager = ChartManager(live: true, serverURL: serverURL)
         chartManager?.delegate = self
         
         switch tradingMode {
         case .interactiveBroker:
             sessionManager = IBSessionManager()
-        case .ninjaTrader:
-            sessionManager = NTSessionManager()
+            commission = IBSessionManager.commission
+        case .ninjaTrader(let accountId, let commission, let ticker, let name, let accountLongName, let accountName, let basePath, let incomingPath, let outgoingPath):
+            sessionManager = NTSessionManager(accountId: accountId,
+                                              commission: commission,
+                                              ticker: ticker,
+                                              name: name,
+                                              accountLongName: accountLongName,
+                                              accountName: accountName,
+                                              basePath: basePath,
+                                              incomingPath: incomingPath,
+                                              outgoingPath: outgoingPath)
+            self.commission = commission
         default:
             break
         }
@@ -123,7 +135,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             
             sender.isEnabled = true
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, commmission: self.commission)
                 
                 if self.chartManager?.monitoring ?? false {
                     self.startButton.isEnabled = false

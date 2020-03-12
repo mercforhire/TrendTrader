@@ -126,7 +126,7 @@ class IBManager {
             
             if let data = response.data, let ibTrades = self.ibTradesBuilder.buildIBTradesFrom(data) {
                 var relevantTrades: [IBTrade] = ibTrades.filter { trade -> Bool in
-                    return trade.account == selectedAccount.accountId && trade.symbol == self.config.ticker
+                    return trade.account == selectedAccount.accountId && trade.symbol == IBSessionManager.ticker
                 }
                 relevantTrades.sort { (left, right) -> Bool in
                     return left.tradeTime_r > right.tradeTime_r
@@ -151,7 +151,7 @@ class IBManager {
                 let liveOrdersResponse = self.liveOrdersResponseBuilder.buildAccountsFrom(data),
                 let orders = liveOrdersResponse.orders {
                 var relevantOrders: [LiveOrder] = orders.filter { liveOrder -> Bool in
-                    return liveOrder.status == "PreSubmitted" && liveOrder.conid == self.config.conId && liveOrder.acct == selectedAccount.accountId && liveOrder.orderType == "Stop"
+                    return liveOrder.status == "PreSubmitted" && liveOrder.conid == IBSessionManager.conId && liveOrder.acct == selectedAccount.accountId && liveOrder.orderType == "Stop"
                 }
                 relevantOrders.sort { (left, right) -> Bool in
                     return left.lastExecutionTime_r > right.lastExecutionTime_r
@@ -198,13 +198,13 @@ class IBManager {
                 return
             }
             
-            let url = "https://localhost:5000/v1/portal/portfolio/\(selectedAccount.accountId)/position/\(self.config.conId)"
+            let url = "https://localhost:5000/v1/portal/portfolio/\(selectedAccount.accountId)/position/\(IBSessionManager.conId)"
             self.afManager.request(url).responseData { [weak self] response in
                 guard let self = self else { return }
                 
                 if let data = response.data, let positions = self.ibPositionsBuilder.buildIBPositionsResponseFrom(data) {
                     let relevantPositions: [IBPosition] = positions.filter { position -> Bool in
-                        return position.acctId == selectedAccount.accountId && position.conid == self.config.conId && position.position != 0
+                        return position.acctId == selectedAccount.accountId && position.conid == IBSessionManager.conId && position.position != 0
                     }
                     DispatchQueue.main.async {
                         completion(.success(relevantPositions.first))
@@ -248,7 +248,7 @@ class IBManager {
                      orderType.typeString(),
                      orderPrice == 0 ? "Market" : String(format: "%.2f", orderPrice)))
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, config.conId, orderRef, orderType.typeString(), direction.tradeString(), orderPrice, config.ticker, size)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"secType\": \"FUT\", \"cOID\": \"%@\", \"orderType\": \"%@\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"useAdaptive\": false}", selectedAccount.accountId, IBSessionManager.conId, orderRef, orderType.typeString(), direction.tradeString(), orderPrice, IBSessionManager.ticker, size)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -304,7 +304,7 @@ class IBManager {
                      direction.description(),
                      String(format: "%.2f", stopPrice)))
         
-        let bodyString = "{ \"orders\": [ { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(config.conId), \"secType\": \"FUT\", \"cOID\": \"\(orderRef)\", \"orderType\": \"MKT\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.tradeString())\", \"ticker\": \"\(config.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false }, { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(config.conId), \"secType\": \"FUT\", \"parentId\": \"\(orderRef)\", \"orderType\": \"STP\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.reverse().tradeString())\", \"price\": \(stopPrice), \"ticker\": \"\(config.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false } ]}"
+        let bodyString = "{ \"orders\": [ { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(IBSessionManager.conId), \"secType\": \"FUT\", \"cOID\": \"\(orderRef)\", \"orderType\": \"MKT\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.tradeString())\", \"ticker\": \"\(IBSessionManager.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false }, { \"acctId\": \"\(selectedAccount.accountId)\", \"conid\": \(IBSessionManager.conId), \"secType\": \"FUT\", \"parentId\": \"\(orderRef)\", \"orderType\": \"STP\", \"listingExchange\": \"GLOBEX\", \"outsideRTH\": false, \"side\": \"\(direction.reverse().tradeString())\", \"price\": \(stopPrice), \"ticker\": \"\(IBSessionManager.ticker)\", \"tif\": \"GTC\", \"quantity\": \(config.positionSize), \"useAdaptive\": false } ]}"
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody
@@ -363,7 +363,7 @@ class IBManager {
                      orderId,
                      String(format: "%.2f", price)))
         
-        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"orderType\": \"%@\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"orderId\": %d}", selectedAccount.accountId, config.conId, orderType.typeString(), direction.tradeString(), price, config.ticker, config.positionSize, orderId)
+        let bodyString = String(format: "{ \"acctId\": \"%@\", \"conid\": %d, \"orderType\": \"%@\", \"outsideRTH\": false, \"side\": \"%@\", \"price\": %.2f, \"ticker\": \"%@\", \"tif\": \"GTC\", \"quantity\": %d, \"orderId\": %d}", selectedAccount.accountId, IBSessionManager.conId, orderType.typeString(), direction.tradeString(), price, IBSessionManager.ticker, config.positionSize, orderId)
         if var request = try? URLRequest(url: url, method: .post, headers: ["Content-Type": "text/plain"]),
             let httpBody: Data = bodyString.data(using: .utf8) {
             request.httpBody = httpBody

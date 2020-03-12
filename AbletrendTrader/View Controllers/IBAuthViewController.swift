@@ -12,6 +12,8 @@ class IBAuthViewController: NSViewController {
     private let config = ConfigurationManager.shared
     private let networkManager = IBManager.shared
     
+    var serverURL: String!
+    
     @IBOutlet weak var authStatusLabel: NSTextField!
     @IBOutlet weak var validateSSOButton: NSButton!
     @IBOutlet weak var getStatusButton: NSButton!
@@ -20,8 +22,6 @@ class IBAuthViewController: NSViewController {
     @IBOutlet weak var accountInfoLabel: NSTextField!
     @IBOutlet weak var tickerField: NSTextField!
     @IBOutlet weak var conIdField: NSTextField!
-    @IBOutlet weak var sizeField: NSTextField!
-    @IBOutlet weak var goToSimButton: NSButton!
     @IBOutlet weak var goToLiveButton: NSButton!
     @IBOutlet weak var ipAddressField: NSTextField!
     
@@ -32,10 +32,10 @@ class IBAuthViewController: NSViewController {
                 goToLiveButton.isEnabled = true
             } else if authenticated == false {
                 authStatusLabel.stringValue = "Not authenticated"
-                goToLiveButton.isEnabled = config.liveTradingMode == .ninjaTrader
+                goToLiveButton.isEnabled = false
             } else {
                 authStatusLabel.stringValue = "--"
-                goToLiveButton.isEnabled = config.liveTradingMode == .ninjaTrader
+                goToLiveButton.isEnabled = false
             }
         }
     }
@@ -56,38 +56,27 @@ class IBAuthViewController: NSViewController {
     func setupUI() {
         accountsPicker.usesDataSource = true
         accountsPicker.dataSource = self
-        tickerField.stringValue = config.ticker
+        tickerField.stringValue = IBSessionManager.ticker
         tickerField.isEditable = false
-        conIdField.stringValue = String(format: "%d", config.conId)
+        conIdField.stringValue = String(format: "%d", IBSessionManager.conId)
         conIdField.isEditable = false
-        sizeField.stringValue = String(format: "%d", config.positionSize)
-        sizeField.isEditable = false
-        ipAddressField.stringValue = config.dataServerURL
+        ipAddressField.stringValue = serverURL
         ipAddressField.isEditable = false
         
-        if config.liveTradingMode == .interactiveBroker {
-            goToLiveButton.isEnabled = false
-        } else {
-            validateSSOButton.isEnabled = false
-            reauthButton.isEnabled = false
-            getStatusButton.isEnabled = false
-            goToLiveButton.isEnabled = true
-        }
+        goToLiveButton.isEnabled = false
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
-        if config.liveTradingMode == .interactiveBroker {
-            validateSSOPressed(validateSSOButton)
-            getStatusPressed(getStatusButton)
-            timer = Timer.scheduledTimer(timeInterval: TimeInterval(30.0),
-                                         target: self,
-                                         selector: #selector(pingServer),
-                                         userInfo: nil,
-                                         repeats: true)
-        }
+        validateSSOPressed(validateSSOButton)
+        getStatusPressed(getStatusButton)
+        timer = Timer.scheduledTimer(timeInterval: TimeInterval(30.0),
+                                     target: self,
+                                     selector: #selector(pingServer),
+                                     userInfo: nil,
+                                     repeats: true)
     }
     
     @objc

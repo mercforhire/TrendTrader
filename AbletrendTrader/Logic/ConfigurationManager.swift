@@ -35,14 +35,15 @@ class ConfigurationManager {
     private(set) var noEntryDuringLunch : Bool
     private(set) var simulateTimePassage : Bool
     private(set) var tickerValue: Double
+    
     private(set) var ntCommission: Double
-    private(set) var ntTicker: String
-    private(set) var ntName: String
-    private(set) var ntAccountLongName: String
-    private(set) var ntBasePath: String
-    private(set) var ntIncomingPath: String
-    private(set) var ntOutgoingPath: String
-    private(set) var ntAccountName: String
+    private(set) var ntTicker: String?
+    private(set) var ntExchange: String
+    private(set) var ntAccountLongName: String?
+    private(set) var ntAccountName: String?
+    private(set) var ntBasePath: String?
+    private(set) var ntIncomingPath: String?
+    private(set) var ntOutgoingPath: String?
     
     init() {
         let defaultSettings: NSDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "DefaultSettings", ofType: "plist")!)!
@@ -97,19 +98,19 @@ class ConfigurationManager {
         
         self.ntCommission = defaults.object(forKey: "nt_commission") as? Double ?? defaultSettings["nt_commission"] as! Double
         
-        self.ntTicker = defaults.object(forKey: "nt_ticker") as? String ?? defaultSettings["nt_ticker"] as! String
+        self.ntTicker = defaults.object(forKey: "nt_ticker") as? String
         
-        self.ntName = defaults.object(forKey: "nt_name") as? String ?? defaultSettings["nt_name"] as! String
+        self.ntExchange = defaults.object(forKey: "nt_exchange") as? String ?? defaultSettings["nt_exchange"] as! String
         
-        self.ntAccountLongName = defaults.object(forKey: "nt_account_name") as? String ?? ""
+        self.ntAccountLongName = defaults.object(forKey: "nt_account_name") as? String
         
-        self.ntBasePath = defaults.object(forKey: "nt_base_path") as? String ?? ""
+        self.ntAccountName = defaults.object(forKey: "nt_account_name") as? String
         
-        self.ntIncomingPath = defaults.object(forKey: "nt_incoming_path") as? String ?? ""
+        self.ntBasePath = defaults.object(forKey: "nt_base_path") as? String
         
-        self.ntOutgoingPath = defaults.object(forKey: "nt_outgoing_path") as? String ?? ""
+        self.ntIncomingPath = defaults.object(forKey: "nt_incoming_path") as? String
         
-        self.ntAccountName = defaults.object(forKey: "nt_account_name") as? String ?? ""
+        self.ntOutgoingPath = defaults.object(forKey: "nt_outgoing_path") as? String
     }
     
     func setRiskMultiplier(newValue: Double) {
@@ -256,8 +257,8 @@ class ConfigurationManager {
         UserDefaults.standard.synchronize()
     }
     
-    func setNTName(newValue: String) {
-        ntName = newValue
+    func setNTExchange(newValue: String) {
+        ntExchange = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_name")
         UserDefaults.standard.synchronize()
     }

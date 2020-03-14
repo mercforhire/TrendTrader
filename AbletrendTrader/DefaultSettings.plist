@@ -2,10 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>nt_name</key>
+	<key>nt_exchange</key>
 	<string>Globex</string>
-	<key>nt_ticker</key>
-	<string>NQ 03-20</string>
 	<key>nt_commission</key>
 	<real>1.6</real>
 	<key>simulate_time_passage</key>

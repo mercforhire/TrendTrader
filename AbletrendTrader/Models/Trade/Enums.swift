@@ -226,13 +226,10 @@ enum OrderType {
 }
 
 enum LiveTradingMode {
-    case interactiveBroker
     case ninjaTrader(accountId: String, commission: Double, ticker: String, name: String, accountLongName: String, accountName: String, basePath: String, incomingPath: String, outgoingPath: String)
     
     func name() -> String {
         switch self {
-        case .interactiveBroker:
-            return "Interactive Broker"
         case .ninjaTrader:
             return "NinjaTrader"
         }

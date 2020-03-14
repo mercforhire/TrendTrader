@@ -79,9 +79,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         chartManager?.delegate = self
         
         switch tradingMode {
-        case .interactiveBroker:
-            sessionManager = IBSessionManager()
-            commission = IBSessionManager.commission
         case .ninjaTrader(let accountId, let commission, let ticker, let name, let accountLongName, let accountName, let basePath, let incomingPath, let outgoingPath):
             sessionManager = NTSessionManager(accountId: accountId,
                                               commission: commission,

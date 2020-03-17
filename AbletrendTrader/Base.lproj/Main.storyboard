@@ -728,7 +728,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yKM-MQ-aHS">
-                                <rect key="frame" x="265" y="202" width="106" height="27"/>
+                                <rect key="frame" x="286" y="202" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="o5L-Wz-S3E">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -736,11 +736,14 @@
                                     </date>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES" second="YES"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
                                 </datePickerCell>
+                                <connections>
+                                    <action selector="highRiskEndChanged:" target="6pn-ly-NU7" id="ju7-Nn-9io"/>
+                                </connections>
                             </datePicker>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5Mr-ny-T6D">
-                                <rect key="frame" x="20" y="202" width="106" height="27"/>
+                                <rect key="frame" x="20" y="202" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="W5I-30-A29">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -748,11 +751,14 @@
                                     </date>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES" second="YES"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
                                 </datePickerCell>
+                                <connections>
+                                    <action selector="highRiskStartChanged:" target="6pn-ly-NU7" id="4jR-Lv-OMg"/>
+                                </connections>
                             </datePicker>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vZb-pz-ioV">
-                                <rect key="frame" x="265" y="168" width="106" height="27"/>
+                                <rect key="frame" x="286" y="168" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="SoL-du-KYx">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -760,8 +766,11 @@
                                     </date>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES" second="YES"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
                                 </datePickerCell>
+                                <connections>
+                                    <action selector="sessionStartChanged:" target="6pn-ly-NU7" id="ZjT-Dw-DoM"/>
+                                </connections>
                             </datePicker>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4BI-nj-gAz">
                                 <rect key="frame" x="18" y="140" width="146" height="16"/>
@@ -772,7 +781,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2St-i5-w4E">
-                                <rect key="frame" x="266" y="137" width="106" height="27"/>
+                                <rect key="frame" x="287" y="137" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="8ma-Hl-7II">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -780,8 +789,11 @@
                                     </date>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES" second="YES"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
                                 </datePickerCell>
+                                <connections>
+                                    <action selector="liquidationTimeChanged:" target="6pn-ly-NU7" id="lso-qC-etR"/>
+                                </connections>
                             </datePicker>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rWn-H4-dBC">
                                 <rect key="frame" x="18" y="78" width="95" height="16"/>
@@ -803,7 +815,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8Lj-ko-wO7">
-                                <rect key="frame" x="265" y="106" width="106" height="27"/>
+                                <rect key="frame" x="286" y="106" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="iJ1-o2-Ztg">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -811,8 +823,11 @@
                                     </date>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES" second="YES"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
                                 </datePickerCell>
+                                <connections>
+                                    <action selector="flatPositionsTimeChanged:" target="6pn-ly-NU7" id="hff-6p-shz"/>
+                                </connections>
                             </datePicker>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nns-FX-mQK">
                                 <rect key="frame" x="146" y="47" width="224" height="18"/>
@@ -947,13 +962,15 @@
                         <outlet property="minProfitPullbackField" destination="8P2-O5-PTk" id="b2D-nB-wcc"/>
                         <outlet property="minSTPField" destination="pFZ-k0-AVu" id="qdP-K8-CLY"/>
                         <outlet property="noEntryDuringLunchCheckbox" destination="of0-Wx-S4o" id="woO-Nl-hBt"/>
+                        <outlet property="riskField" destination="UEB-Um-rH8" id="1wf-rq-NPN"/>
                         <outlet property="sessionStartTimePicker" destination="vZb-pz-ioV" id="wPc-gy-4xk"/>
                         <outlet property="sweetspotDistanceField" destination="EiV-b6-Ycz" id="lKs-53-mZD"/>
+                        <outlet property="takeProfitField" destination="9pS-oT-Qfu" id="SUe-wi-BDb"/>
                     </connections>
                 </viewController>
                 <customObject id="A3Q-Y4-FEE" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-583" y="281.5"/>
+            <point key="canvasLocation" x="-589" y="293"/>
         </scene>
         <!--Live Trader-->
         <scene sceneID="vdT-mG-0Wb">

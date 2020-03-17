@@ -295,3 +295,95 @@ enum TradingError: Error {
         print("Network error:", Date().hourMinuteSecond(), self.displayMessage())
     }
 }
+
+enum ConfigError: Error {
+    case riskMultiplierError
+    case maxRiskError
+    case minStopError
+    case sweetSpotMinDistanceError
+    case greenBarsExitError
+    case skipGreenBarsExitError
+    case enterOnPullbackError
+    case takeProfitBarLengthError
+    case highRiskStartError
+    case highRiskEndError
+    case tradingStartError
+    case tradingEndError
+    case lunchStartError
+    case lunchEndError
+    case clearTimeError
+    case flatTimeError
+    case positionSizeError
+    case maxDailyLossError
+    case tickerValueError
+    case maxHighRiskEntryAllowedError
+    case ntCommissionError
+    case ntTickerError
+    case ntExchangeError
+    case ntAccountLongNameError
+    case ntAccountNameError
+    case ntBasePathError
+    case ntIncomingPathError
+    case ntOutgoingPathError
+    
+    func displayMessage() -> String {
+        switch self {
+        case .riskMultiplierError:
+            return "Risk multplier must be between 1 - 10"
+        case .maxRiskError:
+            return "Max risk must be between 2 - 20"
+        case .minStopError:
+            return "Mn stop must be between 2 - 10"
+        case .sweetSpotMinDistanceError:
+            return "Sweetspot minimum distance between 1 - 5"
+        case .greenBarsExitError:
+            return "Green bars exit profit higher than 5"
+        case .skipGreenBarsExitError:
+            return "Skip green bars exit must be higher than green bars exit"
+        case .enterOnPullbackError:
+            return "Enter on pullback must be higher than 10"
+        case .takeProfitBarLengthError:
+            return "Take profit bar length must be higher than 10"
+        case .highRiskStartError:
+            return "High risk start time error"
+        case .highRiskEndError:
+            return "High risk end time error"
+        case .tradingStartError:
+            return "Trading time start error"
+        case .tradingEndError:
+            return "Trading time end error"
+        case .lunchStartError:
+            return "Lunch start time error"
+        case .lunchEndError:
+            return "Lunch end time error"
+        case .clearTimeError:
+            return "Clear time error"
+        case .flatTimeError:
+            return "Flat time error"
+        case .positionSizeError:
+            return "Position size error"
+        case .maxDailyLossError:
+            return "Max daily loss must be -20 or lower"
+        case .tickerValueError:
+            return "Ticker value must be 1 or more"
+        case .maxHighRiskEntryAllowedError:
+            return "Max high risk entry allowed must be positive number"
+        case .ntCommissionError:
+            return "Commission must be a positive number"
+        case .ntTickerError:
+            return "Ticket name error"
+        case .ntExchangeError:
+            return "Exchange name error"
+        case .ntAccountLongNameError:
+            return "NT long account name error"
+        case .ntAccountNameError:
+            return "NT account name error"
+        case .ntBasePathError:
+            return "Base path error"
+        case .ntIncomingPathError:
+            return "Incoming path error"
+        case .ntOutgoingPathError:
+            return "Outgoing path error"
+        }
+    }
+}

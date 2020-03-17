@@ -73,15 +73,51 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     @IBAction func selectBaseFolder(_ sender: NSButton) {
-        
+        guard let window = view.window else { return }
+
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.beginSheetModal(for: window) { result in
+            if result == .OK, let selectedPath = panel.url?.path {
+                self.baseFolder = selectedPath
+                self.config.setNTBasePath(newValue: selectedPath)
+            }
+            panel.close()
+        }
     }
     
     @IBAction func selectInputFolder(_ sender: NSButton) {
-        
+        guard let window = view.window else { return }
+
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.beginSheetModal(for: window) { result in
+            if result == .OK, let selectedPath = panel.url?.path {
+                self.inputFolder = selectedPath
+                self.config.setNTIncomingPath(newValue: selectedPath)
+            }
+            panel.close()
+        }
     }
     
     @IBAction func selectOutFolder(_ sender: NSButton) {
-        
+        guard let window = view.window else { return }
+
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.beginSheetModal(for: window) { result in
+            if result == .OK, let selectedPath = panel.url?.path {
+                self.outputFolder = selectedPath
+                self.config.setNTOutgoingPath(newValue: selectedPath)
+            }
+            panel.close()
+        }
     }
     
     @IBAction func nextPressed(_ sender: NSButton) {

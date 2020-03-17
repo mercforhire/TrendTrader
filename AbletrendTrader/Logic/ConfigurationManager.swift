@@ -113,187 +113,236 @@ class ConfigurationManager {
         self.ntOutgoingPath = defaults.object(forKey: "nt_outgoing_path") as? String
     }
     
-    func setRiskMultiplier(newValue: Double) {
-        riskMultiplier = newValue
-        UserDefaults.standard.set(newValue, forKey: "risk_multiplier")
-        UserDefaults.standard.synchronize()
+    func setRiskMultiplier(newValue: Double) throws {
+        if newValue >= 1, newValue <= 10 {
+            riskMultiplier = newValue
+            UserDefaults.standard.set(newValue, forKey: "risk_multiplier")
+            UserDefaults.standard.synchronize()
+            return
+        }
+        
+        throw ConfigError.riskMultiplierError
     }
     
-    func setMaxRisk(newValue: Double) {
-        maxRisk = newValue
-        UserDefaults.standard.set(newValue, forKey: "max_risk")
-        UserDefaults.standard.synchronize()
+    func setMaxRisk(newValue: Double) throws {
+        if newValue >= 2, newValue <= 20 {
+            maxRisk = newValue
+            UserDefaults.standard.set(newValue, forKey: "max_risk")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.maxRiskError
     }
     
-    func setMinStop(newValue: Double) {
-        minStop = newValue
-        UserDefaults.standard.set(newValue, forKey: "min_stop")
-        UserDefaults.standard.synchronize()
+    func setMinStop(newValue: Double) throws {
+        if newValue >= 2, newValue <= 10 {
+            minStop = newValue
+            UserDefaults.standard.set(newValue, forKey: "min_stop")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.minStopError
     }
     
-    func setSweetSpotMinDistance(newValue: Double) {
-        sweetSpotMinDistance = newValue
-        UserDefaults.standard.set(newValue, forKey: "sweet_spot_min_distance")
-        UserDefaults.standard.synchronize()
+    func setSweetSpotMinDistance(newValue: Double) throws {
+        if newValue >= 1, newValue <= 5 {
+            sweetSpotMinDistance = newValue
+            UserDefaults.standard.set(newValue, forKey: "sweet_spot_min_distance")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.sweetSpotMinDistanceError
     }
     
-    func setGreenBarsExit(newValue: Double) {
-        greenBarsExit = newValue
-        UserDefaults.standard.set(newValue, forKey: "green_bars_exit")
-        UserDefaults.standard.synchronize()
+    func setGreenBarsExit(newValue: Double) throws {
+        if newValue >= 5 {
+            greenBarsExit = newValue
+            UserDefaults.standard.set(newValue, forKey: "green_bars_exit")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.greenBarsExitError
     }
     
-    func setSkipGreenBarsExit(newValue: Double) {
-        skipGreenBarsExit = newValue
-        UserDefaults.standard.set(newValue, forKey: "skip_green_bars_exit")
-        UserDefaults.standard.synchronize()
+    func setSkipGreenBarsExit(newValue: Double) throws {
+        if newValue > greenBarsExit {
+            skipGreenBarsExit = newValue
+            UserDefaults.standard.set(newValue, forKey: "skip_green_bars_exit")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.skipGreenBarsExitError
     }
     
-    func setEnterOnPullback(newValue: Double) {
-        enterOnPullback = newValue
-        UserDefaults.standard.set(newValue, forKey: "enter_on_pullback")
-        UserDefaults.standard.synchronize()
+    func setEnterOnPullback(newValue: Double) throws {
+        if newValue >= 10 {
+            enterOnPullback = newValue
+            UserDefaults.standard.set(newValue, forKey: "enter_on_pullback")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.enterOnPullbackError
     }
     
-    func setTakeProfitBarLength(newValue: Double) {
-        takeProfitBarLength = newValue
-        UserDefaults.standard.set(newValue, forKey: "take_profit_bar_length")
-        UserDefaults.standard.synchronize()
+    func setTakeProfitBarLength(newValue: Double) throws {
+        if newValue >= 10 {
+            takeProfitBarLength = newValue
+            UserDefaults.standard.set(newValue, forKey: "take_profit_bar_length")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.takeProfitBarLengthError
     }
     
-    func setMaxHighRiskEntryAllowed(newValue: Int) {
-        maxHighRiskEntryAllowed = newValue
-        UserDefaults.standard.set(newValue, forKey: "max_high_risk_entry_allowed")
-        UserDefaults.standard.synchronize()
+    func setMaxHighRiskEntryAllowed(newValue: Int) throws {
+        if newValue >= 0 {
+            maxHighRiskEntryAllowed = newValue
+            UserDefaults.standard.set(newValue, forKey: "max_high_risk_entry_allowed")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.maxHighRiskEntryAllowedError
     }
     
-    func setHighRiskStart(newValue: Date) {
-        highRiskStart = newValue
-        UserDefaults.standard.set(newValue, forKey: "high_risk_start")
-        UserDefaults.standard.synchronize()
+    func setHighRiskStart(newValue: Date) throws {
+        if newValue >= tradingStart, newValue < tradingEnd, newValue < highRiskEnd {
+            highRiskStart = newValue
+            UserDefaults.standard.set(newValue, forKey: "high_risk_start")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.highRiskStartError
     }
     
-    func setHighRiskEnd(newValue: Date) {
-        highRiskEnd = newValue
-        UserDefaults.standard.set(newValue, forKey: "high_risk_end")
-        UserDefaults.standard.synchronize()
+    func setHighRiskEnd(newValue: Date) throws {
+        if newValue > highRiskStart, newValue < tradingEnd {
+            highRiskEnd = newValue
+            UserDefaults.standard.set(newValue, forKey: "high_risk_end")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.highRiskEndError
     }
     
-    func setTradingStart(newValue: Date) {
-        tradingStart = newValue
-        UserDefaults.standard.set(newValue, forKey: "trading_start")
-        UserDefaults.standard.synchronize()
+    func setTradingStart(newValue: Date) throws {
+        if newValue < tradingEnd {
+            tradingStart = newValue
+            UserDefaults.standard.set(newValue, forKey: "trading_start")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.tradingStartError
     }
     
-    func setTradingEnd(newValue: Date) {
+    func setTradingEnd(newValue: Date) throws {
         tradingEnd = newValue
         UserDefaults.standard.set(newValue, forKey: "trading_end")
         UserDefaults.standard.synchronize()
     }
     
-    func setLunchStart(newValue: Date) {
+    func setLunchStart(newValue: Date) throws {
         lunchStart = newValue
         UserDefaults.standard.set(newValue, forKey: "lunch_start")
         UserDefaults.standard.synchronize()
     }
     
-    func setLunchEnd(newValue: Date) {
+    func setLunchEnd(newValue: Date) throws {
         lunchEnd = newValue
         UserDefaults.standard.set(newValue, forKey: "lunch_end")
         UserDefaults.standard.synchronize()
     }
     
-    func setClearTime(newValue: Date) {
+    func setClearTime(newValue: Date) throws {
         clearTime = newValue
         UserDefaults.standard.set(newValue, forKey: "clear_time")
         UserDefaults.standard.synchronize()
     }
     
-    func setFlatTime(newValue: Date) {
+    func setFlatTime(newValue: Date) throws {
         flatTime = newValue
         UserDefaults.standard.set(newValue, forKey: "flat_time")
         UserDefaults.standard.synchronize()
     }
     
-    func setPositionSize(newValue: Int) {
+    func setPositionSize(newValue: Int) throws {
         positionSize = newValue
         UserDefaults.standard.set(newValue, forKey: "position_size")
         UserDefaults.standard.synchronize()
     }
     
-    func setMaxDailyLoss(newValue: Double) {
+    func setMaxDailyLoss(newValue: Double) throws {
         maxDailyLoss = newValue
         UserDefaults.standard.set(newValue, forKey: "max_daily_loss")
         UserDefaults.standard.synchronize()
     }
     
-    func setByPassTradingTimeRestrictions(newValue: Bool) {
+    func setByPassTradingTimeRestrictions(newValue: Bool) throws {
         byPassTradingTimeRestrictions = newValue
         UserDefaults.standard.set(newValue, forKey: "bypass_trading_time_restrictions")
         UserDefaults.standard.synchronize()
     }
     
-    func setNoEntryDuringLunch(newValue: Bool) {
+    func setNoEntryDuringLunch(newValue: Bool) throws {
         noEntryDuringLunch = newValue
         UserDefaults.standard.set(newValue, forKey: "no_entry_during_lunch")
         UserDefaults.standard.synchronize()
     }
     
-    func setSimulateTimePassage(newValue: Bool) {
+    func setSimulateTimePassage(newValue: Bool) throws {
         simulateTimePassage = newValue
         UserDefaults.standard.set(newValue, forKey: "simulate_time_passage")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTCommission(newValue: Double) {
+    func setNTCommission(newValue: Double) throws {
         ntCommission = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_commission")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTTicker(newValue: String) {
+    func setNTTicker(newValue: String) throws {
         ntTicker = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_ticker")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTExchange(newValue: String) {
+    func setNTExchange(newValue: String) throws {
         ntExchange = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_name")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTAccountLongName(newValue: String) {
+    func setNTAccountLongName(newValue: String) throws {
         ntAccountLongName = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_account_name")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTBasePath(newValue: String) {
+    func setNTBasePath(newValue: String) throws {
         ntBasePath = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_base_path")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTIncomingPath(newValue: String) {
+    func setNTIncomingPath(newValue: String) throws {
         ntIncomingPath = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_incoming_path")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTOutgoingPath(newValue: String) {
+    func setNTOutgoingPath(newValue: String) throws {
         ntOutgoingPath = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_outgoing_path")
         UserDefaults.standard.synchronize()
     }
     
-    func setNTAccountName(newValue: String) {
+    func setNTAccountName(newValue: String) throws {
         ntAccountName = newValue
         UserDefaults.standard.set(newValue, forKey: "nt_account_name")
         UserDefaults.standard.synchronize()
     }
     
-    func setTickerValue(newValue: Double) {
+    func setTickerValue(newValue: Double) throws {
         tickerValue = newValue
         UserDefaults.standard.set(newValue, forKey: "ticker_value")
         UserDefaults.standard.synchronize()

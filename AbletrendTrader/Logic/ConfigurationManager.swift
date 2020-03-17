@@ -205,7 +205,9 @@ class ConfigurationManager {
     }
     
     func setHighRiskStart(newValue: Date) throws {
-        if newValue >= tradingStart, newValue < tradingEnd, newValue < highRiskEnd {
+        if newValue >= tradingStart.stripYearMonthAndDay(),
+            newValue < tradingEnd.stripYearMonthAndDay(),
+            newValue < highRiskEnd.stripYearMonthAndDay() {
             highRiskStart = newValue
             UserDefaults.standard.set(newValue, forKey: "high_risk_start")
             UserDefaults.standard.synchronize()
@@ -215,7 +217,7 @@ class ConfigurationManager {
     }
     
     func setHighRiskEnd(newValue: Date) throws {
-        if newValue > highRiskStart, newValue < tradingEnd {
+        if newValue > highRiskStart.stripYearMonthAndDay(), newValue < tradingEnd.stripYearMonthAndDay() {
             highRiskEnd = newValue
             UserDefaults.standard.set(newValue, forKey: "high_risk_end")
             UserDefaults.standard.synchronize()
@@ -225,7 +227,7 @@ class ConfigurationManager {
     }
     
     func setTradingStart(newValue: Date) throws {
-        if newValue < tradingEnd {
+        if newValue < tradingEnd.stripYearMonthAndDay() {
             tradingStart = newValue
             UserDefaults.standard.set(newValue, forKey: "trading_start")
             UserDefaults.standard.synchronize()
@@ -235,45 +237,73 @@ class ConfigurationManager {
     }
     
     func setTradingEnd(newValue: Date) throws {
-        tradingEnd = newValue
-        UserDefaults.standard.set(newValue, forKey: "trading_end")
-        UserDefaults.standard.synchronize()
+        if newValue > tradingStart.stripYearMonthAndDay() {
+            tradingEnd = newValue
+            UserDefaults.standard.set(newValue, forKey: "trading_end")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.tradingEndError
     }
     
     func setLunchStart(newValue: Date) throws {
-        lunchStart = newValue
-        UserDefaults.standard.set(newValue, forKey: "lunch_start")
-        UserDefaults.standard.synchronize()
+        if newValue < lunchEnd.stripYearMonthAndDay() {
+            lunchStart = newValue
+            UserDefaults.standard.set(newValue, forKey: "lunch_start")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.lunchStartError
     }
     
     func setLunchEnd(newValue: Date) throws {
-        lunchEnd = newValue
-        UserDefaults.standard.set(newValue, forKey: "lunch_end")
-        UserDefaults.standard.synchronize()
+        if newValue > lunchStart.stripYearMonthAndDay() {
+            lunchEnd = newValue
+            UserDefaults.standard.set(newValue, forKey: "lunch_end")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.lunchStartError
     }
     
     func setClearTime(newValue: Date) throws {
-        clearTime = newValue
-        UserDefaults.standard.set(newValue, forKey: "clear_time")
-        UserDefaults.standard.synchronize()
+        if newValue < flatTime, newValue > tradingStart {
+            clearTime = newValue
+            UserDefaults.standard.set(newValue, forKey: "clear_time")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.clearTimeError
     }
     
     func setFlatTime(newValue: Date) throws {
-        flatTime = newValue
-        UserDefaults.standard.set(newValue, forKey: "flat_time")
-        UserDefaults.standard.synchronize()
+        if newValue > clearTime, newValue > tradingStart {
+            flatTime = newValue
+            UserDefaults.standard.set(newValue, forKey: "flat_time")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.flatTimeError
     }
     
     func setPositionSize(newValue: Int) throws {
-        positionSize = newValue
-        UserDefaults.standard.set(newValue, forKey: "position_size")
-        UserDefaults.standard.synchronize()
+        if newValue > 0 {
+            positionSize = newValue
+            UserDefaults.standard.set(newValue, forKey: "position_size")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.positionSizeError
     }
     
     func setMaxDailyLoss(newValue: Double) throws {
-        maxDailyLoss = newValue
-        UserDefaults.standard.set(newValue, forKey: "max_daily_loss")
-        UserDefaults.standard.synchronize()
+        if newValue <= -20 {
+            maxDailyLoss = newValue
+            UserDefaults.standard.set(newValue, forKey: "max_daily_loss")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.maxDailyLossError
     }
     
     func setByPassTradingTimeRestrictions(newValue: Bool) throws {
@@ -295,56 +325,92 @@ class ConfigurationManager {
     }
     
     func setNTCommission(newValue: Double) throws {
-        ntCommission = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_commission")
-        UserDefaults.standard.synchronize()
+        if newValue >= 0 {
+            ntCommission = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_commission")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntCommissionError
     }
     
     func setNTTicker(newValue: String) throws {
-        ntTicker = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_ticker")
-        UserDefaults.standard.synchronize()
+        if newValue.count > 0 {
+            ntTicker = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_ticker")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntTickerError
     }
     
     func setNTExchange(newValue: String) throws {
-        ntExchange = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_name")
-        UserDefaults.standard.synchronize()
+        if newValue.count > 0 {
+            ntExchange = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_name")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntExchangeError
     }
     
     func setNTAccountLongName(newValue: String) throws {
-        ntAccountLongName = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_account_name")
-        UserDefaults.standard.synchronize()
+        if newValue.count > 0 {
+            ntAccountLongName = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_account_name")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntAccountLongNameError
     }
     
     func setNTBasePath(newValue: String) throws {
-        ntBasePath = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_base_path")
-        UserDefaults.standard.synchronize()
+        if newValue.count > 0 {
+            ntBasePath = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_base_path")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntBasePathError
     }
     
     func setNTIncomingPath(newValue: String) throws {
-        ntIncomingPath = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_incoming_path")
-        UserDefaults.standard.synchronize()
+        if newValue.count > 0 {
+            ntIncomingPath = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_incoming_path")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntIncomingPathError
     }
     
     func setNTOutgoingPath(newValue: String) throws {
-        ntOutgoingPath = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_outgoing_path")
-        UserDefaults.standard.synchronize()
+        if newValue.count > 0 {
+            ntOutgoingPath = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_outgoing_path")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntOutgoingPathError
     }
     
     func setNTAccountName(newValue: String) throws {
-        ntAccountName = newValue
-        UserDefaults.standard.set(newValue, forKey: "nt_account_name")
-        UserDefaults.standard.synchronize()
+        if newValue.count > 0 {
+            ntAccountName = newValue
+            UserDefaults.standard.set(newValue, forKey: "nt_account_name")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.ntAccountNameError
     }
     
     func setTickerValue(newValue: Double) throws {
-        tickerValue = newValue
-        UserDefaults.standard.set(newValue, forKey: "ticker_value")
-        UserDefaults.standard.synchronize()
+        if newValue >= 1 {
+            tickerValue = newValue
+            UserDefaults.standard.set(newValue, forKey: "ticker_value")
+            UserDefaults.standard.synchronize()
+        }
+        
+        throw ConfigError.tickerValueError
     }
 }

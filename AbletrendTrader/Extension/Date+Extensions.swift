@@ -109,6 +109,19 @@ extension Date {
         return startDate
     }
     
+    func stripYearMonthAndDay() -> Date {
+        let now = Date()
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components = DateComponents(year: now.year(),
+                                         month: now.month(),
+                                         day: now.day(),
+                                         hour: self.hour(),
+                                         minute: self.minute())
+        let strippedDate: Date = calendar.date(from: components)!
+        return strippedDate
+    }
+    
     func hourMinuteSecond() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.calendar = Calendar(identifier: .iso8601)

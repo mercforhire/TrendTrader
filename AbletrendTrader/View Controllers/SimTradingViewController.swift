@@ -8,11 +8,10 @@
 
 import Cocoa
 
-class SimTradingViewController: NSViewController {
+class SimTradingViewController: NSViewController, NSTextFieldDelegate {
     private let config = ConfigurationManager.shared
     
-    var serverURL: String!
-    
+    @IBOutlet weak var serverURLField: NSTextField!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -24,6 +23,11 @@ class SimTradingViewController: NSViewController {
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var chartButton: NSButton!
     
+    private var serverURL: String = "" {
+        didSet {
+            chartManager?.serverURL = serverURL
+        }
+    }
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
@@ -55,6 +59,10 @@ class SimTradingViewController: NSViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
+        serverURLField.delegate = self
+        
+        serverURL = config.serverURL
+        serverURLField.stringValue = serverURL
     }
 
     override func viewDidLoad() {
@@ -239,6 +247,24 @@ extension SimTradingViewController: SessionManagerDelegate {
     }
     
     func positionStatusChanged() {
+    }
+}
+
+extension SimTradingViewController: NSControlTextEditingDelegate {
+    func controlTextDidEndEditing(_ notification: Notification) {
+        if let textField = notification.object as? NSTextField {
+            do {
+                if textField == serverURLField {
+                    try config.setServerURL(newValue: textField.stringValue)
+                    serverURL = textField.stringValue
+                }
+            } catch (let error) {
+                guard let configError = error as? ConfigError else { return }
+                
+                configError.displayErrorDialog()
+                textField.stringValue = serverURL
+            }
+        }
     }
 }
 

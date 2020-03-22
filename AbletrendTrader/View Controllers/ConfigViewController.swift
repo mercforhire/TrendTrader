@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class ConfigViewController: NSViewController {
+class ConfigViewController: NSViewController, NSTextFieldDelegate {
     let config = ConfigurationManager.shared
     
     @IBOutlet private weak var riskField: NSTextField!
@@ -24,35 +24,30 @@ class ConfigViewController: NSViewController {
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
-    @IBOutlet private weak var dailyLossLimitPicker: NSTextField!
+    @IBOutlet private weak var dailyLossLimitField: NSTextField!
     @IBOutlet private weak var byPassTradingTimeCheckbox: NSButton!
     @IBOutlet private weak var noEntryDuringLunchCheckbox: NSButton!
     
     func setupUI() {
-        riskField.isEditable = true
-        maxSLField.isEditable = true
-        minSTPField.isEditable = true
-        sweetspotDistanceField.isEditable = true
-        minProfitGreenBarField.isEditable = true
-        minProfitByPass.isEditable = true
-        minProfitPullbackField.isEditable = true
-        takeProfitField.isEditable = true
-        highRiskEntryStartPicker.isEnabled = true
-        highRiskEntryEndPicker.isEnabled = true
-        sessionStartTimePicker.isEnabled = true
-        liquidateTimePicker.isEnabled = true
-        flatTimePicker.isEnabled = true
-        dailyLossLimitPicker.isEditable = true
+        riskField.delegate = self
+        maxSLField.delegate = self
+        minSTPField.delegate = self
+        sweetspotDistanceField.delegate = self
+        minProfitGreenBarField.delegate = self
+        minProfitByPass.delegate = self
+        minProfitPullbackField.delegate = self
+        takeProfitField.delegate = self
+        dailyLossLimitField.delegate = self
     }
     
     func loadConfig() {
         riskField.stringValue = String(format: "%.2f", config.riskMultiplier)
         maxSLField.stringValue = String(format: "%.2f", config.maxRisk)
         minSTPField.stringValue = String(format: "%.2f", config.minStop)
-        sweetspotDistanceField.stringValue = String(format: "%.2f", config.sweetSpotMinDistance)
-        minProfitGreenBarField.stringValue = String(format: "%.2f", config.greenBarsExit)
-        minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenBarsExit)
-        minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnPullback)
+        sweetspotDistanceField.stringValue = String(format: "%.2f", config.sweetSpot)
+        minProfitGreenBarField.stringValue = String(format: "%.2f", config.greenExit)
+        minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenExit)
+        minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnAnyPullback)
         takeProfitField.stringValue = String(format: "%.2f", config.takeProfitBarLength)
         
         highRiskEntryStartPicker.dateValue = Date.getNewDateFromTime(hour: config.highRiskStart.hour(),
@@ -70,7 +65,7 @@ class ConfigViewController: NSViewController {
         flatTimePicker.dateValue = Date.getNewDateFromTime(hour: config.flatTime.hour(),
                                                            min: config.flatTime.minute())
         
-        dailyLossLimitPicker.stringValue = String(format: "%.2f", config.maxDailyLoss)
+        dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLoss)
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
         noEntryDuringLunchCheckbox.state = config.noEntryDuringLunch ? .on : .off
     }
@@ -105,23 +100,63 @@ class ConfigViewController: NSViewController {
     }
     
     @IBAction func highRiskStartChanged(_ sender: NSDatePicker) {
-        print(sender.dateValue.hourMinute())
+        do {
+            try config.setHighRiskStart(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.highRiskStart
+        }
     }
     
     @IBAction func highRiskEndChanged(_ sender: NSDatePicker) {
-        print(sender.dateValue.hourMinute())
+        do {
+            try config.setHighRiskEnd(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.highRiskEnd
+        }
     }
     
     @IBAction func sessionStartChanged(_ sender: NSDatePicker) {
-        print(sender.dateValue.hourMinute())
+        do {
+            try config.setTradingStart(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.tradingStart
+        }
     }
     
     @IBAction func liquidationTimeChanged(_ sender: NSDatePicker) {
-        print(sender.dateValue.hourMinute())
+        do {
+            try config.setClearTime(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.clearTime
+        }
     }
     
     @IBAction func flatPositionsTimeChanged(_ sender: NSDatePicker) {
-        print(sender.dateValue.hourMinute())
+        do {
+            try config.setFlatTime(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.flatTime
+        }
     }
     
 }
@@ -129,24 +164,30 @@ class ConfigViewController: NSViewController {
 extension ConfigViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
-            if textField == riskField {
-                config.setRiskMultiplier(newValue: textField.doubleValue)
-            } else if textField == maxSLField {
-                config.setMaxRisk(newValue: textField.doubleValue)
-            } else if textField == minSTPField {
-                config.setMaxRisk(newValue: textField.doubleValue)
-            } else if textField == sweetspotDistanceField {
-                config.setSweetSpotMinDistance(newValue: textField.doubleValue)
-            } else if textField == minProfitGreenBarField {
-                config.setGreenBarsExit(newValue: textField.doubleValue)
-            } else if textField == minProfitByPass {
-                config.setSkipGreenBarsExit(newValue: textField.doubleValue)
-            } else if textField == minProfitPullbackField {
-                config.setEnterOnPullback(newValue: textField.doubleValue)
-            } else if textField == takeProfitField {
-                config.setTakeProfitBarLength(newValue: textField.doubleValue)
-            } else if textField == dailyLossLimitPicker {
-                config.setMaxDailyLoss(newValue: textField.doubleValue)
+            do {
+                if textField == riskField {
+                    try config.setRiskMultiplier(newValue: textField.doubleValue)
+                } else if textField == maxSLField {
+                    try config.setMaxRisk(newValue: textField.doubleValue)
+                } else if textField == minSTPField {
+                    try config.setMinStop(newValue: textField.doubleValue)
+                } else if textField == sweetspotDistanceField {
+                    try config.setSweetSpotMinDistance(newValue: textField.doubleValue)
+                } else if textField == minProfitGreenBarField {
+                    try config.setGreenBarsExit(newValue: textField.doubleValue)
+                } else if textField == minProfitByPass {
+                    try config.setSkipGreenBarsExit(newValue: textField.doubleValue)
+                } else if textField == minProfitPullbackField {
+                    try config.setEnterOnPullback(newValue: textField.doubleValue)
+                } else if textField == takeProfitField {
+                    try config.setTakeProfitBarLength(newValue: textField.doubleValue)
+                } else if textField == dailyLossLimitField {
+                    try config.setMaxDailyLoss(newValue: textField.doubleValue)
+                }
+            } catch (let error) {
+                guard let configError = error as? ConfigError else { return }
+                
+                configError.displayErrorDialog()
             }
         }
     }

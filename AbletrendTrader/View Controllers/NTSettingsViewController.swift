@@ -81,8 +81,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         panel.allowsMultipleSelection = false
         panel.beginSheetModal(for: window) { result in
             if result == .OK, let selectedPath = panel.url?.path {
-                self.baseFolder = selectedPath
-                self.config.setNTBasePath(newValue: selectedPath)
+                do {
+                    try self.config.setNTBasePath(newValue: selectedPath)
+                    self.baseFolder = selectedPath
+                } catch(let error) {
+                    guard let configError = error as? ConfigError else { return }
+                    
+                    configError.displayErrorDialog()
+                }
             }
             panel.close()
         }
@@ -97,8 +103,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         panel.allowsMultipleSelection = false
         panel.beginSheetModal(for: window) { result in
             if result == .OK, let selectedPath = panel.url?.path {
-                self.inputFolder = selectedPath
-                self.config.setNTIncomingPath(newValue: selectedPath)
+                do {
+                    try self.config.setNTIncomingPath(newValue: selectedPath)
+                    self.inputFolder = selectedPath
+                } catch (let error) {
+                    guard let configError = error as? ConfigError else { return }
+                    
+                    configError.displayErrorDialog()
+                }
             }
             panel.close()
         }
@@ -113,8 +125,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         panel.allowsMultipleSelection = false
         panel.beginSheetModal(for: window) { result in
             if result == .OK, let selectedPath = panel.url?.path {
-                self.outputFolder = selectedPath
-                self.config.setNTOutgoingPath(newValue: selectedPath)
+                do {
+                    try self.config.setNTOutgoingPath(newValue: selectedPath)
+                    self.outputFolder = selectedPath
+                } catch (let error) {
+                    guard let configError = error as? ConfigError else { return }
+                    
+                    configError.displayErrorDialog()
+                }
             }
             panel.close()
         }
@@ -165,6 +183,13 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         return true
     }
     
+    override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
+        if let vc = segue.destinationController as? LiveTradingViewController {
+            
+            vc.tradingMode = .ninjaTrader(accountId: <#T##String#>, commission: <#T##Double#>, ticker: <#T##String#>, name: <#T##String#>, accountLongName: <#T##String#>, accountName: <#T##String#>, basePath: <#T##String#>, incomingPath: <#T##String#>, outgoingPath: <#T##String#>)
+        }
+    }
+    
     private func showErrorDialog(text: String) {
         let alert = NSAlert()
         alert.messageText = text
@@ -177,18 +202,24 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
 extension NTSettingsViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
-            if textField == commissionField {
-                commission = textField.doubleValue
-                config.setNTCommission(newValue: commission)
-            } else if textField == exchangeField {
-                exchange = textField.stringValue
-                config.setNTExchange(newValue: exchange)
-            } else if textField == longNameField {
-                longName = textField.stringValue
-                config.setNTAccountLongName(newValue: longName)
-            } else if textField == shortNameField {
-                shortName = textField.stringValue
-                config.setNTAccountName(newValue: shortName)
+            do {
+                if textField == commissionField {
+                    try config.setNTCommission(newValue: commission)
+                    commission = textField.doubleValue
+                } else if textField == exchangeField {
+                    try config.setNTExchange(newValue: exchange)
+                    exchange = textField.stringValue
+                } else if textField == longNameField {
+                    try config.setNTAccountLongName(newValue: longName)
+                    longName = textField.stringValue
+                } else if textField == shortNameField {
+                    try config.setNTAccountName(newValue: shortName)
+                    shortName = textField.stringValue
+                }
+            } catch (let error) {
+                guard let configError = error as? ConfigError else { return }
+                
+                configError.displayErrorDialog()
             }
         }
     }

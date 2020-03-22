@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>default_ip</key>
+	<string>http://192.168.0.121/</string>
 	<key>nt_exchange</key>
 	<string>Globex</string>
 	<key>nt_commission</key>
@@ -39,9 +41,9 @@
 	<key>enter_on_pullback</key>
 	<integer>20</integer>
 	<key>skip_green_bars_exit</key>
-	<integer>10</integer>
-	<key>green_bars_exit</key>
 	<integer>30</integer>
+	<key>green_bars_exit</key>
+	<integer>10</integer>
 	<key>sweet_spot_min_distance</key>
 	<integer>3</integer>
 	<key>min_stop</key>

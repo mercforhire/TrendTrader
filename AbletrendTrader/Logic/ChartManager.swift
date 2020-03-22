@@ -23,12 +23,12 @@ class ChartManager {
     private let config = ConfigurationManager.shared
     private let delayBeforeFetchingAtNewMinute = 10
     
+    var serverURL: String
     var chart: Chart?
     var monitoring = false
     weak var delegate: DataManagerDelegate?
     
     private let live: Bool
-    private let serverURL: String
     private var simTime: Date!
     private var currentPriceBarTime: Date?
     private var fetchingChart = false

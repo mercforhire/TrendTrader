@@ -8,12 +8,12 @@
 
 import Cocoa
 
-class LiveTradingViewController: NSViewController, NSWindowDelegate {
+class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
     private let config = ConfigurationManager.shared
     
     var tradingMode: LiveTradingMode!
-    var serverURL: String!
     
+    @IBOutlet weak var serverURLField: NSTextField!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -27,6 +27,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var sellButton: NSButton!
     @IBOutlet weak var positionStatusLabel: NSTextField!
     
+    private var serverURL: String = "" {
+        didSet {
+            chartManager?.serverURL = serverURL
+        }
+    }
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
@@ -60,8 +65,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         tableView.delegate = self
         tableView.dataSource = self
-        
-        view.window?.delegate = self
     }
     
     override func viewDidLoad() {
@@ -330,5 +333,23 @@ extension LiveTradingViewController: SessionManagerDelegate {
     func positionStatusChanged() {
         updateTradesList()
         positionStatusLabel.stringValue = sessionManager.status?.status() ?? "Position: --"
+    }
+}
+
+extension LiveTradingViewController: NSControlTextEditingDelegate {
+    func controlTextDidEndEditing(_ notification: Notification) {
+        if let textField = notification.object as? NSTextField {
+            do {
+                if textField == serverURLField {
+                    try config.setServerURL(newValue: textField.stringValue)
+                    serverURL = textField.stringValue
+                }
+            } catch (let error) {
+                guard let configError = error as? ConfigError else { return }
+                
+                configError.displayErrorDialog()
+                textField.stringValue = serverURL
+            }
+        }
     }
 }

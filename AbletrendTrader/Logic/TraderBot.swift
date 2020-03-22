@@ -172,12 +172,12 @@ class TraderBot {
                     securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
                 }
                 
-                if securedProfit < config.skipGreenBarsExit, securedProfit >= config.greenBarsExit {
+                if securedProfit < config.skipGreenExit, securedProfit >= config.greenExit {
                     switch sessionManager.pos?.direction {
                     case .long:
                         if stopLossFromGreenBars > currentStop {
                             // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
-                            if stopLossFromGreenBars - currentStop > config.sweetSpotMinDistance {
+                            if stopLossFromGreenBars - currentStop > config.sweetSpot {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
                                 twoGreenBarsSL = currentStop - 1
@@ -186,7 +186,7 @@ class TraderBot {
                     default:
                         if stopLossFromGreenBars < currentStop {
                             // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
-                            if currentStop - stopLossFromGreenBars > config.sweetSpotMinDistance {
+                            if currentStop - stopLossFromGreenBars > config.sweetSpot {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
                                 twoGreenBarsSL = currentStop + 1
@@ -301,12 +301,12 @@ class TraderBot {
             switch direction {
             case .long:
                 guard let pullbackLow = pullBack.getLowestPoint(),
-                    pullbackLow < oneMinStop || pullbackLow - oneMinStop <= config.sweetSpotMinDistance else {
+                    pullbackLow < oneMinStop || pullbackLow - oneMinStop <= config.sweetSpot else {
                     return nil
                 }
             default:
                 guard let pullbackHigh = pullBack.getHighestPoint(),
-                    pullbackHigh > oneMinStop || oneMinStop - pullbackHigh <= config.sweetSpotMinDistance else {
+                    pullbackHigh > oneMinStop || oneMinStop - pullbackHigh <= config.sweetSpot else {
                     return nil
                 }
             }
@@ -379,7 +379,7 @@ class TraderBot {
                                            toKey: currentBar.time.generateDateIdentifier()) {
                 // If the previous trade profit is higher than enterOnPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-                if lastTrade.idealProfit > config.enterOnPullback {
+                if lastTrade.idealProfit > config.enterOnAnyPullback {
                     return seekToOpenPosition(bar: currentBar, entryType: .pullBack)
                 } else {
                     return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)

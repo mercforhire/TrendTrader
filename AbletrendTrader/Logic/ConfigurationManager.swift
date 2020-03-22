@@ -12,15 +12,53 @@ class ConfigurationManager {
     static let shared = ConfigurationManager()
     private let defaults : UserDefaults = UserDefaults.standard
     
-    private(set) var riskMultiplier: Double
-    private(set) var maxRisk: Double
-    private(set) var minStop: Double
-    private(set) var sweetSpotMinDistance: Double // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
-    private(set) var greenBarsExit: Double // the min profit the trade must in to use the 2 green bars exit rule
-    private(set) var skipGreenBarsExit: Double // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
-    private(set) var enterOnPullback: Double // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-    private(set) var takeProfitBarLength: Double
-    private(set) var maxHighRiskEntryAllowed: Int
+    var riskMultiplier: Double
+    
+    private var maxRiskBase: Double
+    var maxRisk: Double {
+        return maxRiskBase * riskMultiplier
+    }
+    
+    private var minStopBase: Double
+    var minStop: Double {
+        return minStopBase * riskMultiplier
+    }
+    
+    // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
+    private var sweetSpotBase: Double
+    var sweetSpot: Double {
+        return sweetSpotBase * riskMultiplier
+    }
+    
+    // the min profit the trade must in to use the 2 green bars exit rule
+    private var greenExitBase: Double
+    var greenExit: Double {
+        return greenExitBase * riskMultiplier
+    }
+    
+    // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
+    private var skipGreenExitBase: Double
+    var skipGreenExit: Double {
+        return skipGreenExitBase * riskMultiplier
+    }
+    
+    // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
+    private var enterOnAnyPullbackBase: Double
+    var enterOnAnyPullback: Double {
+        return enterOnAnyPullbackBase * riskMultiplier
+    }
+    
+    private var takeProfitBarLengthBase: Double
+    var takeProfitBarLength: Double {
+        return takeProfitBarLengthBase * riskMultiplier
+    }
+    
+    // stop trading when P/L goes under this number
+    private var maxDailyLossBase: Double
+    var maxDailyLoss: Double {
+        return maxDailyLossBase * riskMultiplier
+    }
+    
     private(set) var highRiskStart: Date
     private(set) var highRiskEnd: Date
     private(set) var tradingStart: Date
@@ -29,8 +67,10 @@ class ConfigurationManager {
     private(set) var lunchEnd: Date
     private(set) var clearTime: Date
     private(set) var flatTime: Date
+    
+    private(set) var maxHighRiskEntryAllowed: Int
     private(set) var positionSize: Int
-    private(set) var maxDailyLoss: Double // stop trading when P/L goes under this number
+    
     private(set) var byPassTradingTimeRestrictions : Bool
     private(set) var noEntryDuringLunch : Bool
     private(set) var simulateTimePassage : Bool
@@ -44,6 +84,7 @@ class ConfigurationManager {
     private(set) var ntBasePath: String?
     private(set) var ntIncomingPath: String?
     private(set) var ntOutgoingPath: String?
+    private(set) var serverURL: String
     
     init() {
         let defaultSettings: NSDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "DefaultSettings", ofType: "plist")!)!
@@ -52,41 +93,41 @@ class ConfigurationManager {
         
         self.riskMultiplier = riskMultiplier
         
-        self.maxRisk = (defaults.object(forKey: "max_risk") as? Double ?? defaultSettings["max_risk"] as! Double) * riskMultiplier
+        self.maxRiskBase = defaults.object(forKey: "max_risk") as? Double ?? defaultSettings["max_risk"] as! Double
         
-        self.minStop = (defaults.object(forKey: "min_stop") as? Double ?? defaultSettings["min_stop"] as! Double) * riskMultiplier
+        self.minStopBase = defaults.object(forKey: "min_stop") as? Double ?? defaultSettings["min_stop"] as! Double
         
-        self.sweetSpotMinDistance = (defaults.object(forKey: "sweet_spot_min_distance") as? Double ?? defaultSettings["sweet_spot_min_distance"] as! Double) * riskMultiplier
+        self.sweetSpotBase = defaults.object(forKey: "sweet_spot_min_distance") as? Double ?? defaultSettings["sweet_spot_min_distance"] as! Double
         
-        self.greenBarsExit = (defaults.object(forKey: "green_bars_exit") as? Double ?? defaultSettings["green_bars_exit"] as! Double) * riskMultiplier
+        self.greenExitBase = defaults.object(forKey: "green_bars_exit") as? Double ?? defaultSettings["green_bars_exit"] as! Double
         
-        self.skipGreenBarsExit = (defaults.object(forKey: "skip_green_bars_exit") as? Double ?? defaultSettings["skip_green_bars_exit"] as! Double) * riskMultiplier
+        self.skipGreenExitBase = defaults.object(forKey: "skip_green_bars_exit") as? Double ?? defaultSettings["skip_green_bars_exit"] as! Double
         
-        self.enterOnPullback = (defaults.object(forKey: "enter_on_pullback") as? Double ?? defaultSettings["enter_on_pullback"] as! Double) * riskMultiplier
+        self.enterOnAnyPullbackBase = defaults.object(forKey: "enter_on_pullback") as? Double ?? defaultSettings["enter_on_pullback"] as! Double
         
-        self.takeProfitBarLength = (defaults.object(forKey: "take_profit_bar_length") as? Double ?? defaultSettings["take_profit_bar_length"] as! Double) * riskMultiplier
+        self.takeProfitBarLengthBase = defaults.object(forKey: "take_profit_bar_length") as? Double ?? defaultSettings["take_profit_bar_length"] as! Double
         
         self.maxHighRiskEntryAllowed = defaults.object(forKey: "max_high_risk_entry_allowed") as? Int ?? defaultSettings["max_high_risk_entry_allowed"] as! Int
         
-        self.highRiskStart = defaults.object(forKey: "high_risk_start") as? Date ?? defaultSettings["high_risk_start"] as! Date
+        self.highRiskStart = (defaults.object(forKey: "high_risk_start") as? Date ?? defaultSettings["high_risk_start"] as! Date).stripYearMonthAndDay()
         
-        self.highRiskEnd = defaults.object(forKey: "high_risk_end") as? Date ?? defaultSettings[ "high_risk_end"] as! Date
+        self.highRiskEnd = (defaults.object(forKey: "high_risk_end") as? Date ?? defaultSettings[ "high_risk_end"] as! Date).stripYearMonthAndDay()
         
-        self.tradingStart = defaults.object(forKey: "trading_start") as? Date ?? defaultSettings["trading_start"] as! Date
+        self.tradingStart = (defaults.object(forKey: "trading_start") as? Date ?? defaultSettings["trading_start"] as! Date).stripYearMonthAndDay()
         
-        self.tradingEnd = defaults.object(forKey: "trading_end") as? Date ?? defaultSettings["trading_end"] as! Date
+        self.tradingEnd = (defaults.object(forKey: "trading_end") as? Date ?? defaultSettings["trading_end"] as! Date).stripYearMonthAndDay()
         
-        self.lunchStart = defaults.object(forKey: "lunch_start") as? Date ?? defaultSettings["lunch_start"] as! Date
+        self.lunchStart = (defaults.object(forKey: "lunch_start") as? Date ?? defaultSettings["lunch_start"] as! Date).stripYearMonthAndDay()
         
-        self.lunchEnd = defaults.object(forKey: "lunch_end") as? Date ?? defaultSettings["lunch_end"] as! Date
+        self.lunchEnd = (defaults.object(forKey: "lunch_end") as? Date ?? defaultSettings["lunch_end"] as! Date).stripYearMonthAndDay()
         
-        self.clearTime = defaults.object(forKey: "clear_time") as? Date ?? defaultSettings["clear_time"] as! Date
+        self.clearTime = (defaults.object(forKey: "clear_time") as? Date ?? defaultSettings["clear_time"] as! Date).stripYearMonthAndDay()
         
-        self.flatTime = defaults.object(forKey: "flat_time") as? Date ?? defaultSettings["flat_time"] as! Date
+        self.flatTime = (defaults.object(forKey: "flat_time") as? Date ?? defaultSettings["flat_time"] as! Date).stripYearMonthAndDay()
         
         self.positionSize = defaults.object(forKey: "position_size") as? Int ?? defaultSettings["position_size"] as! Int
         
-        self.maxDailyLoss = (defaults.object(forKey: "max_daily_loss") as? Double ?? defaultSettings["max_daily_loss"] as! Double) * riskMultiplier
+        self.maxDailyLossBase = defaults.object(forKey: "max_daily_loss") as? Double ?? defaultSettings["max_daily_loss"] as! Double
         
         self.byPassTradingTimeRestrictions = defaults.object(forKey: "bypass_trading_time_restrictions") as? Bool ?? defaultSettings["bypass_trading_time_restrictions"] as! Bool
         
@@ -111,13 +152,24 @@ class ConfigurationManager {
         self.ntIncomingPath = defaults.object(forKey: "nt_incoming_path") as? String
         
         self.ntOutgoingPath = defaults.object(forKey: "nt_outgoing_path") as? String
+        
+        self.serverURL = defaults.object(forKey: "default_ip") as? String ?? defaultSettings["default_ip"] as! String
+    }
+    
+    func setServerURL(newValue: String) throws {
+        if newValue.range(of: #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}\/"#, options: .regularExpression) != nil {
+            serverURL = newValue
+            saveToDefaults(newValue: newValue, key: "default_ip")
+            return
+        }
+        
+        throw ConfigError.serverURLError
     }
     
     func setRiskMultiplier(newValue: Double) throws {
         if newValue >= 1, newValue <= 10 {
             riskMultiplier = newValue
-            UserDefaults.standard.set(newValue, forKey: "risk_multiplier")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "risk_multiplier")
             return
         }
         
@@ -126,9 +178,9 @@ class ConfigurationManager {
     
     func setMaxRisk(newValue: Double) throws {
         if newValue >= 2, newValue <= 20 {
-            maxRisk = newValue
-            UserDefaults.standard.set(newValue, forKey: "max_risk")
-            UserDefaults.standard.synchronize()
+            maxRiskBase = newValue
+            saveToDefaults(newValue: newValue, key: "max_risk")
+            return
         }
         
         throw ConfigError.maxRiskError
@@ -136,9 +188,9 @@ class ConfigurationManager {
     
     func setMinStop(newValue: Double) throws {
         if newValue >= 2, newValue <= 10 {
-            minStop = newValue
-            UserDefaults.standard.set(newValue, forKey: "min_stop")
-            UserDefaults.standard.synchronize()
+            minStopBase = newValue
+            saveToDefaults(newValue: newValue, key: "min_stop")
+            return
         }
         
         throw ConfigError.minStopError
@@ -146,9 +198,9 @@ class ConfigurationManager {
     
     func setSweetSpotMinDistance(newValue: Double) throws {
         if newValue >= 1, newValue <= 5 {
-            sweetSpotMinDistance = newValue
-            UserDefaults.standard.set(newValue, forKey: "sweet_spot_min_distance")
-            UserDefaults.standard.synchronize()
+            sweetSpotBase = newValue
+            saveToDefaults(newValue: newValue, key: "sweet_spot_min_distance")
+            return
         }
         
         throw ConfigError.sweetSpotMinDistanceError
@@ -156,19 +208,19 @@ class ConfigurationManager {
     
     func setGreenBarsExit(newValue: Double) throws {
         if newValue >= 5 {
-            greenBarsExit = newValue
-            UserDefaults.standard.set(newValue, forKey: "green_bars_exit")
-            UserDefaults.standard.synchronize()
+            greenExitBase = newValue
+            saveToDefaults(newValue: newValue, key: "green_bars_exit")
+            return
         }
         
         throw ConfigError.greenBarsExitError
     }
     
     func setSkipGreenBarsExit(newValue: Double) throws {
-        if newValue > greenBarsExit {
-            skipGreenBarsExit = newValue
-            UserDefaults.standard.set(newValue, forKey: "skip_green_bars_exit")
-            UserDefaults.standard.synchronize()
+        if newValue > greenExitBase {
+            skipGreenExitBase = newValue
+            saveToDefaults(newValue: newValue, key: "skip_green_bars_exit")
+            return
         }
         
         throw ConfigError.skipGreenBarsExitError
@@ -176,9 +228,9 @@ class ConfigurationManager {
     
     func setEnterOnPullback(newValue: Double) throws {
         if newValue >= 10 {
-            enterOnPullback = newValue
-            UserDefaults.standard.set(newValue, forKey: "enter_on_pullback")
-            UserDefaults.standard.synchronize()
+            enterOnAnyPullbackBase = newValue
+            saveToDefaults(newValue: newValue, key: "enter_on_pullback")
+            return
         }
         
         throw ConfigError.enterOnPullbackError
@@ -186,9 +238,9 @@ class ConfigurationManager {
     
     func setTakeProfitBarLength(newValue: Double) throws {
         if newValue >= 10 {
-            takeProfitBarLength = newValue
-            UserDefaults.standard.set(newValue, forKey: "take_profit_bar_length")
-            UserDefaults.standard.synchronize()
+            takeProfitBarLengthBase = newValue
+            saveToDefaults(newValue: newValue, key: "take_profit_bar_length")
+            return
         }
         
         throw ConfigError.takeProfitBarLengthError
@@ -197,90 +249,98 @@ class ConfigurationManager {
     func setMaxHighRiskEntryAllowed(newValue: Int) throws {
         if newValue >= 0 {
             maxHighRiskEntryAllowed = newValue
-            UserDefaults.standard.set(newValue, forKey: "max_high_risk_entry_allowed")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "max_high_risk_entry_allowed")
+            return
         }
         
         throw ConfigError.maxHighRiskEntryAllowedError
     }
     
     func setHighRiskStart(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue >= tradingStart.stripYearMonthAndDay(),
             newValue < tradingEnd.stripYearMonthAndDay(),
             newValue < highRiskEnd.stripYearMonthAndDay() {
             highRiskStart = newValue
-            UserDefaults.standard.set(newValue, forKey: "high_risk_start")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "high_risk_start")
+            return
         }
         
         throw ConfigError.highRiskStartError
     }
     
     func setHighRiskEnd(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue > highRiskStart.stripYearMonthAndDay(), newValue < tradingEnd.stripYearMonthAndDay() {
             highRiskEnd = newValue
-            UserDefaults.standard.set(newValue, forKey: "high_risk_end")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "high_risk_end")
+            return
         }
         
         throw ConfigError.highRiskEndError
     }
     
     func setTradingStart(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue < tradingEnd.stripYearMonthAndDay() {
             tradingStart = newValue
-            UserDefaults.standard.set(newValue, forKey: "trading_start")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "trading_start")
+            return
         }
         
         throw ConfigError.tradingStartError
     }
     
     func setTradingEnd(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue > tradingStart.stripYearMonthAndDay() {
             tradingEnd = newValue
-            UserDefaults.standard.set(newValue, forKey: "trading_end")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "trading_end")
+            return
         }
         
         throw ConfigError.tradingEndError
     }
     
     func setLunchStart(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue < lunchEnd.stripYearMonthAndDay() {
             lunchStart = newValue
-            UserDefaults.standard.set(newValue, forKey: "lunch_start")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "lunch_start")
+            return
         }
         
         throw ConfigError.lunchStartError
     }
     
     func setLunchEnd(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue > lunchStart.stripYearMonthAndDay() {
             lunchEnd = newValue
-            UserDefaults.standard.set(newValue, forKey: "lunch_end")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "lunch_end")
+            return
         }
         
         throw ConfigError.lunchStartError
     }
     
     func setClearTime(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue < flatTime, newValue > tradingStart {
             clearTime = newValue
-            UserDefaults.standard.set(newValue, forKey: "clear_time")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "clear_time")
+            return
         }
         
         throw ConfigError.clearTimeError
     }
     
     func setFlatTime(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
         if newValue > clearTime, newValue > tradingStart {
             flatTime = newValue
-            UserDefaults.standard.set(newValue, forKey: "flat_time")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "flat_time")
+            return
         }
         
         throw ConfigError.flatTimeError
@@ -289,8 +349,8 @@ class ConfigurationManager {
     func setPositionSize(newValue: Int) throws {
         if newValue > 0 {
             positionSize = newValue
-            UserDefaults.standard.set(newValue, forKey: "position_size")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "position_size")
+            return
         }
         
         throw ConfigError.positionSizeError
@@ -298,37 +358,34 @@ class ConfigurationManager {
     
     func setMaxDailyLoss(newValue: Double) throws {
         if newValue <= -20 {
-            maxDailyLoss = newValue
-            UserDefaults.standard.set(newValue, forKey: "max_daily_loss")
-            UserDefaults.standard.synchronize()
+            maxDailyLossBase = newValue
+            saveToDefaults(newValue: newValue, key: "max_daily_loss")
+            return
         }
         
         throw ConfigError.maxDailyLossError
     }
     
-    func setByPassTradingTimeRestrictions(newValue: Bool) throws {
+    func setByPassTradingTimeRestrictions(newValue: Bool) {
         byPassTradingTimeRestrictions = newValue
-        UserDefaults.standard.set(newValue, forKey: "bypass_trading_time_restrictions")
-        UserDefaults.standard.synchronize()
+        saveToDefaults(newValue: newValue, key: "bypass_trading_time_restrictions")
     }
     
-    func setNoEntryDuringLunch(newValue: Bool) throws {
+    func setNoEntryDuringLunch(newValue: Bool) {
         noEntryDuringLunch = newValue
-        UserDefaults.standard.set(newValue, forKey: "no_entry_during_lunch")
-        UserDefaults.standard.synchronize()
+        saveToDefaults(newValue: newValue, key: "no_entry_during_lunch")
     }
     
-    func setSimulateTimePassage(newValue: Bool) throws {
+    func setSimulateTimePassage(newValue: Bool) {
         simulateTimePassage = newValue
-        UserDefaults.standard.set(newValue, forKey: "simulate_time_passage")
-        UserDefaults.standard.synchronize()
+        saveToDefaults(newValue: newValue, key: "simulate_time_passage")
     }
     
     func setNTCommission(newValue: Double) throws {
         if newValue >= 0 {
             ntCommission = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_commission")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_commission")
+            return
         }
         
         throw ConfigError.ntCommissionError
@@ -337,8 +394,8 @@ class ConfigurationManager {
     func setNTTicker(newValue: String) throws {
         if newValue.count > 0 {
             ntTicker = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_ticker")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_ticker")
+            return
         }
         
         throw ConfigError.ntTickerError
@@ -347,8 +404,8 @@ class ConfigurationManager {
     func setNTExchange(newValue: String) throws {
         if newValue.count > 0 {
             ntExchange = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_name")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_name")
+            return
         }
         
         throw ConfigError.ntExchangeError
@@ -357,8 +414,8 @@ class ConfigurationManager {
     func setNTAccountLongName(newValue: String) throws {
         if newValue.count > 0 {
             ntAccountLongName = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_account_name")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_account_name")
+            return
         }
         
         throw ConfigError.ntAccountLongNameError
@@ -367,8 +424,8 @@ class ConfigurationManager {
     func setNTBasePath(newValue: String) throws {
         if newValue.count > 0 {
             ntBasePath = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_base_path")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_base_path")
+            return
         }
         
         throw ConfigError.ntBasePathError
@@ -377,8 +434,8 @@ class ConfigurationManager {
     func setNTIncomingPath(newValue: String) throws {
         if newValue.count > 0 {
             ntIncomingPath = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_incoming_path")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_incoming_path")
+            return
         }
         
         throw ConfigError.ntIncomingPathError
@@ -387,8 +444,8 @@ class ConfigurationManager {
     func setNTOutgoingPath(newValue: String) throws {
         if newValue.count > 0 {
             ntOutgoingPath = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_outgoing_path")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_outgoing_path")
+            return
         }
         
         throw ConfigError.ntOutgoingPathError
@@ -397,8 +454,8 @@ class ConfigurationManager {
     func setNTAccountName(newValue: String) throws {
         if newValue.count > 0 {
             ntAccountName = newValue
-            UserDefaults.standard.set(newValue, forKey: "nt_account_name")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "nt_account_name")
+            return
         }
         
         throw ConfigError.ntAccountNameError
@@ -407,10 +464,16 @@ class ConfigurationManager {
     func setTickerValue(newValue: Double) throws {
         if newValue >= 1 {
             tickerValue = newValue
-            UserDefaults.standard.set(newValue, forKey: "ticker_value")
-            UserDefaults.standard.synchronize()
+            saveToDefaults(newValue: newValue, key: "ticker_value")
+            return
         }
         
         throw ConfigError.tickerValueError
+    }
+    
+    private func saveToDefaults(newValue: Any, key: String) {
+        UserDefaults.standard.set(newValue, forKey: "ticker_value")
+        UserDefaults.standard.synchronize()
+        print("Saved value:", newValue, "to key", key)
     }
 }

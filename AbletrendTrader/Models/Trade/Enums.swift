@@ -297,6 +297,7 @@ enum TradingError: Error {
 }
 
 enum ConfigError: Error {
+    case serverURLError
     case riskMultiplierError
     case maxRiskError
     case minStopError
@@ -328,6 +329,8 @@ enum ConfigError: Error {
     
     func displayMessage() -> String {
         switch self {
+        case .serverURLError:
+            return "Server URL Error, must be of format: http://192.168.0.121/"
         case .riskMultiplierError:
             return "Risk multplier must be between 1 - 10"
         case .maxRiskError:
@@ -385,5 +388,13 @@ enum ConfigError: Error {
         case .ntOutgoingPathError:
             return "Outgoing path error"
         }
+    }
+    
+    func displayErrorDialog() {
+        let alert = NSAlert()
+        alert.messageText = self.displayMessage()
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Dismiss")
+        alert.runModal()
     }
 }

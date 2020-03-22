@@ -143,7 +143,7 @@ class ConfigurationManager {
         
         self.ntExchange = defaults.object(forKey: "nt_exchange") as? String ?? defaultSettings["nt_exchange"] as! String
         
-        self.ntAccountLongName = defaults.object(forKey: "nt_account_name") as? String
+        self.ntAccountLongName = defaults.object(forKey: "nt_account_long_name") as? String
         
         self.ntAccountName = defaults.object(forKey: "nt_account_name") as? String
         
@@ -404,7 +404,7 @@ class ConfigurationManager {
     func setNTExchange(newValue: String) throws {
         if newValue.count > 0 {
             ntExchange = newValue
-            saveToDefaults(newValue: newValue, key: "nt_name")
+            saveToDefaults(newValue: newValue, key: "nt_exchange")
             return
         }
         
@@ -414,7 +414,7 @@ class ConfigurationManager {
     func setNTAccountLongName(newValue: String) throws {
         if newValue.count > 0 {
             ntAccountLongName = newValue
-            saveToDefaults(newValue: newValue, key: "nt_account_name")
+            saveToDefaults(newValue: newValue, key: "nt_account_long_name")
             return
         }
         
@@ -472,7 +472,7 @@ class ConfigurationManager {
     }
     
     private func saveToDefaults(newValue: Any, key: String) {
-        UserDefaults.standard.set(newValue, forKey: "ticker_value")
+        UserDefaults.standard.set(newValue, forKey: key)
         UserDefaults.standard.synchronize()
         print("Saved value:", newValue, "to key", key)
     }

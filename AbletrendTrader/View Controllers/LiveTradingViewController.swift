@@ -82,13 +82,12 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
         chartManager?.delegate = self
         
         switch tradingMode {
-        case .ninjaTrader(let accountId, let commission, let ticker, let name, let accountLongName, let accountName, let basePath, let incomingPath, let outgoingPath):
+        case .ninjaTrader(let accountId, let commission, let ticker, let exchange, let accountLongName, let basePath, let incomingPath, let outgoingPath):
             sessionManager = NTSessionManager(accountId: accountId,
                                               commission: commission,
                                               ticker: ticker,
-                                              name: name,
+                                              exchange: exchange,
                                               accountLongName: accountLongName,
-                                              accountName: accountName,
                                               basePath: basePath,
                                               incomingPath: incomingPath,
                                               outgoingPath: outgoingPath)

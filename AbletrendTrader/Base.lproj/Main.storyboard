@@ -264,12 +264,12 @@
         <scene sceneID="MaQ-Fg-w2Z">
             <objects>
                 <viewController title="NinjaTrader Initialization" showSeguePresentationStyle="single" id="DI5-WX-nEg" customClass="NTSettingsViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="Mh4-Gz-qso">
-                        <rect key="frame" x="0.0" y="0.0" width="520" height="514"/>
+                    <view key="view" misplaced="YES" id="Mh4-Gz-qso">
+                        <rect key="frame" x="0.0" y="0.0" width="520" height="549"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WZO-NJ-tu4">
-                                <rect key="frame" x="183" y="475" width="154" height="19"/>
+                                <rect key="frame" x="183" y="510" width="154" height="19"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="NinjaTrader Settings" id="tey-Nv-j5A">
                                     <font key="font" metaFont="systemBold" size="15"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -428,6 +428,22 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IAU-bs-8dD">
+                                <rect key="frame" x="21" y="475" width="101" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Futures symbol:" id="NIv-gL-9hX">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="I3S-zK-6if">
+                                <rect key="frame" x="170" y="473" width="330" height="21"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" drawsBackground="YES" id="64k-QK-gtT">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="zlx-4Y-R82" secondAttribute="trailing" constant="20" id="17u-sP-sZV"/>
@@ -438,14 +454,15 @@
                             <constraint firstItem="KOY-eN-1RI" firstAttribute="leading" secondItem="QlO-jJ-08b" secondAttribute="leading" id="9nc-2D-EXE"/>
                             <constraint firstItem="9kI-Dh-nmX" firstAttribute="centerY" secondItem="Gjk-ao-8GW" secondAttribute="centerY" id="A2i-2z-xey"/>
                             <constraint firstItem="QlO-jJ-08b" firstAttribute="top" secondItem="ACx-OX-4Vd" secondAttribute="bottom" constant="20" id="BqM-9U-q0A"/>
+                            <constraint firstItem="I3S-zK-6if" firstAttribute="centerY" secondItem="IAU-bs-8dD" secondAttribute="centerY" id="C6x-wi-SJr"/>
                             <constraint firstItem="0iB-MP-yIS" firstAttribute="top" secondItem="5bE-4j-bZ3" secondAttribute="bottom" constant="20" id="Cqr-Gu-Zy4"/>
                             <constraint firstItem="0mj-It-UC4" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="D1n-Ge-oE3"/>
                             <constraint firstItem="x8J-G1-uQL" firstAttribute="top" secondItem="0iB-MP-yIS" secondAttribute="bottom" constant="8" id="DL8-M8-Lrx"/>
+                            <constraint firstItem="IAU-bs-8dD" firstAttribute="top" secondItem="WZO-NJ-tu4" secondAttribute="bottom" constant="19" id="GDE-eM-5Gz"/>
                             <constraint firstItem="0mj-It-UC4" firstAttribute="leading" secondItem="BSd-8K-9r8" secondAttribute="leading" id="KC0-S8-K4K"/>
                             <constraint firstItem="KOY-eN-1RI" firstAttribute="top" secondItem="QlO-jJ-08b" secondAttribute="bottom" constant="8" id="LMI-ez-Dqb"/>
                             <constraint firstItem="9kI-Dh-nmX" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="OYY-sj-h3u"/>
                             <constraint firstItem="OOb-Sv-Fdf" firstAttribute="top" secondItem="1FS-c7-l5f" secondAttribute="bottom" constant="20" id="PBG-VH-MMD"/>
-                            <constraint firstItem="fXS-k6-lc5" firstAttribute="top" secondItem="WZO-NJ-tu4" secondAttribute="bottom" constant="20" id="RJU-eA-D0q"/>
                             <constraint firstItem="tCk-tt-lpO" firstAttribute="leading" secondItem="BSd-8K-9r8" secondAttribute="leading" id="RZo-eZ-jxK"/>
                             <constraint firstItem="Gjk-ao-8GW" firstAttribute="top" secondItem="5lr-dZ-rdK" secondAttribute="bottom" constant="20" id="VOw-Ch-qme"/>
                             <constraint firstItem="OOb-Sv-Fdf" firstAttribute="leading" secondItem="QlO-jJ-08b" secondAttribute="leading" id="WsD-Qz-BdF"/>
@@ -454,6 +471,7 @@
                             <constraint firstItem="Vwa-LA-MNm" firstAttribute="top" secondItem="baP-ir-oZD" secondAttribute="bottom" constant="8" id="Yv2-CR-6Vb"/>
                             <constraint firstItem="5lr-dZ-rdK" firstAttribute="leading" secondItem="fXS-k6-lc5" secondAttribute="leading" id="b1U-9v-fHw"/>
                             <constraint firstItem="KOY-eN-1RI" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="bOg-LB-RkP"/>
+                            <constraint firstItem="I3S-zK-6if" firstAttribute="leading" secondItem="tCk-tt-lpO" secondAttribute="leading" id="bRD-hn-rFu"/>
                             <constraint firstItem="BSd-8K-9r8" firstAttribute="centerY" secondItem="ACx-OX-4Vd" secondAttribute="centerY" id="d6b-J9-xEy"/>
                             <constraint firstAttribute="trailing" secondItem="x8J-G1-uQL" secondAttribute="trailing" constant="20" id="fBn-1t-0br"/>
                             <constraint firstItem="5bE-4j-bZ3" firstAttribute="leading" secondItem="OOb-Sv-Fdf" secondAttribute="leading" id="fC5-9o-eZo"/>
@@ -469,12 +487,15 @@
                             <constraint firstItem="BSd-8K-9r8" firstAttribute="leading" secondItem="ACx-OX-4Vd" secondAttribute="trailing" constant="20" id="mBg-rM-JF2"/>
                             <constraint firstItem="1FS-c7-l5f" firstAttribute="top" secondItem="KOY-eN-1RI" secondAttribute="bottom" constant="8" id="oYO-8H-W56"/>
                             <constraint firstItem="ACx-OX-4Vd" firstAttribute="leading" secondItem="fXS-k6-lc5" secondAttribute="leading" id="p0w-Fo-WZD"/>
+                            <constraint firstItem="IAU-bs-8dD" firstAttribute="leading" secondItem="Mh4-Gz-qso" secondAttribute="leading" constant="23" id="rIZ-Se-mgo"/>
+                            <constraint firstItem="fXS-k6-lc5" firstAttribute="top" secondItem="IAU-bs-8dD" secondAttribute="bottom" constant="20" id="sEJ-br-bOK"/>
                             <constraint firstItem="x8J-G1-uQL" firstAttribute="leading" secondItem="Mh4-Gz-qso" secondAttribute="leading" constant="23" id="uGq-K8-PT3"/>
                             <constraint firstItem="0mj-It-UC4" firstAttribute="centerY" secondItem="5lr-dZ-rdK" secondAttribute="centerY" id="uQY-rD-5FF"/>
                             <constraint firstItem="zlx-4Y-R82" firstAttribute="leading" secondItem="Mh4-Gz-qso" secondAttribute="leading" constant="23" id="uey-Yy-sdk"/>
                             <constraint firstItem="fXS-k6-lc5" firstAttribute="leading" secondItem="Mh4-Gz-qso" secondAttribute="leading" constant="23" id="vZr-mB-yQy"/>
                             <constraint firstItem="baP-ir-oZD" firstAttribute="top" secondItem="x8J-G1-uQL" secondAttribute="bottom" constant="8" id="vfw-Wk-Md3"/>
                             <constraint firstAttribute="bottom" secondItem="Vwa-LA-MNm" secondAttribute="bottom" constant="20" id="xbO-N9-Ne4"/>
+                            <constraint firstItem="I3S-zK-6if" firstAttribute="trailing" secondItem="tCk-tt-lpO" secondAttribute="trailing" id="zSW-Bi-OIb"/>
                             <constraint firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" constant="20" id="zYw-RR-9ND"/>
                         </constraints>
                     </view>
@@ -487,12 +508,13 @@
                         <outlet property="nextButton" destination="Vwa-LA-MNm" id="Kjs-63-yDb"/>
                         <outlet property="outputFolderField" destination="x8J-G1-uQL" id="pxM-ll-35o"/>
                         <outlet property="shortNameField" destination="BSd-8K-9r8" id="oPi-Yx-9hP"/>
+                        <outlet property="symbolField" destination="I3S-zK-6if" id="jq3-Ur-e6l"/>
                         <segue destination="cVa-8a-a9U" kind="modal" identifier="showLiveTrader" id="Rm1-CU-Arl"/>
                     </connections>
                 </viewController>
                 <customObject id="4tU-8R-0ce" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="874" y="162"/>
+            <point key="canvasLocation" x="874" y="179"/>
         </scene>
         <!--Chart-->
         <scene sceneID="Nw5-bD-icl">

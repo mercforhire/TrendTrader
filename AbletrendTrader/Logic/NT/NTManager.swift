@@ -15,12 +15,11 @@ protocol NTManagerDelegate: class {
 class NTManager {
     private let maxTryTimes = 10
     
-    private let accountId: String
+    private let accountName: String
     private let commission: Double
     private let ticker: String
-    private let name: String
+    private let exchange: String
     private let accountLongName: String
-    private let accountName: String
     private let basePath: String
     private let incomingPath: String
     private let outgoingPath: String
@@ -39,19 +38,17 @@ class NTManager {
     init(accountId: String,
          commission: Double,
          ticker: String,
-         name: String,
+         exchange: String,
          accountLongName: String,
-         accountName: String,
          basePath: String,
          incomingPath: String,
          outgoingPath: String) {
         
-        self.accountId = accountId
+        self.accountName = accountId
         self.commission = commission
         self.ticker = ticker
-        self.name = name
+        self.exchange = exchange
         self.accountLongName = accountLongName
-        self.accountName = accountName
         self.basePath = basePath
         self.incomingPath = incomingPath
         self.outgoingPath = outgoingPath
@@ -103,11 +100,11 @@ class NTManager {
         var orderString: String = ""
         switch orderType {
         case .market:
-            orderString = "PLACE;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());;;GTC;\(orderRef);\(orderRef);;"
+            orderString = "PLACE;\(accountName);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());;;GTC;\(orderRef);\(orderRef);;"
         case .stop:
-            orderString = "PLACE;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());;\(orderPrice);GTC;\(orderRef);\(orderRef);;"
+            orderString = "PLACE;\(accountName);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());;\(orderPrice);GTC;\(orderRef);\(orderRef);;"
         default:
-            orderString = "PLACE;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+            orderString = "PLACE;\(accountName);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
         }
         
         // place the order to NT
@@ -186,7 +183,7 @@ class NTManager {
         }
         orderPrice = orderPrice.round(nearest: 0.25)
         
-        let orderString = "REVERSEPOSITION;\(accountId);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
+        let orderString = "REVERSEPOSITION;\(accountName);\(ticker);\(direction.tradeString());\(size);\(orderType.ninjaType());\(orderPrice);;GTC;\(orderRef);\(orderRef);;"
         writeTextToFile(text: orderString)
         
         // wait for NT to return with a result file
@@ -314,7 +311,7 @@ class NTManager {
     }
     
     func getOrderResponse(orderId: String) -> NTOrderResponse? {
-        let path = "\(outgoingPath)/\(accountId)_\(orderId).txt"
+        let path = "\(outgoingPath)/\(accountName)_\(orderId).txt"
         if let orderResponse = self.readOrderExecutionFile(filePath: path) {
             return orderResponse
         }
@@ -322,7 +319,7 @@ class NTManager {
     }
     
     func deleteOrderResponse(orderId: String) -> Bool {
-        let path = "\(outgoingPath)/\(accountId)_\(orderId).txt"
+        let path = "\(outgoingPath)/\(accountName)_\(orderId).txt"
         do {
             try FileManager.default.removeItem(atPath: path)
             return true
@@ -335,7 +332,7 @@ class NTManager {
     
     func readPositionStatusFile() -> PositionStatus? {
         let dir = URL(fileURLWithPath: outgoingPath)
-        let fileURL = dir.appendingPathComponent("\(ticker) \(name)_\(accountId)_position.txt")
+        let fileURL = dir.appendingPathComponent("\(ticker) \(exchange)_\(accountName)_position.txt")
         var text: String?
         do {
             text = try String(contentsOf: fileURL, encoding: .utf8)

@@ -18,6 +18,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     private var DefaultOutgoingPath = "/Users/lchen/Downloads/NinjaTrader/outgoing"
     private var DefaultAccountName = "Sim101"
     
+    @IBOutlet weak var symbolField: NSTextField!
     @IBOutlet weak var commissionField: NSTextField!
     @IBOutlet weak var exchangeField: NSTextField!
     @IBOutlet weak var longNameField: NSTextField!
@@ -27,6 +28,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var outputFolderField: NSTextField!
     @IBOutlet weak var nextButton: NSButton!
     
+    private var ticker: String = ""
     private var commission: Double = 0
     private var exchange: String = ""
     private var longName: String = ""
@@ -36,6 +38,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     private var outputFolder: String = ""
     
     func setupUI() {
+        symbolField.delegate = self
         commissionField.delegate = self
         exchangeField.delegate = self
         longNameField.delegate = self
@@ -47,6 +50,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     func loadSettings() {
+        ticker = config.ntTicker ?? DefaultTicker
         commission = config.ntCommission
         exchange = config.ntExchange
         longName = config.ntAccountLongName ?? DefaultAccountLongName
@@ -55,6 +59,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         inputFolder = config.ntIncomingPath ?? DefaultIncomingPath
         outputFolder = config.ntOutgoingPath ?? DefaultOutgoingPath
         
+        symbolField.stringValue = ticker
         commissionField.stringValue = String(format: "%.2f",commission)
         exchangeField.stringValue = exchange
         longNameField.stringValue = longName
@@ -145,6 +150,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     func verifySettings(showError: Bool = false) -> Bool {
+        if ticker.length == 0 {
+            showErrorDialog(text: "Invalid ticker entry")
+            return false
+        }
+        
         if commission < 0 {
             showErrorDialog(text: "Invalid commission entry")
             return false
@@ -186,7 +196,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         if let vc = segue.destinationController as? LiveTradingViewController {
             
-            vc.tradingMode = .ninjaTrader(accountId: <#T##String#>, commission: <#T##Double#>, ticker: <#T##String#>, name: <#T##String#>, accountLongName: <#T##String#>, accountName: <#T##String#>, basePath: <#T##String#>, incomingPath: <#T##String#>, outgoingPath: <#T##String#>)
+            vc.tradingMode = .ninjaTrader(accountId: shortName,
+                                          commission: commission,
+                                          ticker: ticker,
+                                          exchange: exchange,
+                                          accountLongName: longName,
+                                          basePath: baseFolder,
+                                          incomingPath: inputFolder,
+                                          outgoingPath: outputFolder)
         }
     }
     
@@ -203,7 +220,10 @@ extension NTSettingsViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
             do {
-                if textField == commissionField {
+                if textField == symbolField {
+                    try config.setNTTicker(newValue: textField.stringValue)
+                    ticker = textField.stringValue
+                } else if textField == commissionField {
                     try config.setNTCommission(newValue: commission)
                     commission = textField.doubleValue
                 } else if textField == exchangeField {

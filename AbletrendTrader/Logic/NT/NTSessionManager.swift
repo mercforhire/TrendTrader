@@ -18,9 +18,8 @@ class NTSessionManager: BaseSessionManager {
     init(accountId: String,
          commission: Double,
          ticker: String,
-         name: String,
+         exchange: String,
          accountLongName: String,
-         accountName: String,
          basePath: String,
          incomingPath: String,
          outgoingPath: String) {
@@ -30,9 +29,8 @@ class NTSessionManager: BaseSessionManager {
         self.ntManager = NTManager(accountId: accountId,
                                    commission: commission,
                                    ticker: ticker,
-                                   name: name,
+                                   exchange: exchange,
                                    accountLongName: accountLongName,
-                                   accountName: accountName,
                                    basePath: basePath,
                                    incomingPath: incomingPath,
                                    outgoingPath: outgoingPath)

@@ -65,6 +65,11 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
         
         tableView.delegate = self
         tableView.dataSource = self
+        
+        serverURLField.delegate = self
+        
+        serverURL = config.serverURL
+        serverURLField.stringValue = serverURL
     }
     
     override func viewDidLoad() {

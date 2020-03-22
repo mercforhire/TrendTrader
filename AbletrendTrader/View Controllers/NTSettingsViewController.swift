@@ -111,6 +111,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
                 do {
                     try self.config.setNTIncomingPath(newValue: selectedPath)
                     self.inputFolder = selectedPath
+                    self.inputFolderField.stringValue = selectedPath
                 } catch (let error) {
                     guard let configError = error as? ConfigError else { return }
                     
@@ -133,6 +134,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
                 do {
                     try self.config.setNTOutgoingPath(newValue: selectedPath)
                     self.outputFolder = selectedPath
+                    self.outputFolderField.stringValue = selectedPath
                 } catch (let error) {
                     guard let configError = error as? ConfigError else { return }
                     

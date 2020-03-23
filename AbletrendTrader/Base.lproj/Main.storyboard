@@ -171,7 +171,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <segue destination="XfG-lQ-9wD" kind="modal" id="4BP-nI-WDo"/>
+                                    <segue destination="XfG-lQ-9wD" kind="show" id="4BP-nI-WDo"/>
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LDe-GZ-VhE">
@@ -197,7 +197,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <segue destination="DI5-WX-nEg" kind="modal" id="zxK-zK-FW7"/>
+                                    <segue destination="DI5-WX-nEg" kind="show" id="zxK-zK-FW7"/>
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vLO-UW-f4Y">
@@ -264,7 +264,7 @@
         <scene sceneID="MaQ-Fg-w2Z">
             <objects>
                 <viewController title="NinjaTrader Initialization" showSeguePresentationStyle="single" id="DI5-WX-nEg" customClass="NTSettingsViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" misplaced="YES" id="Mh4-Gz-qso">
+                    <view key="view" id="Mh4-Gz-qso">
                         <rect key="frame" x="0.0" y="0.0" width="520" height="549"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
@@ -509,7 +509,7 @@
                         <outlet property="outputFolderField" destination="x8J-G1-uQL" id="pxM-ll-35o"/>
                         <outlet property="shortNameField" destination="BSd-8K-9r8" id="oPi-Yx-9hP"/>
                         <outlet property="symbolField" destination="I3S-zK-6if" id="jq3-Ur-e6l"/>
-                        <segue destination="cVa-8a-a9U" kind="modal" identifier="showLiveTrader" id="Rm1-CU-Arl"/>
+                        <segue destination="cVa-8a-a9U" kind="show" identifier="showLiveTrader" id="Rm1-CU-Arl"/>
                     </connections>
                 </viewController>
                 <customObject id="4tU-8R-0ce" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -554,15 +554,15 @@
                             <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LXr-xQ-Y0G">
                                 <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="vuB-Ii-YB8">
-                                    <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textView editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="VqS-kD-8Fo">
-                                            <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="textColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="minSize" width="683" height="489"/>
+                                            <size key="minSize" width="698" height="489"/>
                                             <size key="maxSize" width="698" height="10000000"/>
                                             <attributedString key="textStorage">
                                                 <fragment content="&lt;Log Start Here&gt;">
@@ -583,7 +583,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="80O-Uf-KaD">
-                                    <rect key="frame" x="683" y="0.0" width="15" height="489"/>
+                                    <rect key="frame" x="682" y="0.0" width="16" height="489"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>

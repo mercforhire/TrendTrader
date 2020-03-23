@@ -111,13 +111,13 @@ class NTSessionManager: BaseSessionManager {
                 { result in
                     switch result {
                     case .success(let confirmation):
+                        self.pos = newPosition
+                        self.pos?.entryOrderRef = confirmation.orderRef
+                        self.pos?.entryTime = confirmation.time
+                        self.pos?.actualEntryPrice = confirmation.price
+                        self.pos?.commission = confirmation.commission
+                        self.pos?.stopLoss?.stopOrderId = confirmation.stopOrderId
                         DispatchQueue.main.async {
-                            self.pos = newPosition
-                            self.pos?.entryOrderRef = confirmation.orderRef
-                            self.pos?.entryTime = confirmation.time
-                            self.pos?.actualEntryPrice = confirmation.price
-                            self.pos?.commission = confirmation.commission
-                            self.pos?.stopLoss?.stopOrderId = confirmation.stopOrderId
                             completion(nil)
                         }
                     case .failure(let ntError):
@@ -139,24 +139,24 @@ class NTSessionManager: BaseSessionManager {
                 { result in
                     switch result {
                     case .success(let confirmation):
+                        if !tradeAlreadyClosed {
+                            let trade = Trade(direction: oldPosition.direction,
+                                              entryTime: oldPosition.entryTime,
+                                              idealEntryPrice: oldPosition.idealEntryPrice,
+                                              actualEntryPrice: oldPosition.actualEntryPrice,
+                                              exitTime: confirmation.time,
+                                              idealExitPrice: newPosition.idealEntryPrice,
+                                              actualExitPrice: confirmation.price,
+                                              commission: oldPosition.commission + confirmation.commission)
+                            self.trades.append(trade)
+                        }
+                        self.pos = newPosition
+                        self.pos?.entryOrderRef = confirmation.orderRef
+                        self.pos?.entryTime = confirmation.time
+                        self.pos?.actualEntryPrice = confirmation.price
+                        self.pos?.commission = confirmation.commission
+                        self.pos?.stopLoss?.stopOrderId = confirmation.stopOrderId
                         DispatchQueue.main.async {
-                            if !tradeAlreadyClosed {
-                                let trade = Trade(direction: oldPosition.direction,
-                                                  entryTime: oldPosition.entryTime,
-                                                  idealEntryPrice: oldPosition.idealEntryPrice,
-                                                  actualEntryPrice: oldPosition.actualEntryPrice,
-                                                  exitTime: confirmation.time,
-                                                  idealExitPrice: newPosition.idealEntryPrice,
-                                                  actualExitPrice: confirmation.price,
-                                                  commission: oldPosition.commission + confirmation.commission)
-                                self.trades.append(trade)
-                            }
-                            self.pos = newPosition
-                            self.pos?.entryOrderRef = confirmation.orderRef
-                            self.pos?.entryTime = confirmation.time
-                            self.pos?.actualEntryPrice = confirmation.price
-                            self.pos?.commission = confirmation.commission
-                            self.pos?.stopLoss?.stopOrderId = confirmation.stopOrderId
                             completion(nil)
                         }
                     case .failure(let ntError):

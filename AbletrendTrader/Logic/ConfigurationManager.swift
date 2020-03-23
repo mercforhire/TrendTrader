@@ -14,47 +14,47 @@ class ConfigurationManager {
     
     var riskMultiplier: Double
     
-    private var maxRiskBase: Double
+    var maxRiskBase: Double
     var maxRisk: Double {
         return maxRiskBase * riskMultiplier
     }
     
-    private var minStopBase: Double
+    var minStopBase: Double
     var minStop: Double {
-        return minStopBase * riskMultiplier
+        return minStopBase
     }
     
     // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
-    private var sweetSpotBase: Double
+    var sweetSpotBase: Double
     var sweetSpot: Double {
         return sweetSpotBase * riskMultiplier
     }
     
     // the min profit the trade must in to use the 2 green bars exit rule
-    private var greenExitBase: Double
+    var greenExitBase: Double
     var greenExit: Double {
         return greenExitBase * riskMultiplier
     }
     
     // if the current profit(based on the currenty set stop) is higher than, we assume it's a big move and won't exit based on the 2 green bar rules
-    private var skipGreenExitBase: Double
+    var skipGreenExitBase: Double
     var skipGreenExit: Double {
         return skipGreenExitBase * riskMultiplier
     }
     
     // if the previous trade profit is higher than this and got stopped out, we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-    private var enterOnAnyPullbackBase: Double
+    var enterOnAnyPullbackBase: Double
     var enterOnAnyPullback: Double {
         return enterOnAnyPullbackBase * riskMultiplier
     }
     
-    private var takeProfitBarLengthBase: Double
+    var takeProfitBarLengthBase: Double
     var takeProfitBarLength: Double {
         return takeProfitBarLengthBase * riskMultiplier
     }
     
     // stop trading when P/L goes under this number
-    private var maxDailyLossBase: Double
+    var maxDailyLossBase: Double
     var maxDailyLoss: Double {
         return maxDailyLossBase * riskMultiplier
     }

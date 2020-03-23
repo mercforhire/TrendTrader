@@ -42,13 +42,13 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     
     func loadConfig() {
         riskField.stringValue = String(format: "%.2f", config.riskMultiplier)
-        maxSLField.stringValue = String(format: "%.2f", config.maxRisk)
-        minSTPField.stringValue = String(format: "%.2f", config.minStop)
-        sweetspotDistanceField.stringValue = String(format: "%.2f", config.sweetSpot)
-        minProfitGreenBarField.stringValue = String(format: "%.2f", config.greenExit)
-        minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenExit)
-        minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnAnyPullback)
-        takeProfitField.stringValue = String(format: "%.2f", config.takeProfitBarLength)
+        maxSLField.stringValue = String(format: "%.2f", config.maxRiskBase)
+        minSTPField.stringValue = String(format: "%.2f", config.minStopBase)
+        sweetspotDistanceField.stringValue = String(format: "%.2f", config.sweetSpotBase)
+        minProfitGreenBarField.stringValue = String(format: "%.2f", config.greenExitBase)
+        minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenExitBase)
+        minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnAnyPullbackBase)
+        takeProfitField.stringValue = String(format: "%.2f", config.takeProfitBarLengthBase)
         
         highRiskEntryStartPicker.dateValue = Date.getNewDateFromTime(hour: config.highRiskStart.hour(),
                                                                        min: config.highRiskStart.minute())

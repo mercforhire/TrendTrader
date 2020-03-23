@@ -77,13 +77,7 @@ class NTSessionManager: BaseSessionManager {
             switch action {
             case .openPosition(let newPosition, _):
                 var skip = false
-                if let currentPosition = self.pos, currentPosition.direction == newPosition.direction {
-                    self.delegate?.newLogAdded(log: "Already has existing position, skipping opening new position")
-                    DispatchQueue.main.async {
-                        completion(nil)
-                    }
-                    return
-                } else if let currentPosition = self.pos, currentPosition.direction != newPosition.direction {
+                if let currentPosition = self.pos, currentPosition.direction != newPosition.direction {
                     self.delegate?.newLogAdded(log: "Conflicting existing position, closing existing position...")
                     self.exitPositions(priceBarTime: priceBarTime,
                                        idealExitPrice: newPosition.idealEntryPrice,
@@ -100,6 +94,12 @@ class NTSessionManager: BaseSessionManager {
                         semaphore.signal()
                     }
                     semaphore.wait()
+                } else if self.status?.position != 0 {
+                    self.delegate?.newLogAdded(log: "Already has existing position, skipping opening new position")
+                    DispatchQueue.main.async {
+                        completion(nil)
+                    }
+                    return
                 }
                 
                 guard !skip else { return }

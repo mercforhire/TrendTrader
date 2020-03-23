@@ -11,7 +11,7 @@ import Cocoa
 class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     let config = ConfigurationManager.shared
     
-    private let DefaultTicker = "NQ 03-20"
+    private let DefaultTicker = "NQ 06-20"
     private let DefaultAccountLongName = "NinjaTrader Continuum (Demo)"
     private var DefaultBasePath = "/Users/lchen/Downloads/NinjaTrader/"
     private var DefaultIncomingPath = "/Users/lchen/Downloads/NinjaTrader/incoming"

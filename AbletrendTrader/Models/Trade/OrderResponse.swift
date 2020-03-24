@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct NTOrderResponse {
+struct OrderResponse {
     var status: NTOrderStatus
     var size: Int
     var price: Double

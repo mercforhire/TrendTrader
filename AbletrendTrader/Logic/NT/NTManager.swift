@@ -125,8 +125,8 @@ class NTManager {
                     desiredStatus = .filled
             }
             
-            var latestOrderResponse: NTOrderResponse?
-            var filledOrderResponse: NTOrderResponse?
+            var latestOrderResponse: OrderResponse?
+            var filledOrderResponse: OrderResponse?
             for _ in 0...self.maxTryTimes {
                 sleep(1)
                 if let orderResponse = self.getOrderResponse(orderId: orderRef) {
@@ -201,8 +201,8 @@ class NTManager {
                     desiredStatus = .filled
             }
             
-            var latestOrderResponse: NTOrderResponse?
-            var filledOrderResponse: NTOrderResponse?
+            var latestOrderResponse: OrderResponse?
+            var filledOrderResponse: OrderResponse?
             for _ in 0...self.maxTryTimes {
                 sleep(1)
                 if let orderResponse = self.getOrderResponse(orderId: orderRef) {
@@ -260,8 +260,8 @@ class NTManager {
                 return
             }
             
-            var latestOrderResponse: NTOrderResponse?
-            var filledOrderResponse: NTOrderResponse?
+            var latestOrderResponse: OrderResponse?
+            var filledOrderResponse: OrderResponse?
             for _ in 0...self.maxTryTimes {
                 sleep(1)
                 if let orderResponse = self.getOrderResponse(orderId: orderRef) {
@@ -310,7 +310,7 @@ class NTManager {
         writeTextToFile(text: orderString)
     }
     
-    func getOrderResponse(orderId: String) -> NTOrderResponse? {
+    func getOrderResponse(orderId: String) -> OrderResponse? {
         let path = "\(outgoingPath)/\(accountName)_\(orderId).txt"
         if let orderResponse = self.readOrderExecutionFile(filePath: path) {
             return orderResponse
@@ -372,7 +372,7 @@ class NTManager {
         }
     }
     
-    private func readOrderExecutionFile(filePath: String, deleteAfterRead: Bool = false) -> NTOrderResponse? {
+    private func readOrderExecutionFile(filePath: String, deleteAfterRead: Bool = false) -> OrderResponse? {
         let fileURL = URL(fileURLWithPath: filePath)
         var text: String?
         do {
@@ -387,7 +387,7 @@ class NTManager {
         }
         
         text = text?.replacingOccurrences(of: "\r\n", with: "")
-        var orderResponse: NTOrderResponse?
+        var orderResponse: OrderResponse?
         if let components = text?.components(separatedBy: ";"),
             components.count == 3,
             let orderState = NTOrderStatus(rawValue: components[0]),
@@ -395,7 +395,7 @@ class NTManager {
             let filledPrice = components[2].double,
             let lastModifiedDate = getLastModifiedDate(url: fileURL) {
             
-            orderResponse = NTOrderResponse(status: orderState,
+            orderResponse = OrderResponse(status: orderState,
                                             size: size,
                                             price: filledPrice,
                                             time: lastModifiedDate)

@@ -23,7 +23,6 @@ class TraderBot {
         self.commmission = commmission
     }
     
-    // Public:
     func generateSimSession(upToPriceBar: PriceBar? = nil, completion: @escaping () -> ()) {
         guard chart.timeKeys.count > 1, let lastBar = upToPriceBar ?? chart.absLastBar else {
             return
@@ -46,7 +45,7 @@ class TraderBot {
         completion()
     }
     
-    // Decide trade actions at the given PriceBar object, returns the list of actions need to be performed
+    // decide trade actions at the given PriceBar object, returns the list of actions need to be performed
     func decide(priceBar: PriceBar? = nil) -> TradeActionType {
         guard chart.timeKeys.count > 1,
             let priceBar = priceBar ?? chart.lastBar,
@@ -248,7 +247,6 @@ class TraderBot {
         return .openPosition(newPosition: sellPosition, entryType: .any)
     }
     
-    // Private:
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let position: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
             return .openPosition(newPosition: position, entryType: entryType)

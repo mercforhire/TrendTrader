@@ -11,7 +11,7 @@
 		851BAB7323D92788000BC720 /* TradingLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851BAB7223D92788000BC720 /* TradingLogViewController.swift */; };
 		854A56A023CFD8D800904F11 /* DisplayNumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */; };
 		854A56A423D17F7E00904F11 /* TradesTableRowItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A323D17F7E00904F11 /* TradesTableRowItem.swift */; };
-		854A56A523D183FD00904F11 /* NTOrderResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A123D1745400904F11 /* NTOrderResponse.swift */; };
+		854A56A523D183FD00904F11 /* OrderResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A123D1745400904F11 /* OrderResponse.swift */; };
 		854A56A723D1854900904F11 /* PositionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A623D1854900904F11 /* PositionStatus.swift */; };
 		854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */; };
 		85582AB323B5E97800DC16AC /* ChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85582AB223B5E97800DC16AC /* ChartManager.swift */; };
@@ -51,7 +51,7 @@
 		7987637B8B2780B3C1E7F8FD /* Pods-AbletrendTrader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.debug.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.debug.xcconfig"; sourceTree = "<group>"; };
 		851BAB7223D92788000BC720 /* TradingLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingLogViewController.swift; sourceTree = "<group>"; };
 		854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayNumberFormatter.swift; sourceTree = "<group>"; };
-		854A56A123D1745400904F11 /* NTOrderResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTOrderResponse.swift; sourceTree = "<group>"; };
+		854A56A123D1745400904F11 /* OrderResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderResponse.swift; sourceTree = "<group>"; };
 		854A56A323D17F7E00904F11 /* TradesTableRowItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradesTableRowItem.swift; sourceTree = "<group>"; };
 		854A56A623D1854900904F11 /* PositionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionStatus.swift; sourceTree = "<group>"; };
 		854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmation.swift; sourceTree = "<group>"; };
@@ -222,7 +222,7 @@
 				8592435723B14DD5004CE61F /* StopLoss.swift */,
 				856D959F23BA8152004A4385 /* Enums.swift */,
 				854B14FA23C7A7D50098A4E5 /* OrderConfirmation.swift */,
-				854A56A123D1745400904F11 /* NTOrderResponse.swift */,
+				854A56A123D1745400904F11 /* OrderResponse.swift */,
 				854A56A623D1854900904F11 /* PositionStatus.swift */,
 				854A56A323D17F7E00904F11 /* TradesTableRowItem.swift */,
 			);
@@ -371,7 +371,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8592435823B14DD5004CE61F /* StopLoss.swift in Sources */,
-				854A56A523D183FD00904F11 /* NTOrderResponse.swift in Sources */,
+				854A56A523D183FD00904F11 /* OrderResponse.swift in Sources */,
 				85FE90DE23D404CF00B99568 /* BaseSessionManager.swift in Sources */,
 				854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */,
 				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,

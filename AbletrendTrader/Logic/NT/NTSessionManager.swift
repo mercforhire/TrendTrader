@@ -511,7 +511,7 @@ class NTSessionManager: BaseSessionManager {
                               idealEntryPrice: closedPosition.idealEntryPrice,
                               actualEntryPrice: closedPosition.actualEntryPrice,
                               exitTime: latestFilledOrderResponse.time,
-                              idealExitPrice: latestFilledOrderResponse.price,
+                              idealExitPrice: closedPosition.stopLoss?.stop ?? latestFilledOrderResponse.price,
                               actualExitPrice: latestFilledOrderResponse.price,
                               commission: closedPosition.commission * 2)
             self.trades.append(trade)

@@ -33,7 +33,7 @@ enum EntryType {
 }
 
 enum TradeActionType {
-    case noAction(entryType: EntryType?)
+    case noAction(entryType: EntryType?, reason: NoActionReason)
     case openPosition(newPosition: Position, entryType: EntryType)
     case reversePosition(oldPosition: Position, newPosition: Position, entryType: EntryType)
     case updateStop(stop: StopLoss)
@@ -42,21 +42,22 @@ enum TradeActionType {
     
     func description(actionBarTime: Date) -> String {
         switch self {
-        case .noAction(let entryType):
+        case .noAction(let entryType, let reason):
             if let entryType = entryType {
-                return String(format: "%@: No action for the minute %@ (enter method: %@)",
+                return String(format: "%@: No action for %@ (enter method: %@)",
                               Date().hourMinuteSecond(),
                               actionBarTime.hourMinute(),
                               entryType.description())
             } else {
-                return String(format: "%@: No action for the minute %@",
+                return String(format: "%@: No action for %@(%@)",
                               Date().hourMinuteSecond(),
-                              actionBarTime.hourMinute())
+                              actionBarTime.hourMinute(),
+                              reason.description())
             }
             
         case .openPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Opened %@ position at price %.2f with SL %.2f reason: %@ for the minute %@",
+            return String(format: "%@: Opened %@ position at %.2f with SL %.2f reason: %@ for %@",
                           Date().hourMinuteSecond(),
                           type, newPosition.idealEntryPrice,
                           newPosition.stopLoss?.stop ?? -1.0,
@@ -65,7 +66,7 @@ enum TradeActionType {
             
         case .reversePosition(let oldPosition, let newPosition, let entryType):
             let type: String = oldPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Reversed %@ position at price %.2f with SL %.2f for the minute %@",
+            return String(format: "%@: Reversed %@ position at %.2f with SL %.2f for %@",
                           Date().hourMinuteSecond(),
                           type, newPosition.idealEntryPrice,
                           newPosition.stopLoss?.stop ?? -1.0,
@@ -74,7 +75,7 @@ enum TradeActionType {
             
         case .verifyPositionClosed(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for the minute %@",
+            return String(format: "%@: Verify %@ position closed at %.2f reason: %@ for %@",
                           Date().hourMinuteSecond(),
                           type, closingPrice,
                           reason.reason(),
@@ -82,14 +83,14 @@ enum TradeActionType {
             
         case .forceClosePosition(let closedPosition, let closingPrice, _, let reason):
             let type: String = closedPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Flat %@ position at %.2f reason: %@ for the minute %@",
+            return String(format: "%@: Flat %@ position at %.2f reason: %@ for %@",
                           Date().hourMinuteSecond(),
                           type, closingPrice,
                           reason.reason(),
                           actionBarTime.hourMinute())
             
         case .updateStop(let stopLoss):
-            return String(format: "%@: Updated stop loss to %.2f reason: %@ for the minute %@",
+            return String(format: "%@: Updated stop loss to %.2f reason: %@ for %@",
                           Date().hourMinuteSecond(),
                           stopLoss.stop,
                           stopLoss.source.reason(),
@@ -137,6 +138,29 @@ enum ExitMethod {
             return "End of day"
         case .manual:
             return "Manual action"
+        }
+    }
+}
+
+enum NoActionReason {
+    case noTradingAction
+    case exceedLoss
+    case outsideTradingHours
+    case lunchHour
+    case other
+    
+    func description() -> String {
+        switch self {
+        case .noTradingAction:
+        return "No trading action"
+        case .exceedLoss:
+        return "Exceeded maximum loss"
+        case .outsideTradingHours:
+        return "Outside trading hours"
+        case .lunchHour:
+        return "Lunch hour"
+        case .other:
+            return "Other reason"
         }
     }
 }

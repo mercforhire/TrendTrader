@@ -94,7 +94,7 @@ class NTSessionManager: BaseSessionManager {
                         semaphore.signal()
                     }
                     semaphore.wait()
-                } else if self.status?.position != 0 {
+                } else if let status = self.status?.position, status != 0 {
                     self.delegate?.newLogAdded(log: "Already has existing position, skipping opening new position")
                     DispatchQueue.main.async {
                         completion(nil)

@@ -148,6 +148,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     @IBAction func nextPressed(_ sender: NSButton) {
         if verifySettings() {
             performSegue(withIdentifier: "showLiveTrader", sender: nil)
+            view.window?.close()
         }
     }
     

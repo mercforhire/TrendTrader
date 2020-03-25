@@ -10,6 +10,7 @@ import Foundation
 
 class TraderBot {
     private let config = ConfigurationManager.shared
+    private let Buffer = 1.0
     
     var sessionManager: BaseSessionManager
     var chart: Chart
@@ -164,10 +165,10 @@ class TraderBot {
                 let securedProfit: Double
                 switch sessionManager.pos?.direction {
                 case .long:
-                    stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - 1
+                    stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - Buffer
                     securedProfit = stopLossFromGreenBars - currentPosition.idealEntryPrice
                 default:
-                    stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + 1
+                    stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + Buffer
                     securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
                 }
                 
@@ -179,7 +180,7 @@ class TraderBot {
                             if stopLossFromGreenBars - currentStop > config.sweetSpot {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
-                                twoGreenBarsSL = currentStop - 1
+                                twoGreenBarsSL = currentStop - Buffer
                             }
                         }
                     default:
@@ -188,7 +189,7 @@ class TraderBot {
                             if currentStop - stopLossFromGreenBars > config.sweetSpot {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
-                                twoGreenBarsSL = currentStop + 1
+                                twoGreenBarsSL = currentStop + Buffer
                             }
                         }
                     }
@@ -420,15 +421,15 @@ class TraderBot {
             if entryBar.candleStick.close - previousLevel <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
-                entryBar.candleStick.close - (currentStop - 1) <= config.maxRisk {
-                return StopLoss(stop: (currentStop - 1), source: .supportResistanceLevel)
+                entryBar.candleStick.close - (currentStop - Buffer) <= config.maxRisk {
+                return StopLoss(stop: (currentStop - Buffer), source: .supportResistanceLevel)
             }
         default:
             if previousLevel - entryBar.candleStick.close <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
                 return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
-                (currentStop + 1) - entryBar.candleStick.close <= config.maxRisk {
-                return StopLoss(stop: (currentStop + 1), source: .supportResistanceLevel)
+                (currentStop + Buffer) - entryBar.candleStick.close <= config.maxRisk {
+                return StopLoss(stop: (currentStop + Buffer), source: .supportResistanceLevel)
             }
         }
         
@@ -439,9 +440,9 @@ class TraderBot {
         
         switch direction {
         case .long:
-            return StopLoss(stop: min(lowRounded - 1, closeRounded - config.minStop), source: .currentBar)
+            return StopLoss(stop: min(lowRounded - Buffer, closeRounded - config.minStop), source: .currentBar)
         default:
-            return StopLoss(stop: max(highRounded + 1, closeRounded + config.minStop), source: .currentBar)
+            return StopLoss(stop: max(highRounded + Buffer, closeRounded + config.minStop), source: .currentBar)
         }
     }
     
@@ -467,12 +468,12 @@ class TraderBot {
                 
                 switch direction {
                 case .long:
-                    if previousLevel - levelRounded > 1 {
+                    if previousLevel - levelRounded > Buffer {
                         previousLevel = levelRounded
                         break outerLoop
                     }
                 default:
-                    if levelRounded - previousLevel > 1 {
+                    if levelRounded - previousLevel > Buffer {
                         previousLevel = levelRounded
                         break outerLoop
                     }
@@ -483,9 +484,9 @@ class TraderBot {
         if previousLevel == initialBarStopRounded {
             switch direction {
             case .long:
-                previousLevel = previousLevel - 1
+                previousLevel = previousLevel - Buffer
             default:
-                previousLevel = previousLevel + 1
+                previousLevel = previousLevel + Buffer
             }
         }
         

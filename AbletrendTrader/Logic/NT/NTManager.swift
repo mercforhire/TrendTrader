@@ -330,29 +330,27 @@ class NTManager {
         return false
     }
     
-    func readPositionStatusFile() -> PositionStatus? {
+    func readPositionStatusFile() -> PositionStatus {
         let dir = URL(fileURLWithPath: outgoingPath)
         let fileURL = dir.appendingPathComponent("\(ticker) \(exchange)_\(accountName)_position.txt")
         var text: String?
         do {
             text = try String(contentsOf: fileURL, encoding: .utf8)
-        }
-        catch {
-//            print(fileURL, "doesn't exist")
-            return nil
+        } catch {
+            return PositionStatus(position: 0, price: 0)
         }
         
         text = text?.replacingOccurrences(of: "\r\n", with: "")
-        var status: PositionStatus?
         if let components = text?.components(separatedBy: ";"),
             components.count == 3,
             let muliplier = components[0] == "LONG" ? 1 : -1,
             let size = components[1].int,
             let avgPrice = components[2].double {
             
-            status = PositionStatus(position: muliplier * size, price: avgPrice)
+            return PositionStatus(position: muliplier * size, price: avgPrice)
         }
-        return status
+        
+        return PositionStatus(position: 0, price: 0)
     }
     
     var counter = 0

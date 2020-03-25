@@ -177,7 +177,7 @@ class ConfigurationManager {
     }
     
     func setMaxRisk(newValue: Double) throws {
-        if newValue >= 2, newValue <= 20 {
+        if newValue >= 2, newValue <= 50 {
             maxRiskBase = newValue
             saveToDefaults(newValue: newValue, key: "max_risk")
             return

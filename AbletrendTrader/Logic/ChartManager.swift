@@ -241,7 +241,6 @@ class ChartManager {
         var threeMinUrl: String?
         let now = Date()
         let urlFetchingTask = DispatchGroup()
-        let secondsDelay = 10
         
         urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now, interval: .oneMin, completion: { url in
@@ -250,31 +249,34 @@ class ChartManager {
         })
         
         urlFetchingTask.enter()
-        if now.second() <= secondsDelay {
-            fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .twoMin) { url in
+        fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { [weak self] url in
+            guard let self = self else { return }
+            
+            if let url = url {
                 twoMinUrl = url
                 urlFetchingTask.leave()
+            } else {
+                self.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .twoMin) { url in
+                    twoMinUrl = url
+                    urlFetchingTask.leave()
+                }
             }
-        } else {
-            fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { url in
-                twoMinUrl = url
-                urlFetchingTask.leave()
-            })
-        }
-        
+        })
         
         urlFetchingTask.enter()
-        if now.second() <= secondsDelay {
-            fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .threeMin) { url in
+        fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { [weak self] url in
+            guard let self = self else { return }
+            
+            if let url = url {
                 threeMinUrl = url
                 urlFetchingTask.leave()
+            } else {
+                self.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .twoMin) { url in
+                    threeMinUrl = url
+                    urlFetchingTask.leave()
+                }
             }
-        } else {
-            fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { url in
-                threeMinUrl = url
-                urlFetchingTask.leave()
-            })
-        }
+        })
         
         urlFetchingTask.notify(queue: DispatchQueue.main) {
             guard let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl else {

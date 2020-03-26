@@ -283,7 +283,7 @@ class ChartManager {
                 return completion(nil)
             }
             
-            print("Fetching:", oneMinUrl, oneMinUrl, threeMinUrl)
+            print("Fetching:", oneMinUrl, twoMinUrl, threeMinUrl)
             completion((oneMinUrl, twoMinUrl, threeMinUrl))
         }
     }

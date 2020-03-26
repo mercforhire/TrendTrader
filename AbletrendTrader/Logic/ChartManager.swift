@@ -119,14 +119,15 @@ class ChartManager {
         }
         
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
-            // call this again 10 seconds after the next minute
+            // call this again X seconds after the next minute
             let waitSeconds = 60 + delayBeforeFetchingAtNewMinute - now.second()
             let nextFetchTime: Date = now.addingTimeInterval(TimeInterval(waitSeconds))
             let statusText: String = "Latest data: \((currentPriceBarTime?.hourMinute() ?? "--")), will fetch again at \(nextFetchTime.hourMinuteSecond())"
             self.delegate?.chartStatusChanged(statusText: statusText)
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(waitSeconds - 2)) {
-                self.updateChart()
-            }
+            
+            let date = Date().addingTimeInterval(TimeInterval(waitSeconds))
+            let timer = Timer(fireAt: date, interval: 0, target: self, selector: #selector(updateChart), userInfo: nil, repeats: false)
+            RunLoop.main.add(timer, forMode: .common)
             return
         }
         
@@ -146,9 +147,9 @@ class ChartManager {
                 
                 if self.monitoring {
                     if self.live {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                            self.updateChart()
-                        }
+                        let date = Date().addingTimeInterval(TimeInterval(1))
+                        let timer = Timer(fireAt: date, interval: 0, target: self, selector: #selector(self.updateChart), userInfo: nil, repeats: false)
+                        RunLoop.main.add(timer, forMode: .common)
                     } else if self.config.simulateTimePassage {
                         guard self.simTime < Date.flatPositionsTime(date: self.simTime), self.simTime < Date() else {
                             self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
@@ -161,9 +162,7 @@ class ChartManager {
                 }
             } else if self.monitoring, self.live {
                 self.delegate?.chartStatusChanged(statusText: "Data for " + Date().hourMinuteSecond() + " yet not found")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    self.updateChart()
-                }
+                self.updateChart()
             }
         }
     }

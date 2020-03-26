@@ -242,13 +242,13 @@ class ChartManager {
         let urlFetchingTask = DispatchGroup()
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, interval: .oneMin, completion: { url in
+        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .oneMin, completion: { url in
             oneMinUrl = url
             urlFetchingTask.leave()
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { [weak self] url in
+        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .twoMin, completion: { [weak self] url in
             guard let self = self else { return }
             
             if let url = url {
@@ -263,7 +263,7 @@ class ChartManager {
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { [weak self] url in
+        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .threeMin, completion: { [weak self] url in
             guard let self = self else { return }
             
             if let url = url {
@@ -363,6 +363,7 @@ class ChartManager {
     }
     
     private func fetchLatestAvailableUrlDuring(time: Date,
+                                               startSecond: Int = 59,
                                                interval: SignalInteval,
                                                completion: @escaping (String?) -> ()) {
         guard let serverURL = serverUrls[interval] else {
@@ -375,7 +376,7 @@ class ChartManager {
             let semaphore = DispatchSemaphore(value: 0)
             var existUrl: String?
             
-            for i in stride(from: 59, through: 0, by: -1) {
+            for i in stride(from: startSecond, through: 0, by: -1) {
                 if existUrl != nil {
                     break
                 }

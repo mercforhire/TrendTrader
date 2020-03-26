@@ -21,9 +21,9 @@ class ChartManager {
     private let fileName3: String = "3m.txt" // filename for local sandbox folder
     
     private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 10
+    private let delayBeforeFetchingAtNewMinute = 5
     
-    var serverURL: String
+    var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?
     var monitoring = false
     weak var delegate: DataManagerDelegate?
@@ -33,9 +33,9 @@ class ChartManager {
     private var currentPriceBarTime: Date?
     private var fetchingChart = false
     
-    init(live: Bool, serverURL: String) {
+    init(live: Bool, serverUrls: [SignalInteval: String]) {
         self.live = live
-        self.serverURL = serverURL
+        self.serverUrls = serverUrls
         resetSimTime()
     }
     
@@ -241,6 +241,7 @@ class ChartManager {
         var threeMinUrl: String?
         let now = Date()
         let urlFetchingTask = DispatchGroup()
+        let secondsDelay = 10
         
         urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now, interval: .oneMin, completion: { url in
@@ -249,22 +250,38 @@ class ChartManager {
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { url in
-            twoMinUrl = url
-            urlFetchingTask.leave()
-        })
+        if now.second() <= secondsDelay {
+            fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .twoMin) { url in
+                twoMinUrl = url
+                urlFetchingTask.leave()
+            }
+        } else {
+            fetchLatestAvailableUrlDuring(time: now, interval: .twoMin, completion: { url in
+                twoMinUrl = url
+                urlFetchingTask.leave()
+            })
+        }
+        
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { url in
-            threeMinUrl = url
-            urlFetchingTask.leave()
-        })
+        if now.second() <= secondsDelay {
+            fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .threeMin) { url in
+                threeMinUrl = url
+                urlFetchingTask.leave()
+            }
+        } else {
+            fetchLatestAvailableUrlDuring(time: now, interval: .threeMin, completion: { url in
+                threeMinUrl = url
+                urlFetchingTask.leave()
+            })
+        }
         
         urlFetchingTask.notify(queue: DispatchQueue.main) {
             guard let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl else {
                 return completion(nil)
             }
             
+            print("Fetching:", oneMinUrl, oneMinUrl, threeMinUrl)
             completion((oneMinUrl, twoMinUrl, threeMinUrl))
         }
     }
@@ -347,25 +364,23 @@ class ChartManager {
     private func fetchLatestAvailableUrlDuring(time: Date,
                                                interval: SignalInteval,
                                                completion: @escaping (String?) -> ()) {
+        guard let serverURL = serverUrls[interval] else {
+            print("Error: Does not contain url for", interval.text(), "min data server")
+            return
+        }
+        
         let queue = DispatchQueue.global()
         queue.async {
             let semaphore = DispatchSemaphore(value: 0)
             var existUrl: String?
             
-            let now = Date()
-            let currentSecond = now.second() - 1
-            
-            if currentSecond < self.delayBeforeFetchingAtNewMinute {
-                sleep(UInt32(self.delayBeforeFetchingAtNewMinute - currentSecond))
-            }
-            
-            for i in stride(from: currentSecond, through: 0, by: -1) {
+            for i in stride(from: 59, through: 0, by: -1) {
                 if existUrl != nil {
                     break
                 }
                 
                 let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt",
-                                               self.serverURL,
+                                               serverURL,
                                                interval.text(),
                                                time.month(),
                                                time.day(),
@@ -390,6 +405,11 @@ class ChartManager {
     }
     
     private func fetchLastAvailableUrlInMinute(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
+        guard let serverURL = serverUrls[interval] else {
+            print("Error: Does not contain url for", interval.text(), "min data server")
+            return
+        }
+        
         let queue = DispatchQueue.global()
         queue.async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -400,7 +420,7 @@ class ChartManager {
                     break
                 }
                 
-                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", self.serverURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", serverURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
                 
                 Alamofire.SessionManager.default.request(urlString).validate().response { response in
                     if response.response?.statusCode == 200 {

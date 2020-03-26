@@ -11,6 +11,7 @@ import Foundation
 class ConfigurationManager {
     static let shared = ConfigurationManager()
     private let defaults : UserDefaults = UserDefaults.standard
+    private let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}\/"#
     
     var riskMultiplier: Double
     
@@ -84,7 +85,10 @@ class ConfigurationManager {
     private(set) var ntBasePath: String?
     private(set) var ntIncomingPath: String?
     private(set) var ntOutgoingPath: String?
-    private(set) var serverURL: String
+    
+    private(set) var server1MinURL: String
+    private(set) var server2MinURL: String
+    private(set) var server3MinURL: String
     
     init() {
         let defaultSettings: NSDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "DefaultSettings", ofType: "plist")!)!
@@ -153,13 +157,37 @@ class ConfigurationManager {
         
         self.ntOutgoingPath = defaults.object(forKey: "nt_outgoing_path") as? String
         
-        self.serverURL = defaults.object(forKey: "default_ip") as? String ?? defaultSettings["default_ip"] as! String
+        self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
+        
+        self.server2MinURL = defaults.object(forKey: "server_2min_url") as? String ?? defaultSettings["default_ip"] as! String
+        
+        self.server3MinURL = defaults.object(forKey: "server_3min_url") as? String ?? defaultSettings["default_ip"] as! String
     }
     
-    func setServerURL(newValue: String) throws {
-        if newValue.range(of: #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}\/"#, options: .regularExpression) != nil {
-            serverURL = newValue
-            saveToDefaults(newValue: newValue, key: "default_ip")
+    func setServer1MinURL(newValue: String) throws {
+        if newValue.range(of: IPRegex, options: .regularExpression) != nil {
+            server1MinURL = newValue
+            saveToDefaults(newValue: newValue, key: "server_1min_url")
+            return
+        }
+        
+        throw ConfigError.serverURLError
+    }
+    
+    func setServer2MinURL(newValue: String) throws {
+        if newValue.range(of: IPRegex, options: .regularExpression) != nil {
+            server2MinURL = newValue
+            saveToDefaults(newValue: newValue, key: "server_2min_url")
+            return
+        }
+        
+        throw ConfigError.serverURLError
+    }
+    
+    func setServer3MinURL(newValue: String) throws {
+        if newValue.range(of: IPRegex, options: .regularExpression) != nil {
+            server3MinURL = newValue
+            saveToDefaults(newValue: newValue, key: "server_3min_url")
             return
         }
         

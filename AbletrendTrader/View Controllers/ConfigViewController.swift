@@ -21,6 +21,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var takeProfitField: NSTextField!
     @IBOutlet private weak var highRiskEntryStartPicker: NSDatePicker!
     @IBOutlet private weak var highRiskEntryEndPicker: NSDatePicker!
+    @IBOutlet private weak var highRiskTradesField: NSTextField!
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
@@ -38,6 +39,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         minProfitPullbackField.delegate = self
         takeProfitField.delegate = self
         dailyLossLimitField.delegate = self
+        highRiskTradesField.delegate = self
     }
     
     func loadConfig() {
@@ -66,6 +68,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
                                                            min: config.flatTime.minute())
         
         dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLoss)
+        highRiskTradesField.stringValue = String(format: "%d", config.maxHighRiskEntryAllowed)
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
         noEntryDuringLunchCheckbox.state = config.noEntryDuringLunch ? .on : .off
     }
@@ -183,6 +186,8 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try config.setTakeProfitBarLength(newValue: textField.doubleValue)
                 } else if textField == dailyLossLimitField {
                     try config.setMaxDailyLoss(newValue: textField.doubleValue)
+                } else if textField == highRiskTradesField {
+                    try config.setMaxHighRiskEntryAllowed(newValue: textField.integerValue)
                 }
             } catch (let error) {
                 guard let configError = error as? ConfigError else { return }

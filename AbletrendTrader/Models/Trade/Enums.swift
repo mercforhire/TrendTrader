@@ -203,7 +203,7 @@ enum TradeDirection {
     }
 }
 
-enum SignalInteval {
+enum SignalInteval: Int {
     case oneMin
     case twoMin
     case threeMin

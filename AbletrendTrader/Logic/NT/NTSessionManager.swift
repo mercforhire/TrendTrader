@@ -9,11 +9,11 @@
 import Foundation
 
 class NTSessionManager: BaseSessionManager {
-    private var ntManager: NTManager!
+    private var ntManager: NTManager
     private let commission: Double
+    private var connected = false
     
     override var liveUpdateFrequency: TimeInterval { 1 }
-    var connected = false
     
     init(accountId: String,
          commission: Double,
@@ -24,16 +24,15 @@ class NTSessionManager: BaseSessionManager {
          incomingPath: String,
          outgoingPath: String) {
         self.commission = commission
-        super.init()
-        
         self.ntManager = NTManager(accountId: accountId,
-                                   commission: commission,
-                                   ticker: ticker,
-                                   exchange: exchange,
-                                   accountLongName: accountLongName,
-                                   basePath: basePath,
-                                   incomingPath: incomingPath,
-                                   outgoingPath: outgoingPath)
+        commission: commission,
+        ticker: ticker,
+        exchange: exchange,
+        accountLongName: accountLongName,
+        basePath: basePath,
+        incomingPath: incomingPath,
+        outgoingPath: outgoingPath)
+        super.init()
         self.ntManager.initialize()
         self.ntManager.delegate = self
     }

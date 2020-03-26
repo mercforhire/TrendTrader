@@ -13,7 +13,8 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
     
     var tradingMode: LiveTradingMode!
     
-    @IBOutlet weak var serverURLField: NSTextField!
+    @IBOutlet weak var server1MinURLField: NSTextField!
+    @IBOutlet weak var server2MinAnd3MinURLField: NSTextField!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -22,16 +23,26 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var exitButton: NSButton!
     @IBOutlet weak var totalPLLabel: NSTextField!
     @IBOutlet weak var tableView: NSTableView!
-    @IBOutlet weak var chartButton: NSButton!
     @IBOutlet weak var buyButton: NSButton!
     @IBOutlet weak var sellButton: NSButton!
     @IBOutlet weak var positionStatusLabel: NSTextField!
     
-    private var serverURL: String = "" {
+    private var server1minURL: String = "" {
         didSet {
-            chartManager?.serverURL = serverURL
+            chartManager?.serverUrls[SignalInteval.oneMin] = server1minURL
         }
     }
+    private var server2minURL: String = "" {
+        didSet {
+            chartManager?.serverUrls[SignalInteval.twoMin] = server2minURL
+        }
+    }
+    private var server3minURL: String = "" {
+        didSet {
+            chartManager?.serverUrls[SignalInteval.threeMin] = server3minURL
+        }
+    }
+    
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
@@ -66,10 +77,15 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
         tableView.delegate = self
         tableView.dataSource = self
         
-        serverURLField.delegate = self
+        server1MinURLField.delegate = self
+        server2MinAnd3MinURLField.delegate = self
         
-        serverURL = config.serverURL
-        serverURLField.stringValue = serverURL
+        server1minURL = config.server1MinURL
+        server2minURL = config.server2MinURL
+        server3minURL = config.server3MinURL
+        
+        server1MinURLField.stringValue = server1minURL
+        server2MinAnd3MinURLField.stringValue = server2minURL
     }
     
     override func viewDidLoad() {
@@ -83,7 +99,11 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
                                                 userInfo: nil,
                                                 repeats: true)
         
-        chartManager = ChartManager(live: true, serverURL: serverURL)
+        var serverUrls: [SignalInteval: String] = [:]
+        serverUrls[SignalInteval.oneMin] = server1minURL
+        serverUrls[SignalInteval.twoMin] = server2minURL
+        serverUrls[SignalInteval.threeMin] = server3minURL
+        chartManager = ChartManager(live: true, serverUrls: serverUrls)
         chartManager?.delegate = self
         
         switch tradingMode {
@@ -344,15 +364,25 @@ extension LiveTradingViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
             do {
-                if textField == serverURLField {
-                    try config.setServerURL(newValue: textField.stringValue)
-                    serverURL = textField.stringValue
+                if textField == server1MinURLField {
+                    try config.setServer1MinURL(newValue: textField.stringValue)
+                    server1minURL = textField.stringValue
+                } else if textField == server2MinAnd3MinURLField {
+                    try config.setServer2MinURL(newValue: textField.stringValue)
+                    try config.setServer3MinURL(newValue: textField.stringValue)
+                    server2minURL = textField.stringValue
+                    server3minURL = textField.stringValue
                 }
             } catch (let error) {
                 guard let configError = error as? ConfigError else { return }
                 
                 configError.displayErrorDialog()
-                textField.stringValue = serverURL
+                
+                if textField == server1MinURLField {
+                    textField.stringValue = server1minURL
+                } else if textField == server2MinAnd3MinURLField {
+                    textField.stringValue = server2minURL
+                }
             }
         }
     }

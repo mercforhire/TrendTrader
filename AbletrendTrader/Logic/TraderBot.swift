@@ -143,11 +143,11 @@ class TraderBot {
                 switch currentPosition.direction {
                 case .long:
                     if priceBar.candleStick.close - priceBar.candleStick.open >= config.takeProfitBarLength {
-                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)
+                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)
                     }
                 case .short:
                     if priceBar.candleStick.open - priceBar.candleStick.close >= config.takeProfitBarLength {
-                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)
+                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)
                     }
                 }
             }
@@ -365,6 +365,7 @@ class TraderBot {
         
         // If the a previous trade exists:
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
+            
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
                 return seekToOpenPosition(bar: currentBar, entryType: .any)
@@ -378,7 +379,7 @@ class TraderBot {
                                            toKey: currentBar.time.generateDateIdentifier()) {
                 // If the previous trade profit is higher than enterOnPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-                if lastTrade.idealProfit > config.enterOnAnyPullback {
+                if lastTrade.idealProfit > config.enterOnAnyPullback, lastTrade.exitMethod != .profitTaking {
                     return seekToOpenPosition(bar: currentBar, entryType: .pullBack)
                 } else {
                     return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)

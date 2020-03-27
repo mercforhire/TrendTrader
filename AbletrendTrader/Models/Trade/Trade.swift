@@ -21,6 +21,7 @@ struct Trade {
     var actualExitPrice: Double
     var exitOrderRef: String?
     var commission: Double
+    var exitMethod: ExitMethod?
     
     var idealProfit: Double {
         switch direction {

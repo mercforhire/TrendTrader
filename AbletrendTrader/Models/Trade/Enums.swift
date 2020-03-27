@@ -122,6 +122,7 @@ enum ExitMethod {
     case signalReversed
     case signalInvalid
     case endOfDay
+    case profitTaking
     case manual
     
     func reason() -> String {
@@ -136,6 +137,8 @@ enum ExitMethod {
             return "Signal invalid"
         case .endOfDay:
             return "End of day"
+        case .profitTaking:
+            return "Profit taking"
         case .manual:
             return "Manual action"
         }

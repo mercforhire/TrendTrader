@@ -305,7 +305,7 @@ class NTSessionManager: BaseSessionManager {
                     let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId) {
                 
                     if latestFilledOrderResponse.status == .filled {
-                        self.delegate?.newLogAdded(log: "Latest filled order: \(latestFilledOrderResponse.description)")
+                        self.delegate?.newLogAdded(log: "Position already closed, latest filled order: \(latestFilledOrderResponse.description)")
                         
                         let trade = Trade(direction: closedPosition.direction,
                                           entryTime: closedPosition.entryTime,
@@ -373,7 +373,6 @@ class NTSessionManager: BaseSessionManager {
                 DispatchQueue.main.async {
                     completion(nil)
                 }
-            
             case .noAction(_):
                 break
             }

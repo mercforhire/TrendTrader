@@ -357,7 +357,7 @@ enum ConfigError: Error {
     func displayMessage() -> String {
         switch self {
         case .serverURLError:
-            return "Server URL Error, must be of format: http://192.168.0.121/"
+            return "Server URL Error, must be of format: http://192.168.0.121:80/"
         case .riskMultiplierError:
             return "Risk multplier must be between 1 - 10"
         case .maxRiskError:

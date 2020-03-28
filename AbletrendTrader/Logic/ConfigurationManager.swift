@@ -11,7 +11,7 @@ import Foundation
 class ConfigurationManager {
     static let shared = ConfigurationManager()
     private let defaults : UserDefaults = UserDefaults.standard
-    private let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}\/"#
+    private let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:\d{0,4}\/"#
     
     var riskMultiplier: Double
     

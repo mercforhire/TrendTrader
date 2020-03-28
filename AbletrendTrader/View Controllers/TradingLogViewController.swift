@@ -22,6 +22,7 @@ class TradingLogViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
+        
         logTextView.string = log
     }
 }

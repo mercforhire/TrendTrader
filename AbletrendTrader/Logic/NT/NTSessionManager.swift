@@ -292,87 +292,8 @@ class NTSessionManager: BaseSessionManager {
                     }
                     semaphore.wait()
                 }
-            case .verifyPositionClosed(let closedPosition, let closingPrice, _, let exitMethod):
-                if self.status?.position == 0, self.pos == nil {
-                    self.delegate?.newLogAdded(log: "Position already closed, verified exit trade.")
-                    DispatchQueue.main.async {
-                        completion(nil)
-                    }
-                    return
-                }
-                
-                if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
-                    let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId) {
-                
-                    if latestFilledOrderResponse.status == .filled {
-                        self.delegate?.newLogAdded(log: "Position already closed, latest filled order: \(latestFilledOrderResponse.description)")
-                        
-                        let trade = Trade(direction: closedPosition.direction,
-                                          entryTime: closedPosition.entryTime,
-                                          idealEntryPrice: closedPosition.idealEntryPrice,
-                                          actualEntryPrice: closedPosition.actualEntryPrice,
-                                          exitTime: latestFilledOrderResponse.time,
-                                          idealExitPrice: closingPrice,
-                                          actualExitPrice: latestFilledOrderResponse.price,
-                                          commission: closedPosition.commission * 2,
-                                          exitMethod: exitMethod)
-                        self.trades.append(trade)
-                        self.pos = nil
-                        DispatchQueue.main.async {
-                            completion(nil)
-                        }
-                    } else if latestFilledOrderResponse.status == .working || latestFilledOrderResponse.status == .accepted {
-                        self.delegate?.newLogAdded(log: "Position not closed, exit position immediately")
-                        
-                        self.ntManager.cancelAllOrders()
-                        self.enterAtMarket(priceBarTime: priceBarTime,
-                                           direction: closedPosition.direction.reverse(),
-                                           size: closedPosition.size)
-                        { result in
-                            switch result {
-                            case .success(let confirmation):
-                                let trade = Trade(direction: closedPosition.direction,
-                                                  entryTime: closedPosition.entryTime,
-                                                  idealEntryPrice: closedPosition.idealEntryPrice,
-                                                  actualEntryPrice: closedPosition.actualEntryPrice,
-                                                  exitTime: confirmation.time,
-                                                  idealExitPrice: closingPrice,
-                                                  actualExitPrice: confirmation.price,
-                                                  commission: closedPosition.commission + confirmation.commission,
-                                                  exitMethod: exitMethod)
-                                self.trades.append(trade)
-                                self.pos = nil
-                                DispatchQueue.main.async {
-                                    completion(nil)
-                                }
-                            case .failure(let error):
-                                DispatchQueue.main.async {
-                                    completion(error)
-                                }
-                            }
-                            semaphore.signal()
-                        }
-                        semaphore.wait()
-                    }
-                    return
-                }
-                    
-                self.delegate?.newLogAdded(log: "No stop order exists, flat all positions immediately")
-                self.ntManager.flatEverything()
-                let trade = Trade(direction: closedPosition.direction,
-                                  entryTime: closedPosition.entryTime,
-                                  idealEntryPrice: closedPosition.idealEntryPrice,
-                                  actualEntryPrice: closedPosition.actualEntryPrice,
-                                  exitTime: Date(),
-                                  idealExitPrice: closingPrice,
-                                  actualExitPrice: closingPrice,
-                                  commission: closedPosition.commission * 2,
-                                  exitMethod: exitMethod)
-                self.trades.append(trade)
-                self.pos = nil
-                DispatchQueue.main.async {
-                    completion(nil)
-                }
+            case .verifyPositionClosed(_, _, _, _):
+                break
             case .noAction(_):
                 break
             }

@@ -175,7 +175,7 @@ extension String {
         return formatter.number(from: self) as? Double
     }
     
-    /// Extract numbers from string
+    // Extract numbers from string
     public var numbers: String {
         let set = CharacterSet.decimalDigits.inverted
         let numbers = self.components(separatedBy: set)

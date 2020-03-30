@@ -413,7 +413,6 @@ class NTSessionManager: BaseSessionManager {
                 }
                 switch result {
                 case .success(let orderConfirmation):
-                    print("Order confirmation: \(orderConfirmation.description)")
                     if let currentPosition = self.pos {
                         let trade = Trade(direction: currentPosition.direction,
                                           entryTime: currentPosition.entryTime,

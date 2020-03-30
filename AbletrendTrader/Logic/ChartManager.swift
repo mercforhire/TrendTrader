@@ -270,7 +270,7 @@ class ChartManager {
                 threeMinUrl = url
                 urlFetchingTask.leave()
             } else {
-                self.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .twoMin) { url in
+                self.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .threeMin) { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()
                 }

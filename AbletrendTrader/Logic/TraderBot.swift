@@ -60,12 +60,12 @@ class TraderBot {
         
         // already have current position, update the stoploss or close it if needed
         if let currentPosition = sessionManager.pos {
-            // Rule 3: If we reached FlatPositionsTime, exit the trade immediately
+            // If we reached FlatPositionsTime, exit the trade immediately
             if Date.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 return forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)
             }
             
-            // Rule 4: if we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
+            // If we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
             if Date.clearPositionTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 switch sessionManager.pos?.direction {
                 case .long:
@@ -79,39 +79,7 @@ class TraderBot {
                 }
             }
             
-            // Rule 1: exit when the the low of the price hit the current stop loss
-            switch sessionManager.pos?.direction {
-            case .long:
-                if let stop = sessionManager.pos?.stopLoss?.stop,
-                    priceBar.candleStick.low <= stop {
-                    let exitMethod: ExitMethod = sessionManager.pos?.stopLoss?.source == .supportResistanceLevel ||
-                        sessionManager.pos?.stopLoss?.source == .currentBar ? .hitStoploss : .twoGreenBars
-                    let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
-                    
-                    switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openPosition(let position, let entryType):
-                        return .openPosition(newPosition: position, entryType: entryType)
-                    default:
-                        return verifyAction
-                    }
-                }
-            default:
-                if let stop = sessionManager.pos?.stopLoss?.stop,
-                    let stopSource = sessionManager.pos?.stopLoss?.source,
-                    priceBar.candleStick.high >= stop {
-                    let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .hitStoploss : .twoGreenBars
-                    let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
-                    
-                    switch handleOpeningNewTrade(currentBar: priceBar) {
-                    case .openPosition(let position, let entryType):
-                        return .openPosition(newPosition: position, entryType: entryType)
-                    default:
-                        return verifyAction
-                    }
-                }
-            }
-            
-            // Rule 2: exit when bar of opposite color bar appears
+            // Exit when bar of opposite color bar appears
             switch sessionManager.pos?.direction {
             case .long:
                 if priceBar.barColor == .red {
@@ -136,7 +104,7 @@ class TraderBot {
                 }
             }
             
-            // Rule 3 exit when the bar is over 'config.takeProfitBarLength' points long
+            // Exit when the bar is over 'config.takeProfitBarLength' points long
             if !Date.highRiskEntryInteval(date: priceBar.time).contains(priceBar.time),
                 currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= config.takeProfitBarLength {
                 
@@ -148,6 +116,40 @@ class TraderBot {
                 case .short:
                     if priceBar.candleStick.open - priceBar.candleStick.close >= config.takeProfitBarLength {
                         return forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)
+                    }
+                }
+            }
+            
+            // Exit when the the low of the price hit the current stop loss (Required in simulation only)
+            if !sessionManager.liveMonitoring {
+                switch sessionManager.pos?.direction {
+                case .long:
+                    if let stop = sessionManager.pos?.stopLoss?.stop,
+                        priceBar.candleStick.low <= stop {
+                        let exitMethod: ExitMethod = sessionManager.pos?.stopLoss?.source == .supportResistanceLevel ||
+                            sessionManager.pos?.stopLoss?.source == .currentBar ? .hitStoploss : .twoGreenBars
+                        let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
+                        
+                        switch handleOpeningNewTrade(currentBar: priceBar) {
+                        case .openPosition(let position, let entryType):
+                            return .openPosition(newPosition: position, entryType: entryType)
+                        default:
+                            return verifyAction
+                        }
+                    }
+                default:
+                    if let stop = sessionManager.pos?.stopLoss?.stop,
+                        let stopSource = sessionManager.pos?.stopLoss?.source,
+                        priceBar.candleStick.high >= stop {
+                        let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .hitStoploss : .twoGreenBars
+                        let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
+                        
+                        switch handleOpeningNewTrade(currentBar: priceBar) {
+                        case .openPosition(let position, let entryType):
+                            return .openPosition(newPosition: position, entryType: entryType)
+                        default:
+                            return verifyAction
+                        }
                     }
                 }
             }
@@ -583,6 +585,7 @@ class TraderBot {
         return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil
     }
     
+    // Unused
     private func checkFor3MinSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
         guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
             return false

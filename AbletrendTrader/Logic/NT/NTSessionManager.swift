@@ -243,20 +243,37 @@ class NTSessionManager: BaseSessionManager {
                     semaphore.wait()
                 }
             case .forceClosePosition(let closedPosition, let closingPrice, _, let exitMethod):
-                if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
-                    let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
-                    latestFilledOrderResponse.status == .filled {
-                    self.delegate?.newLogAdded(log: "Force close position already closed, last filled order response: \(latestFilledOrderResponse.description)")
-                    let trade = Trade(direction: closedPosition.direction,
-                                      entryTime: closedPosition.entryTime,
-                                      idealEntryPrice: closedPosition.idealEntryPrice,
-                                      actualEntryPrice: closedPosition.actualEntryPrice,
-                                      exitTime: latestFilledOrderResponse.time,
-                                      idealExitPrice: closingPrice,
-                                      actualExitPrice: latestFilledOrderResponse.price,
-                                      commission: closedPosition.commission * 2,
-                                      exitMethod: exitMethod)
-                    self.trades.append(trade)
+                if self.status?.position == 0 {
+                    
+                    if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
+                        let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
+                        latestFilledOrderResponse.status == .filled {
+                        
+                        self.delegate?.newLogAdded(log: "Force close position already closed, last filled order response: \(latestFilledOrderResponse.description)")
+                        let trade = Trade(direction: closedPosition.direction,
+                                          entryTime: closedPosition.entryTime,
+                                          idealEntryPrice: closedPosition.idealEntryPrice,
+                                          actualEntryPrice: closedPosition.actualEntryPrice,
+                                          exitTime: latestFilledOrderResponse.time,
+                                          idealExitPrice: closingPrice,
+                                          actualExitPrice: latestFilledOrderResponse.price,
+                                          commission: closedPosition.commission * 2,
+                                          exitMethod: exitMethod)
+                        self.trades.append(trade)
+                    } else {
+                        self.delegate?.newLogAdded(log: "Force close position already closed, but no last order response")
+                        let trade = Trade(direction: closedPosition.direction,
+                                          entryTime: closedPosition.entryTime,
+                                          idealEntryPrice: closedPosition.idealEntryPrice,
+                                          actualEntryPrice: closedPosition.actualEntryPrice,
+                                          exitTime: Date(),
+                                          idealExitPrice: closingPrice,
+                                          actualExitPrice: closingPrice,
+                                          commission: closedPosition.commission * 2,
+                                          exitMethod: exitMethod)
+                        self.trades.append(trade)
+                    }
+                    
                     self.pos = nil
                     DispatchQueue.main.async {
                         completion(nil)

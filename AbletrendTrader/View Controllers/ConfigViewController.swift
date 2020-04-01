@@ -21,6 +21,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var takeProfitField: NSTextField!
     @IBOutlet private weak var highRiskEntryStartPicker: NSDatePicker!
     @IBOutlet private weak var highRiskEntryEndPicker: NSDatePicker!
+    @IBOutlet private weak var lunchStartPicker: NSDatePicker!
+    @IBOutlet private weak var lunchEndPicker: NSDatePicker!
     @IBOutlet private weak var highRiskTradesField: NSTextField!
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
@@ -53,13 +55,19 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         takeProfitField.stringValue = String(format: "%.2f", config.takeProfitBarLengthBase)
         
         highRiskEntryStartPicker.dateValue = Date.getNewDateFromTime(hour: config.highRiskStart.hour(),
-                                                                       min: config.highRiskStart.minute())
+                                                                     min: config.highRiskStart.minute())
         
         highRiskEntryEndPicker.dateValue = Date.getNewDateFromTime(hour: config.highRiskEnd.hour(),
-                                                                     min: config.highRiskEnd.minute())
+                                                                   min: config.highRiskEnd.minute())
+        
+        lunchStartPicker.dateValue = Date.getNewDateFromTime(hour: config.lunchStart.hour(),
+                                                             min: config.lunchStart.minute())
+        
+        lunchEndPicker.dateValue = Date.getNewDateFromTime(hour: config.lunchEnd.hour(),
+                                                           min: config.lunchEnd.minute())
         
         sessionStartTimePicker.dateValue = Date.getNewDateFromTime(hour: config.tradingStart.hour(),
-                                                                     min: config.tradingStart.minute())
+                                                                   min: config.tradingStart.minute())
         
         liquidateTimePicker.dateValue = Date.getNewDateFromTime(hour: config.clearTime.hour(),
                                                                 min: config.clearTime.minute())
@@ -123,6 +131,30 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
             configError.displayErrorDialog()
             
             sender.dateValue = config.highRiskEnd
+        }
+    }
+    
+    @IBAction func lunchStartChanged(_ sender: NSDatePicker) {
+        do {
+            try config.setLunchStart(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.lunchStart
+        }
+    }
+    
+    @IBAction func lunchEndChanged(_ sender: NSDatePicker) {
+        do {
+            try config.setLunchEnd(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.lunchEnd
         }
     }
     

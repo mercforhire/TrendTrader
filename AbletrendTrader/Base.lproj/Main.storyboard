@@ -201,15 +201,15 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vLO-UW-f4Y">
-                                <rect key="frame" x="183" y="99" width="509" height="17"/>
+                                <rect key="frame" x="183" y="99" width="186" height="17"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="- Universal trading platform " id="UPK-0M-6ww">
                                     <font key="font" metaFont="system" size="14"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="euH-P5-EEB">
-                                <rect key="frame" x="183" y="41" width="509" height="17"/>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="euH-P5-EEB">
+                                <rect key="frame" x="183" y="41" width="141" height="17"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="- Trading parameters" id="7ia-Nk-GZp">
                                     <font key="font" metaFont="system" size="14"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -243,7 +243,6 @@
                             <constraint firstItem="BEx-BR-dRF" firstAttribute="top" secondItem="LDe-GZ-VhE" secondAttribute="bottom" constant="26" id="U2J-nv-n3r"/>
                             <constraint firstItem="3zK-we-MkF" firstAttribute="centerY" secondItem="BEx-BR-dRF" secondAttribute="centerY" id="WAp-pP-a6R"/>
                             <constraint firstItem="3zK-we-MkF" firstAttribute="leading" secondItem="BEx-BR-dRF" secondAttribute="trailing" constant="17" id="WAw-Qt-W9f"/>
-                            <constraint firstItem="vLO-UW-f4Y" firstAttribute="trailing" secondItem="3zK-we-MkF" secondAttribute="trailing" id="dZM-JE-1ub"/>
                             <constraint firstItem="LDe-GZ-VhE" firstAttribute="leading" secondItem="tmZ-ie-b1j" secondAttribute="leading" constant="20" id="fAJ-Hw-8LQ"/>
                             <constraint firstItem="vLO-UW-f4Y" firstAttribute="centerY" secondItem="QDF-gq-eSl" secondAttribute="centerY" id="fT8-68-EdB"/>
                             <constraint firstItem="uG7-TN-V8u" firstAttribute="top" secondItem="tmZ-ie-b1j" secondAttribute="top" constant="20" id="gcy-GA-C6X"/>
@@ -252,6 +251,7 @@
                             <constraint firstItem="rNa-Pw-J1s" firstAttribute="leading" secondItem="tmZ-ie-b1j" secondAttribute="leading" constant="20" id="mL0-qt-aDA"/>
                             <constraint firstItem="rNa-Pw-J1s" firstAttribute="top" secondItem="QDF-gq-eSl" secondAttribute="bottom" constant="20" id="pBL-5u-r1R"/>
                             <constraint firstItem="QDF-gq-eSl" firstAttribute="leading" secondItem="tmZ-ie-b1j" secondAttribute="leading" constant="20" id="spd-oM-xTn"/>
+                            <constraint firstItem="euH-P5-EEB" firstAttribute="leading" secondItem="3zK-we-MkF" secondAttribute="leading" id="vp5-aY-UNb"/>
                             <constraint firstAttribute="bottom" secondItem="rNa-Pw-J1s" secondAttribute="bottom" constant="30" id="y65-PN-pwZ"/>
                         </constraints>
                     </view>
@@ -264,12 +264,12 @@
         <scene sceneID="MaQ-Fg-w2Z">
             <objects>
                 <viewController title="NinjaTrader Initialization" showSeguePresentationStyle="single" id="DI5-WX-nEg" customClass="NTSettingsViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="Mh4-Gz-qso">
-                        <rect key="frame" x="0.0" y="0.0" width="520" height="549"/>
+                    <view key="view" misplaced="YES" id="Mh4-Gz-qso">
+                        <rect key="frame" x="0.0" y="0.0" width="520" height="586"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WZO-NJ-tu4">
-                                <rect key="frame" x="183" y="510" width="154" height="19"/>
+                                <rect key="frame" x="183" y="547" width="154" height="19"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="NinjaTrader Settings" id="tey-Nv-j5A">
                                     <font key="font" metaFont="systemBold" size="15"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -444,6 +444,22 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dIa-5m-qJa">
+                                <rect key="frame" x="21" y="511" width="84" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Position size:" id="uRX-g8-Wku">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wtp-2O-mMF">
+                                <rect key="frame" x="170" y="509" width="330" height="21"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" drawsBackground="YES" id="gUF-Pd-Dch">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="zlx-4Y-R82" secondAttribute="trailing" constant="20" id="17u-sP-sZV"/>
@@ -451,6 +467,7 @@
                             <constraint firstItem="1FS-c7-l5f" firstAttribute="leading" secondItem="QlO-jJ-08b" secondAttribute="leading" id="3Vn-jd-3NJ"/>
                             <constraint firstItem="WZO-NJ-tu4" firstAttribute="centerX" secondItem="Mh4-Gz-qso" secondAttribute="centerX" id="5LJ-en-TxP"/>
                             <constraint firstAttribute="trailing" secondItem="Vwa-LA-MNm" secondAttribute="trailing" constant="20" id="7eP-4b-4Jp"/>
+                            <constraint firstItem="wtp-2O-mMF" firstAttribute="centerY" secondItem="dIa-5m-qJa" secondAttribute="centerY" id="8Y6-8z-qRn"/>
                             <constraint firstItem="KOY-eN-1RI" firstAttribute="leading" secondItem="QlO-jJ-08b" secondAttribute="leading" id="9nc-2D-EXE"/>
                             <constraint firstItem="9kI-Dh-nmX" firstAttribute="centerY" secondItem="Gjk-ao-8GW" secondAttribute="centerY" id="A2i-2z-xey"/>
                             <constraint firstItem="QlO-jJ-08b" firstAttribute="top" secondItem="ACx-OX-4Vd" secondAttribute="bottom" constant="20" id="BqM-9U-q0A"/>
@@ -458,7 +475,7 @@
                             <constraint firstItem="0iB-MP-yIS" firstAttribute="top" secondItem="5bE-4j-bZ3" secondAttribute="bottom" constant="20" id="Cqr-Gu-Zy4"/>
                             <constraint firstItem="0mj-It-UC4" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="D1n-Ge-oE3"/>
                             <constraint firstItem="x8J-G1-uQL" firstAttribute="top" secondItem="0iB-MP-yIS" secondAttribute="bottom" constant="8" id="DL8-M8-Lrx"/>
-                            <constraint firstItem="IAU-bs-8dD" firstAttribute="top" secondItem="WZO-NJ-tu4" secondAttribute="bottom" constant="19" id="GDE-eM-5Gz"/>
+                            <constraint firstItem="wtp-2O-mMF" firstAttribute="trailing" secondItem="I3S-zK-6if" secondAttribute="trailing" id="Fpg-qR-TBg"/>
                             <constraint firstItem="0mj-It-UC4" firstAttribute="leading" secondItem="BSd-8K-9r8" secondAttribute="leading" id="KC0-S8-K4K"/>
                             <constraint firstItem="KOY-eN-1RI" firstAttribute="top" secondItem="QlO-jJ-08b" secondAttribute="bottom" constant="8" id="LMI-ez-Dqb"/>
                             <constraint firstItem="9kI-Dh-nmX" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="OYY-sj-h3u"/>
@@ -466,18 +483,22 @@
                             <constraint firstItem="tCk-tt-lpO" firstAttribute="leading" secondItem="BSd-8K-9r8" secondAttribute="leading" id="RZo-eZ-jxK"/>
                             <constraint firstItem="Gjk-ao-8GW" firstAttribute="top" secondItem="5lr-dZ-rdK" secondAttribute="bottom" constant="20" id="VOw-Ch-qme"/>
                             <constraint firstItem="OOb-Sv-Fdf" firstAttribute="leading" secondItem="QlO-jJ-08b" secondAttribute="leading" id="WsD-Qz-BdF"/>
+                            <constraint firstItem="dIa-5m-qJa" firstAttribute="top" secondItem="WZO-NJ-tu4" secondAttribute="bottom" constant="20" id="XFo-aa-k7a"/>
                             <constraint firstItem="5lr-dZ-rdK" firstAttribute="top" secondItem="fXS-k6-lc5" secondAttribute="bottom" constant="20" id="XcH-CY-zow"/>
                             <constraint firstItem="QlO-jJ-08b" firstAttribute="leading" secondItem="Mh4-Gz-qso" secondAttribute="leading" constant="23" id="Yip-H2-WKF"/>
                             <constraint firstItem="Vwa-LA-MNm" firstAttribute="top" secondItem="baP-ir-oZD" secondAttribute="bottom" constant="8" id="Yv2-CR-6Vb"/>
+                            <constraint firstItem="wtp-2O-mMF" firstAttribute="leading" secondItem="I3S-zK-6if" secondAttribute="leading" id="ZcX-el-9K3"/>
                             <constraint firstItem="5lr-dZ-rdK" firstAttribute="leading" secondItem="fXS-k6-lc5" secondAttribute="leading" id="b1U-9v-fHw"/>
                             <constraint firstItem="KOY-eN-1RI" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="bOg-LB-RkP"/>
                             <constraint firstItem="I3S-zK-6if" firstAttribute="leading" secondItem="tCk-tt-lpO" secondAttribute="leading" id="bRD-hn-rFu"/>
+                            <constraint firstItem="IAU-bs-8dD" firstAttribute="top" secondItem="dIa-5m-qJa" secondAttribute="bottom" constant="20" id="cwK-dS-JPZ"/>
                             <constraint firstItem="BSd-8K-9r8" firstAttribute="centerY" secondItem="ACx-OX-4Vd" secondAttribute="centerY" id="d6b-J9-xEy"/>
                             <constraint firstAttribute="trailing" secondItem="x8J-G1-uQL" secondAttribute="trailing" constant="20" id="fBn-1t-0br"/>
                             <constraint firstItem="5bE-4j-bZ3" firstAttribute="leading" secondItem="OOb-Sv-Fdf" secondAttribute="leading" id="fC5-9o-eZo"/>
                             <constraint firstItem="5bE-4j-bZ3" firstAttribute="top" secondItem="zlx-4Y-R82" secondAttribute="bottom" constant="8" id="fQs-1N-6iM"/>
                             <constraint firstItem="Gjk-ao-8GW" firstAttribute="leading" secondItem="fXS-k6-lc5" secondAttribute="leading" id="frZ-iv-hej"/>
                             <constraint firstItem="ACx-OX-4Vd" firstAttribute="top" secondItem="Gjk-ao-8GW" secondAttribute="bottom" constant="20" id="g6e-Vv-vh5"/>
+                            <constraint firstItem="dIa-5m-qJa" firstAttribute="leading" secondItem="IAU-bs-8dD" secondAttribute="leading" id="gi9-PN-zH5"/>
                             <constraint firstItem="0iB-MP-yIS" firstAttribute="leading" secondItem="QlO-jJ-08b" secondAttribute="leading" id="hG2-UQ-Z8u"/>
                             <constraint firstItem="tCk-tt-lpO" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="hJX-GJ-uhA"/>
                             <constraint firstItem="tCk-tt-lpO" firstAttribute="centerY" secondItem="fXS-k6-lc5" secondAttribute="centerY" id="iQK-yZ-ly2"/>
@@ -507,6 +528,7 @@
                         <outlet property="longNameField" destination="9kI-Dh-nmX" id="ihq-AQ-uBe"/>
                         <outlet property="nextButton" destination="Vwa-LA-MNm" id="Kjs-63-yDb"/>
                         <outlet property="outputFolderField" destination="x8J-G1-uQL" id="pxM-ll-35o"/>
+                        <outlet property="positionSizeField" destination="wtp-2O-mMF" id="SAT-vR-UpZ"/>
                         <outlet property="shortNameField" destination="BSd-8K-9r8" id="oPi-Yx-9hP"/>
                         <outlet property="symbolField" destination="I3S-zK-6if" id="jq3-Ur-e6l"/>
                         <segue destination="cVa-8a-a9U" kind="show" identifier="showLiveTrader" id="Rm1-CU-Arl"/>
@@ -514,7 +536,7 @@
                 </viewController>
                 <customObject id="4tU-8R-0ce" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="874" y="179"/>
+            <point key="canvasLocation" x="874" y="200.5"/>
         </scene>
         <!--Chart-->
         <scene sceneID="Nw5-bD-icl">
@@ -541,7 +563,7 @@
                 </viewController>
                 <customObject id="O5U-D5-IU2" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="138" y="1880"/>
+            <point key="canvasLocation" x="-299" y="1833"/>
         </scene>
         <!--Trade Log-->
         <scene sceneID="lRD-HA-YKQ">
@@ -601,7 +623,7 @@
                 </viewController>
                 <customObject id="iK0-NM-QBz" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1008" y="1885"/>
+            <point key="canvasLocation" x="568" y="1756"/>
         </scene>
         <!--Configuration-->
         <scene sceneID="8lg-qv-ddx">
@@ -1529,8 +1551,8 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oWS-LY-aJe">
-                                <rect key="frame" x="18" y="580" width="116" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="1 Minute server IP:" id="15Z-5N-kVf">
+                                <rect key="frame" x="18" y="580" width="96" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="1 min server IP:" id="15Z-5N-kVf">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1632,7 +1654,7 @@
                 </viewController>
                 <customObject id="Wtg-RB-62N" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="814" y="958"/>
+            <point key="canvasLocation" x="801" y="954"/>
         </scene>
         <!--Simulation Trader-->
         <scene sceneID="hIz-AP-VOD">
@@ -1987,8 +2009,8 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PJx-NI-lOn">
-                                <rect key="frame" x="18" y="583" width="116" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="1 Minute server IP:" id="2I1-JZ-hk3">
+                                <rect key="frame" x="18" y="583" width="96" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="1 min server IP:" id="2I1-JZ-hk3">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2089,7 +2111,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="61" y="836"/>
+            <point key="canvasLocation" x="72" y="954"/>
         </scene>
     </scenes>
     <resources>

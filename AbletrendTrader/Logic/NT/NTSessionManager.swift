@@ -486,7 +486,7 @@ class NTSessionManager: BaseSessionManager {
                            actualEntryPrice: existingPrice,
                            stopLoss: nil,
                            entryOrderRef: nil,
-                           commission: self.commission)
+                           commission: self.commission * Double(existingPosition))
         }
     }
 }

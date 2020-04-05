@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class SimTradingViewController: NSViewController, NSTextFieldDelegate {
+class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
     private let config = ConfigurationManager.shared
     
     @IBOutlet weak var server1MinURLField: NSTextField!
@@ -100,6 +100,12 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate {
         sessionManager.delegate = self
     }
     
+    override func viewWillAppear() {
+        super.viewWillAppear()
+        
+        view.window?.delegate = self
+    }
+    
     @objc
     private func updateSystemTimeLabel() {
         systemTimeLabel.stringValue = dateFormatter.string(from: Date())
@@ -178,6 +184,13 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate {
             self.logViewController = logVc
             self.logViewController?.log = log
         }
+    }
+    
+    func windowWillClose(_ notification: Notification) {
+        chartManager?.stopMonitoring()
+        sessionManager.stopLiveMonitoring()
+        systemClockTimer.invalidate()
+        systemClockTimer =  nil
     }
 }
 

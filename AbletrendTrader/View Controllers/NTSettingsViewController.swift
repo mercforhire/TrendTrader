@@ -18,6 +18,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     private var DefaultOutgoingPath = "/Users/lchen/Downloads/NinjaTrader/outgoing"
     private var DefaultAccountName = "Sim101"
     
+    @IBOutlet weak var positionSizeField: NSTextField!
     @IBOutlet weak var symbolField: NSTextField!
     @IBOutlet weak var commissionField: NSTextField!
     @IBOutlet weak var exchangeField: NSTextField!
@@ -28,6 +29,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var outputFolderField: NSTextField!
     @IBOutlet weak var nextButton: NSButton!
     
+    private var positionSize: Int = 1
     private var ticker: String = ""
     private var commission: Double = 0
     private var exchange: String = ""
@@ -38,6 +40,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     private var outputFolder: String = ""
     
     func setupUI() {
+        positionSizeField.delegate = self
         symbolField.delegate = self
         commissionField.delegate = self
         exchangeField.delegate = self
@@ -50,6 +53,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     func loadSettings() {
+        positionSize = config.positionSize 
         ticker = config.ntTicker ?? DefaultTicker
         commission = config.ntCommission
         exchange = config.ntExchange
@@ -59,6 +63,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         inputFolder = config.ntIncomingPath ?? DefaultIncomingPath
         outputFolder = config.ntOutgoingPath ?? DefaultOutgoingPath
         
+        positionSizeField.integerValue = positionSize
         symbolField.stringValue = ticker
         commissionField.stringValue = String(format: "%.2f",commission)
         exchangeField.stringValue = exchange
@@ -153,6 +158,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     func verifySettings(showError: Bool = false) -> Bool {
+        if positionSize < 1 {
+            showErrorDialog(text: "Invalid position size")
+            return false
+        }
+        
         if ticker.length == 0 {
             showErrorDialog(text: "Invalid ticker entry")
             return false
@@ -223,7 +233,10 @@ extension NTSettingsViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
             do {
-                if textField == symbolField {
+                if textField == positionSizeField {
+                    try config.setPositionSize(newValue: textField.integerValue)
+                    ticker = textField.stringValue
+                } else if textField == symbolField {
                     try config.setNTTicker(newValue: textField.stringValue)
                     ticker = textField.stringValue
                 } else if textField == commissionField {

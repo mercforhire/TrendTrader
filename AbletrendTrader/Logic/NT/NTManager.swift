@@ -147,7 +147,7 @@ class NTManager {
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
-                                                              commission: self.commission)
+                                                              commission: self.commission * Double(size))
                     completion?(.success(orderConfirmation))
                     self.resetTimer()
                 }
@@ -221,7 +221,7 @@ class NTManager {
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
-                                                              commission: self.commission)
+                                                              commission: self.commission * Double(size))
                     completion?(.success(orderConfirmation))
                     self.resetTimer()
                 }
@@ -285,7 +285,7 @@ class NTManager {
                                                               orderId: orderRef,
                                                               orderRef: orderRef,
                                                               stopOrderId: nil,
-                                                              commission: self.commission)
+                                                              commission: self.commission * Double(size))
                     completion?(.success(orderConfirmation))
                 }
             } else if let _ = latestOrderResponse {

@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
+class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
     private let config = ConfigurationManager.shared
     
     var tradingMode: LiveTradingMode!
@@ -130,12 +130,12 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
         if chartManager?.monitoring ?? false {
             chartManager?.startMonitoring()
         }
+        
+        view.window?.delegate = self
     }
     
     override func viewDidDisappear() {
         super.viewDidDisappear()
-        
-        chartManager?.stopMonitoring()
     }
     
     @objc func updateSystemTimeLabel() {
@@ -261,6 +261,13 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate {
             self.logViewController = logVc
             self.logViewController?.log = log
         }
+    }
+    
+    func windowWillClose(_ notification: Notification) {
+        chartManager?.stopMonitoring()
+        sessionManager.stopLiveMonitoring()
+        systemClockTimer.invalidate()
+        systemClockTimer =  nil
     }
 }
 

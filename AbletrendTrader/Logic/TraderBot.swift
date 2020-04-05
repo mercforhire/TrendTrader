@@ -238,7 +238,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let buyPosition = Position(direction: .long, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
+        let buyPosition = Position(direction: .long, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
         return .openPosition(newPosition: buyPosition, entryType: .any)
     }
     
@@ -246,7 +246,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let sellPosition = Position(direction: .short, size: config.positionSize, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
+        let sellPosition = Position(direction: .short, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
         return .openPosition(newPosition: sellPosition, entryType: .any)
     }
     
@@ -326,7 +326,7 @@ class TraderBot {
                                     idealEntryPrice: bar.candleStick.close,
                                     actualEntryPrice: bar.candleStick.close,
                                     stopLoss: stopLoss,
-                                    commission: commmission)
+                                    commission: commmission * Double(config.positionSize))
             return position
         } else if risk <= config.maxRisk {
             let position = Position(direction: direction,
@@ -335,7 +335,7 @@ class TraderBot {
                                     idealEntryPrice: bar.candleStick.close,
                                     actualEntryPrice: bar.candleStick.close,
                                     stopLoss: stopLoss,
-                                    commission: commmission)
+                                    commission: commmission * Double(config.positionSize))
             return position
         }
 

@@ -369,7 +369,7 @@ class TraderBot {
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
             
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
-            if lastTrade.exitTime.isInSameMinute(date: currentBar.time) {
+            if lastTrade.exitTime.isInSameMinute(date: currentBar.time), lastTrade.exitMethod != .profitTaking {
                 return seekToOpenPosition(bar: currentBar, entryType: .any)
             }
             

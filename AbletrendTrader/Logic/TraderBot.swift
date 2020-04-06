@@ -419,27 +419,28 @@ class TraderBot {
         // Method 1 and 2:
         guard let previousLevel: Double = findPreviousLevel(direction: direction, entryBar: entryBar) else { return nil }
         
+        let closeRounded = entryBar.candleStick.close.roundBasedOnDirection(direction: direction)
+        
         switch direction {
         case .long:
             if entryBar.candleStick.close - previousLevel <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
-                return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
+                return StopLoss(stop: min(previousLevel, closeRounded - config.minStop), source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
                 entryBar.candleStick.close - (currentStop - Buffer) <= config.maxRisk {
-                return StopLoss(stop: (currentStop - Buffer), source: .supportResistanceLevel)
+                return StopLoss(stop: min(currentStop - Buffer, closeRounded - config.minStop), source: .supportResistanceLevel)
             }
         default:
             if previousLevel - entryBar.candleStick.close <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
-                return StopLoss(stop: previousLevel, source: .supportResistanceLevel)
+                return StopLoss(stop: max(previousLevel, closeRounded + config.minStop), source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
                 (currentStop + Buffer) - entryBar.candleStick.close <= config.maxRisk {
-                return StopLoss(stop: (currentStop + Buffer), source: .supportResistanceLevel)
+                return StopLoss(stop: max(currentStop + Buffer, closeRounded + config.minStop), source: .supportResistanceLevel)
             }
         }
         
         // Method 3:
         let lowRounded = entryBar.candleStick.low.roundBasedOnDirection(direction: direction)
         let highRounded = entryBar.candleStick.high.roundBasedOnDirection(direction: direction)
-        let closeRounded = entryBar.candleStick.close.roundBasedOnDirection(direction: direction)
         
         switch direction {
         case .long:

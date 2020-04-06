@@ -75,7 +75,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         flatTimePicker.dateValue = Date.getNewDateFromTime(hour: config.flatTime.hour(),
                                                            min: config.flatTime.minute())
         
-        dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLoss)
+        dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", config.maxHighRiskEntryAllowed)
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
         noEntryDuringLunchCheckbox.state = config.noEntryDuringLunch ? .on : .off

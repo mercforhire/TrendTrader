@@ -240,16 +240,16 @@ extension NTSettingsViewController: NSControlTextEditingDelegate {
                     try config.setNTTicker(newValue: textField.stringValue)
                     ticker = textField.stringValue
                 } else if textField == commissionField {
-                    try config.setNTCommission(newValue: commission)
+                    try config.setNTCommission(newValue: textField.doubleValue)
                     commission = textField.doubleValue
                 } else if textField == exchangeField {
-                    try config.setNTExchange(newValue: exchange)
+                    try config.setNTExchange(newValue: textField.stringValue)
                     exchange = textField.stringValue
                 } else if textField == longNameField {
-                    try config.setNTAccountLongName(newValue: longName)
+                    try config.setNTAccountLongName(newValue: textField.stringValue)
                     longName = textField.stringValue
                 } else if textField == shortNameField {
-                    try config.setNTAccountName(newValue: shortName)
+                    try config.setNTAccountName(newValue: textField.stringValue)
                     shortName = textField.stringValue
                 }
             } catch (let error) {

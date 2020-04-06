@@ -139,7 +139,7 @@ class NTSessionManager: BaseSessionManager {
                     switch result {
                     case .success(let confirmation):
                         if !tradeAlreadyClosed {
-                            let trade = Trade(direction: oldPosition.direction,
+                            let trade = Trade(direction: oldPosition.direction, size: newPosition.size,
                                               entryTime: oldPosition.entryTime,
                                               idealEntryPrice: oldPosition.idealEntryPrice,
                                               actualEntryPrice: oldPosition.actualEntryPrice,
@@ -250,7 +250,7 @@ class NTSessionManager: BaseSessionManager {
                         latestFilledOrderResponse.status == .filled {
                         
                         self.delegate?.newLogAdded(log: "Force close position already closed, last filled order response: \(latestFilledOrderResponse.description)")
-                        let trade = Trade(direction: closedPosition.direction,
+                        let trade = Trade(direction: closedPosition.direction, size: closedPosition.size,
                                           entryTime: closedPosition.entryTime,
                                           idealEntryPrice: closedPosition.idealEntryPrice,
                                           actualEntryPrice: closedPosition.actualEntryPrice,
@@ -262,7 +262,7 @@ class NTSessionManager: BaseSessionManager {
                         self.trades.append(trade)
                     } else {
                         self.delegate?.newLogAdded(log: "Force close position already closed, but no last order response")
-                        let trade = Trade(direction: closedPosition.direction,
+                        let trade = Trade(direction: closedPosition.direction, size: closedPosition.size,
                                           entryTime: closedPosition.entryTime,
                                           idealEntryPrice: closedPosition.idealEntryPrice,
                                           actualEntryPrice: closedPosition.actualEntryPrice,
@@ -286,7 +286,7 @@ class NTSessionManager: BaseSessionManager {
                     { result in
                         switch result {
                         case .success(let confirmation):
-                            let trade = Trade(direction: closedPosition.direction,
+                            let trade = Trade(direction: closedPosition.direction, size: closedPosition.size,
                                               entryTime: closedPosition.entryTime,
                                               idealEntryPrice: closedPosition.idealEntryPrice,
                                               actualEntryPrice: closedPosition.actualEntryPrice,
@@ -431,7 +431,7 @@ class NTSessionManager: BaseSessionManager {
                 switch result {
                 case .success(let orderConfirmation):
                     if let currentPosition = self.pos {
-                        let trade = Trade(direction: currentPosition.direction,
+                        let trade = Trade(direction: currentPosition.direction, size: currentPosition.size,
                                           entryTime: currentPosition.entryTime,
                                           idealEntryPrice: currentPosition.idealEntryPrice,
                                           actualEntryPrice: currentPosition.idealEntryPrice,
@@ -457,7 +457,7 @@ class NTSessionManager: BaseSessionManager {
             latestFilledOrderResponse.status == .filled {
             
             self.delegate?.newLogAdded(log: "Detected position closed, last filled order response: \(latestFilledOrderResponse.description)")
-            let trade = Trade(direction: closedPosition.direction,
+            let trade = Trade(direction: closedPosition.direction, size: closedPosition.size,
                               entryTime: closedPosition.entryTime,
                               idealEntryPrice: closedPosition.idealEntryPrice,
                               actualEntryPrice: closedPosition.actualEntryPrice,

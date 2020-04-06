@@ -144,7 +144,7 @@ class BaseSessionManager {
                                                  stop: "--",
                                                  iExit: String(format: "%.2f", trade.idealExitPrice),
                                                  aExit: String(format: "%.2f", trade.actualExitPrice),
-                                                 pAndL: String(format: "%.2f", trade.actualProfit),
+                                                 pAndL: String(format: "%.2f", trade.actualProfit * Double(config.positionSize)),
                                                  entryTime: dateFormatter.string(from: trade.entryTime),
                                                  exitTime: dateFormatter.string(from: trade.exitTime),
                                                  commission: trade.commission.currency(true)))

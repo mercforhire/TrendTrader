@@ -11,6 +11,7 @@ import Foundation
 struct Trade {
     var direction: TradeDirection
     
+    var size: Int
     var entryTime: Date
     var idealEntryPrice: Double
     var actualEntryPrice: Double
@@ -35,18 +36,18 @@ struct Trade {
     var actualProfit: Double {
         switch direction {
         case .long:
-            return actualExitPrice - actualEntryPrice
+            return (actualExitPrice - actualEntryPrice) * Double(size)
         default:
-            return actualEntryPrice - actualExitPrice
+            return (actualEntryPrice - actualExitPrice) * Double(size)
         }
     }
     
     var actualProfitDollar: Double {
         switch direction {
         case .long:
-            return (actualExitPrice - actualEntryPrice) * ConfigurationManager.shared.tickerValue - commission
+            return (actualExitPrice - actualEntryPrice) * ConfigurationManager.shared.tickerValue * Double(size) - commission
         default:
-            return (actualEntryPrice - actualExitPrice) * ConfigurationManager.shared.tickerValue - commission
+            return (actualEntryPrice - actualExitPrice) * ConfigurationManager.shared.tickerValue * Double(size) - commission
         }
     }
 }

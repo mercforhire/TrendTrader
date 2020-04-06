@@ -25,13 +25,13 @@ class NTSessionManager: BaseSessionManager {
          outgoingPath: String) {
         self.commission = commission
         self.ntManager = NTManager(accountId: accountId,
-        commission: commission,
-        ticker: ticker,
-        exchange: exchange,
-        accountLongName: accountLongName,
-        basePath: basePath,
-        incomingPath: incomingPath,
-        outgoingPath: outgoingPath)
+                                   commission: commission,
+                                   ticker: ticker,
+                                   exchange: exchange,
+                                   accountLongName: accountLongName,
+                                   basePath: basePath,
+                                   incomingPath: incomingPath,
+                                   outgoingPath: outgoingPath)
         super.init()
         self.ntManager.initialize()
         self.ntManager.delegate = self

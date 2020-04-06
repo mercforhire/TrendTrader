@@ -235,7 +235,7 @@ extension NTSettingsViewController: NSControlTextEditingDelegate {
             do {
                 if textField == positionSizeField {
                     try config.setPositionSize(newValue: textField.integerValue)
-                    ticker = textField.stringValue
+                    positionSize = textField.integerValue
                 } else if textField == symbolField {
                     try config.setNTTicker(newValue: textField.stringValue)
                     ticker = textField.stringValue

@@ -494,7 +494,7 @@ class NTSessionManager: BaseSessionManager {
     override func placeDemoTrade(latestPriceBar: PriceBar) {
         ntManager.generatePlaceOrder(direction: .long,
                                      size: 1,
-                                     orderType: .limit(price: latestPriceBar.candleStick.close - 1000),
+                                     orderType: .limit(price: latestPriceBar.candleStick.close - 300),
                                      orderRef: latestPriceBar.time.generateOrderIdentifier(prefix: "DEMO"))
         { result in
             let alert = NSAlert()
@@ -504,9 +504,9 @@ class NTSessionManager: BaseSessionManager {
                
                 alert.messageText = "Demo order placed successfully, please cancel it asap."
                 
-            case .failure(let ntError):
+            case .failure:
                 let alert = NSAlert()
-                alert.messageText = ntError.displayMessage()
+                alert.messageText = "Demo order place error."
             }
             
             alert.alertStyle = .warning

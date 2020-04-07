@@ -119,10 +119,12 @@ class NTManager {
             
             var desiredStatus: NTOrderStatus = .filled
             switch orderType {
-            case .stop, .limit:
-                    desiredStatus = .accepted
-                default:
-                    desiredStatus = .filled
+            case .stop:
+                desiredStatus = .accepted
+            case .limit:
+                desiredStatus = .working
+            default:
+                desiredStatus = .filled
             }
             
             var latestOrderResponse: OrderResponse?

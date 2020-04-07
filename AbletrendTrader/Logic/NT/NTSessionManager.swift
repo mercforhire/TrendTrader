@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Cocoa
 
 class NTSessionManager: BaseSessionManager {
     private var ntManager: NTManager
@@ -487,6 +488,30 @@ class NTSessionManager: BaseSessionManager {
                            stopLoss: nil,
                            entryOrderRef: nil,
                            commission: self.commission * Double(existingPosition))
+        }
+    }
+    
+    override func placeDemoTrade(latestPriceBar: PriceBar) {
+        ntManager.generatePlaceOrder(direction: .long,
+                                     size: 1,
+                                     orderType: .limit(price: latestPriceBar.candleStick.close - 1000),
+                                     orderRef: latestPriceBar.time.generateOrderIdentifier(prefix: "DEMO"))
+        { result in
+            let alert = NSAlert()
+            
+            switch result {
+            case .success:
+               
+                alert.messageText = "Demo order placed successfully, please cancel it asap."
+                
+            case .failure(let ntError):
+                let alert = NSAlert()
+                alert.messageText = ntError.displayMessage()
+            }
+            
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "Dismiss")
+            alert.runModal()
         }
     }
 }

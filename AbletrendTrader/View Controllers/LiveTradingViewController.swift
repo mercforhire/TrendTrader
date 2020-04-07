@@ -253,6 +253,12 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
         }
     }
     
+    @IBAction func demoPressed(_ sender: NSButton) {
+        guard let latestPriceBar = chartManager?.chart?.absLastBar else { return }
+        
+        sessionManager.placeDemoTrade(latestPriceBar: latestPriceBar)
+    }
+    
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         if let chartVC = segue.destinationController as? ChartViewController, let chart = trader?.chart {
             chartVC.chart = chart

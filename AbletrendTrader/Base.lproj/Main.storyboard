@@ -264,7 +264,7 @@
         <scene sceneID="MaQ-Fg-w2Z">
             <objects>
                 <viewController title="NinjaTrader Initialization" showSeguePresentationStyle="single" id="DI5-WX-nEg" customClass="NTSettingsViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" misplaced="YES" id="Mh4-Gz-qso">
+                    <view key="view" id="Mh4-Gz-qso">
                         <rect key="frame" x="0.0" y="0.0" width="520" height="586"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
@@ -1598,6 +1598,16 @@
                                     <segue destination="mfU-Xh-Ar2" kind="show" identifier="ShowLogSegue" id="Dua-i6-PWC"/>
                                 </connections>
                             </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uS4-g7-CDA">
+                                <rect key="frame" x="410" y="393" width="112" height="32"/>
+                                <buttonCell key="cell" type="push" title="Demo order" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Let-Nb-fsb">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="demoPressed:" target="cVa-8a-a9U" id="tCU-aL-7qU"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="gC5-gH-kEk" firstAttribute="top" secondItem="S2b-lc-lTv" secondAttribute="top" id="0SL-jH-921"/>
@@ -1617,6 +1627,7 @@
                             <constraint firstItem="YHY-kb-BJS" firstAttribute="top" secondItem="qBw-zu-FaF" secondAttribute="bottom" constant="20" id="FGm-jf-IWP"/>
                             <constraint firstItem="jwv-nJ-CuY" firstAttribute="top" secondItem="qtM-KX-Hzj" secondAttribute="bottom" constant="9" id="LcH-E0-KV9"/>
                             <constraint firstItem="qPe-gd-HwE" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="N1S-f2-zhJ"/>
+                            <constraint firstItem="5dO-j7-eHc" firstAttribute="leading" secondItem="uS4-g7-CDA" secondAttribute="trailing" constant="12" id="NTk-lZ-nHI"/>
                             <constraint firstItem="jwv-nJ-CuY" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="Ok1-OW-Ndj"/>
                             <constraint firstItem="i66-Zv-rsj" firstAttribute="top" secondItem="qBw-zu-FaF" secondAttribute="top" id="OxG-wJ-bJm"/>
                             <constraint firstItem="qtM-KX-Hzj" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="Sqn-tM-GzO"/>
@@ -1630,6 +1641,7 @@
                             <constraint firstItem="qBw-zu-FaF" firstAttribute="top" secondItem="qPe-gd-HwE" secondAttribute="bottom" constant="23" id="mDE-4e-6IJ"/>
                             <constraint firstItem="S2b-lc-lTv" firstAttribute="leading" secondItem="oWS-LY-aJe" secondAttribute="leading" id="oeC-1a-4EB"/>
                             <constraint firstAttribute="bottom" secondItem="jwv-nJ-CuY" secondAttribute="bottom" constant="20" id="qUq-9M-flh"/>
+                            <constraint firstItem="uS4-g7-CDA" firstAttribute="bottom" secondItem="5dO-j7-eHc" secondAttribute="bottom" id="qaE-CW-V8x"/>
                             <constraint firstItem="gC5-gH-kEk" firstAttribute="leading" secondItem="S2b-lc-lTv" secondAttribute="trailing" constant="8" id="tcB-Qu-mtI"/>
                             <constraint firstItem="tb1-f5-ekN" firstAttribute="top" secondItem="mB6-MV-HSJ" secondAttribute="top" constant="20" id="wOn-yT-qOd"/>
                             <constraint firstItem="qPe-gd-HwE" firstAttribute="top" secondItem="Cwt-3G-1lk" secondAttribute="bottom" constant="16" id="xXb-Au-cxT"/>

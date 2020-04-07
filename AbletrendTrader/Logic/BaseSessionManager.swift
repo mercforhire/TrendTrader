@@ -95,6 +95,10 @@ class BaseSessionManager {
         // Override
     }
     
+    func placeDemoTrade(latestPriceBar: PriceBar) {
+        // Override
+    }
+    
     func getTotalPAndL() -> Double {
         var pAndL: Double = 0
         

@@ -4,10 +4,6 @@
 <dict>
 	<key>default_ip</key>
 	<string>http://192.168.0.121/</string>
-	<key>nt_exchange</key>
-	<string>Globex</string>
-	<key>nt_commission</key>
-	<real>1.6</real>
 	<key>simulate_time_passage</key>
 	<false/>
 	<key>no_entry_during_lunch</key>
@@ -18,8 +14,6 @@
 	<real>-50</real>
 	<key>position_size</key>
 	<integer>1</integer>
-	<key>ticker_value</key>
-	<integer>20</integer>
 	<key>trading_start</key>
 	<date>2020-03-09T13:30:00Z</date>
 	<key>trading_end</key>

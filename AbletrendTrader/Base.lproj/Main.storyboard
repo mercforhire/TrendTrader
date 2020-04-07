@@ -480,7 +480,7 @@
                                 <rect key="frame" x="168" y="614" width="195" height="25"/>
                                 <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="aPG-mW-hT1" id="6FX-dQ-mao">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="BRI-ms-Zzh">
                                         <items>
                                             <menuItem title="Item 1" state="on" id="aPG-mW-hT1"/>
@@ -489,6 +489,9 @@
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
+                                <connections>
+                                    <action selector="selectionChanged:" target="DI5-WX-nEg" id="HEd-UB-Hhq"/>
+                                </connections>
                             </popUpButton>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pFy-ce-CrQ">
                                 <rect key="frame" x="21" y="583" width="66" height="16"/>

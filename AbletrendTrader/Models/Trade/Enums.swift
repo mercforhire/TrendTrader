@@ -343,16 +343,7 @@ enum ConfigError: Error {
     case flatTimeError
     case positionSizeError
     case maxDailyLossError
-    case tickerValueError
     case maxHighRiskEntryAllowedError
-    case ntCommissionError
-    case ntTickerError
-    case ntExchangeError
-    case ntAccountLongNameError
-    case ntAccountNameError
-    case ntBasePathError
-    case ntIncomingPathError
-    case ntOutgoingPathError
     
     func displayMessage() -> String {
         switch self {
@@ -394,26 +385,8 @@ enum ConfigError: Error {
             return "Position size error"
         case .maxDailyLossError:
             return "Max daily loss must be -20 or lower"
-        case .tickerValueError:
-            return "Ticker value must be 1 or more"
         case .maxHighRiskEntryAllowedError:
             return "Max high risk entry allowed must be positive number"
-        case .ntCommissionError:
-            return "Commission must be a positive number"
-        case .ntTickerError:
-            return "Ticket name error"
-        case .ntExchangeError:
-            return "Exchange name error"
-        case .ntAccountLongNameError:
-            return "NT long account name error"
-        case .ntAccountNameError:
-            return "NT account name error"
-        case .ntBasePathError:
-            return "Base path error"
-        case .ntIncomingPathError:
-            return "Incoming path error"
-        case .ntOutgoingPathError:
-            return "Outgoing path error"
         }
     }
     

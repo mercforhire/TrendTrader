@@ -385,13 +385,8 @@ class ConfigurationManager {
         saveToDefaults(newValue: newValue, key: "simulate_time_passage")
     }
     
-    func setNTSettings(name: String, settings: NTSettings) {
-        ntSettings[name] = settings
-        saveToDefaults(newValue: ntSettings, key: "nt_settings")
-    }
-    
-    func removeNTSettings(name: String) {
-        ntSettings[name] = nil
+    func setNTSettings(settings: [String: NTSettings]) {
+        ntSettings = settings
         saveToDefaults(newValue: ntSettings, key: "nt_settings")
     }
     

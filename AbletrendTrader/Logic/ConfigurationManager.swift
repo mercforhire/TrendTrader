@@ -75,20 +75,12 @@ class ConfigurationManager {
     private(set) var byPassTradingTimeRestrictions : Bool
     private(set) var noEntryDuringLunch : Bool
     private(set) var simulateTimePassage : Bool
-    private(set) var tickerValue: Double
-    
-    private(set) var ntCommission: Double
-    private(set) var ntTicker: String?
-    private(set) var ntExchange: String
-    private(set) var ntAccountLongName: String?
-    private(set) var ntAccountName: String?
-    private(set) var ntBasePath: String?
-    private(set) var ntIncomingPath: String?
-    private(set) var ntOutgoingPath: String?
     
     private(set) var server1MinURL: String
     private(set) var server2MinURL: String
     private(set) var server3MinURL: String
+    
+    private(set) var ntSettings: [String: NTSettings]
     
     init() {
         let defaultSettings: NSDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "DefaultSettings", ofType: "plist")!)!
@@ -139,29 +131,13 @@ class ConfigurationManager {
        
         self.simulateTimePassage = defaults.object(forKey: "simulate_time_passage") as? Bool ?? defaultSettings["simulate_time_passage"] as! Bool
         
-        self.tickerValue = defaults.object(forKey: "ticker_value") as? Double ?? defaultSettings["ticker_value"] as! Double
-        
-        self.ntCommission = defaults.object(forKey: "nt_commission") as? Double ?? defaultSettings["nt_commission"] as! Double
-        
-        self.ntTicker = defaults.object(forKey: "nt_ticker") as? String
-        
-        self.ntExchange = defaults.object(forKey: "nt_exchange") as? String ?? defaultSettings["nt_exchange"] as! String
-        
-        self.ntAccountLongName = defaults.object(forKey: "nt_account_long_name") as? String
-        
-        self.ntAccountName = defaults.object(forKey: "nt_account_name") as? String
-        
-        self.ntBasePath = defaults.object(forKey: "nt_base_path") as? String
-        
-        self.ntIncomingPath = defaults.object(forKey: "nt_incoming_path") as? String
-        
-        self.ntOutgoingPath = defaults.object(forKey: "nt_outgoing_path") as? String
-        
         self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
         
         self.server2MinURL = defaults.object(forKey: "server_2min_url") as? String ?? defaultSettings["default_ip"] as! String
         
         self.server3MinURL = defaults.object(forKey: "server_3min_url") as? String ?? defaultSettings["default_ip"] as! String
+        
+        self.ntSettings = defaults.object(forKey: "nt_settings") as? [String: NTSettings] ?? [:]
     }
     
     func setServer1MinURL(newValue: String) throws {
@@ -409,94 +385,14 @@ class ConfigurationManager {
         saveToDefaults(newValue: newValue, key: "simulate_time_passage")
     }
     
-    func setNTCommission(newValue: Double) throws {
-        if newValue >= 0 {
-            ntCommission = newValue
-            saveToDefaults(newValue: newValue, key: "nt_commission")
-            return
-        }
-        
-        throw ConfigError.ntCommissionError
+    func setNTSettings(name: String, settings: NTSettings) {
+        ntSettings[name] = settings
+        saveToDefaults(newValue: ntSettings, key: "nt_settings")
     }
     
-    func setNTTicker(newValue: String) throws {
-        if newValue.count > 0 {
-            ntTicker = newValue
-            saveToDefaults(newValue: newValue, key: "nt_ticker")
-            return
-        }
-        
-        throw ConfigError.ntTickerError
-    }
-    
-    func setNTExchange(newValue: String) throws {
-        if newValue.count > 0 {
-            ntExchange = newValue
-            saveToDefaults(newValue: newValue, key: "nt_exchange")
-            return
-        }
-        
-        throw ConfigError.ntExchangeError
-    }
-    
-    func setNTAccountLongName(newValue: String) throws {
-        if newValue.count > 0 {
-            ntAccountLongName = newValue
-            saveToDefaults(newValue: newValue, key: "nt_account_long_name")
-            return
-        }
-        
-        throw ConfigError.ntAccountLongNameError
-    }
-    
-    func setNTBasePath(newValue: String) throws {
-        if newValue.count > 0 {
-            ntBasePath = newValue
-            saveToDefaults(newValue: newValue, key: "nt_base_path")
-            return
-        }
-        
-        throw ConfigError.ntBasePathError
-    }
-    
-    func setNTIncomingPath(newValue: String) throws {
-        if newValue.count > 0 {
-            ntIncomingPath = newValue
-            saveToDefaults(newValue: newValue, key: "nt_incoming_path")
-            return
-        }
-        
-        throw ConfigError.ntIncomingPathError
-    }
-    
-    func setNTOutgoingPath(newValue: String) throws {
-        if newValue.count > 0 {
-            ntOutgoingPath = newValue
-            saveToDefaults(newValue: newValue, key: "nt_outgoing_path")
-            return
-        }
-        
-        throw ConfigError.ntOutgoingPathError
-    }
-    
-    func setNTAccountName(newValue: String) throws {
-        if newValue.count > 0 {
-            ntAccountName = newValue
-            saveToDefaults(newValue: newValue, key: "nt_account_name")
-            return
-        }
-        
-        throw ConfigError.ntAccountNameError
-    }
-    
-    func setTickerValue(newValue: Double) throws {
-        if newValue >= 1 {
-            tickerValue = newValue
-            saveToDefaults(newValue: newValue, key: "ticker_value")
-            return
-        }
-        
-        throw ConfigError.tickerValueError
+    func removeNTSettings(name: String) {
+        ntSettings[name] = nil
+        saveToDefaults(newValue: ntSettings, key: "nt_settings")
     }
     
     private func saveToDefaults(newValue: Any, key: String) {

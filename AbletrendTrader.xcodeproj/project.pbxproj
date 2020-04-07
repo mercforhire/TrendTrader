@@ -44,6 +44,7 @@
 		85FE90D923D3EA9A00B99568 /* NTSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90D823D3EA9900B99568 /* NTSessionManager.swift */; };
 		85FE90DC23D3EC1200B99568 /* SimSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90DB23D3EC1200B99568 /* SimSessionManager.swift */; };
 		85FE90DE23D404CF00B99568 /* BaseSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90DD23D404CF00B99568 /* BaseSessionManager.swift */; };
+		85FF9C08243CA9040050666F /* NTSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FF9C07243CA9040050666F /* NTSettings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +89,7 @@
 		85FE90D823D3EA9900B99568 /* NTSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTSessionManager.swift; sourceTree = "<group>"; };
 		85FE90DB23D3EC1200B99568 /* SimSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimSessionManager.swift; sourceTree = "<group>"; };
 		85FE90DD23D404CF00B99568 /* BaseSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSessionManager.swift; sourceTree = "<group>"; };
+		85FF9C07243CA9040050666F /* NTSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTSettings.swift; sourceTree = "<group>"; };
 		E5A4543CD303759A7D95F956 /* Pods-AbletrendTrader.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.release.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -166,6 +168,7 @@
 				8592433923AC41C8004CE61F /* Parser.swift */,
 				8592435A23B1559E004CE61F /* Trade */,
 				8592435923B15571004CE61F /* Chart */,
+				85FF9C07243CA9040050666F /* NTSettings.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -364,6 +367,7 @@
 			files = (
 				8592435823B14DD5004CE61F /* StopLoss.swift in Sources */,
 				854A56A523D183FD00904F11 /* OrderResponse.swift in Sources */,
+				85FF9C08243CA9040050666F /* NTSettings.swift in Sources */,
 				85FE90DE23D404CF00B99568 /* BaseSessionManager.swift in Sources */,
 				854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */,
 				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,

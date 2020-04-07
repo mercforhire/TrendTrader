@@ -12,14 +12,21 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     let config = ConfigurationManager.shared
     
     private let DefaultTicker = "NQ 06-20"
+    private let DefaultPointValue = 20.0
+    private let DefaultCommission = 2.04
     private let DefaultAccountLongName = "NinjaTrader Continuum (Demo)"
     private var DefaultBasePath = "/Users/lchen/Downloads/NinjaTrader/"
     private var DefaultIncomingPath = "/Users/lchen/Downloads/NinjaTrader/incoming"
     private var DefaultOutgoingPath = "/Users/lchen/Downloads/NinjaTrader/outgoing"
     private var DefaultAccountName = "Sim101"
     
+    @IBOutlet weak var selectionPicker: NSPopUpButton!
+    @IBOutlet weak var addButton: NSButton!
+    @IBOutlet weak var deleteButton: NSButton!
+    @IBOutlet weak var botNameField: NSTextField!
     @IBOutlet weak var positionSizeField: NSTextField!
     @IBOutlet weak var symbolField: NSTextField!
+    @IBOutlet weak var dollarPointField: NSTextField!
     @IBOutlet weak var commissionField: NSTextField!
     @IBOutlet weak var exchangeField: NSTextField!
     @IBOutlet weak var longNameField: NSTextField!
@@ -29,6 +36,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var outputFolderField: NSTextField!
     @IBOutlet weak var nextButton: NSButton!
     
+    private var ntSettings: [String: NTSettings] = [:]
+    private var settingsNames: [String] {
+        return ntSettings.keys
+    }
+    private var settingsName: String = ""
     private var positionSize: Int = 1
     private var ticker: String = ""
     private var commission: Double = 0
@@ -53,6 +65,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     func loadSettings() {
+        ntSettings = config.ntSettings
+        
+        
+        
+        
         positionSize = config.positionSize 
         ticker = config.ntTicker ?? DefaultTicker
         commission = config.ntCommission
@@ -220,12 +237,110 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         }
     }
     
+    @IBAction func addPressed(_ sender: NSButton) {
+        
+    }
+    
+    @IBAction func deletePressed(_ sender: NSButton) {
+        
+    }
+    
     private func showErrorDialog(text: String) {
         let alert = NSAlert()
         alert.messageText = text
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+    
+    func setNTCommission(newValue: Double) throws {
+        if newValue >= 0 {
+            ntCommission = newValue
+            saveToDefaults(newValue: newValue, key: "nt_commission")
+            return
+        }
+        
+        throw ConfigError.ntCommissionError
+    }
+    
+    func setNTTicker(newValue: String) throws {
+        if newValue.count > 0 {
+            ntTicker = newValue
+            saveToDefaults(newValue: newValue, key: "nt_ticker")
+            return
+        }
+        
+        throw ConfigError.ntTickerError
+    }
+    
+    func setNTExchange(newValue: String) throws {
+        if newValue.count > 0 {
+            ntExchange = newValue
+            saveToDefaults(newValue: newValue, key: "nt_exchange")
+            return
+        }
+        
+        throw ConfigError.ntExchangeError
+    }
+    
+    func setNTAccountLongName(newValue: String) throws {
+        if newValue.count > 0 {
+            ntAccountLongName = newValue
+            saveToDefaults(newValue: newValue, key: "nt_account_long_name")
+            return
+        }
+        
+        throw ConfigError.ntAccountLongNameError
+    }
+    
+    func setNTBasePath(newValue: String) throws {
+        if newValue.count > 0 {
+            ntBasePath = newValue
+            saveToDefaults(newValue: newValue, key: "nt_base_path")
+            return
+        }
+        
+        throw ConfigError.ntBasePathError
+    }
+    
+    func setNTIncomingPath(newValue: String) throws {
+        if newValue.count > 0 {
+            ntIncomingPath = newValue
+            saveToDefaults(newValue: newValue, key: "nt_incoming_path")
+            return
+        }
+        
+        throw ConfigError.ntIncomingPathError
+    }
+    
+    func setNTOutgoingPath(newValue: String) throws {
+        if newValue.count > 0 {
+            ntOutgoingPath = newValue
+            saveToDefaults(newValue: newValue, key: "nt_outgoing_path")
+            return
+        }
+        
+        throw ConfigError.ntOutgoingPathError
+    }
+    
+    func setNTAccountName(newValue: String) throws {
+        if newValue.count > 0 {
+            ntAccountName = newValue
+            saveToDefaults(newValue: newValue, key: "nt_account_name")
+            return
+        }
+        
+        throw ConfigError.ntAccountNameError
+    }
+    
+    func setTickerValue(newValue: Double) throws {
+        if newValue >= 1 {
+            tickerValue = newValue
+            saveToDefaults(newValue: newValue, key: "ticker_value")
+            return
+        }
+        
+        throw ConfigError.tickerValueError
     }
 }
 

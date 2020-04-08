@@ -80,7 +80,7 @@ class ConfigurationManager {
     private(set) var server2MinURL: String
     private(set) var server3MinURL: String
     
-    private(set) var ntSettings: [String: NTSettings]
+    private(set) var ntSettings: [NTSettings] = []
     
     init() {
         let defaultSettings: NSDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "DefaultSettings", ofType: "plist")!)!
@@ -137,7 +137,9 @@ class ConfigurationManager {
         
         self.server3MinURL = defaults.object(forKey: "server_3min_url") as? String ?? defaultSettings["default_ip"] as! String
         
-        self.ntSettings = defaults.object(forKey: "nt_settings") as? [String: NTSettings] ?? [:]
+        if let data = UserDefaults.standard.value(forKey:"nt_settings") as? Data {
+            self.ntSettings = (try? PropertyListDecoder().decode(Array<NTSettings>.self, from: data)) ?? []
+        }
     }
     
     func setServer1MinURL(newValue: String) throws {
@@ -385,9 +387,32 @@ class ConfigurationManager {
         saveToDefaults(newValue: newValue, key: "simulate_time_passage")
     }
     
-    func setNTSettings(settings: [String: NTSettings]) {
-        ntSettings = settings
-        saveToDefaults(newValue: ntSettings, key: "nt_settings")
+    func addNTSettings(settings: NTSettings) {
+        ntSettings.append(settings)
+        
+        UserDefaults.standard.set(try? PropertyListEncoder().encode(ntSettings), forKey:"nt_settings")
+        UserDefaults.standard.synchronize()
+        print("Saved value:", ntSettings, "to key", "nt_settings")
+    }
+    
+    func updateNTSettings(index: Int, settings: NTSettings) {
+        guard index < ntSettings.count else { return }
+        
+        ntSettings[index] = settings
+        
+        UserDefaults.standard.set(try? PropertyListEncoder().encode(ntSettings), forKey:"nt_settings")
+        UserDefaults.standard.synchronize()
+        print("Saved value:", ntSettings, "to key", "nt_settings")
+    }
+    
+    func removeNTSettings(index: Int) {
+        guard index < ntSettings.count else { return }
+        
+        ntSettings.remove(at: index)
+        
+        UserDefaults.standard.set(try? PropertyListEncoder().encode(ntSettings), forKey:"nt_settings")
+        UserDefaults.standard.synchronize()
+        print("Saved value:", ntSettings, "to key", "nt_settings")
     }
     
     private func saveToDefaults(newValue: Any, key: String) {

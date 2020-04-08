@@ -8,14 +8,12 @@
 
 import Cocoa
 
-class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
+class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
     let config = ConfigurationManager.shared
-    private let DefaultName = "New Bot"
     
     @IBOutlet weak var selectionPicker: NSPopUpButton!
     @IBOutlet weak var addButton: NSButton!
     @IBOutlet weak var deleteButton: NSButton!
-    @IBOutlet weak var botNameField: NSTextField!
     @IBOutlet weak var positionSizeField: NSTextField!
     @IBOutlet weak var symbolField: NSTextField!
     @IBOutlet weak var dollarPointField: NSTextField!
@@ -28,32 +26,37 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet weak var outputFolderField: NSTextField!
     @IBOutlet weak var nextButton: NSButton!
     
-    private var ntSettings: [String: NTSettings] = [:]
-    private var settingsNames: [String] {
-        return Array(ntSettings.keys)
-    }
-    private var selectedSettingName: String! {
+    private var selectedSettingsIndex: Int?
+    private var selectedSettings: NTSettings? {
         didSet {
-            botNameField.stringValue = selectedSettingName
-        }
-    }
-    private var selectedSettings: NTSettings! {
-        didSet {
-            positionSizeField.integerValue = selectedSettings.positionSize
-            symbolField.stringValue = selectedSettings.ticker
-            commissionField.stringValue = String(format: "%.2f", selectedSettings.commission)
-            dollarPointField.stringValue = String(format: "%.2f", selectedSettings.pointValue)
-            exchangeField.stringValue = selectedSettings.exchange
-            longNameField.stringValue = selectedSettings.accLongName
-            shortNameField.stringValue = selectedSettings.accName
-            baseFolderField.stringValue = selectedSettings.basePath
-            inputFolderField.stringValue = selectedSettings.incomingPath
-            outputFolderField.stringValue = selectedSettings.outgoingPath
+            if let selectedSettings = selectedSettings {
+                positionSizeField.integerValue = selectedSettings.positionSize
+                symbolField.stringValue = selectedSettings.ticker
+                commissionField.stringValue = String(format: "%.2f", selectedSettings.commission)
+                dollarPointField.stringValue = String(format: "%.2f", selectedSettings.pointValue)
+                exchangeField.stringValue = selectedSettings.exchange
+                longNameField.stringValue = selectedSettings.accLongName
+                shortNameField.stringValue = selectedSettings.accName
+                baseFolderField.stringValue = selectedSettings.basePath
+                inputFolderField.stringValue = selectedSettings.incomingPath
+                outputFolderField.stringValue = selectedSettings.outgoingPath
+            } else {
+                positionSizeField.stringValue = ""
+                symbolField.stringValue = ""
+                commissionField.stringValue = ""
+                dollarPointField.stringValue = ""
+                exchangeField.stringValue = ""
+                longNameField.stringValue = ""
+                shortNameField.stringValue = ""
+                baseFolderField.stringValue = ""
+                inputFolderField.stringValue = ""
+                outputFolderField.stringValue = ""
+            }
+            
         }
     }
     
     func setupUI() {
-        botNameField.delegate = self
         positionSizeField.delegate = self
         symbolField.delegate = self
         commissionField.delegate = self
@@ -68,20 +71,23 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     func loadSettings() {
-        ntSettings = config.ntSettings
-        
-        if ntSettings.isEmpty {
-            ntSettings[DefaultName] = NTSettings()
+        if config.ntSettings.isEmpty {
+            config.addNTSettings(settings: NTSettings())
         }
         
-        guard let defaultSelectionName = settingsNames.first,
-            let defaultSelection: NTSettings = ntSettings[defaultSelectionName] else {
-                print("ERROR: ntSettings shouldn't be empty.")
-                return
+        guard let defaultSelection = config.ntSettings.first else {
+            print("ERROR: ntSettings shouldn't be empty.")
+            return
         }
+        
         selectedSettings = defaultSelection
-        selectedSettingName = defaultSelectionName
-        selectionPicker.addItems(withTitles: settingsNames)
+        selectedSettingsIndex = 0
+        selectionPicker.removeAllItems()
+        for i in 1...config.ntSettings.count {
+            selectionPicker.addItem(withTitle: "Settings - \(i)")
+        }
+        
+        deleteButton.isEnabled = config.ntSettings.count > 1
     }
     
     override func viewDidLoad() {
@@ -89,7 +95,12 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         // Do view setup here.
         setupUI()
         loadSettings()
-        _ = verifySettings()
+    }
+    
+    override func viewWillAppear() {
+        super.viewWillAppear()
+        
+        view.window?.delegate = self
     }
     
     @IBAction func selectBaseFolder(_ sender: NSButton) {
@@ -101,7 +112,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         panel.allowsMultipleSelection = false
         panel.beginSheetModal(for: window) { result in
             if result == .OK, let selectedPath = panel.url?.path {
-                self.selectedSettings.basePath = selectedPath
+                self.selectedSettings?.basePath = selectedPath
                 self.baseFolderField.stringValue = selectedPath
             }
             panel.close()
@@ -117,7 +128,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         panel.allowsMultipleSelection = false
         panel.beginSheetModal(for: window) { result in
             if result == .OK, let selectedPath = panel.url?.path {
-                self.selectedSettings.incomingPath = selectedPath
+                self.selectedSettings?.incomingPath = selectedPath
                 self.inputFolderField.stringValue = selectedPath
             }
             panel.close()
@@ -133,7 +144,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         panel.allowsMultipleSelection = false
         panel.beginSheetModal(for: window) { result in
             if result == .OK, let selectedPath = panel.url?.path {
-                self.selectedSettings.outgoingPath = selectedPath
+                self.selectedSettings?.outgoingPath = selectedPath
                 self.outputFolderField.stringValue = selectedPath
             }
             panel.close()
@@ -141,18 +152,18 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     @IBAction func nextPressed(_ sender: NSButton) {
-        if verifySettings() {
-            config.setNTSettings(settings: ntSettings)
+        if let selectedSettingsIndex = selectedSettingsIndex,
+            let selectedSettings = selectedSettings,
+            verifySettings() {
+            
+            config.updateNTSettings(index: selectedSettingsIndex, settings: selectedSettings)
             performSegue(withIdentifier: "showLiveTrader", sender: nil)
             view.window?.close()
         }
     }
     
     func verifySettings(showError: Bool = false) -> Bool {
-        if selectedSettingName == DefaultName {
-            showErrorDialog(text: "Must rename settings name")
-            return false
-        }
+        guard let selectedSettings = selectedSettings else { return false }
         
         if selectedSettings.positionSize < 1 {
             showErrorDialog(text: "Invalid position size")
@@ -169,7 +180,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
             return false
         }
         
-        if selectedSettings.pointValue > 0 {
+        if selectedSettings.pointValue < 1{
             showErrorDialog(text: "Point value must be 1 or more")
             return false
         }
@@ -208,11 +219,13 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
-        if let vc = segue.destinationController as? LiveTradingViewController {
+        if let vc = segue.destinationController as? LiveTradingViewController,
+            let selectedSettings = selectedSettings {
             
             vc.tradingMode = .ninjaTrader(accountId: selectedSettings.accName,
                                           commission: selectedSettings.commission,
                                           ticker: selectedSettings.ticker,
+                                          pointValue: selectedSettings.pointValue,
                                           exchange: selectedSettings.exchange,
                                           accountLongName: selectedSettings.accLongName,
                                           basePath: selectedSettings.basePath,
@@ -222,15 +235,43 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
     }
     
     @IBAction func addPressed(_ sender: NSButton) {
+        config.addNTSettings(settings: NTSettings())
         
+        guard let newSelection = config.ntSettings.last else {
+            print("ERROR: ntSettings shouldn't be empty.")
+            return
+        }
+        
+        selectedSettingsIndex = config.ntSettings.count - 1
+        selectedSettings = newSelection
+        selectionPicker.addItem(withTitle: "Settings - \(config.ntSettings.count)")
+        selectionPicker.selectItem(at: config.ntSettings.count - 1)
+        
+        deleteButton.isEnabled = config.ntSettings.count > 1
     }
     
     @IBAction func deletePressed(_ sender: NSButton) {
+        guard config.ntSettings.count > 1, let selectedSettingsIndex = selectedSettingsIndex else { return }
         
+        config.removeNTSettings(index: selectedSettingsIndex)
+        loadSettings()
+    }
+    
+    @IBAction func savePressed(_ sender: NSButton) {
+        if let selectedSettingsIndex = selectedSettingsIndex,
+            let selectedSettings = selectedSettings,
+            verifySettings() {
+            
+            config.updateNTSettings(index: selectedSettingsIndex, settings: selectedSettings)
+        }
     }
     
     @IBAction func selectionChanged(_ sender: NSPopUpButton) {
+        guard sender.indexOfSelectedItem < config.ntSettings.count,
+            config.ntSettings[sender.indexOfSelectedItem] != selectedSettings else { return }
         
+        selectedSettings = config.ntSettings[sender.indexOfSelectedItem]
+        selectedSettingsIndex = sender.indexOfSelectedItem
     }
     
     private func showErrorDialog(text: String) {
@@ -240,23 +281,37 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate {
         alert.addButton(withTitle: "OK")
         alert.runModal()
     }
+    
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        if let selectedSettingsIndex = selectedSettingsIndex,
+            let selectedSettings = selectedSettings,
+            verifySettings() {
+            
+            config.updateNTSettings(index: selectedSettingsIndex, settings: selectedSettings)
+            
+            return true
+        }
+        return false
+    }
 }
 
 extension NTSettingsViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
             if textField == positionSizeField {
-                selectedSettings.positionSize = textField.integerValue
+                selectedSettings?.positionSize = textField.integerValue
             } else if textField == symbolField {
-                selectedSettings.ticker = textField.stringValue
+                selectedSettings?.ticker = textField.stringValue
             } else if textField == commissionField {
-                selectedSettings.commission = textField.doubleValue
+                selectedSettings?.commission = textField.doubleValue
+            } else if textField == dollarPointField {
+                selectedSettings?.pointValue = textField.doubleValue
             } else if textField == exchangeField {
-                selectedSettings.exchange = textField.stringValue
+                selectedSettings?.exchange = textField.stringValue
             } else if textField == longNameField {
-                selectedSettings.accLongName = textField.stringValue
+                selectedSettings?.accLongName = textField.stringValue
             } else if textField == shortNameField {
-                selectedSettings.accName = textField.stringValue
+                selectedSettings?.accName = textField.stringValue
             }
         }
     }

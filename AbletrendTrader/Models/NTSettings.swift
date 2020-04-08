@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct NTSettings: Codable {
+struct NTSettings: Codable, Equatable {
     var positionSize: Int = 1
     var commission: Double = 2.04
     var ticker: String = "NQ 06-20"
@@ -19,4 +19,18 @@ struct NTSettings: Codable {
     var basePath: String = "/Users/lchen/Downloads/NinjaTrader/"
     var incomingPath: String = "/Users/lchen/Downloads/NinjaTrader/incoming"
     var outgoingPath: String = "/Users/lchen/Downloads/NinjaTrader/outgoing"
+    
+    static func == (lhs: NTSettings, rhs: NTSettings) -> Bool {
+        return
+            lhs.positionSize == rhs.positionSize &&
+            lhs.commission == rhs.commission &&
+            lhs.ticker == rhs.ticker &&
+            lhs.pointValue == rhs.pointValue &&
+            lhs.exchange == rhs.exchange &&
+            lhs.accLongName == rhs.accLongName &&
+            lhs.accName == rhs.accName &&
+            lhs.basePath == rhs.basePath &&
+            lhs.incomingPath == rhs.incomingPath &&
+            lhs.outgoingPath == rhs.outgoingPath
+    }
 }

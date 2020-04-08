@@ -38,6 +38,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             chartManager?.serverUrls[SignalInteval.threeMin] = server3minURL
         }
     }
+    private var serverUrls: [SignalInteval: String] {
+        return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
+    }
     
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
@@ -91,10 +94,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                                                 userInfo: nil,
                                                 repeats: true)
         
-        var serverUrls: [SignalInteval: String] = [:]
-        serverUrls[SignalInteval.oneMin] = server1minURL
-        serverUrls[SignalInteval.twoMin] = server2minURL
-        serverUrls[SignalInteval.threeMin] = server3minURL
         chartManager = ChartManager(live: false, serverUrls: serverUrls)
         chartManager?.delegate = self
         sessionManager.delegate = self
@@ -120,7 +119,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             guard let self = self else { return }
             
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, commmission: 2.0)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
                 self.startButton.isEnabled = self.config.simulateTimePassage
             }

@@ -33,7 +33,7 @@ class SimSessionManager: BaseSessionManager {
                               exitTime: newPosition.entryTime,
                               idealExitPrice: newPosition.idealEntryPrice,
                               actualExitPrice: newPosition.idealEntryPrice,
-                              commission: oldPosition.commission * 2,
+                              commission: commission * 2,
                               exitMethod: .signalReversed)
             trades.append(trade)
             
@@ -51,7 +51,7 @@ class SimSessionManager: BaseSessionManager {
                               exitTime: closingTime,
                               idealExitPrice: closingPrice,
                               actualExitPrice: closingPrice,
-                              commission: closedPosition.commission * 2,
+                              commission: commission * 2,
                               exitMethod: method)
             trades.append(trade)
             pos = nil
@@ -65,7 +65,7 @@ class SimSessionManager: BaseSessionManager {
                               exitTime: closingTime,
                               idealExitPrice: closingPrice,
                               actualExitPrice: closingPrice,
-                              commission: closedPosition.commission * 2,
+                              commission: commission * 2,
                               exitMethod: .hitStoploss)
             trades.append(trade)
             pos = nil

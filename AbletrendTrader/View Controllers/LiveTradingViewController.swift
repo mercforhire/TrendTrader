@@ -42,6 +42,9 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
             chartManager?.serverUrls[SignalInteval.threeMin] = server3minURL
         }
     }
+    private var serverUrls: [SignalInteval: String] {
+        return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
+    }
     
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
@@ -57,7 +60,6 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
             }
         }
     }
-    private var commission: Double = 0
     
     weak var delegate: DataManagerDelegate?
     
@@ -79,7 +81,9 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
         
         server1MinURLField.delegate = self
         server2MinAnd3MinURLField.delegate = self
-        
+    }
+    
+    func loadServerUrls() {
         server1minURL = config.server1MinURL
         server2minURL = config.server2MinURL
         server3minURL = config.server3MinURL
@@ -92,6 +96,7 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
+        loadServerUrls()
         
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                                 target: self,
@@ -99,10 +104,6 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
                                                 userInfo: nil,
                                                 repeats: true)
         
-        var serverUrls: [SignalInteval: String] = [:]
-        serverUrls[SignalInteval.oneMin] = server1minURL
-        serverUrls[SignalInteval.twoMin] = server2minURL
-        serverUrls[SignalInteval.threeMin] = server3minURL
         chartManager = ChartManager(live: true, serverUrls: serverUrls)
         chartManager?.delegate = self
         
@@ -117,7 +118,7 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
                                               basePath: basePath,
                                               incomingPath: incomingPath,
                                               outgoingPath: outgoingPath)
-            self.commission = commission
+            sessionManager.commission = commission
             self.title = "Live trader - \(accountId)"
         default:
             break
@@ -161,7 +162,7 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
             
             sender.isEnabled = true
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, commmission: self.commission)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 
                 if self.chartManager?.monitoring ?? false {
                     self.startButton.isEnabled = false

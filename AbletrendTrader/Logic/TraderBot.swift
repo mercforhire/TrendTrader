@@ -14,14 +14,12 @@ class TraderBot {
     
     var sessionManager: BaseSessionManager
     var chart: Chart
-    var commmission: Double
     
     private var highRiskEntriesTaken: Int = 0
     
-    init(chart: Chart, sessionManager: BaseSessionManager, commmission: Double) {
+    init(chart: Chart, sessionManager: BaseSessionManager) {
         self.chart = chart
         self.sessionManager = sessionManager
-        self.commmission = commmission
     }
     
     func generateSimSession(upToPriceBar: PriceBar? = nil, completion: @escaping () -> ()) {
@@ -238,7 +236,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let buyPosition = Position(direction: .long, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
+        let buyPosition = Position(direction: .long, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
         return .openPosition(newPosition: buyPosition, entryType: .any)
     }
     
@@ -246,7 +244,7 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let sellPosition = Position(direction: .short, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
+        let sellPosition = Position(direction: .short, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
         return .openPosition(newPosition: sellPosition, entryType: .any)
     }
     
@@ -325,8 +323,7 @@ class TraderBot {
                                     entryTime: bar.time.getOffByMinutes(minutes: 1),
                                     idealEntryPrice: bar.candleStick.close,
                                     actualEntryPrice: bar.candleStick.close,
-                                    stopLoss: stopLoss,
-                                    commission: commmission * Double(config.positionSize))
+                                    stopLoss: stopLoss)
             return position
         } else if risk <= config.maxRisk {
             let position = Position(direction: direction,
@@ -334,8 +331,7 @@ class TraderBot {
                                     entryTime: bar.time.getOffByMinutes(minutes: 1),
                                     idealEntryPrice: bar.candleStick.close,
                                     actualEntryPrice: bar.candleStick.close,
-                                    stopLoss: stopLoss,
-                                    commission: commmission * Double(config.positionSize))
+                                    stopLoss: stopLoss)
             return position
         }
 

@@ -11,7 +11,6 @@ import Cocoa
 
 class NTSessionManager: BaseSessionManager {
     private var ntManager: NTManager
-    private let commission: Double
     private var connected = false
     
     override var liveUpdateFrequency: TimeInterval { 1 }
@@ -25,7 +24,6 @@ class NTSessionManager: BaseSessionManager {
          basePath: String,
          incomingPath: String,
          outgoingPath: String) {
-        self.commission = commission
         self.ntManager = NTManager(accountId: accountId,
                                    commission: commission,
                                    ticker: ticker,
@@ -35,6 +33,7 @@ class NTSessionManager: BaseSessionManager {
                                    incomingPath: incomingPath,
                                    outgoingPath: outgoingPath)
         super.init()
+        self.commission = commission
         self.pointsValue = pointsValue
         self.ntManager.initialize()
         self.ntManager.delegate = self
@@ -117,7 +116,6 @@ class NTSessionManager: BaseSessionManager {
                         self.pos?.entryOrderRef = confirmation.orderRef
                         self.pos?.entryTime = confirmation.time
                         self.pos?.actualEntryPrice = confirmation.price
-                        self.pos?.commission = confirmation.commission
                         self.pos?.stopLoss?.stopOrderId = confirmation.stopOrderId
                         DispatchQueue.main.async {
                             completion(nil)
@@ -151,7 +149,7 @@ class NTSessionManager: BaseSessionManager {
                                               exitTime: confirmation.time,
                                               idealExitPrice: newPosition.idealEntryPrice,
                                               actualExitPrice: confirmation.price,
-                                              commission: oldPosition.commission + confirmation.commission,
+                                              commission: confirmation.commission * 2,
                                               exitMethod: .signalReversed)
                             self.trades.append(trade)
                         }
@@ -159,7 +157,6 @@ class NTSessionManager: BaseSessionManager {
                         self.pos?.entryOrderRef = confirmation.orderRef
                         self.pos?.entryTime = confirmation.time
                         self.pos?.actualEntryPrice = confirmation.price
-                        self.pos?.commission = confirmation.commission
                         self.pos?.stopLoss?.stopOrderId = confirmation.stopOrderId
                         DispatchQueue.main.async {
                             completion(nil)
@@ -264,7 +261,7 @@ class NTSessionManager: BaseSessionManager {
                                           exitTime: latestFilledOrderResponse.time,
                                           idealExitPrice: closingPrice,
                                           actualExitPrice: latestFilledOrderResponse.price,
-                                          commission: closedPosition.commission * 2,
+                                          commission: self.commission * Double(closedPosition.size) * 2,
                                           exitMethod: exitMethod)
                         self.trades.append(trade)
                     } else {
@@ -278,7 +275,7 @@ class NTSessionManager: BaseSessionManager {
                                           exitTime: Date(),
                                           idealExitPrice: closingPrice,
                                           actualExitPrice: closingPrice,
-                                          commission: closedPosition.commission * 2,
+                                          commission: self.commission * Double(closedPosition.size) * 2,
                                           exitMethod: exitMethod)
                         self.trades.append(trade)
                     }
@@ -304,7 +301,7 @@ class NTSessionManager: BaseSessionManager {
                                               exitTime: confirmation.time,
                                               idealExitPrice: closingPrice,
                                               actualExitPrice: confirmation.price,
-                                              commission: closedPosition.commission + confirmation.commission,
+                                              commission: confirmation.commission * 2,
                                               exitMethod: exitMethod)
                             self.trades.append(trade)
                             self.pos = nil
@@ -451,7 +448,7 @@ class NTSessionManager: BaseSessionManager {
                                           exitTime: orderConfirmation.time,
                                           idealExitPrice: idealExitPrice,
                                           actualExitPrice: orderConfirmation.price,
-                                          commission: currentPosition.commission + orderConfirmation.commission)
+                                          commission: orderConfirmation.commission * 2)
                         self.trades.append(trade)
                         self.pos = nil
                     }
@@ -479,7 +476,7 @@ class NTSessionManager: BaseSessionManager {
                               exitTime: latestFilledOrderResponse.time,
                               idealExitPrice: closedPosition.stopLoss?.stop ?? latestFilledOrderResponse.price,
                               actualExitPrice: latestFilledOrderResponse.price,
-                              commission: closedPosition.commission * 2)
+                              commission: commission * Double(closedPosition.size) * 2)
             self.trades.append(trade)
             self.pos = nil
             self.delegate?.positionStatusChanged()
@@ -500,8 +497,7 @@ class NTSessionManager: BaseSessionManager {
                            idealEntryPrice: existingPrice,
                            actualEntryPrice: existingPrice,
                            stopLoss: nil,
-                           entryOrderRef: nil,
-                           commission: self.commission * Double(existingPosition))
+                           entryOrderRef: nil)
         }
     }
     

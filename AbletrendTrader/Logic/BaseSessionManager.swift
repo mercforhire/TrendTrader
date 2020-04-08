@@ -19,6 +19,7 @@ class BaseSessionManager {
     let config = ConfigurationManager.shared
     
     var pointsValue: Double = 20.0
+    var commission: Double = 2.0
     var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
     var status: PositionStatus? {
@@ -140,7 +141,7 @@ class BaseSessionManager {
                                                  pAndL: "--",
                                                  entryTime: dateFormatter.string(from: currentPosition.entryTime),
                                                  exitTime: "--",
-                                                 commission: currentPosition.commission.currency(true, showPlusSign: false)))
+                                                 commission: (commission * Double(currentPosition.size)).currency(true, showPlusSign: false)))
         }
         
         for trade in trades.reversed() {

@@ -178,7 +178,33 @@ class NTSessionManager: BaseSessionManager {
                     return
                 }
                 
-                if let stopOrderId = currentPosition.stopLoss?.stopOrderId {
+                if self.status?.position == 0 {
+                    
+                    if let closedPosition = self.pos,
+                        let stopOrderId = closedPosition.stopLoss?.stopOrderId,
+                        let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
+                        latestFilledOrderResponse.status == .filled {
+                        
+                        self.delegate?.newLogAdded(log: "Trying to update stop but position already closed, last filled order response: \(latestFilledOrderResponse.description)")
+                        let trade = Trade(direction: closedPosition.direction, size: closedPosition.size,
+                                          entryTime: closedPosition.entryTime,
+                                          idealEntryPrice: closedPosition.idealEntryPrice,
+                                          actualEntryPrice: closedPosition.actualEntryPrice,
+                                          exitTime: latestFilledOrderResponse.time,
+                                          idealExitPrice: closedPosition.stopLoss?.stop ?? latestFilledOrderResponse.price,
+                                          actualExitPrice: latestFilledOrderResponse.price,
+                                          commission: closedPosition.commission * 2,
+                                          exitMethod: .hitStoploss)
+                        self.trades.append(trade)
+                    } else {
+                        self.delegate?.newLogAdded(log: "Trying to update stop but position already closed, but no last order response")
+                    }
+                    
+                    self.pos = nil
+                    DispatchQueue.main.async {
+                        completion(nil)
+                    }
+                } else if let stopOrderId = currentPosition.stopLoss?.stopOrderId {
                     _ = self.ntManager.deleteOrderResponse(orderId: stopOrderId)
                     self.ntManager.changeOrder(orderRef: stopOrderId,
                                                size: currentPosition.size,

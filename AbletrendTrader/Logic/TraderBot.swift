@@ -240,7 +240,7 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
         let buyPosition = Position(direction: .long, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
-        return .openPosition(newPosition: buyPosition, entryType: .any)
+        return .openPosition(newPosition: buyPosition, entryType: .all)
     }
     
     func sellAtMarket() -> TradeActionType {
@@ -248,7 +248,7 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
         let sellPosition = Position(direction: .short, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice, commission: commmission)
-        return .openPosition(newPosition: sellPosition, entryType: .any)
+        return .openPosition(newPosition: sellPosition, entryType: .all)
     }
     
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
@@ -363,15 +363,18 @@ class TraderBot {
         // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter aggressively on any entry.
         if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
             highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
-            return seekToOpenPosition(bar: currentBar, entryType: .any)
+            return seekToOpenPosition(bar: currentBar, entryType: .all)
         }
         
-        // If the a previous trade exists:
+        if sessionManager.trades.isEmpty {
+            return seekToOpenPosition(bar: currentBar, entryType: .all)
+        }
+        
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
             
             // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time), lastTrade.exitMethod != .profitTaking {
-                return seekToOpenPosition(bar: currentBar, entryType: .any)
+                return seekToOpenPosition(bar: currentBar, entryType: .all)
             }
             
             // Check if the direction from the start of the last trade to current bar are same as current
@@ -388,7 +391,7 @@ class TraderBot {
                     return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
                 }
             } else {
-                return seekToOpenPosition(bar: currentBar, entryType: .any)
+                return seekToOpenPosition(bar: currentBar, entryType: .all)
             }
         }
         

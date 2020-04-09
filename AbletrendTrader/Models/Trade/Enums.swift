@@ -13,14 +13,14 @@ typealias Action = () -> Void
 
 enum EntryType {
     // for all entries, the price must be above 1 min support or under 1 min resistance
-    case any // any bar of a triple confirmation
+    case all // any bar of a triple confirmation
     case pullBack // any blue/red bar followed by one or more green bars
     case sweetSpot // pullback that bounced/almost bounced off the S/R level
     case reversal // opposite entry signal of a previous substantial trend
     
     func description() -> String {
         switch self {
-        case .any:
+        case .all:
             return "Any"
         case .pullBack:
             return "PullBack"

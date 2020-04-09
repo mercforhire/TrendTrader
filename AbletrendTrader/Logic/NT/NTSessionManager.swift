@@ -186,14 +186,16 @@ class NTSessionManager: BaseSessionManager {
                         latestFilledOrderResponse.status == .filled {
                         
                         self.delegate?.newLogAdded(log: "Trying to update stop but position already closed, last filled order response: \(latestFilledOrderResponse.description)")
-                        let trade = Trade(direction: closedPosition.direction, size: closedPosition.size,
+                        let trade = Trade(direction: closedPosition.direction,
+                                          size: closedPosition.size,
+                                          pointValue: self.pointsValue,
                                           entryTime: closedPosition.entryTime,
                                           idealEntryPrice: closedPosition.idealEntryPrice,
                                           actualEntryPrice: closedPosition.actualEntryPrice,
                                           exitTime: latestFilledOrderResponse.time,
                                           idealExitPrice: closedPosition.stopLoss?.stop ?? latestFilledOrderResponse.price,
                                           actualExitPrice: latestFilledOrderResponse.price,
-                                          commission: closedPosition.commission * 2,
+                                          commission: self.commission * 2,
                                           exitMethod: .hitStoploss)
                         self.trades.append(trade)
                     } else {

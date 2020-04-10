@@ -49,7 +49,7 @@ enum TradeActionType {
                               actionBarTime.hourMinute(),
                               entryType.description())
             } else {
-                return String(format: "%@: No action for %@(%@)",
+                return String(format: "%@: No action for %@ (%@)",
                               Date().hourMinuteSecond(),
                               actionBarTime.hourMinute(),
                               reason.description())
@@ -356,7 +356,7 @@ enum ConfigError: Error {
         case .minStopError:
             return "Mn stop must be between 2 - 10"
         case .sweetSpotMinDistanceError:
-            return "Sweetspot minimum distance between 1 - 5"
+            return "Sweetspot minimum distance between 1 - 10"
         case .greenBarsExitError:
             return "Green bars exit profit higher than 5"
         case .skipGreenBarsExitError:

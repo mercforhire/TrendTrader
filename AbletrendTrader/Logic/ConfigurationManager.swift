@@ -28,7 +28,7 @@ class ConfigurationManager {
     // the max allowed distance from support to low of a series of green bar(s) followed by a blue bar
     var sweetSpotBase: Double
     var sweetSpot: Double {
-        return sweetSpotBase * riskMultiplier
+        return sweetSpotBase
     }
     
     // the min profit the trade must in to use the 2 green bars exit rule
@@ -203,7 +203,7 @@ class ConfigurationManager {
     }
     
     func setSweetSpotMinDistance(newValue: Double) throws {
-        if newValue >= 1, newValue <= 5 {
+        if newValue >= 1, newValue <= 10 {
             sweetSpotBase = newValue
             saveToDefaults(newValue: newValue, key: "sweet_spot_min_distance")
             return

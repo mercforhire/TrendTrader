@@ -25,6 +25,27 @@ struct PriceBar {
         
         return nil
     }
+    
+    var twoMinSignal: Signal? {
+        for signal in signals {
+            if signal.inteval == .twoMin {
+                return signal
+            }
+        }
+        
+        return nil
+    }
+    
+    var threeMinSignal: Signal? {
+        for signal in signals {
+            if signal.inteval == .threeMin {
+                return signal
+            }
+        }
+        
+        return nil
+    }
+    
     var barColor: SignalColor {
         return oneMinSignal?.color ?? .green
     }

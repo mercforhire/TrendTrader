@@ -59,17 +59,37 @@ struct Chart {
         return lastBarKey
     }
     
-    func checkAllSameDirection(direction: TradeDirection, fromKey: String, toKey: String) -> Bool {
+    func checkAllSameDirection(direction: TradeDirection, currBar: PriceBar, fromKey: String, toKey: String) -> Bool {
         guard let fromKeyIndex = timeKeys.firstIndex(of: fromKey),
             let toKeyIndex = timeKeys.firstIndex(of: toKey),
             fromKeyIndex < toKeyIndex else { return true }
         
-        for i in fromKeyIndex...toKeyIndex {
+        var oneMinSignals = 0
+        var twoMinSignals = 0
+        var threeMinSignals = 0
+        
+        // toKeyIndex is the currentIndex, so skip comparing with itself by toKeyIndex-1
+        for i in (fromKeyIndex...toKeyIndex-1).reversed() {
             let key = timeKeys[i]
             guard let bar = priceBars[key] else { continue }
             
             for signal in bar.signals {
-                if let signalDirection = signal.direction, signalDirection != direction {
+                switch signal.inteval {
+                case .oneMin:
+                    if let signalDirection = signal.direction, signalDirection != direction {
+                        oneMinSignals += 1
+                    }
+                case .twoMin:
+                    if let signalDirection = signal.direction, signalDirection != direction {
+                        twoMinSignals += 1
+                    }
+                case .threeMin:
+                    if let signalDirection = signal.direction, signalDirection != direction {
+                        threeMinSignals += 1
+                    }
+                }
+                
+                if oneMinSignals > 0 || twoMinSignals > 2 || threeMinSignals > 1 {
                     return false
                 }
             }

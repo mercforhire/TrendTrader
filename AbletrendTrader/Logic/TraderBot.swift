@@ -71,12 +71,7 @@ class TraderBot {
                             sessionManager.pos?.stopLoss?.source == .currentBar ? .hitStoploss : .twoGreenBars
                         let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                         
-                        switch handleOpeningNewTrade(currentBar: priceBar) {
-                        case .openPosition(let position, let entryType):
-                            return [verifyAction, .openPosition(newPosition: position, entryType: entryType)]
-                        default:
-                            return [verifyAction]
-                        }
+                        return [verifyAction]
                     }
                 default:
                     if let stop = sessionManager.pos?.stopLoss?.stop,
@@ -85,12 +80,7 @@ class TraderBot {
                         let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .hitStoploss : .twoGreenBars
                         let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                         
-                        switch handleOpeningNewTrade(currentBar: priceBar) {
-                        case .openPosition(let position, let entryType):
-                            return [verifyAction, .openPosition(newPosition: position, entryType: entryType)]
-                        default:
-                            return [verifyAction]
-                        }
+                        return [verifyAction]
                     }
                 }
             }
@@ -306,11 +296,13 @@ class TraderBot {
                     pullbackLow < oneMinStop || pullbackLow - oneMinStop <= config.sweetSpot else {
                     return nil
                 }
+                print("SweetSpot entry")
             default:
                 guard let pullbackHigh = pullBack.getHighestPoint(),
                     pullbackHigh > oneMinStop || oneMinStop - pullbackHigh <= config.sweetSpot else {
                     return nil
                 }
+                print("SweetSpot entry")
             }
         default:
             break
@@ -372,8 +364,10 @@ class TraderBot {
         
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
             
-            // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
-            if lastTrade.exitTime.isInSameMinute(date: currentBar.time), lastTrade.exitMethod != .profitTaking {
+            // if the last trade was stopped out in the current minute bar AND last trade's direction is opposite of current bar direction, then enter aggressively on any entry
+            if lastTrade.exitTime.isInSameMinute(date: currentBar.time),
+                lastTrade.direction != currentBarDirection,
+                lastTrade.exitMethod != .profitTaking {
                 return seekToOpenPosition(bar: currentBar, entryType: .all)
             }
             
@@ -381,8 +375,10 @@ class TraderBot {
             // If yes, we need to decide if we want to enter on any Pullback or only SweetSpot
             // Otherwise, then enter aggressively on any entry
             if chart.checkAllSameDirection(direction: currentBarDirection,
-                                           fromKey: lastTrade.entryTime.generateDateIdentifier(),
+                                           currBar: currentBar,
+                                           fromKey: lastTrade.exitTime.generateDateIdentifier(),
                                            toKey: currentBar.time.generateDateIdentifier()) {
+                
                 // If the previous trade profit is higher than enterOnPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
                 if lastTrade.idealProfit > config.enterOnAnyPullback, lastTrade.exitMethod != .profitTaking {
@@ -521,7 +517,8 @@ class TraderBot {
             if coloredBar == nil, priceBar.barColor == color {
                 coloredBar = priceBar
             } else if let coloredBar = coloredBar,
-                abs((priceBar.oneMinSignal?.stop ?? 0) - (coloredBar.oneMinSignal?.stop ?? 0)) <= 0.25 {
+                abs((priceBar.oneMinSignal?.stop ?? 0) - (coloredBar.oneMinSignal?.stop ?? 0)) <= 0.25,
+                priceBar.barColor == .green {
                 greenBars.insert(priceBar, at: 0)
             } else {
                 break
@@ -562,10 +559,16 @@ class TraderBot {
                     case .twoMin:
                         if !finishedScanningFor2MinConfirmation {
                             earliest2MinConfirmationBar = priceBar
+                            
+                            // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
+                            finishedScanningFor2MinConfirmation = true
                         }
                     case .threeMin:
                         if !finishedScanningFor3MinConfirmation {
                             earliest3MinConfirmationBar = priceBar
+                            
+                            // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
+                            finishedScanningFor3MinConfirmation = true
                         }
                     default:
                         break
@@ -581,8 +584,9 @@ class TraderBot {
                     }
                 }
             }
-            
-            if earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil {
+
+            // This enables early exit rather than checking for empty PriceBars
+            if finishedScanningFor2MinConfirmation && finishedScanningFor3MinConfirmation {
                 break
             }
         }

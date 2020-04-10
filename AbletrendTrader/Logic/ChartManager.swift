@@ -44,9 +44,9 @@ class ChartManager {
         calendar.timeZone = Date.DefaultTimeZone
         let components1 = DateComponents(year: Date().year(),
                                          month: Date().month(),
-                                         day: Date().day(),
+                                         day: Date().day() - 1,
                                          hour: 9,
-                                         minute: 25)
+                                         minute: 40)
         self.simTime = calendar.date(from: components1)!
     }
     
@@ -313,19 +313,19 @@ class ChartManager {
                 let urlFetchingTask = DispatchGroup()
                 
                 urlFetchingTask.enter()
-                self.fetchLastAvailableUrlInMinute(time: self.simTime, interval: .oneMin, completion: { url in
+                self.fetchLatestAvailableUrlDuring(time: self.simTime, startSecond: 15, interval: .oneMin, completion: { url in
                     oneMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.fetchLastAvailableUrlInMinute(time: self.simTime, interval: .twoMin, completion: { url in
+                self.fetchLatestAvailableUrlDuring(time: self.simTime, startSecond: 15, interval: .twoMin, completion: { url in
                     twoMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.fetchLastAvailableUrlInMinute(time: self.simTime, interval: .threeMin, completion: { url in
+                self.fetchLatestAvailableUrlDuring(time: self.simTime, startSecond: 15, interval: .threeMin, completion: { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()
                 })

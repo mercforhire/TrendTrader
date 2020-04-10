@@ -79,7 +79,7 @@ class BaseSessionManager {
     }
     
     func processActions(priceBarTime: Date,
-                        action: TradeActionType,
+                        actions: [TradeActionType],
                         completion: @escaping (TradingError?) -> ()) {
         // Override
     }

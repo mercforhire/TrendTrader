@@ -208,8 +208,8 @@ extension SimTradingViewController: DataManagerDelegate {
         
         trader?.chart = chart
         
-        if let action = trader?.decide() {
-            sessionManager.processActions(priceBarTime: lastBarTime, action: action, completion: { _ in
+        if let actions = trader?.decide() {
+            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions, completion: { _ in
                 self.updateTradesList()
             })
         }

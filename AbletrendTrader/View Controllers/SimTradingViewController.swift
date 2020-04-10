@@ -177,6 +177,16 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         if let lastSimTime = trader?.chart.lastBar?.time {
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
         }
+        
+        var currentPL = 0.0
+        for trade in sessionManager.trades {
+            currentPL += trade.idealProfit
+            print(String(format: "%.2f", currentPL))
+        }
+        
+        for trade in sessionManager.trades {
+            print(trade.exitTime.generateDate())
+        }
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

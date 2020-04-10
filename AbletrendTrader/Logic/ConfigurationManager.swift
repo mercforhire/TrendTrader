@@ -137,7 +137,7 @@ class ConfigurationManager {
         
         self.noEntryDuringLunch = defaults.object(forKey: "no_entry_during_lunch") as? Bool ?? defaultSettings["no_entry_during_lunch"] as! Bool
        
-        self.simulateTimePassage = true
+        self.simulateTimePassage = false
         
         self.tickerValue = defaults.object(forKey: "ticker_value") as? Double ?? defaultSettings["ticker_value"] as! Double
         

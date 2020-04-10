@@ -17,6 +17,8 @@ class BaseSessionManager {
     private var timer: Timer?
     
     let config = ConfigurationManager.shared
+    
+    var highRiskEntriesTaken: Int = 0
     var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
     var status: PositionStatus? {

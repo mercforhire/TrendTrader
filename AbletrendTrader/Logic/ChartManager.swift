@@ -21,7 +21,7 @@ class ChartManager {
     private let fileName3: String = "3m.txt" // filename for local sandbox folder
     
     private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 7
+    private let delayBeforeFetchingAtNewMinute = 10
     
     var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?
@@ -248,33 +248,15 @@ class ChartManager {
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .twoMin, completion: { [weak self] url in
-            guard let self = self else { return }
-            
-            if let url = url {
-                twoMinUrl = url
-                urlFetchingTask.leave()
-            } else {
-                self.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .twoMin) { url in
-                    twoMinUrl = url
-                    urlFetchingTask.leave()
-                }
-            }
+        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .twoMin, completion: { url in
+            twoMinUrl = url
+            urlFetchingTask.leave()
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .threeMin, completion: { [weak self] url in
-            guard let self = self else { return }
-            
-            if let url = url {
-                threeMinUrl = url
-                urlFetchingTask.leave()
-            } else {
-                self.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60), interval: .threeMin) { url in
-                    threeMinUrl = url
-                    urlFetchingTask.leave()
-                }
-            }
+        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .threeMin, completion: { url in
+            threeMinUrl = url
+            urlFetchingTask.leave()
         })
         
         urlFetchingTask.notify(queue: DispatchQueue.main) {

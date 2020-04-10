@@ -16,8 +16,6 @@ class TraderBot {
     var chart: Chart
     var commmission: Double
     
-    private var highRiskEntriesTaken: Int = 0
-    
     init(chart: Chart, sessionManager: BaseSessionManager, commmission: Double) {
         self.chart = chart
         self.sessionManager = sessionManager
@@ -31,6 +29,7 @@ class TraderBot {
         
         sessionManager.resetSession()
         
+        var previousBar: PriceBar?
         for timeKey in self.chart.timeKeys {
             if timeKey == lastBar.identifier {
                 break
@@ -38,9 +37,16 @@ class TraderBot {
             
             guard let currentBar = self.chart.priceBars[timeKey] else { continue }
             
+            if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
+                print("New day detected", currentBar.time, "resetting highRiskEntriesTaken")
+                sessionManager.highRiskEntriesTaken = 0
+            }
+            
             let actions = self.decide(priceBar: currentBar)
             self.sessionManager.processActions(priceBarTime: currentBar.time, actions: actions, completion: { _ in
             })
+            
+            previousBar = currentBar
         }
         
         completion()
@@ -242,8 +248,19 @@ class TraderBot {
     }
     
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
-        if let position: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
-            return .openPosition(newPosition: position, entryType: entryType)
+        if let newPosition: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
+            
+            if let newPositionStop = newPosition.stopLoss?.stop,
+                let lastTrade = sessionManager.trades.last,
+                lastTrade.direction == newPosition.direction,
+                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+                lastTrade.exitMethod == .hitStoploss {
+                    
+                print("Ignored repeated trade:", newPosition)
+                return .noAction(entryType: nil, reason: .noTradingAction)
+            }
+            
+            return .openPosition(newPosition: newPosition, entryType: entryType)
         }
         return .noAction(entryType: entryType, reason: .noTradingAction)
     }
@@ -296,13 +313,11 @@ class TraderBot {
                     pullbackLow < oneMinStop || pullbackLow - oneMinStop <= config.sweetSpot else {
                     return nil
                 }
-                print("SweetSpot entry")
             default:
                 guard let pullbackHigh = pullBack.getHighestPoint(),
                     pullbackHigh > oneMinStop || oneMinStop - pullbackHigh <= config.sweetSpot else {
                     return nil
                 }
-                print("SweetSpot entry")
             }
         default:
             break
@@ -310,8 +325,8 @@ class TraderBot {
         
         if risk > config.maxRisk,
             Date.highRiskEntryInteval(date: bar.time).contains(bar.time),
-            highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
-            highRiskEntriesTaken += 1
+            sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
+            sessionManager.highRiskEntriesTaken += 1
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction,
                                     size: config.positionSize,
@@ -354,7 +369,7 @@ class TraderBot {
         
         // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter aggressively on any entry.
         if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
-            highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
+            sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
             return seekToOpenPosition(bar: currentBar, entryType: .all)
         }
         
@@ -384,7 +399,23 @@ class TraderBot {
                 if lastTrade.idealProfit > config.enterOnAnyPullback, lastTrade.exitMethod != .profitTaking {
                     return seekToOpenPosition(bar: currentBar, entryType: .pullBack)
                 } else {
-                    return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
+                    let action = seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
+                    
+//                    switch action {
+//                    case .openPosition(let newPosition, _):
+//                        if let newPositionStop = newPosition.stopLoss?.stop,
+//                            lastTrade.direction == newPosition.direction,
+//                            abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+//                            lastTrade.exitMethod == .hitStoploss {
+//
+//                            print("Ignored repeated trade:", newPosition)
+//                            return .noAction(entryType: nil, reason: .noTradingAction)
+//                        }
+//                    default:
+//                        break
+//                    }
+                    
+                    return action
                 }
             } else {
                 return seekToOpenPosition(bar: currentBar, entryType: .all)

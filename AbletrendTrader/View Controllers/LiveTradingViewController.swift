@@ -263,10 +263,7 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
-        if let chartVC = segue.destinationController as? ChartViewController, let chart = trader?.chart {
-            chartVC.chart = chart
-            delegate = chartVC
-        } else if let logVc = segue.destinationController as? TradingLogViewController {
+        if let logVc = segue.destinationController as? TradingLogViewController {
             self.logViewController = logVc
             self.logViewController?.log = log
         }

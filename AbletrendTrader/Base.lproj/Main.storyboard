@@ -640,33 +640,6 @@
             </objects>
             <point key="canvasLocation" x="874" y="253.5"/>
         </scene>
-        <!--Chart-->
-        <scene sceneID="Nw5-bD-icl">
-            <objects>
-                <viewController title="Chart" showSeguePresentationStyle="single" id="cu5-OY-MBx" customClass="ChartViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="4RC-Xv-0Gp">
-                        <rect key="frame" x="0.0" y="0.0" width="804" height="480"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="pbT-5f-IWY" customClass="CandleStickChartView" customModule="Charts">
-                                <rect key="frame" x="0.0" y="0.0" width="804" height="480"/>
-                            </customView>
-                        </subviews>
-                        <constraints>
-                            <constraint firstItem="pbT-5f-IWY" firstAttribute="leading" secondItem="4RC-Xv-0Gp" secondAttribute="leading" id="5dF-IQ-qgz"/>
-                            <constraint firstItem="pbT-5f-IWY" firstAttribute="top" secondItem="4RC-Xv-0Gp" secondAttribute="top" id="XDo-zH-25t"/>
-                            <constraint firstAttribute="trailing" secondItem="pbT-5f-IWY" secondAttribute="trailing" id="kbD-mu-JsZ"/>
-                            <constraint firstAttribute="bottom" secondItem="pbT-5f-IWY" secondAttribute="bottom" id="vXF-Ut-02K"/>
-                        </constraints>
-                    </view>
-                    <connections>
-                        <outlet property="chartView" destination="pbT-5f-IWY" id="MEq-EM-tsj"/>
-                    </connections>
-                </viewController>
-                <customObject id="O5U-D5-IU2" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-299" y="1833"/>
-        </scene>
         <!--Trade Log-->
         <scene sceneID="lRD-HA-YKQ">
             <objects>

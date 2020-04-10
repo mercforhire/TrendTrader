@@ -7,5 +7,4 @@ target 'AbletrendTrader' do
 
   # Pods for AbletrendTrader
   pod 'Alamofire', '~> 4.9.1'
-  pod 'Charts'
 end

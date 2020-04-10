@@ -40,7 +40,6 @@
 		8598205824168ECA00C5A317 /* DefaultSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8598205724168ECA00C5A317 /* DefaultSettings.plist */; };
 		85C193B823CA6B6F00F7CE68 /* NTManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C193B723CA6B6F00F7CE68 /* NTManager.swift */; };
 		85C8CED823B7130B00E75F76 /* ConfigViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C8CED723B7130B00E75F76 /* ConfigViewController.swift */; };
-		85C8CEDC23B7235300E75F76 /* ChartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C8CEDB23B7235300E75F76 /* ChartViewController.swift */; };
 		85FE90D923D3EA9A00B99568 /* NTSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90D823D3EA9900B99568 /* NTSessionManager.swift */; };
 		85FE90DC23D3EC1200B99568 /* SimSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90DB23D3EC1200B99568 /* SimSessionManager.swift */; };
 		85FE90DE23D404CF00B99568 /* BaseSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90DD23D404CF00B99568 /* BaseSessionManager.swift */; };
@@ -85,7 +84,6 @@
 		8598205724168ECA00C5A317 /* DefaultSettings.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = DefaultSettings.plist; sourceTree = "<group>"; };
 		85C193B723CA6B6F00F7CE68 /* NTManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTManager.swift; sourceTree = "<group>"; };
 		85C8CED723B7130B00E75F76 /* ConfigViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigViewController.swift; sourceTree = "<group>"; };
-		85C8CEDB23B7235300E75F76 /* ChartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartViewController.swift; sourceTree = "<group>"; };
 		85FE90D823D3EA9900B99568 /* NTSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTSessionManager.swift; sourceTree = "<group>"; };
 		85FE90DB23D3EC1200B99568 /* SimSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimSessionManager.swift; sourceTree = "<group>"; };
 		85FE90DD23D404CF00B99568 /* BaseSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSessionManager.swift; sourceTree = "<group>"; };
@@ -119,7 +117,6 @@
 				8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */,
 				856D95A323BA8524004A4385 /* LiveTradingViewController.swift */,
 				85C8CED723B7130B00E75F76 /* ConfigViewController.swift */,
-				85C8CEDB23B7235300E75F76 /* ChartViewController.swift */,
 				851BAB7223D92788000BC720 /* TradingLogViewController.swift */,
 				859820552415E7BA00C5A317 /* NTSettingsViewController.swift */,
 			);
@@ -379,7 +376,6 @@
 				8592434223AD403E004CE61F /* Signal.swift in Sources */,
 				854A56A023CFD8D800904F11 /* DisplayNumberFormatter.swift in Sources */,
 				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
-				85C8CEDC23B7235300E75F76 /* ChartViewController.swift in Sources */,
 				8592432C23AC3EAF004CE61F /* SimTradingViewController.swift in Sources */,
 				8592435623B00CC6004CE61F /* Position.swift in Sources */,
 				851BAB7323D92788000BC720 /* TradingLogViewController.swift in Sources */,

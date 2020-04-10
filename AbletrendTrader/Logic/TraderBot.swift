@@ -15,9 +15,8 @@ class TraderBot {
     var sessionManager: BaseSessionManager
     var chart: Chart
     
-    private var highRiskEntriesTaken: Int = 0
-    
     init(chart: Chart, sessionManager: BaseSessionManager) {
+
         self.chart = chart
         self.sessionManager = sessionManager
     }
@@ -29,6 +28,7 @@ class TraderBot {
         
         sessionManager.resetSession()
         
+        var previousBar: PriceBar?
         for timeKey in self.chart.timeKeys {
             if timeKey == lastBar.identifier {
                 break
@@ -36,16 +36,23 @@ class TraderBot {
             
             guard let currentBar = self.chart.priceBars[timeKey] else { continue }
             
-            let action = self.decide(priceBar: currentBar)
-            self.sessionManager.processActions(priceBarTime: currentBar.time, action: action, completion: { _ in
+            if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
+                print("New day detected", currentBar.time, "resetting highRiskEntriesTaken")
+                sessionManager.highRiskEntriesTaken = 0
+            }
+            
+            let actions = self.decide(priceBar: currentBar)
+            self.sessionManager.processActions(priceBarTime: currentBar.time, actions: actions, completion: { _ in
             })
+            
+            previousBar = currentBar
         }
         
         completion()
     }
     
     // decide trade actions at the given PriceBar object, returns the list of actions need to be performed
-    func decide(priceBar: PriceBar? = nil) -> TradeActionType {
+    func decide(priceBar: PriceBar? = nil) -> [TradeActionType] {
         guard chart.timeKeys.count > 1,
             let priceBar = priceBar ?? chart.lastBar,
             chart.timeKeys.contains(priceBar.identifier),
@@ -53,7 +60,7 @@ class TraderBot {
             priceBarIndex > 0,
             let previousPriceBar = chart.priceBars[chart.timeKeys[priceBarIndex - 1]]
             else {
-                return .noAction(entryType: nil, reason: .other)
+                return [.noAction(entryType: nil, reason: .other)]
         }
         
         // already have current position, update the stoploss or close it if needed
@@ -69,12 +76,7 @@ class TraderBot {
                             sessionManager.pos?.stopLoss?.source == .currentBar ? .hitStoploss : .twoGreenBars
                         let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                         
-                        switch handleOpeningNewTrade(currentBar: priceBar) {
-                        case .openPosition(let position, let entryType):
-                            return .openPosition(newPosition: position, entryType: entryType)
-                        default:
-                            return verifyAction
-                        }
+                        return [verifyAction]
                     }
                 default:
                     if let stop = sessionManager.pos?.stopLoss?.stop,
@@ -83,19 +85,14 @@ class TraderBot {
                         let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .hitStoploss : .twoGreenBars
                         let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                         
-                        switch handleOpeningNewTrade(currentBar: priceBar) {
-                        case .openPosition(let position, let entryType):
-                            return .openPosition(newPosition: position, entryType: entryType)
-                        default:
-                            return verifyAction
-                        }
+                        return [verifyAction]
                     }
                 }
             }
             
             // If we reached FlatPositionsTime, exit the trade immediately
             if Date.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
-                return forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)
+                return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
             }
             
             // If we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
@@ -103,11 +100,11 @@ class TraderBot {
                 switch sessionManager.pos?.direction {
                 case .long:
                     if priceBar.barColor == .blue {
-                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)
+                        return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
                     }
                 default:
                     if priceBar.barColor == .red {
-                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)
+                        return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
                     }
                 }
             }
@@ -119,9 +116,9 @@ class TraderBot {
                     let exitAction = forceExitPosition(atEndOfBar: priceBar, exitMethod: .signalReversed)
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openPosition(let position, let entryType):
-                        return .reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)
+                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
                     default:
-                        return exitAction
+                        return [exitAction]
                     }
                 }
             default:
@@ -130,9 +127,9 @@ class TraderBot {
                     
                     switch handleOpeningNewTrade(currentBar: priceBar) {
                     case .openPosition(let position, let entryType):
-                        return .reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)
+                        return [.reversePosition(oldPosition: currentPosition, newPosition: position, entryType: entryType)]
                     default:
-                        return exitAction
+                        return [exitAction]
                     }
                 }
             }
@@ -144,11 +141,11 @@ class TraderBot {
                 switch currentPosition.direction {
                 case .long:
                     if priceBar.candleStick.close - priceBar.candleStick.open >= config.takeProfitBarLength {
-                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)
+                        return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)]
                     }
                 case .short:
                     if priceBar.candleStick.open - priceBar.candleStick.close >= config.takeProfitBarLength {
-                        return forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)
+                        return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)]
                     }
                 }
             }
@@ -216,21 +213,21 @@ class TraderBot {
                 switch sessionManager.pos!.direction {
                 case .long:
                     if let stop = sessionManager.pos?.stopLoss?.stop, newStop > stop {
-                        return .updateStop(stop: StopLoss(stop: newStop, source: newStopSource))
+                        return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                     }
                 default:
                     if let stop = sessionManager.pos?.stopLoss?.stop, newStop < stop {
-                        return .updateStop(stop: StopLoss(stop: newStop, source: newStopSource))
+                        return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                     }
                 }
             }
         }
         // no current position, check if we should enter on the current bar
         else if sessionManager.pos == nil {
-            return handleOpeningNewTrade(currentBar: priceBar)
+            return [handleOpeningNewTrade(currentBar: priceBar)]
         }
         
-        return .noAction(entryType: nil, reason: .noTradingAction)
+        return [.noAction(entryType: nil, reason: .noTradingAction)]
     }
 
     func buyAtMarket() -> TradeActionType {
@@ -238,7 +235,7 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
         let buyPosition = Position(direction: .long, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
-        return .openPosition(newPosition: buyPosition, entryType: .any)
+        return .openPosition(newPosition: buyPosition, entryType: .all)
     }
     
     func sellAtMarket() -> TradeActionType {
@@ -246,12 +243,23 @@ class TraderBot {
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
         let sellPosition = Position(direction: .short, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
-        return .openPosition(newPosition: sellPosition, entryType: .any)
+        return .openPosition(newPosition: sellPosition, entryType: .all)
     }
     
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
-        if let position: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
-            return .openPosition(newPosition: position, entryType: entryType)
+        if let newPosition: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
+            
+            if let newPositionStop = newPosition.stopLoss?.stop,
+                let lastTrade = sessionManager.trades.last,
+                lastTrade.direction == newPosition.direction,
+                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+                lastTrade.exitMethod == .hitStoploss {
+                    
+                print("Ignored repeated trade:", newPosition)
+                return .noAction(entryType: nil, reason: .noTradingAction)
+            }
+            
+            return .openPosition(newPosition: newPosition, entryType: entryType)
         }
         return .noAction(entryType: entryType, reason: .noTradingAction)
     }
@@ -316,8 +324,8 @@ class TraderBot {
         
         if risk > config.maxRisk,
             Date.highRiskEntryInteval(date: bar.time).contains(bar.time),
-            highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
-            highRiskEntriesTaken += 1
+            sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
+            sessionManager.highRiskEntriesTaken += 1
             stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
             let position = Position(direction: direction,
                                     size: config.positionSize,
@@ -358,33 +366,56 @@ class TraderBot {
         
         // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter aggressively on any entry.
         if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
-            highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
-            return seekToOpenPosition(bar: currentBar, entryType: .any)
+            sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
+            return seekToOpenPosition(bar: currentBar, entryType: .all)
         }
         
-        // If the a previous trade exists:
+        if sessionManager.trades.isEmpty {
+            return seekToOpenPosition(bar: currentBar, entryType: .all)
+        }
+        
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
             
-            // if the last trade was stopped out in the current minute bar, enter aggressively on any entry
-            if lastTrade.exitTime.isInSameMinute(date: currentBar.time), lastTrade.exitMethod != .profitTaking {
-                return seekToOpenPosition(bar: currentBar, entryType: .any)
+            // if the last trade was stopped out in the current minute bar AND last trade's direction is opposite of current bar direction, then enter aggressively on any entry
+            if lastTrade.exitTime.isInSameMinute(date: currentBar.time),
+                lastTrade.direction != currentBarDirection,
+                lastTrade.exitMethod != .profitTaking {
+                return seekToOpenPosition(bar: currentBar, entryType: .all)
             }
             
             // Check if the direction from the start of the last trade to current bar are same as current
             // If yes, we need to decide if we want to enter on any Pullback or only SweetSpot
             // Otherwise, then enter aggressively on any entry
             if chart.checkAllSameDirection(direction: currentBarDirection,
-                                           fromKey: lastTrade.entryTime.generateDateIdentifier(),
+                                           currBar: currentBar,
+                                           fromKey: lastTrade.exitTime.generateDateIdentifier(),
                                            toKey: currentBar.time.generateDateIdentifier()) {
+                
                 // If the previous trade profit is higher than enterOnPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
                 if lastTrade.idealProfit > config.enterOnAnyPullback, lastTrade.exitMethod != .profitTaking {
                     return seekToOpenPosition(bar: currentBar, entryType: .pullBack)
                 } else {
-                    return seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
+                    let action = seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
+                    
+//                    switch action {
+//                    case .openPosition(let newPosition, _):
+//                        if let newPositionStop = newPosition.stopLoss?.stop,
+//                            lastTrade.direction == newPosition.direction,
+//                            abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+//                            lastTrade.exitMethod == .hitStoploss {
+//
+//                            print("Ignored repeated trade:", newPosition)
+//                            return .noAction(entryType: nil, reason: .noTradingAction)
+//                        }
+//                    default:
+//                        break
+//                    }
+                    
+                    return action
                 }
             } else {
-                return seekToOpenPosition(bar: currentBar, entryType: .any)
+                return seekToOpenPosition(bar: currentBar, entryType: .all)
             }
         }
         
@@ -514,7 +545,8 @@ class TraderBot {
             if coloredBar == nil, priceBar.barColor == color {
                 coloredBar = priceBar
             } else if let coloredBar = coloredBar,
-                abs((priceBar.oneMinSignal?.stop ?? 0) - (coloredBar.oneMinSignal?.stop ?? 0)) <= 0.25 {
+                abs((priceBar.oneMinSignal?.stop ?? 0) - (coloredBar.oneMinSignal?.stop ?? 0)) <= 0.25,
+                priceBar.barColor == .green {
                 greenBars.insert(priceBar, at: 0)
             } else {
                 break
@@ -555,10 +587,16 @@ class TraderBot {
                     case .twoMin:
                         if !finishedScanningFor2MinConfirmation {
                             earliest2MinConfirmationBar = priceBar
+                            
+                            // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
+                            finishedScanningFor2MinConfirmation = true
                         }
                     case .threeMin:
                         if !finishedScanningFor3MinConfirmation {
                             earliest3MinConfirmationBar = priceBar
+                            
+                            // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
+                            finishedScanningFor3MinConfirmation = true
                         }
                     default:
                         break
@@ -574,8 +612,9 @@ class TraderBot {
                     }
                 }
             }
-            
-            if earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil {
+
+            // This enables early exit rather than checking for empty PriceBars
+            if finishedScanningFor2MinConfirmation && finishedScanningFor3MinConfirmation {
                 break
             }
         }

@@ -129,7 +129,7 @@ class ConfigurationManager {
         
         self.noEntryDuringLunch = defaults.object(forKey: "no_entry_during_lunch") as? Bool ?? defaultSettings["no_entry_during_lunch"] as! Bool
        
-        self.simulateTimePassage = defaults.object(forKey: "simulate_time_passage") as? Bool ?? defaultSettings["simulate_time_passage"] as! Bool
+        self.simulateTimePassage = false
         
         self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
         

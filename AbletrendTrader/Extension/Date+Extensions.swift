@@ -59,6 +59,15 @@ extension Date {
         return calendar.component(.year, from: self)
     }
     
+    func generateDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.calendar = Calendar(identifier: .iso8601)
+        dateFormatter.timeZone = Date.DefaultTimeZone
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let response = dateFormatter.string(from: self)
+        return response
+    }
+    
     func generateDateIdentifier() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.calendar = Calendar(identifier: .iso8601)

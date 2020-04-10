@@ -222,8 +222,8 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
         }
     }
     
-    private func processActions(time: Date = Date(), action: TradeActionType, completion: Action? = nil) {
-        sessionManager.processActions(priceBarTime: time, action: action) { [weak self] networkError in
+    private func processActions(time: Date = Date(), actions: [TradeActionType], completion: Action? = nil) {
+        sessionManager.processActions(priceBarTime: time, actions: actions) { [weak self] networkError in
             guard let self = self else { return }
             
             if let networkError = networkError {
@@ -241,7 +241,7 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        processActions(action: action) {
+        processActions(actions: [action]) {
             sender.isEnabled = true
         }
     }
@@ -251,7 +251,7 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        processActions(action: action) {
+        processActions(actions: [action]) {
             sender.isEnabled = true
         }
     }
@@ -295,8 +295,8 @@ extension LiveTradingViewController: DataManagerDelegate {
         
         trader?.chart = chart
         
-        if let action = trader?.decide(), chartManager?.monitoring ?? false {
-            processActions(time: lastBarTime, action: action)
+        if let actions = trader?.decide(), chartManager?.monitoring ?? false {
+            processActions(time: lastBarTime, actions: actions)
         }
     }
     

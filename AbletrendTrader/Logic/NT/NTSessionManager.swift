@@ -47,8 +47,10 @@ class NTSessionManager: BaseSessionManager {
     }
     
     override func processActions(priceBarTime: Date,
-                                 action: TradeActionType,
+                                 actions: [TradeActionType],
                                  completion: @escaping (TradingError?) -> ()) {
+        guard let action = actions.first else { return }
+        
         if !connected {
             completion(.brokerNotConnected)
             return

@@ -14,12 +14,11 @@ protocol SessionManagerDelegate: class {
 }
 
 class BaseSessionManager {
-    private var timer: Timer?
-    
     let config = ConfigurationManager.shared
     
     var pointsValue: Double = 20.0
     var commission: Double = 2.0
+    var highRiskEntriesTaken: Int = 0
     var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
     var status: PositionStatus? {
@@ -39,6 +38,8 @@ class BaseSessionManager {
     var currentPriceBarTime: Date?
     var liveMonitoring = false
     weak var delegate: SessionManagerDelegate?
+    
+    private var timer: Timer?
     
     func startLiveMonitoring() {
         if liveMonitoring {
@@ -82,7 +83,7 @@ class BaseSessionManager {
     }
     
     func processActions(priceBarTime: Date,
-                        action: TradeActionType,
+                        actions: [TradeActionType],
                         completion: @escaping (TradingError?) -> ()) {
         // Override
     }

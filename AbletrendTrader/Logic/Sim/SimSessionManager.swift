@@ -24,6 +24,7 @@ class SimSessionManager: BaseSessionManager {
             case .openPosition(let newPosition, _):
                 pos = newPosition
                 pos?.actualEntryPrice = newPosition.idealEntryPrice
+                
             case .reversePosition(let oldPosition, let newPosition, _):
                 let trade = Trade(direction: oldPosition.direction,
                                   size: newPosition.size,
@@ -37,11 +38,12 @@ class SimSessionManager: BaseSessionManager {
                                   commission: commission * 2,
                                   exitMethod: .signalReversed)
                 trades.append(trade)
-                
                 pos = newPosition
                 pos?.actualEntryPrice = newPosition.idealEntryPrice
+                
             case .updateStop(let newStop):
                 pos?.stopLoss = newStop
+                
             case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let method):
                 let trade = Trade(direction: closedPosition.direction,
                                   size: closedPosition.size,
@@ -56,6 +58,7 @@ class SimSessionManager: BaseSessionManager {
                                   exitMethod: method)
                 trades.append(trade)
                 pos = nil
+                
             case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
                 let trade = Trade(direction: closedPosition.direction,
                                   size: closedPosition.size,
@@ -70,6 +73,7 @@ class SimSessionManager: BaseSessionManager {
                                   exitMethod: .hitStoploss)
                 trades.append(trade)
                 pos = nil
+                
             case .noAction(_):
                 break
             }

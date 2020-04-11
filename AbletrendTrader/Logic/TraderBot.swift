@@ -75,7 +75,15 @@ class TraderBot {
                             sessionManager.pos?.stopLoss?.source == .currentBar ? .hitStoploss : .twoGreenBars
                         let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                         
-                        return [verifyAction]
+                        sessionManager.processActions(priceBarTime: priceBar.time, actions: [verifyAction]) { error in
+                        }
+                        
+                        switch handleOpeningNewTrade(currentBar: priceBar) {
+                        case .openPosition(let position, let entryType):
+                            return [.openPosition(newPosition: position, entryType: entryType)]
+                        default:
+                            return [.noAction(entryType: nil, reason: .noTradingAction)]
+                        }
                     }
                 default:
                     if let stop = sessionManager.pos?.stopLoss?.stop,
@@ -84,7 +92,15 @@ class TraderBot {
                         let exitMethod: ExitMethod = stopSource == .supportResistanceLevel || stopSource == .currentBar ? .hitStoploss : .twoGreenBars
                         let verifyAction = verifyStopWasHit(duringBar: priceBar, exitMethod: exitMethod)
                         
-                        return [verifyAction]
+                        sessionManager.processActions(priceBarTime: priceBar.time, actions: [verifyAction]) { error in
+                        }
+                        
+                        switch handleOpeningNewTrade(currentBar: priceBar) {
+                        case .openPosition(let position, let entryType):
+                            return [.openPosition(newPosition: position, entryType: entryType)]
+                        default:
+                            return [.noAction(entryType: nil, reason: .noTradingAction)]
+                        }
                     }
                 }
             }

@@ -87,7 +87,6 @@ struct Chart {
                         threeMinSignals += 1
                     }
                 }
-                
                 if oneMinSignals > 0 || twoMinSignals > 2 || threeMinSignals > 1 {
                     return false
                 }

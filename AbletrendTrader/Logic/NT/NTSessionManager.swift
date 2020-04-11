@@ -349,7 +349,7 @@ class NTSessionManager: BaseSessionManager {
                 }
             case .verifyPositionClosed(_, _, _, _):
                 break
-            case .noAction(_):
+            case .noAction:
                 break
             }
         }

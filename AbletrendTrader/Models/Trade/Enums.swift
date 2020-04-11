@@ -336,7 +336,6 @@ enum ConfigError: Error {
     case highRiskStartError
     case highRiskEndError
     case tradingStartError
-    case tradingEndError
     case lunchStartError
     case lunchEndError
     case clearTimeError
@@ -371,8 +370,6 @@ enum ConfigError: Error {
             return "High risk end time error"
         case .tradingStartError:
             return "Trading time start error"
-        case .tradingEndError:
-            return "Trading time end error"
         case .lunchStartError:
             return "Lunch start time error"
         case .lunchEndError:

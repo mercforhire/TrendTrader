@@ -9,7 +9,6 @@
 import Foundation
 
 struct Chart {
-    var ticker: String
     var timeKeys: [String] = []
     var priceBars: [String : PriceBar] = [:] // Key is an identifier generated from time of the bar
     
@@ -63,9 +62,9 @@ struct Chart {
             let toKeyIndex = timeKeys.firstIndex(of: toKey),
             fromKeyIndex < toKeyIndex else { return true }
         
-        var oneMinSignals = 0
-        var twoMinSignals = 0
-        var threeMinSignals = 0
+        var opposite1MinDots = 0
+        var opposite2MinCrosses = 0
+        var opposite3MinCrosses = 0
         
         // toKeyIndex is the currentIndex, so skip comparing with itself by toKeyIndex-1
         for i in (fromKeyIndex...toKeyIndex-1).reversed() {
@@ -76,18 +75,18 @@ struct Chart {
                 switch signal.inteval {
                 case .oneMin:
                     if let signalDirection = signal.direction, signalDirection != direction {
-                        oneMinSignals += 1
+                        opposite1MinDots += 1
                     }
                 case .twoMin:
                     if let signalDirection = signal.direction, signalDirection != direction {
-                        twoMinSignals += 1
+                        opposite2MinCrosses += 1
                     }
                 case .threeMin:
                     if let signalDirection = signal.direction, signalDirection != direction {
-                        threeMinSignals += 1
+                        opposite3MinCrosses += 1
                     }
                 }
-                if oneMinSignals > 0 || twoMinSignals > 2 || threeMinSignals > 1 {
+                if opposite1MinDots > 0 || opposite2MinCrosses > 2 || opposite3MinCrosses > 1 {
                     return false
                 }
             }
@@ -96,7 +95,7 @@ struct Chart {
         return true
     }
     
-    static func generateChart(ticker: String, candleSticks: [CandleStick], indicatorsSet: [Indicators]) -> Chart {
+    static func generateChart(candleSticks: [CandleStick], indicatorsSet: [Indicators]) -> Chart {
         var keys: [String] = []
         
         var timeVsCandleSticks: [String: CandleStick] = [:]
@@ -129,7 +128,7 @@ struct Chart {
             timeVsPriceBars[key] = priceBar
         }
         
-        let chart = Chart(ticker: ticker, timeKeys: keys, priceBars: timeVsPriceBars)
+        let chart = Chart(timeKeys: keys, priceBars: timeVsPriceBars)
         return chart
     }
     

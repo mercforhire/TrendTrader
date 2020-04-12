@@ -21,7 +21,7 @@ class ChartManager {
     private let fileName3: String = "3m.txt" // filename for local sandbox folder
     
     private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 10
+    private let delayBeforeFetchingAtNewMinute = 7
     
     var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?
@@ -44,7 +44,7 @@ class ChartManager {
         calendar.timeZone = Date.DefaultTimeZone
         let components1 = DateComponents(year: Date().year(),
                                          month: Date().month(),
-                                         day: Date().day() - 1,
+                                         day: Date().day(),
                                          hour: 9,
                                          minute: 40)
         self.simTime = calendar.date(from: components1)!
@@ -64,7 +64,7 @@ class ChartManager {
             }
         } else {
             if config.simulateTimePassage {
-                findFirstAvailableUrls { [weak self] urls in
+                findLatestAvailableUrls { [weak self] urls in
                     guard let self = self else {
                         return
                     }
@@ -229,8 +229,7 @@ class ChartManager {
         let twoMinIndicators = Indicators(interval: .twoMin, signals: twoMinSignals)
         let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
         
-        self.chart = Chart.generateChart(ticker: "NQ",
-                                         candleSticks: candleSticks,
+        self.chart = Chart.generateChart(candleSticks: candleSticks,
                                          indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
     }
     
@@ -269,7 +268,7 @@ class ChartManager {
         }
     }
     
-    private func findFirstAvailableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+    private func findLatestAvailableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {
@@ -371,40 +370,6 @@ class ChartManager {
                                                time.hour(),
                                                time.minute(),
                                                i)
-                
-                Alamofire.SessionManager.default.request(urlString).validate().response { response in
-                    if response.response?.statusCode == 200 {
-                        existUrl = urlString
-                    }
-                    semaphore.signal()
-                }
-                
-                semaphore.wait()
-            }
-            
-            DispatchQueue.main.async {
-                completion(existUrl)
-            }
-        }
-    }
-    
-    private func fetchLastAvailableUrlInMinute(time: Date, interval: SignalInteval, completion: @escaping (String?) -> ()) {
-        guard let serverURL = serverUrls[interval] else {
-            print("Error: Does not contain url for", interval.text(), "min data server")
-            return
-        }
-        
-        let queue = DispatchQueue.global()
-        queue.async {
-            let semaphore = DispatchSemaphore(value: 0)
-            var existUrl: String?
-            
-            for second in self.delayBeforeFetchingAtNewMinute...59 {
-                if existUrl != nil {
-                    break
-                }
-                
-                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt", serverURL, interval.text(), time.month(), time.day(), time.hour(), time.minute(), second)
                 
                 Alamofire.SessionManager.default.request(urlString).validate().response { response in
                     if response.response?.statusCode == 200 {

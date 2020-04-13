@@ -25,6 +25,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var lunchEndPicker: NSDatePicker!
     @IBOutlet private weak var highRiskTradesField: NSTextField!
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
+    @IBOutlet private weak var sessionEndTimePicker: NSDatePicker!
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
     @IBOutlet private weak var dailyLossLimitField: NSTextField!
@@ -68,6 +69,9 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         sessionStartTimePicker.dateValue = Date.getNewDateFromTime(hour: config.tradingStart.hour(),
                                                                    min: config.tradingStart.minute())
+        
+        sessionEndTimePicker.dateValue = Date.getNewDateFromTime(hour: config.tradingEnd.hour(),
+                                                                 min: config.tradingEnd.minute())
         
         liquidateTimePicker.dateValue = Date.getNewDateFromTime(hour: config.clearTime.hour(),
                                                                 min: config.clearTime.minute())
@@ -167,6 +171,18 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
             configError.displayErrorDialog()
             
             sender.dateValue = config.tradingStart
+        }
+    }
+    
+    @IBAction func sessionEndChanged(_ sender: NSDatePicker) {
+        do {
+            try config.setTradingEnd(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.tradingEnd
         }
     }
     

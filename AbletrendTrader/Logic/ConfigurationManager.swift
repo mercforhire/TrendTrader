@@ -63,6 +63,7 @@ class ConfigurationManager {
     private(set) var highRiskStart: Date
     private(set) var highRiskEnd: Date
     private(set) var tradingStart: Date
+    private(set) var tradingEnd: Date
     private(set) var lunchStart: Date
     private(set) var lunchEnd: Date
     private(set) var clearTime: Date
@@ -109,6 +110,8 @@ class ConfigurationManager {
         self.highRiskEnd = (defaults.object(forKey: "high_risk_end") as? Date ?? defaultSettings[ "high_risk_end"] as! Date).stripYearMonthAndDay()
         
         self.tradingStart = (defaults.object(forKey: "trading_start") as? Date ?? defaultSettings["trading_start"] as! Date).stripYearMonthAndDay()
+        
+        self.tradingEnd = (defaults.object(forKey: "trading_end") as? Date ?? defaultSettings["trading_end"] as! Date).stripYearMonthAndDay()
         
         self.lunchStart = (defaults.object(forKey: "lunch_start") as? Date ?? defaultSettings["lunch_start"] as! Date).stripYearMonthAndDay()
         
@@ -288,6 +291,18 @@ class ConfigurationManager {
         if newValue < clearTime.stripYearMonthAndDay() {
             tradingStart = newValue
             saveToDefaults(newValue: newValue, key: "trading_start")
+            return
+        }
+        
+        throw ConfigError.tradingStartError
+    }
+    
+    func setTradingEnd(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
+        if newValue > tradingStart.stripYearMonthAndDay(),
+            newValue < clearTime.stripYearMonthAndDay() {
+            tradingEnd = newValue
+            saveToDefaults(newValue: newValue, key: "trading_end")
             return
         }
         

@@ -704,12 +704,12 @@
         <scene sceneID="8lg-qv-ddx">
             <objects>
                 <viewController title="Configuration" showSeguePresentationStyle="single" id="6pn-ly-NU7" customClass="ConfigViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="ase-WH-YaY">
-                        <rect key="frame" x="0.0" y="0.0" width="388" height="534"/>
+                    <view key="view" misplaced="YES" id="ase-WH-YaY">
+                        <rect key="frame" x="0.0" y="0.0" width="388" height="562"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1HZ-zE-mtD">
-                                <rect key="frame" x="298" y="470" width="70" height="21"/>
+                                <rect key="frame" x="298" y="496" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="Hyl-SB-6Z9"/>
                                 </constraints>
@@ -720,7 +720,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pFZ-k0-AVu">
-                                <rect key="frame" x="298" y="444" width="70" height="21"/>
+                                <rect key="frame" x="298" y="470" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="AwX-Cv-GEQ"/>
                                 </constraints>
@@ -731,7 +731,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="o80-kA-tzn">
-                                <rect key="frame" x="18" y="446" width="83" height="16"/>
+                                <rect key="frame" x="18" y="472" width="83" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Minimal STP:" id="Pdy-9d-0B1">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -739,7 +739,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EiV-b6-Ycz">
-                                <rect key="frame" x="298" y="418" width="70" height="21"/>
+                                <rect key="frame" x="298" y="444" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="HCa-HI-NWQ"/>
                                 </constraints>
@@ -750,7 +750,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UTR-to-ULY">
-                                <rect key="frame" x="18" y="420" width="127" height="16"/>
+                                <rect key="frame" x="18" y="446" width="127" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Sweetspot distance:" id="0Tg-ZZ-pLA">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -758,7 +758,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Qip-aw-AeW">
-                                <rect key="frame" x="299" y="392" width="70" height="21"/>
+                                <rect key="frame" x="299" y="418" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="Lpu-IX-xAp"/>
                                 </constraints>
@@ -769,7 +769,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Q38-EC-OOe">
-                                <rect key="frame" x="18" y="394" width="180" height="16"/>
+                                <rect key="frame" x="18" y="420" width="180" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Min profit for green bars exit:" id="MrM-BC-lfu">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -777,7 +777,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ke3-Te-DsJ">
-                                <rect key="frame" x="298" y="366" width="70" height="21"/>
+                                <rect key="frame" x="298" y="392" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="5rv-zc-Il8"/>
                                 </constraints>
@@ -788,7 +788,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="VG4-Lk-PUU">
-                                <rect key="frame" x="18" y="368" width="206" height="16"/>
+                                <rect key="frame" x="18" y="394" width="206" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Min profit bypass green bars exit:" id="geF-By-3uE">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -796,7 +796,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NaI-Ca-x1s">
-                                <rect key="frame" x="18" y="342" width="190" height="16"/>
+                                <rect key="frame" x="18" y="368" width="190" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Min profit allow pullback entry:" id="hIu-qf-lTQ">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -804,7 +804,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8P2-O5-PTk">
-                                <rect key="frame" x="298" y="340" width="70" height="21"/>
+                                <rect key="frame" x="298" y="366" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="B4u-FQ-SEY"/>
                                 </constraints>
@@ -815,7 +815,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MKP-Wc-VSw">
-                                <rect key="frame" x="18" y="290" width="145" height="16"/>
+                                <rect key="frame" x="18" y="316" width="145" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="High risk entry interval:" id="Zbi-mC-l7W">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -823,7 +823,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DnC-II-sbq">
-                                <rect key="frame" x="18" y="146" width="117" height="16"/>
+                                <rect key="frame" x="18" y="172" width="117" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Session start time:" id="XOo-cS-6nU">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -839,7 +839,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MLv-fc-Lh1">
-                                <rect key="frame" x="18" y="472" width="53" height="16"/>
+                                <rect key="frame" x="18" y="498" width="53" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Max SL:" id="7vA-Vy-2C5">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -847,7 +847,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yKM-MQ-aHS">
-                                <rect key="frame" x="286" y="257" width="85" height="27"/>
+                                <rect key="frame" x="286" y="283" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="o5L-Wz-S3E">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -862,7 +862,7 @@
                                 </connections>
                             </datePicker>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5Mr-ny-T6D">
-                                <rect key="frame" x="20" y="257" width="85" height="27"/>
+                                <rect key="frame" x="20" y="283" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="W5I-30-A29">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -877,7 +877,7 @@
                                 </connections>
                             </datePicker>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vZb-pz-ioV">
-                                <rect key="frame" x="286" y="143" width="85" height="27"/>
+                                <rect key="frame" x="286" y="169" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="SoL-du-KYx">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -969,7 +969,7 @@
                                 </connections>
                             </button>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UEB-Um-rH8">
-                                <rect key="frame" x="298" y="496" width="70" height="21"/>
+                                <rect key="frame" x="298" y="522" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="VYT-30-uiy"/>
                                 </constraints>
@@ -980,7 +980,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dqP-vc-0bH">
-                                <rect key="frame" x="18" y="316" width="120" height="16"/>
+                                <rect key="frame" x="18" y="342" width="120" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Take profit bar size" id="G1K-Vd-Udg">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -988,7 +988,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9pS-oT-Qfu">
-                                <rect key="frame" x="298" y="314" width="70" height="21"/>
+                                <rect key="frame" x="298" y="340" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="tEU-Pu-iEk"/>
                                 </constraints>
@@ -999,7 +999,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="R1i-le-7zB">
-                                <rect key="frame" x="18" y="498" width="93" height="16"/>
+                                <rect key="frame" x="18" y="524" width="93" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Risk multiplier:" id="FvR-TD-FrO">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1007,7 +1007,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XIP-vo-OIu">
-                                <rect key="frame" x="18" y="172" width="243" height="16"/>
+                                <rect key="frame" x="18" y="198" width="243" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Max number of high risk trades/session" id="TGH-xs-gM7">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1015,7 +1015,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PXL-V4-ndD">
-                                <rect key="frame" x="298" y="170" width="70" height="21"/>
+                                <rect key="frame" x="298" y="196" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="tuR-Dq-DKa"/>
                                 </constraints>
@@ -1026,7 +1026,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dJi-V8-XmW">
-                                <rect key="frame" x="18" y="231" width="123" height="16"/>
+                                <rect key="frame" x="18" y="257" width="123" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Lunch time interval:" id="7F5-Ap-Hjm">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1034,7 +1034,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GsN-hI-npt">
-                                <rect key="frame" x="286" y="198" width="85" height="27"/>
+                                <rect key="frame" x="286" y="224" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="eEs-eV-iDI">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -1049,7 +1049,7 @@
                                 </connections>
                             </datePicker>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nzq-6Q-h9i">
-                                <rect key="frame" x="21" y="198" width="85" height="27"/>
+                                <rect key="frame" x="21" y="224" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="uay-nq-iWj">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -1063,10 +1063,34 @@
                                     <action selector="lunchStartChanged:" target="6pn-ly-NU7" id="BvC-3G-5ZD"/>
                                 </connections>
                             </datePicker>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xdS-82-ol5">
+                                <rect key="frame" x="18" y="146" width="112" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Session end time:" id="MvA-pN-5gY">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nvu-lL-SDc">
+                                <rect key="frame" x="286" y="143" width="85" height="27"/>
+                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="4bI-u3-maE">
+                                    <font key="font" metaFont="system"/>
+                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
+                                        <!--1982-02-12 17:00:00 +0000-->
+                                    </date>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
+                                </datePickerCell>
+                                <connections>
+                                    <action selector="sessionEndChanged:" target="6pn-ly-NU7" id="G1D-BZ-lKs"/>
+                                </connections>
+                            </datePicker>
                         </subviews>
                         <constraints>
                             <constraint firstItem="bNd-Lf-5A5" firstAttribute="centerY" secondItem="rWn-H4-dBC" secondAttribute="centerY" id="00Y-fi-kad"/>
                             <constraint firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" constant="20" id="0Fc-7l-Z3K"/>
+                            <constraint firstItem="Nvu-lL-SDc" firstAttribute="centerY" secondItem="xdS-82-ol5" secondAttribute="centerY" id="0Ga-fU-NEy"/>
                             <constraint firstItem="kKg-dL-LnA" firstAttribute="leading" secondItem="MLv-fc-Lh1" secondAttribute="leading" id="0na-Le-lsg"/>
                             <constraint firstAttribute="trailing" secondItem="vZb-pz-ioV" secondAttribute="trailing" constant="20" id="0pk-xc-FIb"/>
                             <constraint firstItem="Nzq-6Q-h9i" firstAttribute="top" secondItem="dJi-V8-XmW" secondAttribute="bottom" constant="10" id="1VV-yD-ygR"/>
@@ -1081,18 +1105,19 @@
                             <constraint firstItem="Nzq-6Q-h9i" firstAttribute="leading" secondItem="ase-WH-YaY" secondAttribute="leading" constant="21" id="CfR-gE-RIC"/>
                             <constraint firstItem="5Mr-ny-T6D" firstAttribute="leading" secondItem="MLv-fc-Lh1" secondAttribute="leading" id="CvU-bh-5Pu"/>
                             <constraint firstAttribute="trailing" secondItem="Nns-FX-mQK" secondAttribute="trailing" constant="20" id="D9s-Tg-mUY"/>
+                            <constraint firstItem="xdS-82-ol5" firstAttribute="top" secondItem="DnC-II-sbq" secondAttribute="bottom" constant="10" id="GBs-zG-yuP"/>
                             <constraint firstAttribute="bottom" secondItem="of0-Wx-S4o" secondAttribute="bottom" constant="20" id="GIJ-0m-BOC"/>
                             <constraint firstItem="R1i-le-7zB" firstAttribute="leading" secondItem="ase-WH-YaY" secondAttribute="leading" constant="20" id="HIW-Kf-a02"/>
                             <constraint firstItem="MLv-fc-Lh1" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="Hwb-vo-Ats"/>
                             <constraint firstItem="yKM-MQ-aHS" firstAttribute="centerY" secondItem="5Mr-ny-T6D" secondAttribute="centerY" id="IGe-JE-maE"/>
                             <constraint firstItem="dqP-vc-0bH" firstAttribute="top" secondItem="NaI-Ca-x1s" secondAttribute="bottom" constant="10" id="IHO-On-UTe"/>
                             <constraint firstItem="NaI-Ca-x1s" firstAttribute="leading" secondItem="MLv-fc-Lh1" secondAttribute="leading" id="Iwm-Tr-BWb"/>
+                            <constraint firstItem="4BI-nj-gAz" firstAttribute="top" secondItem="xdS-82-ol5" secondAttribute="bottom" constant="10" id="JDR-mr-406"/>
                             <constraint firstItem="9pS-oT-Qfu" firstAttribute="centerY" secondItem="dqP-vc-0bH" secondAttribute="centerY" id="JUR-zb-noN"/>
                             <constraint firstItem="2St-i5-w4E" firstAttribute="centerY" secondItem="4BI-nj-gAz" secondAttribute="centerY" id="KzU-ue-7ET"/>
                             <constraint firstAttribute="trailing" secondItem="8Lj-ko-wO7" secondAttribute="trailing" constant="20" id="Lht-RQ-vtP"/>
                             <constraint firstItem="XIP-vo-OIu" firstAttribute="leading" secondItem="ase-WH-YaY" secondAttribute="leading" constant="20" id="OVK-lO-O5F"/>
                             <constraint firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" constant="20" id="TSU-R1-sGC"/>
-                            <constraint firstItem="4BI-nj-gAz" firstAttribute="top" secondItem="DnC-II-sbq" secondAttribute="bottom" constant="10" id="TeF-mM-ybT"/>
                             <constraint firstItem="MKP-Wc-VSw" firstAttribute="top" secondItem="dqP-vc-0bH" secondAttribute="bottom" constant="10" id="UzN-tc-95S"/>
                             <constraint firstItem="Qip-aw-AeW" firstAttribute="centerY" secondItem="Q38-EC-OOe" secondAttribute="centerY" id="VOl-lF-0EO"/>
                             <constraint firstItem="o80-kA-tzn" firstAttribute="leading" secondItem="MLv-fc-Lh1" secondAttribute="leading" id="WZg-KB-R5w"/>
@@ -1110,6 +1135,7 @@
                             <constraint firstAttribute="trailing" secondItem="2St-i5-w4E" secondAttribute="trailing" constant="19" id="eKD-7D-TCB"/>
                             <constraint firstAttribute="trailing" secondItem="PXL-V4-ndD" secondAttribute="trailing" constant="20" id="eYS-9R-0rW"/>
                             <constraint firstAttribute="trailing" secondItem="1HZ-zE-mtD" secondAttribute="trailing" constant="20" id="eYt-Jc-hD8"/>
+                            <constraint firstItem="Nvu-lL-SDc" firstAttribute="trailing" secondItem="vZb-pz-ioV" secondAttribute="trailing" id="fEA-wk-CTx"/>
                             <constraint firstItem="dJi-V8-XmW" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="fJw-BZ-c4M"/>
                             <constraint firstItem="of0-Wx-S4o" firstAttribute="top" secondItem="Nns-FX-mQK" secondAttribute="bottom" constant="10" id="fZV-kQ-pXb"/>
                             <constraint firstItem="pFZ-k0-AVu" firstAttribute="centerY" secondItem="o80-kA-tzn" secondAttribute="centerY" id="hb1-oX-umY"/>
@@ -1124,6 +1150,7 @@
                             <constraint firstItem="MKP-Wc-VSw" firstAttribute="leading" secondItem="MLv-fc-Lh1" secondAttribute="leading" id="rT6-vr-new"/>
                             <constraint firstAttribute="trailing" secondItem="UEB-Um-rH8" secondAttribute="trailing" constant="20" id="sfA-vB-CM0"/>
                             <constraint firstItem="kKg-dL-LnA" firstAttribute="top" secondItem="4BI-nj-gAz" secondAttribute="bottom" constant="10" id="sfe-HY-JWX"/>
+                            <constraint firstItem="xdS-82-ol5" firstAttribute="leading" secondItem="DnC-II-sbq" secondAttribute="leading" id="st2-2W-LzT"/>
                             <constraint firstAttribute="trailing" secondItem="8P2-O5-PTk" secondAttribute="trailing" constant="20" id="uS4-Xz-524"/>
                             <constraint firstAttribute="trailing" secondItem="pFZ-k0-AVu" secondAttribute="trailing" constant="20" id="vdr-xd-4cS"/>
                             <constraint firstItem="Q38-EC-OOe" firstAttribute="leading" secondItem="MLv-fc-Lh1" secondAttribute="leading" id="vkn-nQ-7eb"/>
@@ -1153,6 +1180,7 @@
                         <outlet property="minSTPField" destination="pFZ-k0-AVu" id="qdP-K8-CLY"/>
                         <outlet property="noEntryDuringLunchCheckbox" destination="of0-Wx-S4o" id="woO-Nl-hBt"/>
                         <outlet property="riskField" destination="UEB-Um-rH8" id="1wf-rq-NPN"/>
+                        <outlet property="sessionEndTimePicker" destination="Nvu-lL-SDc" id="mvI-vz-xrR"/>
                         <outlet property="sessionStartTimePicker" destination="vZb-pz-ioV" id="wPc-gy-4xk"/>
                         <outlet property="sweetspotDistanceField" destination="EiV-b6-Ycz" id="lKs-53-mZD"/>
                         <outlet property="takeProfitField" destination="9pS-oT-Qfu" id="SUe-wi-BDb"/>
@@ -1160,7 +1188,7 @@
                 </viewController>
                 <customObject id="A3Q-Y4-FEE" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-589" y="342.5"/>
+            <point key="canvasLocation" x="-589" y="362"/>
         </scene>
         <!--Live Trader-->
         <scene sceneID="vdT-mG-0Wb">

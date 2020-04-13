@@ -134,8 +134,7 @@ class ChartManager {
         
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
             // call this again X seconds after the next minute
-            let waitSeconds = 60 + delayBeforeFetchingAtNewMinute - now.second()
-            nextRuntime = now.addingTimeInterval(TimeInterval(waitSeconds))
+            nextRuntime = now.addingTimeInterval(TimeInterval(60 + delayBeforeFetchingAtNewMinute - now.second()))
             let statusText: String = "Latest data: \((currentPriceBarTime?.hourMinute() ?? "--")), will fetch again at \(nextRuntime!.hourMinuteSecond())"
             self.delegate?.chartStatusChanged(statusText: statusText)
             
@@ -252,7 +251,7 @@ class ChartManager {
         let now = Date()
         let urlFetchingTask = DispatchGroup()
         
-        print(Date().hourMinuteSecond() + ": start fetching latest urls...")
+        print(Date().hourMinuteSecond() + ": Start fetching latest urls...")
         
         urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .oneMin, completion: { url in
@@ -277,7 +276,7 @@ class ChartManager {
                 return completion(nil)
             }
             
-            print(Date().hourMinuteSecond() + ": downloading", oneMinUrl, twoMinUrl, threeMinUrl)
+            print(Date().hourMinuteSecond() + ": Downloading", oneMinUrl, twoMinUrl, threeMinUrl)
             completion((oneMinUrl, twoMinUrl, threeMinUrl))
         }
     }

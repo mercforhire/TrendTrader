@@ -277,7 +277,7 @@ class ChartManager {
                 return completion(nil)
             }
             
-            print(Date().hourMinuteSecond() + ": urls fetched, downloading", oneMinUrl, twoMinUrl, threeMinUrl)
+            print(Date().hourMinuteSecond() + ": downloading", oneMinUrl, twoMinUrl, threeMinUrl)
             completion((oneMinUrl, twoMinUrl, threeMinUrl))
         }
     }

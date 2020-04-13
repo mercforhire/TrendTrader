@@ -105,6 +105,12 @@ extension Date {
         return calender.isDate(self, equalTo: date, toGranularity: .minute)
     }
     
+    func isInSameSecond(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {
+        var calender = Calendar.current
+        calender.timeZone = timeZone
+        return calender.isDate(self, equalTo: date, toGranularity: .second)
+    }
+    
     static func getNewDateFromTime(hour: Int, min: Int) -> Date {
         let now = Date()
         var calendar = Calendar(identifier: .gregorian)

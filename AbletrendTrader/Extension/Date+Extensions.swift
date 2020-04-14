@@ -178,80 +178,85 @@ extension Date {
     }
     
     static func highRiskEntryInteval(date: Date) -> DateInterval {
+        let config = ConfigurationManager.shared
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
         let components1 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.highRiskStart.hour(),
-                                         minute: ConfigurationManager.shared.highRiskStart.minute())
+                                         hour: config.highRiskStart.hour(),
+                                         minute: config.highRiskStart.minute())
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.highRiskEnd.hour(),
-                                         minute: ConfigurationManager.shared.highRiskEnd.minute())
+                                         hour: config.highRiskEnd.hour(),
+                                         minute: config.highRiskEnd.minute())
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
     
     static func tradingTimeInterval(date: Date) -> DateInterval {
+        let config = ConfigurationManager.shared
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
         let components1 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.tradingStart.hour(),
-                                         minute: ConfigurationManager.shared.tradingStart.minute())
+                                         hour: config.tradingStart.hour(),
+                                         minute: config.tradingStart.minute())
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.tradingEnd.hour(),
-                                         minute: ConfigurationManager.shared.tradingEnd.minute())
+                                         hour: config.tradingEnd.hour(),
+                                         minute: config.tradingEnd.minute())
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
     
     static func lunchInterval(date: Date) -> DateInterval {
+        let config = ConfigurationManager.shared
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
         let components1 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.lunchStart.hour(),
-                                         minute: ConfigurationManager.shared.lunchStart.minute())
+                                         hour: config.lunchStart.hour(),
+                                         minute: config.lunchStart.minute())
         let startDate: Date = calendar.date(from: components1)!
         let components2 = DateComponents(year: date.year(),
                                          month: date.month(),
                                          day: date.day(),
-                                         hour: ConfigurationManager.shared.lunchEnd.hour(),
-                                         minute: ConfigurationManager.shared.lunchEnd.minute())
+                                         hour: config.lunchEnd.hour(),
+                                         minute: config.lunchEnd.minute())
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }
     
     static func clearPositionTime(date: Date) -> Date {
+        let config = ConfigurationManager.shared
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
         let components = DateComponents(year: date.year(),
                                         month: date.month(),
                                         day: date.day(),
-                                        hour: ConfigurationManager.shared.clearTime.hour(),
-                                        minute: ConfigurationManager.shared.clearTime.minute())
+                                        hour: config.clearTime.hour(),
+                                        minute: config.clearTime.minute())
         let date: Date = calendar.date(from: components)!
         return date
     }
     
 
     static func flatPositionsTime(date: Date) -> Date {
+        let config = ConfigurationManager.shared
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = Date.DefaultTimeZone
         let components = DateComponents(year: date.year(),
                                         month: date.month(),
                                         day: date.day(),
-                                        hour: ConfigurationManager.shared.flatTime.hour(),
-                                        minute: ConfigurationManager.shared.flatTime.minute())
+                                        hour: config.flatTime.hour(),
+                                        minute: config.flatTime.minute())
         let date: Date = calendar.date(from: components)!
         return date
     }

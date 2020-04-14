@@ -465,20 +465,21 @@ class TraderBot {
         guard let previousLevel: Double = findPreviousLevel(direction: direction, entryBar: entryBar) else { return nil }
         
         let closeRounded = entryBar.candleStick.close.roundBasedOnDirection(direction: direction)
+        let highRiskAllowed = Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) && sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed
         
         switch direction {
         case .long:
-            if entryBar.candleStick.close - previousLevel <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
+            if entryBar.candleStick.close - previousLevel <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: min(previousLevel, closeRounded - config.minStop), source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
-                entryBar.candleStick.close - (currentStop - Buffer) <= config.maxRisk {
+                entryBar.candleStick.close - (currentStop - Buffer) <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: min(currentStop - Buffer, closeRounded - config.minStop), source: .supportResistanceLevel)
             }
         default:
-            if previousLevel - entryBar.candleStick.close <= config.maxRisk || Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) {
+            if previousLevel - entryBar.candleStick.close <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: max(previousLevel, closeRounded + config.minStop), source: .supportResistanceLevel)
             } else if let currentStop = entryBar.oneMinSignal?.stop,
-                (currentStop + Buffer) - entryBar.candleStick.close <= config.maxRisk {
+                (currentStop + Buffer) - entryBar.candleStick.close <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: max(currentStop + Buffer, closeRounded + config.minStop), source: .supportResistanceLevel)
             }
         }

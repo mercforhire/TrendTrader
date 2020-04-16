@@ -75,6 +75,8 @@ class ConfigurationManager {
     private(set) var byPassTradingTimeRestrictions : Bool
     private(set) var noEntryDuringLunch : Bool
     private(set) var simulateTimePassage : Bool
+    private(set) var avoidTakingSameTrade : Bool
+    private(set) var avoidTakingSameLosingTrade : Bool
     
     private(set) var server1MinURL: String
     private(set) var server2MinURL: String
@@ -130,6 +132,10 @@ class ConfigurationManager {
         self.noEntryDuringLunch = defaults.object(forKey: "no_entry_during_lunch") as? Bool ?? defaultSettings["no_entry_during_lunch"] as! Bool
        
         self.simulateTimePassage = false
+        
+        self.avoidTakingSameTrade = true
+        
+        self.avoidTakingSameLosingTrade = false
         
         self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
         

@@ -264,16 +264,16 @@ class TraderBot {
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let newPosition: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
             
-//            if let newPositionStop = newPosition.stopLoss?.stop,
-//                let lastTrade = sessionManager.trades.last,
-//                lastTrade.direction == newPosition.direction,
-//                lastTrade.idealProfit < 0,
-//                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
-//                lastTrade.exitMethod == .hitStoploss {
-//
-//                print("Ignored repeated trade:", newPosition)
-//                return .noAction(entryType: nil, reason: .noTradingAction)
-//            }
+            if config.avoidTakingSameTrade,
+                let newPositionStop = newPosition.stopLoss?.stop,
+                let lastTrade = sessionManager.trades.last,
+                lastTrade.direction == newPosition.direction,
+                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+                lastTrade.exitMethod == .hitStoploss {
+
+                print("Ignored repeated trade:", newPosition)
+                return .noAction(entryType: nil, reason: .repeatedTrade)
+            }
             
             return .openPosition(newPosition: newPosition, entryType: entryType)
         }
@@ -415,20 +415,22 @@ class TraderBot {
                 } else {
                     let action = seekToOpenPosition(bar: currentBar, entryType: .sweetSpot)
                     
-//                    switch action {
-//                    case .openPosition(let newPosition, _):
-//                        if let newPositionStop = newPosition.stopLoss?.stop,
-//                            lastTrade.direction == newPosition.direction,
-//                            lastTrade.idealProfit < 0,
-//                            abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
-//                            lastTrade.exitMethod == .hitStoploss {
-//
-//                            print("Ignoring repeated losing trade:", newPosition)
-//                            return .noAction(entryType: nil, reason: .noTradingAction)
-//                        }
-//                    default:
-//                        break
-//                    }
+                    if config.avoidTakingSameLosingTrade {
+                        switch action {
+                        case .openPosition(let newPosition, _):
+                            if let newPositionStop = newPosition.stopLoss?.stop,
+                                lastTrade.direction == newPosition.direction,
+                                lastTrade.idealProfit < 0,
+                                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+                                lastTrade.exitMethod == .hitStoploss {
+
+                                print("Ignoring repeated losing trade:", newPosition)
+                                return .noAction(entryType: nil, reason: .repeatedTrade)
+                            }
+                        default:
+                            break
+                        }
+                    }
                     
                     return action
                 }

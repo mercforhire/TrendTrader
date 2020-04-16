@@ -147,6 +147,7 @@ enum ExitMethod {
 
 enum NoActionReason {
     case noTradingAction
+    case repeatedTrade
     case exceedLoss
     case outsideTradingHours
     case lunchHour
@@ -156,6 +157,8 @@ enum NoActionReason {
         switch self {
         case .noTradingAction:
         return "No trading action"
+        case .repeatedTrade:
+        return "Repeated trade"
         case .exceedLoss:
         return "Exceeded maximum loss"
         case .outsideTradingHours:

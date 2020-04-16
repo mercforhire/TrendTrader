@@ -402,7 +402,8 @@ class TraderBot {
             // Check if the direction from the start of the last trade to current bar are same as current
             // If yes, we need to decide if we want to enter on any Pullback or only SweetSpot
             // Otherwise, then enter aggressively on any entry
-            if chart.checkAllSameDirection(direction: currentBarDirection,
+            if lastTrade.direction == currentBarDirection,
+                chart.checkAllSameDirection(direction: currentBarDirection,
                                            currBar: currentBar,
                                            fromKey: lastTrade.exitTime.generateDateIdentifier(),
                                            toKey: currentBar.time.generateDateIdentifier()) {

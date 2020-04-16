@@ -163,9 +163,9 @@
 			children = (
 				854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */,
 				8592433923AC41C8004CE61F /* Parser.swift */,
+				85FF9C07243CA9040050666F /* NTSettings.swift */,
 				8592435A23B1559E004CE61F /* Trade */,
 				8592435923B15571004CE61F /* Chart */,
-				85FF9C07243CA9040050666F /* NTSettings.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";

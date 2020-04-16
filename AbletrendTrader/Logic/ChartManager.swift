@@ -87,9 +87,10 @@ class ChartManager {
                 if let oneMinText = Parser.readFile(fileName: fileName1),
                     let twoMinText = Parser.readFile(fileName: fileName2),
                     let threeMinText = Parser.readFile(fileName: fileName3) {
-                    
-                    generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText)
-                    completion(self.chart)
+                    generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
+                        self.chart = chart
+                        completion(self.chart)
+                    }
                 } else {
                     self.delegate?.chartStatusChanged(statusText: "Chart data reading failed")
                     completion(nil)
@@ -221,9 +222,11 @@ class ChartManager {
             guard let self = self else { return }
             
             if let oneMinText = oneMinText, let twoMinText = twoMinText, let threeMinText = threeMinText {
-                self.generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText)
-                self.delegate?.chartStatusChanged(statusText: "Latest data: " + (self.chart?.lastBar?.candleStick.time.hourMinuteSecond() ?? "--"))
-                completion(self.chart)
+                self.generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
+                    self.chart = chart
+                    self.delegate?.chartStatusChanged(statusText: "Latest data: " + (self.chart?.lastBar?.candleStick.time.hourMinuteSecond() ?? "--"))
+                    completion(self.chart)
+                }
             } else {
                 self.delegate?.chartStatusChanged(statusText: "Chart fetching failed")
                 completion(nil)
@@ -231,17 +234,25 @@ class ChartManager {
         }
     }
     
-    private func generateChart(oneMinText: String, twoMinText: String, threeMinText: String) {
-        let candleSticks = Parser.getPriceData(rawFileInput: oneMinText)
-        let oneMinSignals = Parser.getSignalData(rawFileInput: oneMinText, inteval: .oneMin)
-        let twoMinSignals = Parser.getSignalData(rawFileInput: twoMinText, inteval: .twoMin)
-        let threeMinSignals = Parser.getSignalData(rawFileInput: threeMinText, inteval: .threeMin)
-        let oneMinIndicators = Indicators(interval: .oneMin, signals: oneMinSignals)
-        let twoMinIndicators = Indicators(interval: .twoMin, signals: twoMinSignals)
-        let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
+    private func generateChart(oneMinText: String, twoMinText: String, threeMinText: String, completion: @escaping (_ chart: Chart) -> Void) {
         
-        self.chart = Chart.generateChart(candleSticks: candleSticks,
-                                         indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
+        let queue = DispatchQueue.global()
+        queue.async {
+            let candleSticks = Parser.getPriceData(rawFileInput: oneMinText)
+            let oneMinSignals = Parser.getSignalData(rawFileInput: oneMinText, inteval: .oneMin)
+            let twoMinSignals = Parser.getSignalData(rawFileInput: twoMinText, inteval: .twoMin)
+            let threeMinSignals = Parser.getSignalData(rawFileInput: threeMinText, inteval: .threeMin)
+            let oneMinIndicators = Indicators(interval: .oneMin, signals: oneMinSignals)
+            let twoMinIndicators = Indicators(interval: .twoMin, signals: twoMinSignals)
+            let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
+            
+            let chart = Chart.generateChart(candleSticks: candleSticks,
+                                             indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
+            
+            DispatchQueue.main.async {
+                completion(chart)
+            }
+        }
     }
     
     private func findLatestAvaiableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {

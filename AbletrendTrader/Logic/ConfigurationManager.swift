@@ -133,9 +133,9 @@ class ConfigurationManager {
        
         self.simulateTimePassage = false
         
-        self.avoidTakingSameTrade = true
+        self.avoidTakingSameTrade = defaults.object(forKey: "avoid_taking_same_trade") as? Bool ?? true
         
-        self.avoidTakingSameLosingTrade = false
+        self.avoidTakingSameLosingTrade = defaults.object(forKey: "avoid_taking_same_losing_trade") as? Bool ?? false
         
         self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
         
@@ -377,6 +377,16 @@ class ConfigurationManager {
         }
         
         throw ConfigError.maxDailyLossError
+    }
+    
+    func setAvoidTakingSameTrade(newValue: Bool) {
+        avoidTakingSameTrade = newValue
+        saveToDefaults(newValue: newValue, key: "avoid_taking_same_trade")
+    }
+    
+    func setAvoidTakingSameLosingTrade(newValue: Bool) {
+        avoidTakingSameLosingTrade = newValue
+        saveToDefaults(newValue: newValue, key: "avoid_taking_same_losing_trade")
     }
     
     func setByPassTradingTimeRestrictions(newValue: Bool) {

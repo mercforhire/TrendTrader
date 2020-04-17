@@ -29,8 +29,11 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
     @IBOutlet private weak var dailyLossLimitField: NSTextField!
+    @IBOutlet private weak var avoidSameTradeCheckbox: NSButton!
+    @IBOutlet private weak var avoidSameLosingTradeCheckbox: NSButton!
     @IBOutlet private weak var byPassTradingTimeCheckbox: NSButton!
     @IBOutlet private weak var noEntryDuringLunchCheckbox: NSButton!
+    
     
     func setupUI() {
         riskField.delegate = self
@@ -81,6 +84,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", config.maxHighRiskEntryAllowed)
+        avoidSameTradeCheckbox.state = config.avoidTakingSameTrade ? .on : .off
+        avoidSameLosingTradeCheckbox.state = config.avoidTakingSameLosingTrade ? .on : .off
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
         noEntryDuringLunchCheckbox.state = config.noEntryDuringLunch ? .on : .off
     }
@@ -90,6 +95,28 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         // Do view setup here.
         setupUI()
         loadConfig()
+    }
+    
+    @IBAction func avoidSameTradeChecked(_ sender: NSButton) {
+        switch sender.state {
+        case .on:
+            config.setAvoidTakingSameTrade(newValue: true)
+        case .off:
+            config.setAvoidTakingSameTrade(newValue: false)
+        default:
+            break
+        }
+    }
+    
+    @IBAction func avoidSameLosingTrade(_ sender: NSButton) {
+        switch sender.state {
+        case .on:
+            config.setAvoidTakingSameLosingTrade(newValue: true)
+        case .off:
+            config.setAvoidTakingSameLosingTrade(newValue: false)
+        default:
+            break
+        }
     }
     
     @IBAction func byPassTimeChecked(_ sender: NSButton) {

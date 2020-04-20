@@ -227,11 +227,11 @@ class TraderBot {
                 // Apply the new SL if it is more in favor than the existing SL
                 switch sessionManager.pos!.direction {
                 case .long:
-                    if let stop = sessionManager.pos?.stopLoss?.stop, newStop > stop {
+                    if let stop = sessionManager.pos?.stopLoss?.stop, newStop - stop >= 0.25 {
                         return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                     }
                 default:
-                    if let stop = sessionManager.pos?.stopLoss?.stop, newStop < stop {
+                    if let stop = sessionManager.pos?.stopLoss?.stop, stop - newStop >= 0.25 {
                         return [.updateStop(stop: StopLoss(stop: newStop, source: newStopSource))]
                     }
                 }
@@ -268,7 +268,8 @@ class TraderBot {
                 let newPositionStop = newPosition.stopLoss?.stop,
                 let lastTrade = sessionManager.trades.last,
                 lastTrade.direction == newPosition.direction,
-                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
+                chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
                 lastTrade.exitMethod == .hitStoploss {
 
                 print("Ignored repeated trade:", newPosition)
@@ -404,7 +405,6 @@ class TraderBot {
             // Otherwise, then enter aggressively on any entry
             if lastTrade.direction == currentBarDirection,
                 chart.checkAllSameDirection(direction: currentBarDirection,
-                                           currBar: currentBar,
                                            fromKey: lastTrade.exitTime.generateDateIdentifier(),
                                            toKey: currentBar.time.generateDateIdentifier()) {
                 
@@ -421,7 +421,7 @@ class TraderBot {
                             if let newPositionStop = newPosition.stopLoss?.stop,
                                 lastTrade.direction == newPosition.direction,
                                 lastTrade.idealProfit < 0,
-                                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.25,
+                                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
                                 lastTrade.exitMethod == .hitStoploss {
 
                                 print("Ignoring repeated losing trade:", newPosition)
@@ -465,7 +465,8 @@ class TraderBot {
         // Method 3: current bar's high plus 1 or low, minus 1 depending on direction(min 5 points)
         
         // Method 1 and 2:
-        guard let previousLevel: Double = findPreviousLevel(direction: direction, entryBar: entryBar) else { return nil }
+        guard let previousLevel: Double = findPreviousLevel(direction: direction, entryBar: entryBar),
+            let currentStop = entryBar.oneMinSignal?.stop else { return nil }
         
         let closeRounded = entryBar.candleStick.close.roundBasedOnDirection(direction: direction)
         let highRiskAllowed = Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) && sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed
@@ -474,15 +475,13 @@ class TraderBot {
         case .long:
             if entryBar.candleStick.close - previousLevel <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: min(previousLevel, closeRounded - config.minStop), source: .supportResistanceLevel)
-            } else if let currentStop = entryBar.oneMinSignal?.stop,
-                entryBar.candleStick.close - (currentStop - Buffer) <= config.maxRisk || highRiskAllowed {
+            } else if entryBar.candleStick.close - (currentStop - Buffer) <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: min(currentStop - Buffer, closeRounded - config.minStop), source: .supportResistanceLevel)
             }
         default:
             if previousLevel - entryBar.candleStick.close <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: max(previousLevel, closeRounded + config.minStop), source: .supportResistanceLevel)
-            } else if let currentStop = entryBar.oneMinSignal?.stop,
-                (currentStop + Buffer) - entryBar.candleStick.close <= config.maxRisk || highRiskAllowed {
+            } else if (currentStop + Buffer) - entryBar.candleStick.close <= config.maxRisk || highRiskAllowed {
                 return StopLoss(stop: max(currentStop + Buffer, closeRounded + config.minStop), source: .supportResistanceLevel)
             }
         }
@@ -606,18 +605,40 @@ class TraderBot {
                 if signalDirection == direction {
                     switch signal.inteval {
                     case .twoMin:
-                        if !finishedScanningFor2MinConfirmation {
-                            earliest2MinConfirmationBar = priceBar
-                            
-                            // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
-                            finishedScanningFor2MinConfirmation = true
+                        if config.waitForFinalizedSignals {
+                            if !finishedScanningFor2MinConfirmation,
+                                let twoMinIndex = chart.timeKeys.firstIndex(of: priceBar.identifier),
+                                startIndex - twoMinIndex >= 1 {
+                                earliest2MinConfirmationBar = priceBar
+                                
+                                // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
+                                finishedScanningFor2MinConfirmation = true
+                            }
+                        } else {
+                            if !finishedScanningFor2MinConfirmation {
+                                earliest2MinConfirmationBar = priceBar
+                                
+                                // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
+                                finishedScanningFor2MinConfirmation = true
+                            }
                         }
                     case .threeMin:
-                        if !finishedScanningFor3MinConfirmation {
-                            earliest3MinConfirmationBar = priceBar
-                            
-                            // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
-                            finishedScanningFor3MinConfirmation = true
+                        if config.waitForFinalizedSignals {
+                            if !finishedScanningFor3MinConfirmation,
+                                let threeMinIndex = chart.timeKeys.firstIndex(of: priceBar.identifier),
+                                startIndex - threeMinIndex >= 2 {
+                                earliest3MinConfirmationBar = priceBar
+                                
+                                // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
+                                finishedScanningFor3MinConfirmation = true
+                            }
+                        } else {
+                            if !finishedScanningFor3MinConfirmation {
+                                earliest3MinConfirmationBar = priceBar
+                                
+                                // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
+                                finishedScanningFor3MinConfirmation = true
+                            }
                         }
                     default:
                         break

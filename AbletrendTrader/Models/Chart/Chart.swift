@@ -57,7 +57,7 @@ struct Chart {
         return lastBarKey
     }
     
-    func checkAllSameDirection(direction: TradeDirection, currBar: PriceBar, fromKey: String, toKey: String) -> Bool {
+    func checkAllSameDirection(direction: TradeDirection, fromKey: String, toKey: String) -> Bool {
         guard let fromKeyIndex = timeKeys.firstIndex(of: fromKey),
             let toKeyIndex = timeKeys.firstIndex(of: toKey),
             fromKeyIndex < toKeyIndex else { return true }

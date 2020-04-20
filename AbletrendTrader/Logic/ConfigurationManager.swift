@@ -77,6 +77,7 @@ class ConfigurationManager {
     private(set) var simulateTimePassage : Bool
     private(set) var avoidTakingSameTrade : Bool
     private(set) var avoidTakingSameLosingTrade : Bool
+    private(set) var waitForFinalizedSignals : Bool
     
     private(set) var server1MinURL: String
     private(set) var server2MinURL: String
@@ -130,6 +131,8 @@ class ConfigurationManager {
         self.byPassTradingTimeRestrictions = defaults.object(forKey: "bypass_trading_time_restrictions") as? Bool ?? defaultSettings["bypass_trading_time_restrictions"] as! Bool
         
         self.noEntryDuringLunch = defaults.object(forKey: "no_entry_during_lunch") as? Bool ?? defaultSettings["no_entry_during_lunch"] as! Bool
+        
+        self.waitForFinalizedSignals = defaults.object(forKey: "wait_for_finalized_signals") as? Bool ?? false
        
         self.simulateTimePassage = false
         

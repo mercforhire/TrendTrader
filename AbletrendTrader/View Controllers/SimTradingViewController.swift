@@ -178,14 +178,32 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         var currentPL = 0.0
+        var winningTrades = 0
+        var totalWin = 0.0
+        var losingTrades = 0
+        var totalLoss = 0.0
+        
         for trade in sessionManager.trades {
             currentPL += trade.idealProfit
             print(String(format: "%.2f", currentPL))
+            
+            if trade.idealProfit < 0 {
+                losingTrades += 1
+                totalLoss = totalLoss + abs(trade.idealProfit)
+            } else {
+                winningTrades += 1
+                totalWin = totalWin + abs(trade.idealProfit)
+            }
         }
         
         for trade in sessionManager.trades {
             print(trade.exitTime.generateDate())
         }
+        
+        print("Total \(sessionManager.trades.count) trades")
+        print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(sessionManager.trades.count) * 100))
+        print(String(format: "Average win: %.2f", totalWin / Double(winningTrades)))
+        print(String(format: "Average loss: %.2f", totalLoss / Double(losingTrades)))
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

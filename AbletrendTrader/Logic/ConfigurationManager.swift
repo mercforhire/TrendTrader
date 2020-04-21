@@ -407,6 +407,11 @@ class ConfigurationManager {
         saveToDefaults(newValue: newValue, key: "simulate_time_passage")
     }
     
+    func setWaitForFinalizedSignals(newValue: Bool) {
+        waitForFinalizedSignals = newValue
+        saveToDefaults(newValue: newValue, key: "wait_for_finalized_signals")
+    }
+    
     func addNTSettings(settings: NTSettings) {
         ntSettings.append(settings)
         

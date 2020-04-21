@@ -182,9 +182,24 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var totalWin = 0.0
         var losingTrades = 0
         var totalLoss = 0.0
+        var worstPLDay = 0.0
+        var worstPLDayTime: Date?
         
+        var lastTrade: Trade?
+        var currentDayPL = 0.0
+        var count = 0
         for trade in sessionManager.trades {
+            if let lastTradeTime = lastTrade?.entryTime,
+                lastTradeTime.day() != trade.entryTime.day(),
+                count != sessionManager.trades.count {
+                
+                worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
+                worstPLDay = min(worstPLDay, currentDayPL)
+                currentDayPL = 0.0
+            }
+            
             currentPL += trade.idealProfit
+            currentDayPL += trade.idealProfit
             print(String(format: "%.2f", currentPL))
             
             if trade.idealProfit < 0 {
@@ -194,6 +209,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 winningTrades += 1
                 totalWin = totalWin + abs(trade.idealProfit)
             }
+            
+            count += 1
+            lastTrade = trade
         }
         
         for trade in sessionManager.trades {
@@ -201,9 +219,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         print("Total \(sessionManager.trades.count) trades")
-        print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(sessionManager.trades.count) * 100))
-        print(String(format: "Average win: %.2f", totalWin / Double(winningTrades)))
-        print(String(format: "Average loss: %.2f", totalLoss / Double(losingTrades)))
+        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100))
+        print(String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)))
+        print(String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
+        print("Worst PL: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime?.generateDate() ?? "")")
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

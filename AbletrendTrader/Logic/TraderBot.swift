@@ -602,7 +602,16 @@ class TraderBot {
             for signal in priceBar.signals where signal.inteval != .oneMin {
                 guard let signalDirection = signal.direction else { continue }
                 
-                if signalDirection == direction {
+                if signalDirection != direction {
+                    switch signal.inteval {
+                    case .twoMin:
+                        finishedScanningFor2MinConfirmation = true
+                    case .threeMin:
+                        finishedScanningFor3MinConfirmation = true
+                    default:
+                        break
+                    }
+                } else {
                     switch signal.inteval {
                     case .twoMin:
                         if config.waitForFinalizedSignals {
@@ -640,15 +649,6 @@ class TraderBot {
                                 finishedScanningFor3MinConfirmation = true
                             }
                         }
-                    default:
-                        break
-                    }
-                } else {
-                    switch signal.inteval {
-                    case .twoMin:
-                        finishedScanningFor2MinConfirmation = true
-                    case .threeMin:
-                        finishedScanningFor3MinConfirmation = true
                     default:
                         break
                     }

@@ -318,19 +318,25 @@ class ChartManager {
                 let urlFetchingTask = DispatchGroup()
                 
                 urlFetchingTask.enter()
-                self.fetchLatestAvailableUrlDuring(time: self.simTime, startSecond: 15, interval: .oneMin, completion: { url in
+                self.fetchLatestAvailableUrlDuring(time: self.simTime,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   interval: .oneMin, completion: { url in
                     oneMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.fetchLatestAvailableUrlDuring(time: self.simTime, startSecond: 15, interval: .twoMin, completion: { url in
+                self.fetchLatestAvailableUrlDuring(time: self.simTime,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   interval: .twoMin, completion: { url in
                     twoMinUrl = url
                     urlFetchingTask.leave()
                 })
                 
                 urlFetchingTask.enter()
-                self.fetchLatestAvailableUrlDuring(time: self.simTime, startSecond: 15, interval: .threeMin, completion: { url in
+                self.fetchLatestAvailableUrlDuring(time: self.simTime,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   interval: .threeMin, completion: { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()
                 })

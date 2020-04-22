@@ -17,8 +17,8 @@ protocol DataManagerDelegate: class {
 
 class ChartManager {
     private let fileName1: String = "1m.txt" // filename for local sandbox folder
-    private let fileName2: String = "2m.txt" // filename for local sandbox folder
-    private let fileName3: String = "3m.txt" // filename for local sandbox folder
+    private let fileName2: String = "2m.txt"
+    private let fileName3: String = "3m.txt"
     
     private let config = ConfigurationManager.shared
     private let delayBeforeFetchingAtNewMinute = 5
@@ -33,7 +33,7 @@ class ChartManager {
     private var currentPriceBarTime: Date?
     private var fetchingChart = false
     private var refreshTimer: Timer?
-    private var nextRuntime: Date?
+    private var nextFetchTime: Date?
     
     init(live: Bool, serverUrls: [SignalInteval: String]) {
         self.live = live
@@ -110,13 +110,13 @@ class ChartManager {
     func stopMonitoring() {
         monitoring = false
         currentPriceBarTime = nil
-        nextRuntime = nil
+        nextFetchTime = nil
         refreshTimer?.invalidate()
         refreshTimer = nil
     }
     
     @objc func timerFunction() {
-        guard let nextRuntime = nextRuntime else { return }
+        guard let nextRuntime = nextFetchTime else { return }
         
         if Date() >= nextRuntime {
             updateChart()
@@ -135,8 +135,8 @@ class ChartManager {
         
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
             // call this again X seconds after the next minute
-            nextRuntime = now.addingTimeInterval(TimeInterval(60 + delayBeforeFetchingAtNewMinute - now.second()))
-            let statusText: String = "Latest data: \((currentPriceBarTime?.hourMinute() ?? "--")), will fetch again at \(nextRuntime!.hourMinuteSecond())"
+            nextFetchTime = now.addingTimeInterval(TimeInterval(60 + delayBeforeFetchingAtNewMinute - now.second()))
+            let statusText: String = "Latest data: \((currentPriceBarTime?.hourMinute() ?? "--")), will fetch again at \(nextFetchTime!.hourMinuteSecond())"
             self.delegate?.chartStatusChanged(statusText: statusText)
             
             return
@@ -147,6 +147,7 @@ class ChartManager {
         }
         
         self.delegate?.chartStatusChanged(statusText: "Start fetching at " + now.hourMinuteSecond())
+        
         fetchingChart = true
         fetchChart { [weak self] chart in
             guard let self = self else { return }
@@ -158,25 +159,31 @@ class ChartManager {
                 
                 if self.monitoring {
                     if self.live {
-                        self.nextRuntime = nil
-                        let date = Date().addingTimeInterval(TimeInterval(1))
-                        let timer = Timer(fireAt: date, interval: 0, target: self, selector: #selector(self.updateChart), userInfo: nil, repeats: false)
-                        RunLoop.main.add(timer, forMode: .common)
+                        self.nextFetchTime = nil
+                        self.updateChartNextSecond()
                     } else if self.config.simulateTimePassage {
-                        guard self.simTime < Date.flatPositionsTime(date: self.simTime), self.simTime < Date() else {
-                            self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
-                            self.stopMonitoring()
-                            self.delegate?.requestStopMonitoring()
-                            return
+                        guard self.simTime < Date.flatPositionsTime(date: self.simTime),
+                            self.simTime < Date() else {
+                                self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
+                                self.stopMonitoring()
+                                self.delegate?.requestStopMonitoring()
+                                return
                         }
                         self.updateChart()
                     }
                 }
             } else if self.monitoring, self.live {
                 self.delegate?.chartStatusChanged(statusText: "Data for " + Date().hourMinuteSecond() + " yet not found")
-                self.updateChart()
+                print("Data for " + Date().hourMinuteSecond() + " yet not found")
+                self.updateChartNextSecond()
             }
         }
+    }
+    
+    private func updateChartNextSecond() {
+        let date = Date().addingTimeInterval(TimeInterval(1))
+        let timer = Timer(fireAt: date, interval: 0, target: self, selector: #selector(self.updateChart), userInfo: nil, repeats: false)
+        RunLoop.main.add(timer, forMode: .common)
     }
     
     private func downloadChartFromUrls(oneMinUrl: String,

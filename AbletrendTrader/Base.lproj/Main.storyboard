@@ -1108,13 +1108,13 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ToP-uD-y6Z">
-                                <rect key="frame" x="246" y="18" width="123" height="18"/>
-                                <buttonCell key="cell" type="check" title="New trading rule" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Esd-kI-lNi">
+                                <rect key="frame" x="199" y="18" width="170" height="18"/>
+                                <buttonCell key="cell" type="check" title="Wait for finalized signals" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Esd-kI-lNi">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="newTradingRuleChecked:" target="6pn-ly-NU7" id="hhP-0d-q3o"/>
+                                    <action selector="waitFinalizedSignalsCheckboxChecked:" target="6pn-ly-NU7" id="hhP-0d-q3o"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -1217,13 +1217,13 @@
                         <outlet property="minProfitGreenBarField" destination="Qip-aw-AeW" id="CYO-iJ-IPh"/>
                         <outlet property="minProfitPullbackField" destination="8P2-O5-PTk" id="b2D-nB-wcc"/>
                         <outlet property="minSTPField" destination="pFZ-k0-AVu" id="qdP-K8-CLY"/>
-                        <outlet property="newTradingRuleCheckbox" destination="ToP-uD-y6Z" id="epS-3E-W9Y"/>
                         <outlet property="noEntryDuringLunchCheckbox" destination="of0-Wx-S4o" id="woO-Nl-hBt"/>
                         <outlet property="riskField" destination="UEB-Um-rH8" id="1wf-rq-NPN"/>
                         <outlet property="sessionEndTimePicker" destination="Nvu-lL-SDc" id="mvI-vz-xrR"/>
                         <outlet property="sessionStartTimePicker" destination="vZb-pz-ioV" id="wPc-gy-4xk"/>
                         <outlet property="sweetspotDistanceField" destination="EiV-b6-Ycz" id="lKs-53-mZD"/>
                         <outlet property="takeProfitField" destination="9pS-oT-Qfu" id="SUe-wi-BDb"/>
+                        <outlet property="waitFinalizedSignalsCheckbox" destination="ToP-uD-y6Z" id="epS-3E-W9Y"/>
                     </connections>
                 </viewController>
                 <customObject id="A3Q-Y4-FEE" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

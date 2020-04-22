@@ -366,7 +366,7 @@ class TraderBot {
     
     private func handleOpeningNewTrade(currentBar: PriceBar) -> TradeActionType {
         // stop trading if P&L <= MaxDailyLoss
-        if sessionManager.getTotalPAndL() <= config.maxDailyLoss {
+        if sessionManager.getDailyPAndL(day: currentBar.time) <= config.maxDailyLoss {
             return .noAction(entryType: nil, reason: .exceedLoss)
         }
         
@@ -567,6 +567,7 @@ class TraderBot {
             } else if let coloredBar = coloredBar,
                 abs((priceBar.oneMinSignal?.stop ?? 0) - (coloredBar.oneMinSignal?.stop ?? 0)) <= 0.25,
                 priceBar.barColor == .green {
+                
                 greenBars.insert(priceBar, at: 0)
             } else {
                 break
@@ -662,30 +663,5 @@ class TraderBot {
         }
         
         return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil
-    }
-    
-    // Unused
-    private func checkFor3MinSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
-        guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
-            return false
-        }
-        
-        let timeKeysUpToIncludingStartIndex = chart.timeKeys[0...startIndex]
-        
-        for timeKey in timeKeysUpToIncludingStartIndex.reversed() {
-            guard let priceBar = chart.priceBars[timeKey] else { break }
-            
-            for signal in priceBar.signals where signal.inteval == .threeMin {
-                guard let signalDirection = signal.direction else { continue }
-                
-                if signalDirection == direction {
-                    return true
-                } else {
-                    return false
-                }
-            }
-        }
-        
-        return false
     }
 }

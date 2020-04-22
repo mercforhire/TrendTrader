@@ -222,7 +222,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100))
         print(String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)))
         print(String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
-        print("Worst PL: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime?.generateDate() ?? "")")
+        if let worstPLDayTime = worstPLDayTime {
+            print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
+        }
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
@@ -236,7 +238,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         chartManager?.stopMonitoring()
         sessionManager.stopLiveMonitoring()
         systemClockTimer.invalidate()
-        systemClockTimer =  nil
+        systemClockTimer = nil
     }
 }
 

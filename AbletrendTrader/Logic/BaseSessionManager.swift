@@ -113,6 +113,16 @@ class BaseSessionManager {
         return pAndL
     }
     
+    func getDailyPAndL(day: Date) -> Double {
+        var pAndL: Double = 0
+        
+        for trade in trades where trade.entryTime.isInSameDay(date: day) {
+            pAndL = pAndL + trade.actualProfit
+        }
+        
+        return pAndL
+    }
+    
     func getTotalPAndLDollar() -> Double {
         var pAndLDollar: Double = 0
         

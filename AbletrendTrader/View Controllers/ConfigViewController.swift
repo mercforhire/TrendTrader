@@ -33,7 +33,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var avoidSameLosingTradeCheckbox: NSButton!
     @IBOutlet private weak var byPassTradingTimeCheckbox: NSButton!
     @IBOutlet private weak var noEntryDuringLunchCheckbox: NSButton!
-    @IBOutlet private weak var newTradingRuleCheckbox: NSButton!
+    @IBOutlet private weak var waitFinalizedSignalsCheckbox: NSButton!
     
     
     func setupUI() {
@@ -89,7 +89,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         avoidSameLosingTradeCheckbox.state = config.avoidTakingSameLosingTrade ? .on : .off
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
         noEntryDuringLunchCheckbox.state = config.noEntryDuringLunch ? .on : .off
-        newTradingRuleCheckbox.state = config.waitForFinalizedSignals ? .on : .off
+        waitFinalizedSignalsCheckbox.state = config.waitForFinalizedSignals ? .on : .off
     }
     
     override func viewDidLoad() {
@@ -143,7 +143,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         }
     }
     
-    @IBAction func newTradingRuleChecked(_ sender: NSButton) {
+    @IBAction func waitFinalizedSignalsCheckboxChecked(_ sender: NSButton) {
         switch sender.state {
         case .on:
             config.setWaitForFinalizedSignals(newValue: true)

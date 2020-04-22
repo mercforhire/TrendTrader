@@ -48,7 +48,8 @@ class ChartManager {
                                          month: Date().month(),
                                          day: Date().day(),
                                          hour: 9,
-                                         minute: 40)
+                                         minute: 40,
+                                         second: 1)
         self.simTime = calendar.date(from: components1)!
     }
     
@@ -326,7 +327,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute - 1,
                                                    interval: .oneMin, completion: { url in
                     oneMinUrl = url
                     urlFetchingTask.leave()
@@ -334,7 +335,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute - 1,
                                                    interval: .twoMin, completion: { url in
                     twoMinUrl = url
                     urlFetchingTask.leave()
@@ -342,7 +343,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute - 1,
                                                    interval: .threeMin, completion: { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()
@@ -405,7 +406,7 @@ class ChartManager {
                                                time.month(),
                                                time.day(),
                                                time.hour(),
-                                               time.minute(),
+                                               time.minute() + 1,
                                                i)
                 
                 Alamofire.SessionManager.default.request(urlString).validate().response { response in

@@ -478,7 +478,8 @@ class NTSessionManager: BaseSessionManager {
                                           exitTime: orderConfirmation.time,
                                           idealExitPrice: idealExitPrice,
                                           actualExitPrice: orderConfirmation.price,
-                                          commission: orderConfirmation.commission * 2)
+                                          commission: orderConfirmation.commission * 2,
+                                          exitMethod: .manual)
                         self.trades.append(trade)
                         self.pos = nil
                     }
@@ -506,7 +507,8 @@ class NTSessionManager: BaseSessionManager {
                               exitTime: latestFilledOrderResponse.time,
                               idealExitPrice: closedPosition.stopLoss?.stop ?? latestFilledOrderResponse.price,
                               actualExitPrice: latestFilledOrderResponse.price,
-                              commission: commission * Double(closedPosition.size) * 2)
+                              commission: commission * Double(closedPosition.size) * 2,
+                              exitMethod: .hitStoploss)
             self.trades.append(trade)
             self.pos = nil
             self.delegate?.positionStatusChanged()

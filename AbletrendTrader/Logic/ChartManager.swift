@@ -319,6 +319,7 @@ class ChartManager {
                         print(oneMinUrl, terminator:", ")
                         print(twoMinUrl, terminator:", ")
                         print(threeMinUrl)
+                        self.simTime = self.simTime.getOffByMinutes(minutes: 1)
                         completion((oneMinUrl, twoMinUrl, threeMinUrl))
                     }
                     return
@@ -356,10 +357,10 @@ class ChartManager {
                     semaphore.signal()
                 }
                 semaphore.wait()
-                self.simTime = self.simTime.getOffByMinutes(minutes: 1)
             }
             
             DispatchQueue.main.async {
+                self.simTime = self.simTime.getOffByMinutes(minutes: 1)
                 completion(nil)
             }
         }
@@ -406,7 +407,7 @@ class ChartManager {
                                                time.month(),
                                                time.day(),
                                                time.hour(),
-                                               time.minute() + 1,
+                                               time.minute(),
                                                i)
                 
                 Alamofire.SessionManager.default.request(urlString).validate().response { response in

@@ -492,26 +492,41 @@ class NTSessionManager: BaseSessionManager {
     }
     
     override func updateCurrentPositionToBeClosed() {
-        if let closedPosition = self.pos,
-            let stopOrderId = closedPosition.stopLoss?.stopOrderId,
-            let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
-            latestFilledOrderResponse.status == .filled {
+        let queue = DispatchQueue.global()
+        queue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
             
-            self.delegate?.newLogAdded(log: "Detected position closed, last filled order response: \(latestFilledOrderResponse.description)")
-            let trade = Trade(direction: closedPosition.direction,
-                              size: closedPosition.size,
-                              pointValue: pointsValue,
-                              entryTime: closedPosition.entryTime,
-                              idealEntryPrice: closedPosition.idealEntryPrice,
-                              actualEntryPrice: closedPosition.actualEntryPrice,
-                              exitTime: latestFilledOrderResponse.time,
-                              idealExitPrice: closedPosition.stopLoss?.stop ?? latestFilledOrderResponse.price,
-                              actualExitPrice: latestFilledOrderResponse.price,
-                              commission: commission * Double(closedPosition.size) * 2,
-                              exitMethod: .hitStoploss)
-            self.trades.append(trade)
-            self.pos = nil
-            self.delegate?.positionStatusChanged()
+            for _ in 0...2 {
+                if let closedPosition = self.pos,
+                    let stopOrderId = closedPosition.stopLoss?.stopOrderId,
+                    let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
+                    latestFilledOrderResponse.status == .filled {
+                    
+                    let trade = Trade(direction: closedPosition.direction,
+                                      size: closedPosition.size,
+                                      pointValue: self.pointsValue,
+                                      entryTime: closedPosition.entryTime,
+                                      idealEntryPrice: closedPosition.idealEntryPrice,
+                                      actualEntryPrice: closedPosition.actualEntryPrice,
+                                      exitTime: latestFilledOrderResponse.time,
+                                      idealExitPrice: closedPosition.stopLoss?.stop ?? latestFilledOrderResponse.price,
+                                      actualExitPrice: latestFilledOrderResponse.price,
+                                      commission: self.commission * Double(closedPosition.size) * 2,
+                                      exitMethod: .hitStoploss)
+                    self.trades.append(trade)
+                    self.pos = nil
+                    
+                    DispatchQueue.main.async {
+                        self.delegate?.newLogAdded(log: "Detected position closed, last filled order response: \(latestFilledOrderResponse.description)")
+                        self.delegate?.positionStatusChanged()
+                    }
+                    break
+                }
+                print("Detected position closed but last filled order response not found. Retrying...")
+                sleep(1)
+            }
         }
     }
     

@@ -29,7 +29,9 @@ class BaseSessionManager {
                     delegate?.newLogAdded(log: status.status())
                 }
             }
-            if oldValue?.position != 0 && status?.position == 0 {
+            if let oldValue = oldValue,
+                let status = status,
+                oldValue.position != 0 && status.position == 0 {
                 updateCurrentPositionToBeClosed()
             }
         }

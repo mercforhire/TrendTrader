@@ -15,7 +15,7 @@ class SimSessionManager: BaseSessionManager {
         for action in actions {
             switch action {
             case .noAction:
-                print(action.description(actionBarTime: priceBarTime))
+                break
             default:
                 self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
             }

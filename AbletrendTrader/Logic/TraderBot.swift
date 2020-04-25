@@ -424,7 +424,7 @@ class TraderBot {
                                 abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
                                 lastTrade.exitMethod == .hitStoploss {
 
-                                print("Ignoring repeated losing trade:", newPosition)
+                                print("Ignored repeated losing trade:", newPosition)
                                 return .noAction(entryType: nil, reason: .repeatedTrade)
                             }
                         default:

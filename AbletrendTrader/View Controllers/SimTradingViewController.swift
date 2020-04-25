@@ -160,12 +160,29 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         chartManager?.stopMonitoring()
         trader?.chart = completedChart
+        
         trader?.generateSimSession(completion: { [weak self] in
             guard let self = self else { return }
             
             self.updateTradesList()
             self.delegate?.chartUpdated(chart: completedChart)
         })
+        
+//        var startingSL = 10.0
+//        let endingSL = 15.0
+//
+//        while startingSL <= endingSL {
+//            print("Testing SL: \(startingSL):")
+//            config.maxRiskBase = startingSL
+//            trader?.generateSimSession(completion: { [weak self] in
+//                guard let self = self else { return }
+//
+//                self.updateTradesList()
+//                self.delegate?.chartUpdated(chart: completedChart)
+//
+//                startingSL += 0.5
+//            })
+//        }
     }
     
     private func updateTradesList() {
@@ -218,7 +235,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             print(trade.exitTime.generateDate())
         }
         
-        print("Total \(sessionManager.trades.count) trades")
+        print("Total \(sessionManager.trades.count) trades,", "Final P/L: ", String(format: "%.2f", currentPL))
         print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100))
         print(String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)))
         print(String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))

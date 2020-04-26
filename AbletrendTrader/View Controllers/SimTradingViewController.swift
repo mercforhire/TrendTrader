@@ -161,18 +161,18 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         chartManager?.stopMonitoring()
         trader?.chart = completedChart
         
-        var greenExitMin = 10.0
+        var start = 5.0
 
-        while greenExitMin <= 30.0 {
-            print("Testing green exit: \(greenExitMin)...")
-            config.greenExitBase = greenExitMin
+        while start <= 20.0 {
+            print("Testing greenExitBase: \(start)...")
+            config.greenExitBase = start
             trader?.generateSimSession(completion: { [weak self] in
                 guard let self = self else { return }
 
                 self.updateTradesList()
                 self.delegate?.chartUpdated(chart: completedChart)
 
-                greenExitMin += 2.5
+                start += 1.0
                 print("")
             })
         }

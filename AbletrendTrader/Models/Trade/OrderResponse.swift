@@ -1,5 +1,5 @@
 //
-//  NTOrderResponse.swift
+//  OrderResponse.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2020-01-16.

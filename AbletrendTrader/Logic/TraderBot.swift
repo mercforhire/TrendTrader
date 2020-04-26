@@ -492,9 +492,9 @@ class TraderBot {
         
         switch direction {
         case .long:
-            return StopLoss(stop: min(lowRounded - Buffer, closeRounded - config.minStop), source: .currentBar)
+            return StopLoss(stop: min(lowRounded - Buffer, closeRounded - (config.minStop * 2.0)), source: .currentBar)
         default:
-            return StopLoss(stop: max(highRounded + Buffer, closeRounded + config.minStop), source: .currentBar)
+            return StopLoss(stop: max(highRounded + Buffer, closeRounded + (config.minStop * 2.0)), source: .currentBar)
         }
     }
     

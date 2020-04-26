@@ -271,8 +271,8 @@ class TraderBot {
                 abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
                 chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
                 lastTrade.exitMethod == .hitStoploss {
-
-                print("Ignored repeated trade:", newPosition)
+                
+                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
                 return .noAction(entryType: nil, reason: .repeatedTrade)
             }
             
@@ -424,7 +424,7 @@ class TraderBot {
                                 abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
                                 lastTrade.exitMethod == .hitStoploss {
 
-                                print("Ignored repeated losing trade:", newPosition)
+                                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: currentBar.time))")
                                 return .noAction(entryType: nil, reason: .repeatedTrade)
                             }
                         default:

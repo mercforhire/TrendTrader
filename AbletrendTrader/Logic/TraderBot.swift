@@ -271,6 +271,8 @@ class TraderBot {
                 abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
                 chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
                 lastTrade.exitMethod == .hitStoploss {
+                
+                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
 
                 return .noAction(entryType: nil, reason: .repeatedTrade)
             }
@@ -423,6 +425,8 @@ class TraderBot {
                                 abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
                                 lastTrade.exitMethod == .hitStoploss {
 
+                                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: currentBar.time))")
+
                                 return .noAction(entryType: nil, reason: .repeatedTrade)
                             }
                         default:
@@ -490,9 +494,9 @@ class TraderBot {
         
         switch direction {
         case .long:
-            return StopLoss(stop: min(lowRounded - Buffer, closeRounded - config.minStop), source: .currentBar)
+            return StopLoss(stop: min(lowRounded - Buffer, closeRounded - (config.maxRisk / 2)), source: .currentBar)
         default:
-            return StopLoss(stop: max(highRounded + Buffer, closeRounded + config.minStop), source: .currentBar)
+            return StopLoss(stop: max(highRounded + Buffer, closeRounded + (config.maxRisk / 2)), source: .currentBar)
         }
     }
     

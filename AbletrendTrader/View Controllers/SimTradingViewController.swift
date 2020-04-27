@@ -12,7 +12,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     private let config = ConfigurationManager.shared
     
     @IBOutlet weak var server1MinURLField: NSTextField!
-    @IBOutlet weak var server2MinAnd3MinURLField: NSTextField!
+    @IBOutlet weak var server2MinURLField: NSTextField!
+    @IBOutlet weak var server3MinURLField: NSTextField!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -73,14 +74,18 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         tableView.delegate = self
         tableView.dataSource = self
+        
         server1MinURLField.delegate = self
-        server2MinAnd3MinURLField.delegate = self
+        server2MinURLField.delegate = self
+        server3MinURLField.delegate = self
         
         server1minURL = config.server1MinURL
         server2minURL = config.server2MinURL
         server3minURL = config.server3MinURL
+        
         server1MinURLField.stringValue = server1minURL
-        server2MinAnd3MinURLField.stringValue = server2minURL
+        server2MinURLField.stringValue = server2minURL
+        server3MinURLField.stringValue = server3minURL
     }
 
     override func viewDidLoad() {
@@ -335,10 +340,11 @@ extension SimTradingViewController: NSControlTextEditingDelegate {
                 if textField == server1MinURLField {
                     try config.setServer1MinURL(newValue: textField.stringValue)
                     server1minURL = textField.stringValue
-                } else if textField == server2MinAnd3MinURLField {
+                } else if textField == server2MinURLField {
                     try config.setServer2MinURL(newValue: textField.stringValue)
-                    try config.setServer3MinURL(newValue: textField.stringValue)
                     server2minURL = textField.stringValue
+                } else if textField == server3MinURLField {
+                    try config.setServer3MinURL(newValue: textField.stringValue)
                     server3minURL = textField.stringValue
                 }
             } catch (let error) {
@@ -348,10 +354,11 @@ extension SimTradingViewController: NSControlTextEditingDelegate {
                 
                 if textField == server1MinURLField {
                     textField.stringValue = server1minURL
-                } else if textField == server2MinAnd3MinURLField {
+                } else if textField == server2MinURLField {
                     textField.stringValue = server2minURL
+                } else if textField == server3MinURLField {
+                    textField.stringValue = server3minURL
                 }
-                
             }
         }
     }

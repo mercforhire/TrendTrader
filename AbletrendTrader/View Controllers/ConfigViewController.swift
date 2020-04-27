@@ -29,6 +29,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
     @IBOutlet private weak var dailyLossLimitField: NSTextField!
+    @IBOutlet private weak var simRealTimeCheckbox: NSButton!
     @IBOutlet private weak var avoidSameTradeCheckbox: NSButton!
     @IBOutlet private weak var avoidSameLosingTradeCheckbox: NSButton!
     @IBOutlet private weak var byPassTradingTimeCheckbox: NSButton!
@@ -85,6 +86,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", config.maxHighRiskEntryAllowed)
+        
+        simRealTimeCheckbox.state = config.simulateTimePassage ? .on : .off
         avoidSameTradeCheckbox.state = config.avoidTakingSameTrade ? .on : .off
         avoidSameLosingTradeCheckbox.state = config.avoidTakingSameLosingTrade ? .on : .off
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
@@ -97,6 +100,17 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         // Do view setup here.
         setupUI()
         loadConfig()
+    }
+    
+    @IBAction func simRealTimeChecked(_ sender: NSButton) {
+        switch sender.state {
+        case .on:
+            config.setSimulateTimePassage(newValue: true)
+        case .off:
+            config.setSimulateTimePassage(newValue: false)
+        default:
+            break
+        }
     }
     
     @IBAction func avoidSameTradeChecked(_ sender: NSButton) {

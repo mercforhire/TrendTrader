@@ -134,7 +134,7 @@ class ConfigurationManager {
         
         self.waitForFinalizedSignals = defaults.object(forKey: "wait_for_finalized_signals") as? Bool ?? false
        
-        self.simulateTimePassage = false
+        self.simulateTimePassage = defaults.object(forKey: "simulate_time_passage") as? Bool ?? false
         
         self.avoidTakingSameTrade = defaults.object(forKey: "avoid_taking_same_trade") as? Bool ?? true
         

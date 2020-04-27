@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_ip</key>
-	<string>http://192.168.0.121/</string>
+	<string>http://192.168.0.121:80/</string>
 	<key>simulate_time_passage</key>
 	<false/>
 	<key>no_entry_during_lunch</key>

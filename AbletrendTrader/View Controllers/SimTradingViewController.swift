@@ -182,7 +182,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
         }
         
-        var currentPL = 0.0
+        var currentPL = 1071.35
         var winningTrades = 0
         var totalWin = 0.0
         var losingTrades = 0
@@ -193,6 +193,12 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var lastTrade: Trade?
         var currentDayPL = 0.0
         var count = 0
+        var monday = 0.0
+        var tuesday = 0.0
+        var wednesday = 0.0
+        var thursday = 0.0
+        var friday = 0.0
+        var morningTrades = 0.0
         for trade in sessionManager.trades {
             if let lastTradeTime = lastTrade?.entryTime,
                 lastTradeTime.day() != trade.entryTime.day(),
@@ -206,6 +212,24 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             currentPL += trade.idealProfit
             currentDayPL += trade.idealProfit
             print(String(format: "%.2f", currentPL))
+            
+            switch trade.entryTime.weekDay() {
+            case 2:
+                monday += trade.idealProfit
+            case 3:
+                tuesday += trade.idealProfit
+            case 4:
+                wednesday += trade.idealProfit
+            case 5:
+                thursday += trade.idealProfit
+            case 6:
+                friday += trade.idealProfit
+            default:
+                break
+            }
+            if Date.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime) {
+                morningTrades += trade.idealProfit
+            }
             
             if trade.idealProfit < 0 {
                 losingTrades += 1
@@ -224,12 +248,16 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         print("Total \(sessionManager.trades.count) trades")
-        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100))
-        print(String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)))
-        print(String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
+        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: ", Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: ", Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
         }
+        print("Monday: \(String(format: "%.2f", monday))")
+        print("Tuesday: \(String(format: "%.2f", tuesday))")
+        print("Wednesday: \(String(format: "%.2f", wednesday))")
+        print("Thursday: \(String(format: "%.2f", thursday))")
+        print("Friday: \(String(format: "%.2f", friday))")
+        print("Morning trades: \(String(format: "%.2f", morningTrades))")
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

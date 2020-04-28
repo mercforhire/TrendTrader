@@ -43,6 +43,14 @@ extension Date {
         return calendar.component(.day, from: self) - (zeroIndex ? 1 : 0)
     }
     
+    func weekDay(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
+        var calendar = Calendar.current
+        if let timezone = timeZone {
+            calendar.timeZone = timezone
+        }
+        return calendar.component(.weekday, from: self) - (zeroIndex ? 1 : 0)
+    }
+    
     func month(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
         var calendar = Calendar.current
         if let timezone = timeZone {

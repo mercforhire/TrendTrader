@@ -105,6 +105,14 @@ class TraderBot {
                 }
             }
             
+            // exit trade during FOMC hour
+            if Date.fomcInterval(date: priceBar.time).contains(priceBar.time) &&
+                config.fomcDay &&
+                !config.byPassTradingTimeRestrictions {
+                
+                return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)]
+            }
+            
             // If we reached FlatPositionsTime, exit the trade immediately
             if Date.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
                 return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
@@ -370,12 +378,20 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .exceedLoss)
         }
         
+        // no entering trades during FOMC hour
+        if Date.fomcInterval(date: currentBar.time).contains(currentBar.time) &&
+            config.fomcDay &&
+            !config.byPassTradingTimeRestrictions {
+            
+            return .noAction(entryType: nil, reason: .outsideTradingHours)
+        }
+        
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
         if !Date.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .outsideTradingHours)
         }
         
-        // no entrying trades during lunch hour
+        // no entering trades during lunch hour
         if config.noEntryDuringLunch,
             Date.lunchInterval(date: currentBar.time).contains(currentBar.time), !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .lunchHour)

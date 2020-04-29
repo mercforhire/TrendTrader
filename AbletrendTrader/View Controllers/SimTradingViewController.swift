@@ -248,7 +248,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         print("Total \(sessionManager.trades.count) trades")
-        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: ", Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: ", Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
+        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
         }

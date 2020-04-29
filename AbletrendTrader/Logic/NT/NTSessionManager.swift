@@ -498,7 +498,11 @@ class NTSessionManager: BaseSessionManager {
                 return
             }
             
+            var quitLoop = false
             for _ in 0...2 {
+                if quitLoop {
+                    break
+                }
                 if let closedPosition = self.pos,
                     let stopOrderId = closedPosition.stopLoss?.stopOrderId,
                     let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
@@ -522,10 +526,11 @@ class NTSessionManager: BaseSessionManager {
                         self.delegate?.newLogAdded(log: "Detected position closed, last filled order response: \(latestFilledOrderResponse.description)")
                         self.delegate?.positionStatusChanged()
                     }
-                    break
+                    quitLoop = true
+                } else {
+                    print("Detected position closed but last filled order response not found. Retrying...")
+                    sleep(1)
                 }
-                print("Detected position closed but last filled order response not found. Retrying...")
-                sleep(1)
             }
         }
     }

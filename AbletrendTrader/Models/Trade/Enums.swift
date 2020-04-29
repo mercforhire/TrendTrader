@@ -343,6 +343,7 @@ enum ConfigError: Error {
     case lunchEndError
     case clearTimeError
     case flatTimeError
+    case fomcTimeError
     case positionSizeError
     case maxDailyLossError
     case maxHighRiskEntryAllowedError
@@ -381,6 +382,8 @@ enum ConfigError: Error {
             return "Clear time error"
         case .flatTimeError:
             return "Flat time error"
+        case .fomcTimeError:
+            return "FOMC time error"
         case .positionSizeError:
             return "Position size error"
         case .maxDailyLossError:

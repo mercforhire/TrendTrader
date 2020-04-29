@@ -10,7 +10,6 @@ import Cocoa
 
 class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
     let config = ConfigurationManager.shared
-    private let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:\d{0,4}\/"#
     
     @IBOutlet weak var server1MinField: NSTextField!
     @IBOutlet weak var server2MinField: NSTextField!
@@ -247,7 +246,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     private func validateServerURL(url: String) -> Bool {
-        return url.range(of: IPRegex, options: .regularExpression) != nil
+        return url.range(of: config.IPRegex, options: .regularExpression) != nil
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

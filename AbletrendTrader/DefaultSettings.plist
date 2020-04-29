@@ -31,7 +31,7 @@
 	<key>flat_time</key>
 	<date>2020-03-09T20:05:00Z</date>
 	<key>fomc_time</key>
-	<date>2020-03-09T18:30:00Z</date>
+	<date>2020-03-09T18:00:00Z</date>
 	<key>take_profit_bar_length</key>
 	<integer>25</integer>
 	<key>enter_on_pullback</key>

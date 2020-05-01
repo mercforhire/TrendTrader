@@ -40,6 +40,18 @@ class TraderBot {
                 sessionManager.highRiskEntriesTaken = 0
             }
             
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = Date.DefaultTimeZone
+            let components1 = DateComponents(year: currentBar.time.year(),
+                                             month: 4,
+                                             day: 29)
+            let fomcDay: Date = calendar.date(from: components1)!
+            if currentBar.time.isInSameDay(date: fomcDay) {
+                config.fomcDay = true
+            } else {
+                config.fomcDay = false
+            }
+            
             let actions = self.decide(priceBar: currentBar)
             self.sessionManager.processActions(priceBarTime: currentBar.time, actions: actions, completion: { _ in
             })

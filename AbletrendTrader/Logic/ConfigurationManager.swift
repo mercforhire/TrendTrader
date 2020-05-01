@@ -79,7 +79,7 @@ class ConfigurationManager {
     private(set) var avoidTakingSameTrade: Bool
     private(set) var avoidTakingSameLosingTrade: Bool
     private(set) var waitForFinalizedSignals: Bool
-    private(set) var fomcDay: Bool
+    var fomcDay: Bool 
     
     private(set) var server1MinURL: String
     private(set) var server2MinURL: String

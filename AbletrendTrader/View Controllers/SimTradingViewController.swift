@@ -200,15 +200,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var friday = 0.0
         var morningTrades = 0.0
         for trade in sessionManager.trades {
-            if let lastTradeTime = lastTrade?.entryTime,
-                lastTradeTime.day() != trade.entryTime.day(),
-                count != sessionManager.trades.count {
-                
-                worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
-                worstPLDay = min(worstPLDay, currentDayPL)
-                currentDayPL = 0.0
-            }
-            
             currentPL += trade.idealProfit
             currentDayPL += trade.idealProfit
             print(String(format: "%.2f", currentPL))
@@ -240,6 +231,19 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             }
             
             count += 1
+            
+            if let lastTradeTime = lastTrade?.entryTime,
+                lastTradeTime.day() != trade.entryTime.day(),
+                count != sessionManager.trades.count {
+                
+                worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
+                worstPLDay = min(worstPLDay, currentDayPL)
+                currentDayPL = 0.0
+            } else if count == sessionManager.trades.count {
+                worstPLDayTime = currentDayPL < worstPLDay ? trade.entryTime : worstPLDayTime
+                worstPLDay = min(worstPLDay, currentDayPL)
+            }
+            
             lastTrade = trade
         }
         

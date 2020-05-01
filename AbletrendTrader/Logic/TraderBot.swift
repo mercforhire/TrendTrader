@@ -649,14 +649,12 @@ class TraderBot {
                                 startIndex - twoMinIndex >= 1 {
                                 earliest2MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
                                 finishedScanningFor2MinConfirmation = true
                             }
                         } else {
                             if !finishedScanningFor2MinConfirmation {
                                 earliest2MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
                                 finishedScanningFor2MinConfirmation = true
                             }
                         }
@@ -667,14 +665,12 @@ class TraderBot {
                                 startIndex - threeMinIndex >= 2 {
                                 earliest3MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
                                 finishedScanningFor3MinConfirmation = true
                             }
                         } else {
                             if !finishedScanningFor3MinConfirmation {
                                 earliest3MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
                                 finishedScanningFor3MinConfirmation = true
                             }
                         }

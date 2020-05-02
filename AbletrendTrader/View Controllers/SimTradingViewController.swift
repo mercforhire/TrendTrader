@@ -199,6 +199,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var thursday = 0.0
         var friday = 0.0
         var morningTrades = 0.0
+        var lunchTrades = 0.0
         for trade in sessionManager.trades {
             currentPL += trade.idealProfit
             currentDayPL += trade.idealProfit
@@ -218,8 +219,11 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             default:
                 break
             }
+            
             if Date.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime) {
                 morningTrades += trade.idealProfit
+            } else if Date.lunchInterval(date: trade.entryTime).contains(trade.entryTime) {
+                lunchTrades += trade.idealProfit
             }
             
             if trade.idealProfit < 0 {
@@ -262,6 +266,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         print("Thursday: \(String(format: "%.2f", thursday))")
         print("Friday: \(String(format: "%.2f", friday))")
         print("Morning trades: \(String(format: "%.2f", morningTrades))")
+        print("Lunch trades: \(String(format: "%.2f", lunchTrades))")
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

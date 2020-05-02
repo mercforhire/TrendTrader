@@ -269,7 +269,11 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let buyPosition = Position(direction: .long, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
+        let buyPosition = Position(direction: .long,
+                                   size: 1,
+                                   entryTime: currentTime,
+                                   idealEntryPrice: currentPrice,
+                                   actualEntryPrice: currentPrice)
         return .openPosition(newPosition: buyPosition, entryType: .all)
     }
     
@@ -277,7 +281,11 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let sellPosition = Position(direction: .short, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
+        let sellPosition = Position(direction: .short,
+                                    size: 1,
+                                    entryTime: currentTime,
+                                    idealEntryPrice: currentPrice,
+                                    actualEntryPrice: currentPrice)
         return .openPosition(newPosition: sellPosition, entryType: .all)
     }
     

@@ -315,6 +315,7 @@ class TraderBot {
         
         guard bar.barColor == color,
             checkForSignalConfirmation(direction: direction, bar: bar),
+            checkNotTooFarFromSupport(direction: direction, bar: bar),
             bar.oneMinSignal?.direction == direction,
             let oneMinStop = bar.oneMinSignal?.stop,
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,
@@ -616,6 +617,21 @@ class TraderBot {
         }
         
         return nil
+    }
+    
+    // check if the low/high of the bar is too far from the 1 min S/R
+    private func checkNotTooFarFromSupport(direction: TradeDirection, bar: PriceBar) -> Bool {
+        guard let stop = bar.oneMinSignal?.stop else { return false }
+        
+        var notTooFarFromSupport = false
+        switch direction {
+        case .long:
+            notTooFarFromSupport = bar.candleStick.low - stop <= config.maxDistanceToSR
+        case .short:
+            notTooFarFromSupport = stop - bar.candleStick.high <= config.maxDistanceToSR
+        }
+        
+        return notTooFarFromSupport
     }
     
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)

@@ -72,6 +72,7 @@ class ConfigurationManager {
     
     private(set) var maxHighRiskEntryAllowed: Int
     private(set) var positionSize: Int
+    var maxDistanceToSR: Double = 100.0
     
     private(set) var byPassTradingTimeRestrictions: Bool
     private(set) var noEntryDuringLunch: Bool

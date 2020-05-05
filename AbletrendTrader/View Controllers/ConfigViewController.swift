@@ -24,17 +24,19 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var lunchStartPicker: NSDatePicker!
     @IBOutlet private weak var lunchEndPicker: NSDatePicker!
     @IBOutlet private weak var highRiskTradesField: NSTextField!
+    @IBOutlet private weak var fomcTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionEndTimePicker: NSDatePicker!
     @IBOutlet private weak var liquidateTimePicker: NSDatePicker!
     @IBOutlet private weak var flatTimePicker: NSDatePicker!
     @IBOutlet private weak var dailyLossLimitField: NSTextField!
+    @IBOutlet private weak var simRealTimeCheckbox: NSButton!
     @IBOutlet private weak var avoidSameTradeCheckbox: NSButton!
     @IBOutlet private weak var avoidSameLosingTradeCheckbox: NSButton!
     @IBOutlet private weak var byPassTradingTimeCheckbox: NSButton!
     @IBOutlet private weak var noEntryDuringLunchCheckbox: NSButton!
     @IBOutlet private weak var waitFinalizedSignalsCheckbox: NSButton!
-    
+    @IBOutlet private weak var fomcDayCheckbox: NSButton!
     
     func setupUI() {
         riskField.delegate = self
@@ -58,6 +60,9 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenExitBase)
         minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnAnyPullbackBase)
         takeProfitField.stringValue = String(format: "%.2f", config.takeProfitBarLengthBase)
+    
+        fomcTimePicker.dateValue = Date.getNewDateFromTime(hour: config.fomcTime.hour(),
+                                                           min: config.fomcTime.minute())
         
         highRiskEntryStartPicker.dateValue = Date.getNewDateFromTime(hour: config.highRiskStart.hour(),
                                                                      min: config.highRiskStart.minute())
@@ -85,11 +90,13 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", config.maxHighRiskEntryAllowed)
+        simRealTimeCheckbox.state = config.simulateTimePassage ? .on : .off
         avoidSameTradeCheckbox.state = config.avoidTakingSameTrade ? .on : .off
         avoidSameLosingTradeCheckbox.state = config.avoidTakingSameLosingTrade ? .on : .off
         byPassTradingTimeCheckbox.state = config.byPassTradingTimeRestrictions ? .on : .off
         noEntryDuringLunchCheckbox.state = config.noEntryDuringLunch ? .on : .off
         waitFinalizedSignalsCheckbox.state = config.waitForFinalizedSignals ? .on : .off
+        fomcDayCheckbox.state = config.fomcDay ? .on : .off
     }
     
     override func viewDidLoad() {
@@ -97,6 +104,17 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         // Do view setup here.
         setupUI()
         loadConfig()
+    }
+    
+    @IBAction func simRealTimeChecked(_ sender: NSButton) {
+        switch sender.state {
+        case .on:
+            config.setSimulateTimePassage(newValue: true)
+        case .off:
+            config.setSimulateTimePassage(newValue: false)
+        default:
+            break
+        }
     }
     
     @IBAction func avoidSameTradeChecked(_ sender: NSButton) {
@@ -154,6 +172,17 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         }
     }
     
+    @IBAction func fomcDayCheckboxChecked(_ sender: NSButton) {
+        switch sender.state {
+        case .on:
+            config.setFomcDay(newValue: true)
+        case .off:
+            config.setFomcDay(newValue: false)
+        default:
+            break
+        }
+    }
+    
     @IBAction func highRiskStartChanged(_ sender: NSDatePicker) {
         do {
             try config.setHighRiskStart(newValue: sender.dateValue)
@@ -199,6 +228,18 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
             configError.displayErrorDialog()
             
             sender.dateValue = config.lunchEnd
+        }
+    }
+    
+    @IBAction func fomcTimeChanged(_ sender: NSDatePicker) {
+        do {
+            try config.setFomcTime(newValue: sender.dateValue)
+        } catch (let error) {
+            guard let configError = error as? ConfigError else { return }
+            
+            configError.displayErrorDialog()
+            
+            sender.dateValue = config.fomcTime
         }
     }
     

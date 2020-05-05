@@ -8,13 +8,10 @@
 
 import Cocoa
 
-class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
+class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private let config = ConfigurationManager.shared
     
     var tradingMode: LiveTradingMode!
-    
-    @IBOutlet weak var server1MinURLField: NSTextField!
-    @IBOutlet weak var server2MinAnd3MinURLField: NSTextField!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -27,17 +24,17 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
     @IBOutlet weak var sellButton: NSButton!
     @IBOutlet weak var positionStatusLabel: NSTextField!
     
-    private var server1minURL: String = "" {
+    var server1minURL: String = "" {
         didSet {
             chartManager?.serverUrls[SignalInteval.oneMin] = server1minURL
         }
     }
-    private var server2minURL: String = "" {
+    var server2minURL: String = "" {
         didSet {
             chartManager?.serverUrls[SignalInteval.twoMin] = server2minURL
         }
     }
-    private var server3minURL: String = "" {
+    var server3minURL: String = "" {
         didSet {
             chartManager?.serverUrls[SignalInteval.threeMin] = server3minURL
         }
@@ -78,25 +75,12 @@ class LiveTradingViewController: NSViewController, NSTextFieldDelegate, NSWindow
         
         tableView.delegate = self
         tableView.dataSource = self
-        
-        server1MinURLField.delegate = self
-        server2MinAnd3MinURLField.delegate = self
-    }
-    
-    func loadServerUrls() {
-        server1minURL = config.server1MinURL
-        server2minURL = config.server2MinURL
-        server3minURL = config.server3MinURL
-        
-        server1MinURLField.stringValue = server1minURL
-        server2MinAnd3MinURLField.stringValue = server2minURL
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
-        loadServerUrls()
         
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                                 target: self,
@@ -370,33 +354,5 @@ extension LiveTradingViewController: SessionManagerDelegate {
     func positionStatusChanged() {
         updateTradesList()
         positionStatusLabel.stringValue = sessionManager.status?.status() ?? "Position: --"
-    }
-}
-
-extension LiveTradingViewController: NSControlTextEditingDelegate {
-    func controlTextDidEndEditing(_ notification: Notification) {
-        if let textField = notification.object as? NSTextField {
-            do {
-                if textField == server1MinURLField {
-                    try config.setServer1MinURL(newValue: textField.stringValue)
-                    server1minURL = textField.stringValue
-                } else if textField == server2MinAnd3MinURLField {
-                    try config.setServer2MinURL(newValue: textField.stringValue)
-                    try config.setServer3MinURL(newValue: textField.stringValue)
-                    server2minURL = textField.stringValue
-                    server3minURL = textField.stringValue
-                }
-            } catch (let error) {
-                guard let configError = error as? ConfigError else { return }
-                
-                configError.displayErrorDialog()
-                
-                if textField == server1MinURLField {
-                    textField.stringValue = server1minURL
-                } else if textField == server2MinAnd3MinURLField {
-                    textField.stringValue = server2minURL
-                }
-            }
-        }
     }
 }

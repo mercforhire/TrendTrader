@@ -43,6 +43,14 @@ extension Date {
         return calendar.component(.day, from: self) - (zeroIndex ? 1 : 0)
     }
     
+    func weekDay(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
+        var calendar = Calendar.current
+        if let timezone = timeZone {
+            calendar.timeZone = timezone
+        }
+        return calendar.component(.weekday, from: self) - (zeroIndex ? 1 : 0)
+    }
+    
     func month(_ zeroIndex: Bool = false, timeZone: TimeZone? = DefaultTimeZone) -> Int {
         var calendar = Calendar.current
         if let timezone = timeZone {
@@ -230,6 +238,25 @@ extension Date {
                                          day: date.day(),
                                          hour: config.lunchEnd.hour(),
                                          minute: config.lunchEnd.minute())
+        let endDate: Date = calendar.date(from: components2)!
+        return DateInterval(start: startDate, end: endDate)
+    }
+    
+    static func fomcInterval(date: Date) -> DateInterval {
+        let config = ConfigurationManager.shared
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Date.DefaultTimeZone
+        let components1 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: config.fomcTime.hour(),
+                                         minute: config.fomcTime.minute() - 30)
+        let startDate: Date = calendar.date(from: components1)!
+        let components2 = DateComponents(year: date.year(),
+                                         month: date.month(),
+                                         day: date.day(),
+                                         hour: config.fomcTime.hour(),
+                                         minute: config.fomcTime.minute() + 30)
         let endDate: Date = calendar.date(from: components2)!
         return DateInterval(start: startDate, end: endDate)
     }

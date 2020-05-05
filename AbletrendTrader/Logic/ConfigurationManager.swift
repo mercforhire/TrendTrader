@@ -11,7 +11,7 @@ import Foundation
 class ConfigurationManager {
     static let shared = ConfigurationManager()
     private let defaults : UserDefaults = UserDefaults.standard
-    private let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:\d{0,4}\/"#
+    let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:\d{0,4}\/"#
     
     var riskMultiplier: Double
     
@@ -68,16 +68,19 @@ class ConfigurationManager {
     private(set) var lunchEnd: Date
     private(set) var clearTime: Date
     private(set) var flatTime: Date
+    private(set) var fomcTime: Date
     
     private(set) var maxHighRiskEntryAllowed: Int
     private(set) var positionSize: Int
+    var maxDistanceToSR: Double = 100.0
     
-    private(set) var byPassTradingTimeRestrictions : Bool
-    private(set) var noEntryDuringLunch : Bool
-    private(set) var simulateTimePassage : Bool
-    private(set) var avoidTakingSameTrade : Bool
-    private(set) var avoidTakingSameLosingTrade : Bool
-    private(set) var waitForFinalizedSignals : Bool
+    private(set) var byPassTradingTimeRestrictions: Bool
+    private(set) var noEntryDuringLunch: Bool
+    private(set) var simulateTimePassage: Bool
+    private(set) var avoidTakingSameTrade: Bool
+    private(set) var avoidTakingSameLosingTrade: Bool
+    private(set) var waitForFinalizedSignals: Bool
+    var fomcDay: Bool 
     
     private(set) var server1MinURL: String
     private(set) var server2MinURL: String
@@ -124,6 +127,10 @@ class ConfigurationManager {
         
         self.flatTime = (defaults.object(forKey: "flat_time") as? Date ?? defaultSettings["flat_time"] as! Date).stripYearMonthAndDay()
         
+        self.fomcTime = (defaults.object(forKey: "fomc_time") as? Date ?? defaultSettings["fomc_time"] as! Date).stripYearMonthAndDay()
+        
+        self.fomcDay = defaults.object(forKey: "fomc_day") as? Bool ?? false
+        
         self.positionSize = defaults.object(forKey: "position_size") as? Int ?? defaultSettings["position_size"] as! Int
         
         self.maxDailyLossBase = defaults.object(forKey: "max_daily_loss") as? Double ?? defaultSettings["max_daily_loss"] as! Double
@@ -134,7 +141,7 @@ class ConfigurationManager {
         
         self.waitForFinalizedSignals = defaults.object(forKey: "wait_for_finalized_signals") as? Bool ?? false
        
-        self.simulateTimePassage = false
+        self.simulateTimePassage = defaults.object(forKey: "simulate_time_passage") as? Bool ?? false
         
         self.avoidTakingSameTrade = defaults.object(forKey: "avoid_taking_same_trade") as? Bool ?? true
         
@@ -360,6 +367,22 @@ class ConfigurationManager {
         }
         
         throw ConfigError.flatTimeError
+    }
+    
+    func setFomcTime(newValue: Date) throws {
+        let newValue = newValue.stripYearMonthAndDay()
+        if newValue > tradingStart, newValue < tradingEnd {
+            fomcTime = newValue
+            saveToDefaults(newValue: newValue, key: "fomc_time")
+            return
+        }
+        
+        throw ConfigError.fomcTimeError
+    }
+    
+    func setFomcDay(newValue: Bool) {
+        fomcDay = newValue
+        saveToDefaults(newValue: newValue, key: "fomc_day")
     }
     
     func setPositionSize(newValue: Int) throws {

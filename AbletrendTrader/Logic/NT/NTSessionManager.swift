@@ -143,6 +143,7 @@ class NTSessionManager: BaseSessionManager {
                     case .success(let confirmation):
                         if !tradeAlreadyClosed {
                             let trade = Trade(direction: oldPosition.direction,
+                                              simulated: false,
                                               size: newPosition.size,
                                               pointValue: self.pointsValue,
                                               entryTime: oldPosition.entryTime,
@@ -189,6 +190,7 @@ class NTSessionManager: BaseSessionManager {
                         
                         self.delegate?.newLogAdded(log: "Trying to update stop but position already closed, last filled order response: \(latestFilledOrderResponse.description)")
                         let trade = Trade(direction: closedPosition.direction,
+                                          simulated: false,
                                           size: closedPosition.size,
                                           pointValue: self.pointsValue,
                                           entryTime: closedPosition.entryTime,
@@ -283,6 +285,7 @@ class NTSessionManager: BaseSessionManager {
                         
                         self.delegate?.newLogAdded(log: "Force close position already closed, last filled order response: \(latestFilledOrderResponse.description)")
                         let trade = Trade(direction: closedPosition.direction,
+                                          simulated: false,
                                           size: closedPosition.size,
                                           pointValue: self.pointsValue,
                                           entryTime: closedPosition.entryTime,
@@ -297,6 +300,7 @@ class NTSessionManager: BaseSessionManager {
                     } else {
                         self.delegate?.newLogAdded(log: "Force close position already closed, but no last order response")
                         let trade = Trade(direction: closedPosition.direction,
+                                          simulated: false,
                                           size: closedPosition.size,
                                           pointValue: self.pointsValue,
                                           entryTime: closedPosition.entryTime,
@@ -323,6 +327,7 @@ class NTSessionManager: BaseSessionManager {
                         switch result {
                         case .success(let confirmation):
                             let trade = Trade(direction: closedPosition.direction,
+                                              simulated: false,
                                               size: closedPosition.size,
                                               pointValue: self.pointsValue,
                                               entryTime: closedPosition.entryTime,
@@ -470,6 +475,7 @@ class NTSessionManager: BaseSessionManager {
                 case .success(let orderConfirmation):
                     if let currentPosition = self.pos {
                         let trade = Trade(direction: currentPosition.direction,
+                                          simulated: false,
                                           size: currentPosition.size,
                                           pointValue: self.pointsValue,
                                           entryTime: currentPosition.entryTime,
@@ -498,13 +504,18 @@ class NTSessionManager: BaseSessionManager {
                 return
             }
             
+            var quitLoop = false
             for _ in 0...2 {
+                if quitLoop {
+                    break
+                }
                 if let closedPosition = self.pos,
                     let stopOrderId = closedPosition.stopLoss?.stopOrderId,
                     let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                     latestFilledOrderResponse.status == .filled {
                     
                     let trade = Trade(direction: closedPosition.direction,
+                                      simulated: false,
                                       size: closedPosition.size,
                                       pointValue: self.pointsValue,
                                       entryTime: closedPosition.entryTime,
@@ -522,10 +533,11 @@ class NTSessionManager: BaseSessionManager {
                         self.delegate?.newLogAdded(log: "Detected position closed, last filled order response: \(latestFilledOrderResponse.description)")
                         self.delegate?.positionStatusChanged()
                     }
-                    break
+                    quitLoop = true
+                } else {
+                    print("Detected position closed but last filled order response not found. Retrying...")
+                    sleep(1)
                 }
-                print("Detected position closed but last filled order response not found. Retrying...")
-                sleep(1)
             }
         }
     }

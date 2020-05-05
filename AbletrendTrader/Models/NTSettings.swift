@@ -9,6 +9,9 @@
 import Foundation
 
 struct NTSettings: Codable, Equatable {
+    var server1MinURL: String = "http://192.168.0.121:80/"
+    var server2MinURL: String = "http://192.168.0.121:80/"
+    var server3MinURL: String = "http://192.168.0.121:80/"
     var positionSize: Int = 1
     var commission: Double = 2.04
     var ticker: String = "NQ 06-20"
@@ -22,6 +25,9 @@ struct NTSettings: Codable, Equatable {
     
     static func == (lhs: NTSettings, rhs: NTSettings) -> Bool {
         return
+            lhs.server1MinURL == rhs.server1MinURL &&
+            lhs.server2MinURL == rhs.server2MinURL &&
+            lhs.server3MinURL == rhs.server3MinURL &&
             lhs.positionSize == rhs.positionSize &&
             lhs.commission == rhs.commission &&
             lhs.ticker == rhs.ticker &&

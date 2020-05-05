@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_ip</key>
-	<string>http://192.168.0.121/</string>
+	<string>http://192.168.0.121:80/</string>
 	<key>simulate_time_passage</key>
 	<false/>
 	<key>no_entry_during_lunch</key>
@@ -30,6 +30,8 @@
 	<date>2020-03-09T19:59:00Z</date>
 	<key>flat_time</key>
 	<date>2020-03-09T20:05:00Z</date>
+	<key>fomc_time</key>
+	<date>2020-03-09T18:00:00Z</date>
 	<key>take_profit_bar_length</key>
 	<integer>25</integer>
 	<key>enter_on_pullback</key>

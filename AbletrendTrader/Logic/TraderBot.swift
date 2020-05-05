@@ -40,6 +40,18 @@ class TraderBot {
                 sessionManager.highRiskEntriesTaken = 0
             }
             
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = Date.DefaultTimeZone
+            let components1 = DateComponents(year: currentBar.time.year(),
+                                             month: 4,
+                                             day: 29)
+            let fomcDay: Date = calendar.date(from: components1)!
+            if currentBar.time.isInSameDay(date: fomcDay) {
+                config.fomcDay = true
+            } else {
+                config.fomcDay = false
+            }
+            
             let actions = self.decide(priceBar: currentBar)
             self.sessionManager.processActions(priceBarTime: currentBar.time, actions: actions, completion: { _ in
             })
@@ -103,6 +115,14 @@ class TraderBot {
                         }
                     }
                 }
+            }
+            
+            // exit trade during FOMC hour
+            if Date.fomcInterval(date: priceBar.time).contains(priceBar.time) &&
+                config.fomcDay &&
+                !config.byPassTradingTimeRestrictions {
+                
+                return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)]
             }
             
             // If we reached FlatPositionsTime, exit the trade immediately
@@ -249,7 +269,11 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let buyPosition = Position(direction: .long, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
+        let buyPosition = Position(direction: .long,
+                                   size: 1,
+                                   entryTime: currentTime,
+                                   idealEntryPrice: currentPrice,
+                                   actualEntryPrice: currentPrice)
         return .openPosition(newPosition: buyPosition, entryType: .all)
     }
     
@@ -257,7 +281,11 @@ class TraderBot {
         guard let currentPrice = chart.absLastBar?.candleStick.close,
             let currentTime = chart.absLastBarDate else { return .noAction(entryType: nil, reason: .other) }
         
-        let sellPosition = Position(direction: .short, size: 1, entryTime: currentTime, idealEntryPrice: currentPrice, actualEntryPrice: currentPrice)
+        let sellPosition = Position(direction: .short,
+                                    size: 1,
+                                    entryTime: currentTime,
+                                    idealEntryPrice: currentPrice,
+                                    actualEntryPrice: currentPrice)
         return .openPosition(newPosition: sellPosition, entryType: .all)
     }
     
@@ -288,6 +316,7 @@ class TraderBot {
         
         guard bar.barColor == color,
             checkForSignalConfirmation(direction: direction, bar: bar),
+            checkNotTooFarFromSupport(direction: direction, bar: bar),
             bar.oneMinSignal?.direction == direction,
             let oneMinStop = bar.oneMinSignal?.stop,
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,
@@ -371,12 +400,20 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .exceedLoss)
         }
         
+        // no entering trades during FOMC hour
+        if Date.fomcInterval(date: currentBar.time).contains(currentBar.time) &&
+            config.fomcDay &&
+            !config.byPassTradingTimeRestrictions {
+            
+            return .noAction(entryType: nil, reason: .outsideTradingHours)
+        }
+        
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
         if !Date.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .outsideTradingHours)
         }
         
-        // no entrying trades during lunch hour
+        // no entering trades during lunch hour
         if config.noEntryDuringLunch,
             Date.lunchInterval(date: currentBar.time).contains(currentBar.time), !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .lunchHour)
@@ -584,6 +621,21 @@ class TraderBot {
         return nil
     }
     
+    // check if the low/high of the bar is too far from the 1 min S/R
+    private func checkNotTooFarFromSupport(direction: TradeDirection, bar: PriceBar) -> Bool {
+        guard let stop = bar.oneMinSignal?.stop else { return false }
+        
+        var notTooFarFromSupport = false
+        switch direction {
+        case .long:
+            notTooFarFromSupport = bar.candleStick.low - stop <= config.maxDistanceToSR
+        case .short:
+            notTooFarFromSupport = stop - bar.candleStick.high <= config.maxDistanceToSR
+        }
+        
+        return notTooFarFromSupport
+    }
+    
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)
     private func checkForSignalConfirmation(direction: TradeDirection, bar: PriceBar) -> Bool {
         guard let startIndex = chart.timeKeys.firstIndex(of: bar.identifier) else {
@@ -623,14 +675,12 @@ class TraderBot {
                                 startIndex - twoMinIndex >= 1 {
                                 earliest2MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
                                 finishedScanningFor2MinConfirmation = true
                             }
                         } else {
                             if !finishedScanningFor2MinConfirmation {
                                 earliest2MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest2MinConfirmationBar, 2MinConfirm is finished
                                 finishedScanningFor2MinConfirmation = true
                             }
                         }
@@ -641,14 +691,12 @@ class TraderBot {
                                 startIndex - threeMinIndex >= 2 {
                                 earliest3MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
                                 finishedScanningFor3MinConfirmation = true
                             }
                         } else {
                             if !finishedScanningFor3MinConfirmation {
                                 earliest3MinConfirmationBar = priceBar
                                 
-                                // Once we set earliest3MinConfirmationBar, 3MinConfirm is finished
                                 finishedScanningFor3MinConfirmation = true
                             }
                         }

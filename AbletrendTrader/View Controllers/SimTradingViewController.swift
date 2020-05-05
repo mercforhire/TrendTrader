@@ -12,7 +12,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     private let config = ConfigurationManager.shared
     
     @IBOutlet weak var server1MinURLField: NSTextField!
-    @IBOutlet weak var server2MinAnd3MinURLField: NSTextField!
+    @IBOutlet weak var server2MinURLField: NSTextField!
+    @IBOutlet weak var server3MinURLField: NSTextField!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -73,14 +74,18 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         tableView.delegate = self
         tableView.dataSource = self
+        
         server1MinURLField.delegate = self
-        server2MinAnd3MinURLField.delegate = self
+        server2MinURLField.delegate = self
+        server3MinURLField.delegate = self
         
         server1minURL = config.server1MinURL
         server2minURL = config.server2MinURL
         server3minURL = config.server3MinURL
+        
         server1MinURLField.stringValue = server1minURL
-        server2MinAnd3MinURLField.stringValue = server2minURL
+        server2MinURLField.stringValue = server2minURL
+        server3MinURLField.stringValue = server3minURL
     }
 
     override func viewDidLoad() {
@@ -198,19 +203,38 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var lastTrade: Trade?
         var currentDayPL = 0.0
         var count = 0
+        var monday = 0.0
+        var tuesday = 0.0
+        var wednesday = 0.0
+        var thursday = 0.0
+        var friday = 0.0
+        var morningTrades = 0.0
+        var lunchTrades = 0.0
         for trade in sessionManager.trades {
-            if let lastTradeTime = lastTrade?.entryTime,
-                lastTradeTime.day() != trade.entryTime.day(),
-                count != sessionManager.trades.count {
-                
-                worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
-                worstPLDay = min(worstPLDay, currentDayPL)
-                currentDayPL = 0.0
-            }
-            
             currentPL += trade.idealProfit
             currentDayPL += trade.idealProfit
 //            print(String(format: "%.2f", currentPL))
+            
+            switch trade.entryTime.weekDay() {
+            case 2:
+                monday += trade.idealProfit
+            case 3:
+                tuesday += trade.idealProfit
+            case 4:
+                wednesday += trade.idealProfit
+            case 5:
+                thursday += trade.idealProfit
+            case 6:
+                friday += trade.idealProfit
+            default:
+                break
+            }
+            
+            if Date.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime) {
+                morningTrades += trade.idealProfit
+            } else if Date.lunchInterval(date: trade.entryTime).contains(trade.entryTime) {
+                lunchTrades += trade.idealProfit
+            }
             
             if trade.idealProfit < 0 {
                 losingTrades += 1
@@ -221,6 +245,19 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             }
             
             count += 1
+            
+            if let lastTradeTime = lastTrade?.entryTime,
+                lastTradeTime.day() != trade.entryTime.day(),
+                count != sessionManager.trades.count {
+                
+                worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
+                worstPLDay = min(worstPLDay, currentDayPL)
+                currentDayPL = 0.0
+            } else if count == sessionManager.trades.count {
+                worstPLDayTime = currentDayPL < worstPLDay ? trade.entryTime : worstPLDayTime
+                worstPLDay = min(worstPLDay, currentDayPL)
+            }
+            
             lastTrade = trade
         }
         
@@ -228,13 +265,18 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
 //            print(trade.exitTime.generateDate())
 //        }
         
-        print("Total \(sessionManager.trades.count) trades,", "Final P/L:", String(format: "%.2f", currentPL))
-        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100))
-        print(String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)))
-        print(String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
+        print("Total \(sessionManager.trades.count) trades")
+        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
         }
+        print("Monday: \(String(format: "%.2f", monday))")
+        print("Tuesday: \(String(format: "%.2f", tuesday))")
+        print("Wednesday: \(String(format: "%.2f", wednesday))")
+        print("Thursday: \(String(format: "%.2f", thursday))")
+        print("Friday: \(String(format: "%.2f", friday))")
+        print("Morning trades: \(String(format: "%.2f", morningTrades))")
+        print("Lunch trades: \(String(format: "%.2f", lunchTrades))")
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
@@ -345,10 +387,11 @@ extension SimTradingViewController: NSControlTextEditingDelegate {
                 if textField == server1MinURLField {
                     try config.setServer1MinURL(newValue: textField.stringValue)
                     server1minURL = textField.stringValue
-                } else if textField == server2MinAnd3MinURLField {
+                } else if textField == server2MinURLField {
                     try config.setServer2MinURL(newValue: textField.stringValue)
-                    try config.setServer3MinURL(newValue: textField.stringValue)
                     server2minURL = textField.stringValue
+                } else if textField == server3MinURLField {
+                    try config.setServer3MinURL(newValue: textField.stringValue)
                     server3minURL = textField.stringValue
                 }
             } catch (let error) {
@@ -358,10 +401,11 @@ extension SimTradingViewController: NSControlTextEditingDelegate {
                 
                 if textField == server1MinURLField {
                     textField.stringValue = server1minURL
-                } else if textField == server2MinAnd3MinURLField {
+                } else if textField == server2MinURLField {
                     textField.stringValue = server2minURL
+                } else if textField == server3MinURLField {
+                    textField.stringValue = server3minURL
                 }
-                
             }
         }
     }

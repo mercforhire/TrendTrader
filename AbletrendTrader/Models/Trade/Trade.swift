@@ -8,9 +8,9 @@
 
 import Foundation
 
-struct Trade {
+struct Trade: Codable {
     var direction: TradeDirection
-    
+    var simulated: Bool
     var size: Int
     var pointValue: Double
     var entryTime: Date

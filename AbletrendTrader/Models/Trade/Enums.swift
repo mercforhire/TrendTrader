@@ -116,7 +116,7 @@ enum StopLossSource {
     }
 }
 
-enum ExitMethod {
+enum ExitMethod: Codable {
     case hitStoploss
     case twoGreenBars
     case signalReversed
@@ -124,6 +124,57 @@ enum ExitMethod {
     case endOfDay
     case profitTaking
     case manual
+    
+    enum Key: CodingKey {
+        case rawValue
+    }
+    
+    enum CodingError: Error {
+        case unknownValue
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: Key.self)
+        let rawValue = try container.decode(Int.self, forKey: .rawValue)
+        switch rawValue {
+        case 0:
+            self = .hitStoploss
+        case 1:
+            self = .twoGreenBars
+        case 2:
+            self = .signalReversed
+        case 3:
+            self = .signalInvalid
+        case 4:
+            self = .endOfDay
+        case 5:
+            self = .profitTaking
+        case 6:
+            self = .manual
+        default:
+            throw CodingError.unknownValue
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: Key.self)
+        switch self {
+        case .hitStoploss:
+            try container.encode(0, forKey: .rawValue)
+        case .twoGreenBars:
+            try container.encode(1, forKey: .rawValue)
+        case .signalReversed:
+            try container.encode(2, forKey: .rawValue)
+        case .signalInvalid:
+            try container.encode(3, forKey: .rawValue)
+        case .endOfDay:
+            try container.encode(4, forKey: .rawValue)
+        case .profitTaking:
+            try container.encode(5, forKey: .rawValue)
+        case .manual:
+            try container.encode(6, forKey: .rawValue)
+        }
+    }
     
     func reason() -> String {
         switch self {
@@ -177,9 +228,40 @@ enum SignalColor {
     case red
 }
 
-enum TradeDirection {
+enum TradeDirection: Codable {
     case long
     case short
+    
+    enum Key: CodingKey {
+        case rawValue
+    }
+    
+    enum CodingError: Error {
+        case unknownValue
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: Key.self)
+        let rawValue = try container.decode(Int.self, forKey: .rawValue)
+        switch rawValue {
+        case 0:
+            self = .long
+        case 1:
+            self = .short
+        default:
+            throw CodingError.unknownValue
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: Key.self)
+        switch self {
+        case .long:
+            try container.encode(0, forKey: .rawValue)
+        case .short:
+            try container.encode(1, forKey: .rawValue)
+        }
+    }
     
     func description(short: Bool = false) -> String {
         switch self {
@@ -343,6 +425,7 @@ enum ConfigError: Error {
     case lunchEndError
     case clearTimeError
     case flatTimeError
+    case fomcTimeError
     case positionSizeError
     case maxDailyLossError
     case maxHighRiskEntryAllowedError
@@ -381,6 +464,8 @@ enum ConfigError: Error {
             return "Clear time error"
         case .flatTimeError:
             return "Flat time error"
+        case .fomcTimeError:
+            return "FOMC time error"
         case .positionSizeError:
             return "Position size error"
         case .maxDailyLossError:

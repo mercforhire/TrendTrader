@@ -11,6 +11,9 @@ import Cocoa
 class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
     let config = ConfigurationManager.shared
     
+    @IBOutlet weak var server1MinField: NSTextField!
+    @IBOutlet weak var server2MinField: NSTextField!
+    @IBOutlet weak var server3MinField: NSTextField!
     @IBOutlet weak var selectionPicker: NSPopUpButton!
     @IBOutlet weak var addButton: NSButton!
     @IBOutlet weak var deleteButton: NSButton!
@@ -30,6 +33,9 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     private var selectedSettings: NTSettings? {
         didSet {
             if let selectedSettings = selectedSettings {
+                server1MinField.stringValue = selectedSettings.server1MinURL
+                server2MinField.stringValue = selectedSettings.server2MinURL
+                server3MinField.stringValue = selectedSettings.server3MinURL
                 positionSizeField.integerValue = selectedSettings.positionSize
                 symbolField.stringValue = selectedSettings.ticker
                 commissionField.stringValue = String(format: "%.2f", selectedSettings.commission)
@@ -41,6 +47,9 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 inputFolderField.stringValue = selectedSettings.incomingPath
                 outputFolderField.stringValue = selectedSettings.outgoingPath
             } else {
+                server1MinField.stringValue = ""
+                server2MinField.stringValue = ""
+                server3MinField.stringValue = ""
                 positionSizeField.stringValue = ""
                 symbolField.stringValue = ""
                 commissionField.stringValue = ""
@@ -57,6 +66,9 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     func setupUI() {
+        server1MinField.delegate = self
+        server2MinField.delegate = self
+        server3MinField.delegate = self
         positionSizeField.delegate = self
         symbolField.delegate = self
         commissionField.delegate = self
@@ -165,6 +177,21 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     func verifySettings(showError: Bool = false) -> Bool {
         guard let selectedSettings = selectedSettings else { return false }
         
+        if !validateServerURL(url: selectedSettings.server1MinURL) {
+            showErrorDialog(text: ConfigError.serverURLError.displayMessage())
+            return false
+        }
+        
+        if !validateServerURL(url: selectedSettings.server2MinURL) {
+            showErrorDialog(text: ConfigError.serverURLError.displayMessage())
+            return false
+        }
+        
+        if !validateServerURL(url: selectedSettings.server3MinURL) {
+            showErrorDialog(text: ConfigError.serverURLError.displayMessage())
+            return false
+        }
+        
         if selectedSettings.positionSize < 1 {
             showErrorDialog(text: "Invalid position size")
             return false
@@ -218,10 +245,16 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         return true
     }
     
+    private func validateServerURL(url: String) -> Bool {
+        return url.range(of: config.IPRegex, options: .regularExpression) != nil
+    }
+    
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         if let vc = segue.destinationController as? LiveTradingViewController,
             let selectedSettings = selectedSettings {
-            
+            vc.server1minURL = selectedSettings.server1MinURL
+            vc.server2minURL = selectedSettings.server2MinURL
+            vc.server3minURL = selectedSettings.server3MinURL
             vc.tradingMode = .ninjaTrader(accountId: selectedSettings.accName,
                                           commission: selectedSettings.commission,
                                           ticker: selectedSettings.ticker,
@@ -298,7 +331,13 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
 extension NTSettingsViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
-            if textField == positionSizeField {
+            if textField == server1MinField {
+                selectedSettings?.server1MinURL = textField.stringValue
+            } else if textField == server2MinField {
+                selectedSettings?.server2MinURL = textField.stringValue
+            } else if textField == server3MinField {
+                selectedSettings?.server3MinURL = textField.stringValue
+            } else if textField == positionSizeField {
                 selectedSettings?.positionSize = textField.integerValue
             } else if textField == symbolField {
                 selectedSettings?.ticker = textField.stringValue

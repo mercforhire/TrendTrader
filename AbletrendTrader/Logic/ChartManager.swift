@@ -328,7 +328,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute - 1,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
                                                    interval: .oneMin, completion: { url in
                     oneMinUrl = url
                     urlFetchingTask.leave()
@@ -336,7 +336,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute - 1,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
                                                    interval: .twoMin, completion: { url in
                     twoMinUrl = url
                     urlFetchingTask.leave()
@@ -344,7 +344,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute - 1,
+                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
                                                    interval: .threeMin, completion: { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()

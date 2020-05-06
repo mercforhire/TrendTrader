@@ -158,7 +158,7 @@ class ConfigurationManager {
         
         self.maxDistanceToSRBase = defaults.object(forKey: "max_distance_to_SR") as? Double ?? 11.25
         
-        self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 10.0
+        self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 25.0
         
         self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
         

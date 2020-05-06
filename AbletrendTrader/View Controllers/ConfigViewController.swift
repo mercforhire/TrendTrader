@@ -24,6 +24,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var lunchStartPicker: NSDatePicker!
     @IBOutlet private weak var lunchEndPicker: NSDatePicker!
     @IBOutlet private weak var highRiskTradesField: NSTextField!
+    @IBOutlet private weak var maxDistanceToSRField: NSTextField!
+    @IBOutlet private weak var profitAvoidSameDirectionField: NSTextField!
     @IBOutlet private weak var fomcTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionEndTimePicker: NSDatePicker!
@@ -49,6 +51,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         takeProfitField.delegate = self
         dailyLossLimitField.delegate = self
         highRiskTradesField.delegate = self
+        maxDistanceToSRField.delegate = self
+        profitAvoidSameDirectionField.delegate = self
     }
     
     func loadConfig() {
@@ -90,6 +94,9 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", config.maxHighRiskEntryAllowed)
+        maxDistanceToSRField.stringValue = String(format: "%.2f", config.maxDistanceToSRBase)
+        profitAvoidSameDirectionField.stringValue = String(format: "%.2f", config.profitAvoidSameDirectionBase)
+        
         simRealTimeCheckbox.state = config.simulateTimePassage ? .on : .off
         avoidSameTradeCheckbox.state = config.avoidTakingSameTrade ? .on : .off
         avoidSameLosingTradeCheckbox.state = config.avoidTakingSameLosingTrade ? .on : .off
@@ -317,6 +324,10 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try config.setMaxDailyLoss(newValue: textField.doubleValue)
                 } else if textField == highRiskTradesField {
                     try config.setMaxHighRiskEntryAllowed(newValue: textField.integerValue)
+                } else if textField == maxDistanceToSRField {
+                    try config.setMaxDistanceToSR(newValue: textField.doubleValue)
+                } else if textField == profitAvoidSameDirectionField {
+                    try config.setProfitAvoidSameDirection(newValue: textField.doubleValue)
                 }
             } catch (let error) {
                 guard let configError = error as? ConfigError else { return }

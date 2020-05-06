@@ -60,12 +60,12 @@ class ConfigurationManager {
         return maxDailyLossBase * riskMultiplier
     }
     
-    var maxDistanceToSRBase: Double = 11.25
+    var maxDistanceToSRBase: Double
     var maxDistanceToSR: Double {
         return maxDistanceToSRBase * riskMultiplier
     }
     
-    var profitAvoidSameDirectionBase: Double = 10.0
+    var profitAvoidSameDirectionBase: Double
     var profitAvoidSameDirection: Double {
         return profitAvoidSameDirectionBase * riskMultiplier
     }
@@ -155,6 +155,10 @@ class ConfigurationManager {
         self.avoidTakingSameTrade = defaults.object(forKey: "avoid_taking_same_trade") as? Bool ?? true
         
         self.avoidTakingSameLosingTrade = defaults.object(forKey: "avoid_taking_same_losing_trade") as? Bool ?? false
+        
+        self.maxDistanceToSRBase = defaults.object(forKey: "max_distance_to_SR") as? Double ?? 11.25
+        
+        self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 10.0
         
         self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
         
@@ -412,6 +416,26 @@ class ConfigurationManager {
         }
         
         throw ConfigError.maxDailyLossError
+    }
+    
+    func setMaxDistanceToSR(newValue: Double) throws {
+        if newValue < 5.0 {
+            maxDistanceToSRBase = newValue
+            saveToDefaults(newValue: newValue, key: "max_distance_to_SR")
+            return
+        }
+        
+        throw ConfigError.maxDistanceToSRError
+    }
+    
+    func setProfitAvoidSameDirection(newValue: Double) throws {
+        if newValue < 10 {
+            profitAvoidSameDirectionBase = newValue
+            saveToDefaults(newValue: newValue, key: "profit_avoid_same_direction_base")
+            return
+        }
+        
+        throw ConfigError.profitAvoidSameDirectionError
     }
     
     func setAvoidTakingSameTrade(newValue: Bool) {

@@ -167,17 +167,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if false {
-            var start = 10.0
-            while start < 20.0 {
-                print("Testing profitAvoidSameDirectionBase: \(start)...")
-                config.profitAvoidSameDirectionBase = start
+            var start = 5.0
+            while start <= 20.0 {
+                print("Testing maxDistanceToSRBase: \(start)...")
+                config.maxDistanceToSRBase = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
 
-                    start += 1.0
+                    start += 1.25
                     print("")
                 })
             }

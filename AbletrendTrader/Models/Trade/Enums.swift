@@ -432,6 +432,8 @@ enum ConfigError: Error {
     case positionSizeError
     case maxDailyLossError
     case maxHighRiskEntryAllowedError
+    case maxDistanceToSRError
+    case profitAvoidSameDirectionError
     
     func displayMessage() -> String {
         switch self {
@@ -475,6 +477,10 @@ enum ConfigError: Error {
             return "Max daily loss must be -20 or lower"
         case .maxHighRiskEntryAllowedError:
             return "Max high risk entry allowed must be positive number"
+        case .maxDistanceToSRError:
+            return "Max distance to SR must be over 5"
+        case .profitAvoidSameDirectionError:
+            return "Profit avoid same direction must be over 10"
         }
     }
     

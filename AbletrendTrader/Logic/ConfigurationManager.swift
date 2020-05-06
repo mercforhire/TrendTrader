@@ -60,6 +60,16 @@ class ConfigurationManager {
         return maxDailyLossBase * riskMultiplier
     }
     
+    var maxDistanceToSRBase: Double = 11.25
+    var maxDistanceToSR: Double {
+        return maxDistanceToSRBase * riskMultiplier
+    }
+    
+    var profitAvoidSameDirectionBase: Double = 10.0
+    var profitAvoidSameDirection: Double {
+        return profitAvoidSameDirectionBase * riskMultiplier
+    }
+    
     private(set) var highRiskStart: Date
     private(set) var highRiskEnd: Date
     private(set) var tradingStart: Date
@@ -72,7 +82,6 @@ class ConfigurationManager {
     
     private(set) var maxHighRiskEntryAllowed: Int
     private(set) var positionSize: Int
-    var maxDistanceToSR: Double = 100.0
     
     private(set) var byPassTradingTimeRestrictions: Bool
     private(set) var noEntryDuringLunch: Bool

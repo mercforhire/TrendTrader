@@ -199,6 +199,7 @@ enum ExitMethod: Codable {
 enum NoActionReason {
     case noTradingAction
     case repeatedTrade
+    case lowQualityTrade
     case exceedLoss
     case outsideTradingHours
     case lunchHour
@@ -207,15 +208,17 @@ enum NoActionReason {
     func description() -> String {
         switch self {
         case .noTradingAction:
-        return "No trading action"
+            return "No trading action"
         case .repeatedTrade:
-        return "Repeated trade"
+            return "Repeated trade"
+        case .lowQualityTrade:
+            return "Low quality trade"
         case .exceedLoss:
-        return "Exceeded maximum loss"
+            return "Exceeded maximum loss"
         case .outsideTradingHours:
-        return "Outside trading hours"
+            return "Outside trading hours"
         case .lunchHour:
-        return "Lunch hour"
+            return "Lunch hour"
         case .other:
             return "Other reason"
         }

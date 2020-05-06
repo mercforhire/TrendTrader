@@ -305,6 +305,21 @@ class TraderBot {
                 return .noAction(entryType: nil, reason: .repeatedTrade)
             }
             
+            if !checkNotTooFarFromSupport(direction: newPosition.direction, bar: bar) {
+                sessionManager.delegate?.newLogAdded(log: "Ignored too far from support trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
+
+                return .noAction(entryType: nil, reason: .lowQualityTrade)
+            }
+            
+            if let lastTrade = sessionManager.trades.last,
+                lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
+                lastTrade.direction == newPosition.direction,
+                lastTrade.idealProfit > config.profitAvoidSameDirection {
+                sessionManager.delegate?.newLogAdded(log: "Ignored same direction trade after significant profit: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
+
+                return .noAction(entryType: nil, reason: .lowQualityTrade)
+            }
+            
             return .openPosition(newPosition: newPosition, entryType: entryType)
         }
         return .noAction(entryType: entryType, reason: .noTradingAction)
@@ -316,7 +331,6 @@ class TraderBot {
         
         guard bar.barColor == color,
             checkForSignalConfirmation(direction: direction, bar: bar),
-            checkNotTooFarFromSupport(direction: direction, bar: bar),
             bar.oneMinSignal?.direction == direction,
             let oneMinStop = bar.oneMinSignal?.stop,
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,

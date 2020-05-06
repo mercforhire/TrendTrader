@@ -166,18 +166,27 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         chartManager?.stopMonitoring()
         trader?.chart = completedChart
         
-        var start = 5.0
+        if false {
+            var start = 10.0
+            while start < 20.0 {
+                print("Testing profitAvoidSameDirectionBase: \(start)...")
+                config.profitAvoidSameDirectionBase = start
+                trader?.generateSimSession(completion: { [weak self] in
+                    guard let self = self else { return }
 
-        while start <= 20.0 {
-            print("Testing greenExitBase: \(start)...")
-            config.greenExitBase = start
+                    self.updateTradesList()
+                    self.delegate?.chartUpdated(chart: completedChart)
+
+                    start += 1.0
+                    print("")
+                })
+            }
+        } else {
             trader?.generateSimSession(completion: { [weak self] in
                 guard let self = self else { return }
 
                 self.updateTradesList()
                 self.delegate?.chartUpdated(chart: completedChart)
-
-                start += 1.0
                 print("")
             })
         }
@@ -213,7 +222,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         for trade in sessionManager.trades {
             currentPL += trade.idealProfit
             currentDayPL += trade.idealProfit
-//            print(String(format: "%.2f", currentPL))
+            print(String(format: "%.2f", currentPL))
             
             switch trade.entryTime.weekDay() {
             case 2:
@@ -261,11 +270,11 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             lastTrade = trade
         }
         
-//        for trade in sessionManager.trades {
-//            print(trade.exitTime.generateDate())
-//        }
+        for trade in sessionManager.trades {
+            print(trade.exitTime.generateDate())
+        }
         
-        print("Total \(sessionManager.trades.count) trades")
+        print("Total \(sessionManager.trades.count) trades,", "Final P/L:", String(format: "%.2f", currentPL))
         print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")

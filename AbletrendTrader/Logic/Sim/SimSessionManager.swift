@@ -14,6 +14,13 @@ class SimSessionManager: BaseSessionManager {
                                  completion: @escaping (TradingError?) -> ()) {
         for action in actions {
             switch action {
+            case .noAction:
+                break
+            default:
+                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
+            }
+            
+            switch action {
             case .openPosition(let newPosition, _):
                 pos = newPosition
                 pos?.actualEntryPrice = newPosition.idealEntryPrice

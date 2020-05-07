@@ -154,6 +154,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         tableView.reloadData()
     }
     
+    let testingPerformance = false
+    
     @IBAction
     private func goToEndOfDay(_ sender: Any) {
         guard trader != nil, let completedChart = chartManager?.chart, !completedChart.timeKeys.isEmpty
@@ -166,9 +168,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         chartManager?.stopMonitoring()
         trader?.chart = completedChart
         
-        if false {
-            var start = 5.0
-            while start <= 20.0 {
+        if testingPerformance {
+            var start = 8.0
+            while start <= 15.0 {
                 print("Testing maxDistanceToSRBase: \(start)...")
                 config.maxDistanceToSRBase = start
                 trader?.generateSimSession(completion: { [weak self] in
@@ -177,7 +179,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
 
-                    start += 1.25
+                    start += 0.25
                     print("")
                 })
             }
@@ -222,7 +224,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         for trade in sessionManager.trades {
             currentPL += trade.idealProfit
             currentDayPL += trade.idealProfit
-            print(String(format: "%.2f", currentPL))
+            
+            if !testingPerformance {
+                print(String(format: "%.2f", currentPL))
+            }
             
             switch trade.entryTime.weekDay() {
             case 2:
@@ -245,7 +250,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 lunchTrades += trade.idealProfit
             }
             
-            if trade.idealProfit < 0 {
+            if trade.idealProfit <= 0 {
                 losingTrades += 1
                 totalLoss = totalLoss + abs(trade.idealProfit)
             } else {
@@ -270,8 +275,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             lastTrade = trade
         }
         
-        for trade in sessionManager.trades {
-            print(trade.exitTime.generateDate())
+        if !testingPerformance {
+            for trade in sessionManager.trades {
+                print(trade.exitTime.generateDate())
+            }
         }
         
         print("Total \(sessionManager.trades.count) trades,", "Final P/L:", String(format: "%.2f", currentPL))

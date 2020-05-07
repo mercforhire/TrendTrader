@@ -771,7 +771,7 @@
         <scene sceneID="8lg-qv-ddx">
             <objects>
                 <viewController title="Configuration" showSeguePresentationStyle="single" id="6pn-ly-NU7" customClass="ConfigViewController" customModule="AbletrendTrader" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" misplaced="YES" id="ase-WH-YaY">
+                    <view key="view" id="ase-WH-YaY">
                         <rect key="frame" x="0.0" y="0.0" width="701" height="453"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
@@ -881,16 +881,8 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MKP-Wc-VSw">
-                                <rect key="frame" x="357" y="417" width="145" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="High risk entry interval:" id="Zbi-mC-l7W">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DnC-II-sbq">
-                                <rect key="frame" x="357" y="313" width="117" height="16"/>
+                                <rect key="frame" x="357" y="417" width="117" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Session start time:" id="XOo-cS-6nU">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -898,7 +890,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kKg-dL-LnA">
-                                <rect key="frame" x="357" y="235" width="119" height="16"/>
+                                <rect key="frame" x="357" y="339" width="119" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Flat positions time:" id="LTs-Vw-MDK">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -913,38 +905,8 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yKM-MQ-aHS">
-                                <rect key="frame" x="599" y="414" width="85" height="27"/>
-                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="o5L-Wz-S3E">
-                                    <font key="font" metaFont="system"/>
-                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
-                                        <!--1982-02-12 17:00:00 +0000-->
-                                    </date>
-                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
-                                </datePickerCell>
-                                <connections>
-                                    <action selector="highRiskEndChanged:" target="6pn-ly-NU7" id="ju7-Nn-9io"/>
-                                </connections>
-                            </datePicker>
-                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5Mr-ny-T6D">
-                                <rect key="frame" x="507" y="414" width="85" height="27"/>
-                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="W5I-30-A29">
-                                    <font key="font" metaFont="system"/>
-                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
-                                        <!--1982-02-12 17:00:00 +0000-->
-                                    </date>
-                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
-                                </datePickerCell>
-                                <connections>
-                                    <action selector="highRiskStartChanged:" target="6pn-ly-NU7" id="4jR-Lv-OMg"/>
-                                </connections>
-                            </datePicker>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vZb-pz-ioV">
-                                <rect key="frame" x="599" y="310" width="85" height="27"/>
+                                <rect key="frame" x="599" y="414" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="SoL-du-KYx">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -959,7 +921,7 @@
                                 </connections>
                             </datePicker>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4BI-nj-gAz">
-                                <rect key="frame" x="357" y="261" width="146" height="16"/>
+                                <rect key="frame" x="357" y="365" width="146" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Liquidate position time:" id="TbQ-cQ-6Oc">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -967,7 +929,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2St-i5-w4E">
-                                <rect key="frame" x="599" y="258" width="85" height="27"/>
+                                <rect key="frame" x="599" y="362" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="8ma-Hl-7II">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -1001,7 +963,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8Lj-ko-wO7">
-                                <rect key="frame" x="599" y="232" width="85" height="27"/>
+                                <rect key="frame" x="599" y="336" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="iJ1-o2-Ztg">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -1073,46 +1035,8 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dJi-V8-XmW">
-                                <rect key="frame" x="357" y="391" width="123" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Lunch time interval:" id="7F5-Ap-Hjm">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GsN-hI-npt">
-                                <rect key="frame" x="599" y="388" width="85" height="27"/>
-                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="eEs-eV-iDI">
-                                    <font key="font" metaFont="system"/>
-                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
-                                        <!--1982-02-12 17:00:00 +0000-->
-                                    </date>
-                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
-                                </datePickerCell>
-                                <connections>
-                                    <action selector="lunchEndChanged:" target="6pn-ly-NU7" id="ne3-Fu-5Pq"/>
-                                </connections>
-                            </datePicker>
-                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nzq-6Q-h9i">
-                                <rect key="frame" x="507" y="388" width="85" height="27"/>
-                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="uay-nq-iWj">
-                                    <font key="font" metaFont="system"/>
-                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
-                                        <!--1982-02-12 17:00:00 +0000-->
-                                    </date>
-                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
-                                </datePickerCell>
-                                <connections>
-                                    <action selector="lunchStartChanged:" target="6pn-ly-NU7" id="BvC-3G-5ZD"/>
-                                </connections>
-                            </datePicker>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xdS-82-ol5">
-                                <rect key="frame" x="357" y="287" width="112" height="16"/>
+                                <rect key="frame" x="357" y="391" width="112" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Session end time:" id="MvA-pN-5gY">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1120,7 +1044,7 @@
                                 </textFieldCell>
                             </textField>
                             <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nvu-lL-SDc">
-                                <rect key="frame" x="599" y="284" width="85" height="27"/>
+                                <rect key="frame" x="599" y="388" width="85" height="27"/>
                                 <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="4bI-u3-maE">
                                     <font key="font" metaFont="system"/>
                                     <date key="date" timeIntervalSinceReferenceDate="-595926000">
@@ -1174,29 +1098,6 @@
                                     <action selector="simRealTimeChecked:" target="6pn-ly-NU7" id="u4B-2P-hgJ"/>
                                 </connections>
                             </button>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="E9O-bA-Exd">
-                                <rect key="frame" x="357" y="339" width="76" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="FOMC time:" id="y9L-X7-zTE">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="phy-gR-GKr">
-                                <rect key="frame" x="599" y="336" width="85" height="27"/>
-                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="upM-G1-KLz">
-                                    <font key="font" metaFont="system"/>
-                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
-                                        <!--1982-02-12 17:00:00 +0000-->
-                                    </date>
-                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
-                                </datePickerCell>
-                                <connections>
-                                    <action selector="fomcTimeChanged:" target="6pn-ly-NU7" id="gP1-Pq-9TT"/>
-                                </connections>
-                            </datePicker>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sAI-QM-GBT">
                                 <rect key="frame" x="357" y="42" width="87" height="18"/>
                                 <buttonCell key="cell" type="check" title="FOMC Day" bezelStyle="regularSquare" imagePosition="left" inset="2" id="gZk-dr-dh7">
@@ -1264,6 +1165,105 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MKP-Wc-VSw">
+                                <rect key="frame" x="357" y="313" width="145" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="High risk entry interval:" id="Zbi-mC-l7W">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yKM-MQ-aHS">
+                                <rect key="frame" x="599" y="310" width="85" height="27"/>
+                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="o5L-Wz-S3E">
+                                    <font key="font" metaFont="system"/>
+                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
+                                        <!--1982-02-12 17:00:00 +0000-->
+                                    </date>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
+                                </datePickerCell>
+                                <connections>
+                                    <action selector="highRiskEndChanged:" target="6pn-ly-NU7" id="ju7-Nn-9io"/>
+                                </connections>
+                            </datePicker>
+                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5Mr-ny-T6D">
+                                <rect key="frame" x="507" y="310" width="85" height="27"/>
+                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="W5I-30-A29">
+                                    <font key="font" metaFont="system"/>
+                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
+                                        <!--1982-02-12 17:00:00 +0000-->
+                                    </date>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
+                                </datePickerCell>
+                                <connections>
+                                    <action selector="highRiskStartChanged:" target="6pn-ly-NU7" id="4jR-Lv-OMg"/>
+                                </connections>
+                            </datePicker>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dJi-V8-XmW">
+                                <rect key="frame" x="357" y="287" width="123" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Lunch time interval:" id="7F5-Ap-Hjm">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GsN-hI-npt">
+                                <rect key="frame" x="599" y="284" width="85" height="27"/>
+                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="eEs-eV-iDI">
+                                    <font key="font" metaFont="system"/>
+                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
+                                        <!--1982-02-12 17:00:00 +0000-->
+                                    </date>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
+                                </datePickerCell>
+                                <connections>
+                                    <action selector="lunchEndChanged:" target="6pn-ly-NU7" id="ne3-Fu-5Pq"/>
+                                </connections>
+                            </datePicker>
+                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nzq-6Q-h9i">
+                                <rect key="frame" x="507" y="284" width="85" height="27"/>
+                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="uay-nq-iWj">
+                                    <font key="font" metaFont="system"/>
+                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
+                                        <!--1982-02-12 17:00:00 +0000-->
+                                    </date>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
+                                </datePickerCell>
+                                <connections>
+                                    <action selector="lunchStartChanged:" target="6pn-ly-NU7" id="BvC-3G-5ZD"/>
+                                </connections>
+                            </datePicker>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="E9O-bA-Exd">
+                                <rect key="frame" x="357" y="261" width="76" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="FOMC time:" id="y9L-X7-zTE">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <datePicker verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="phy-gR-GKr">
+                                <rect key="frame" x="599" y="258" width="85" height="27"/>
+                                <datePickerCell key="cell" borderStyle="bezel" alignment="left" datePickerMode="range" id="upM-G1-KLz">
+                                    <font key="font" metaFont="system"/>
+                                    <date key="date" timeIntervalSinceReferenceDate="-595926000">
+                                        <!--1982-02-12 17:00:00 +0000-->
+                                    </date>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
+                                </datePickerCell>
+                                <connections>
+                                    <action selector="fomcTimeChanged:" target="6pn-ly-NU7" id="gP1-Pq-9TT"/>
+                                </connections>
+                            </datePicker>
                         </subviews>
                         <constraints>
                             <constraint firstItem="bNd-Lf-5A5" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="0yl-tP-5jE"/>
@@ -1275,14 +1275,12 @@
                             <constraint firstItem="9pS-oT-Qfu" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="48c-KL-ncT"/>
                             <constraint firstItem="dJi-V8-XmW" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="4ek-OJ-bSO"/>
                             <constraint firstItem="xdS-82-ol5" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="60q-6p-a07"/>
-                            <constraint firstItem="DnC-II-sbq" firstAttribute="centerY" secondItem="Q38-EC-OOe" secondAttribute="centerY" id="7tn-g1-aJ0"/>
                             <constraint firstItem="Nns-FX-mQK" firstAttribute="top" secondItem="JY2-LQ-dpr" secondAttribute="bottom" constant="10" id="8Rs-5x-TyE"/>
                             <constraint firstItem="UTR-to-ULY" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="8fo-1a-hEm"/>
                             <constraint firstItem="pFZ-k0-AVu" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="8mM-Y5-K4x"/>
                             <constraint firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" constant="20" id="8wo-vn-jm5"/>
                             <constraint firstItem="xAN-G6-93M" firstAttribute="trailing" secondItem="UEB-Um-rH8" secondAttribute="trailing" id="Aqw-O2-Mif"/>
                             <constraint firstItem="2St-i5-w4E" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="B8A-h9-a1n"/>
-                            <constraint firstItem="dJi-V8-XmW" firstAttribute="centerY" secondItem="MLv-fc-Lh1" secondAttribute="centerY" id="BEs-Tr-b1j"/>
                             <constraint firstItem="GsN-hI-npt" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="By0-VT-0JB"/>
                             <constraint firstItem="EiV-b6-Ycz" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="C4h-4C-s1j"/>
                             <constraint firstItem="1HZ-zE-mtD" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="CML-mS-Svr"/>
@@ -1290,7 +1288,6 @@
                             <constraint firstItem="Q38-EC-OOe" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="EiJ-j4-BX1"/>
                             <constraint firstItem="1HZ-zE-mtD" firstAttribute="centerY" secondItem="MLv-fc-Lh1" secondAttribute="centerY" id="FnJ-Ke-gEp"/>
                             <constraint firstItem="VG4-Lk-PUU" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="Hjo-zq-r8S"/>
-                            <constraint firstItem="xdS-82-ol5" firstAttribute="centerY" secondItem="VG4-Lk-PUU" secondAttribute="centerY" id="Hrk-6m-JGC"/>
                             <constraint firstItem="MKP-Wc-VSw" firstAttribute="leading" secondItem="UEB-Um-rH8" secondAttribute="trailing" constant="17" id="ITq-IN-yJM"/>
                             <constraint firstItem="pFZ-k0-AVu" firstAttribute="centerY" secondItem="o80-kA-tzn" secondAttribute="centerY" id="JTk-tz-8mH"/>
                             <constraint firstItem="rWn-H4-dBC" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="K0b-y9-XgD"/>
@@ -1300,9 +1297,11 @@
                             <constraint firstItem="krP-SR-T3W" firstAttribute="centerY" secondItem="v7D-6w-gxx" secondAttribute="centerY" id="Nsy-3r-jIl"/>
                             <constraint firstItem="JY2-LQ-dpr" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="OyD-fJ-hfI"/>
                             <constraint firstItem="MLv-fc-Lh1" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="P3R-Ja-4Zi"/>
+                            <constraint firstItem="DnC-II-sbq" firstAttribute="centerY" secondItem="R1i-le-7zB" secondAttribute="centerY" id="PaK-aJ-uFQ"/>
                             <constraint firstItem="UEB-Um-rH8" firstAttribute="centerY" secondItem="R1i-le-7zB" secondAttribute="centerY" id="QRl-qW-XCn"/>
                             <constraint firstItem="EiV-b6-Ycz" firstAttribute="centerY" secondItem="UTR-to-ULY" secondAttribute="centerY" id="QVJ-sx-Lrb"/>
                             <constraint firstItem="JY2-LQ-dpr" firstAttribute="top" secondItem="iFc-4e-GUS" secondAttribute="bottom" constant="10" id="RSl-JO-Geo"/>
+                            <constraint firstItem="xdS-82-ol5" firstAttribute="centerY" secondItem="MLv-fc-Lh1" secondAttribute="centerY" id="RdP-QZ-WKg"/>
                             <constraint firstItem="ZR3-U1-ftQ" firstAttribute="top" secondItem="rWn-H4-dBC" secondAttribute="bottom" constant="11" id="RfR-jl-WUP"/>
                             <constraint firstItem="8Lj-ko-wO7" firstAttribute="centerY" secondItem="kKg-dL-LnA" secondAttribute="centerY" id="Rsq-eu-yyw"/>
                             <constraint firstItem="ToP-uD-y6Z" firstAttribute="leading" secondItem="of0-Wx-S4o" secondAttribute="leading" id="Sej-vE-KD4"/>
@@ -1310,6 +1309,8 @@
                             <constraint firstItem="GsN-hI-npt" firstAttribute="centerY" secondItem="dJi-V8-XmW" secondAttribute="centerY" id="StB-eN-dgC"/>
                             <constraint firstItem="8P2-O5-PTk" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="T5L-fy-ZhA"/>
                             <constraint firstItem="OML-bs-d5P" firstAttribute="top" secondItem="v7D-6w-gxx" secondAttribute="bottom" constant="11" id="T8V-0s-JqK"/>
+                            <constraint firstItem="MKP-Wc-VSw" firstAttribute="centerY" secondItem="Q38-EC-OOe" secondAttribute="centerY" id="TEf-no-O3B"/>
+                            <constraint firstItem="E9O-bA-Exd" firstAttribute="centerY" secondItem="NaI-Ca-x1s" secondAttribute="centerY" id="TRP-XO-jDb"/>
                             <constraint firstItem="phy-gR-GKr" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="Vrw-fe-KPN"/>
                             <constraint firstItem="ke3-Te-DsJ" firstAttribute="leading" secondItem="VG4-Lk-PUU" secondAttribute="trailing" constant="50" id="VsG-MV-bdS"/>
                             <constraint firstItem="8P2-O5-PTk" firstAttribute="centerY" secondItem="NaI-Ca-x1s" secondAttribute="centerY" id="WQF-VU-der"/>
@@ -1329,10 +1330,11 @@
                             <constraint firstItem="bNd-Lf-5A5" firstAttribute="centerY" secondItem="rWn-H4-dBC" secondAttribute="centerY" id="cK8-Yt-y0n"/>
                             <constraint firstItem="of0-Wx-S4o" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="cKg-7Q-9BD"/>
                             <constraint firstItem="rWn-H4-dBC" firstAttribute="top" secondItem="dqP-vc-0bH" secondAttribute="bottom" constant="10" id="ccR-dO-Mxa"/>
+                            <constraint firstItem="kKg-dL-LnA" firstAttribute="centerY" secondItem="UTR-to-ULY" secondAttribute="centerY" id="dKg-JC-Z3T"/>
                             <constraint firstItem="9pS-oT-Qfu" firstAttribute="centerY" secondItem="dqP-vc-0bH" secondAttribute="centerY" id="dLZ-sf-jDF"/>
+                            <constraint firstItem="4BI-nj-gAz" firstAttribute="centerY" secondItem="o80-kA-tzn" secondAttribute="centerY" id="dnM-Q2-bqx"/>
                             <constraint firstItem="0BP-IF-9o0" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="eXc-9o-IA7"/>
                             <constraint firstItem="phy-gR-GKr" firstAttribute="centerY" secondItem="E9O-bA-Exd" secondAttribute="centerY" id="ee1-Uy-gXS"/>
-                            <constraint firstItem="4BI-nj-gAz" firstAttribute="centerY" secondItem="NaI-Ca-x1s" secondAttribute="centerY" id="eul-KO-ySs"/>
                             <constraint firstItem="ZR3-U1-ftQ" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="fKI-lZ-40B"/>
                             <constraint firstItem="Nzq-6Q-h9i" firstAttribute="centerY" secondItem="GsN-hI-npt" secondAttribute="centerY" id="fWs-KM-hxH"/>
                             <constraint firstItem="OML-bs-d5P" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="ffc-7l-wAO"/>
@@ -1343,24 +1345,22 @@
                             <constraint firstItem="qxg-8Q-OiA" firstAttribute="trailing" secondItem="UEB-Um-rH8" secondAttribute="trailing" id="jMm-nQ-3E2"/>
                             <constraint firstItem="xAN-G6-93M" firstAttribute="centerY" secondItem="OML-bs-d5P" secondAttribute="centerY" id="mfa-89-syq"/>
                             <constraint firstItem="yKM-MQ-aHS" firstAttribute="leading" secondItem="5Mr-ny-T6D" secondAttribute="trailing" constant="10" id="mo7-aD-HAB"/>
-                            <constraint firstItem="E9O-bA-Exd" firstAttribute="centerY" secondItem="UTR-to-ULY" secondAttribute="centerY" id="oEL-BR-JgV"/>
                             <constraint firstItem="Qip-aw-AeW" firstAttribute="centerY" secondItem="Q38-EC-OOe" secondAttribute="centerY" id="obE-o5-K6o"/>
                             <constraint firstItem="R1i-le-7zB" firstAttribute="top" secondItem="ase-WH-YaY" secondAttribute="top" constant="20" id="pcT-fi-tyl"/>
                             <constraint firstItem="iFc-4e-GUS" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="qdJ-FU-kD4"/>
                             <constraint firstItem="ToP-uD-y6Z" firstAttribute="centerY" secondItem="iFc-4e-GUS" secondAttribute="centerY" id="ryd-PX-67G"/>
                             <constraint firstItem="UEB-Um-rH8" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="sRY-md-bxT"/>
                             <constraint firstItem="kKg-dL-LnA" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="sUo-NJ-EXs"/>
-                            <constraint firstItem="kKg-dL-LnA" firstAttribute="centerY" secondItem="dqP-vc-0bH" secondAttribute="centerY" id="snX-xE-hKP"/>
                             <constraint firstItem="v7D-6w-gxx" firstAttribute="top" secondItem="ZR3-U1-ftQ" secondAttribute="bottom" constant="13" id="u9s-d8-PdL"/>
                             <constraint firstItem="of0-Wx-S4o" firstAttribute="centerY" secondItem="0BP-IF-9o0" secondAttribute="centerY" id="uaj-9A-Wou"/>
                             <constraint firstItem="sAI-QM-GBT" firstAttribute="leading" secondItem="of0-Wx-S4o" secondAttribute="leading" id="vRh-eO-rvc"/>
-                            <constraint firstItem="MKP-Wc-VSw" firstAttribute="top" secondItem="R1i-le-7zB" secondAttribute="top" id="w1T-z5-sEd"/>
                             <constraint firstItem="DnC-II-sbq" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="w6R-A5-ZCK"/>
                             <constraint firstItem="dqP-vc-0bH" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="xac-PE-ltj"/>
                             <constraint firstItem="R1i-le-7zB" firstAttribute="leading" secondItem="ase-WH-YaY" secondAttribute="leading" constant="20" id="xhi-2S-0AG"/>
                             <constraint firstItem="krP-SR-T3W" firstAttribute="trailing" secondItem="UEB-Um-rH8" secondAttribute="trailing" id="yHJ-Qd-Xc4"/>
                             <constraint firstAttribute="bottom" secondItem="Nns-FX-mQK" secondAttribute="bottom" constant="20" id="ydp-hY-kmj"/>
                             <constraint firstItem="NaI-Ca-x1s" firstAttribute="top" secondItem="VG4-Lk-PUU" secondAttribute="bottom" constant="10" id="zcf-tW-Kby"/>
+                            <constraint firstItem="dJi-V8-XmW" firstAttribute="centerY" secondItem="VG4-Lk-PUU" secondAttribute="centerY" id="zqG-cA-DNc"/>
                         </constraints>
                     </view>
                     <connections>

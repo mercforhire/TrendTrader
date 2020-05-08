@@ -718,15 +718,15 @@
                             <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LXr-xQ-Y0G">
                                 <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="vuB-Ii-YB8">
-                                    <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textView editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="VqS-kD-8Fo">
-                                            <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="textColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="minSize" width="683" height="489"/>
+                                            <size key="minSize" width="698" height="489"/>
                                             <size key="maxSize" width="698" height="10000000"/>
                                             <attributedString key="textStorage">
                                                 <fragment content="&lt;Log Start Here&gt;">
@@ -747,7 +747,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="80O-Uf-KaD">
-                                    <rect key="frame" x="683" y="0.0" width="15" height="489"/>
+                                    <rect key="frame" x="682" y="0.0" width="16" height="489"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
@@ -1264,17 +1264,39 @@
                                     <action selector="fomcTimeChanged:" target="6pn-ly-NU7" id="gP1-Pq-9TT"/>
                                 </connections>
                             </datePicker>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ssd-VA-eKV">
+                                <rect key="frame" x="357" y="118" width="135" height="32"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="# of losing opposite  trades to halt trading: " id="URZ-Ur-N4h">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lcT-h2-rDk">
+                                <rect key="frame" x="611" y="124" width="70" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="70" id="Ch2-hZ-oJ4"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" drawsBackground="YES" id="guf-eJ-tfo">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
+                            <constraint firstItem="Ssd-VA-eKV" firstAttribute="leading" secondItem="DnC-II-sbq" secondAttribute="leading" id="0mW-uI-5O4"/>
                             <constraint firstItem="bNd-Lf-5A5" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="0yl-tP-5jE"/>
                             <constraint firstItem="UTR-to-ULY" firstAttribute="top" secondItem="o80-kA-tzn" secondAttribute="bottom" constant="10" id="2II-Xc-V83"/>
                             <constraint firstItem="0BP-IF-9o0" firstAttribute="top" secondItem="OML-bs-d5P" secondAttribute="bottom" constant="20" id="2Rr-vV-cG6"/>
+                            <constraint firstItem="lcT-h2-rDk" firstAttribute="trailing" secondItem="vZb-pz-ioV" secondAttribute="trailing" id="2q4-8k-00u"/>
                             <constraint firstItem="GsN-hI-npt" firstAttribute="leading" secondItem="Nzq-6Q-h9i" secondAttribute="trailing" constant="10" id="2th-8F-PLl"/>
                             <constraint firstItem="2St-i5-w4E" firstAttribute="centerY" secondItem="4BI-nj-gAz" secondAttribute="centerY" id="32M-1u-WB4"/>
                             <constraint firstItem="o80-kA-tzn" firstAttribute="top" secondItem="MLv-fc-Lh1" secondAttribute="bottom" constant="10" id="3Fi-wI-j1y"/>
                             <constraint firstItem="9pS-oT-Qfu" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="48c-KL-ncT"/>
                             <constraint firstItem="dJi-V8-XmW" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="4ek-OJ-bSO"/>
                             <constraint firstItem="xdS-82-ol5" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="60q-6p-a07"/>
+                            <constraint firstItem="lcT-h2-rDk" firstAttribute="centerY" secondItem="Ssd-VA-eKV" secondAttribute="centerY" id="6U9-dk-LHS"/>
                             <constraint firstItem="Nns-FX-mQK" firstAttribute="top" secondItem="JY2-LQ-dpr" secondAttribute="bottom" constant="10" id="8Rs-5x-TyE"/>
                             <constraint firstItem="UTR-to-ULY" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="8fo-1a-hEm"/>
                             <constraint firstItem="pFZ-k0-AVu" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="8mM-Y5-K4x"/>
@@ -1317,6 +1339,7 @@
                             <constraint firstItem="yKM-MQ-aHS" firstAttribute="centerY" secondItem="MKP-Wc-VSw" secondAttribute="centerY" id="WZ4-LV-adJ"/>
                             <constraint firstItem="VG4-Lk-PUU" firstAttribute="top" secondItem="Q38-EC-OOe" secondAttribute="bottom" constant="10" id="Wj6-Wd-yZb"/>
                             <constraint firstItem="v7D-6w-gxx" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="Wk0-X8-Vsr"/>
+                            <constraint firstItem="Ssd-VA-eKV" firstAttribute="centerY" secondItem="OML-bs-d5P" secondAttribute="centerY" id="Y8f-Ld-RLM"/>
                             <constraint firstItem="iFc-4e-GUS" firstAttribute="top" secondItem="0BP-IF-9o0" secondAttribute="bottom" constant="10" id="YGZ-Jh-aXg"/>
                             <constraint firstItem="o80-kA-tzn" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="YNt-XD-AI5"/>
                             <constraint firstItem="Nvu-lL-SDc" firstAttribute="centerY" secondItem="xdS-82-ol5" secondAttribute="centerY" id="Zke-p1-DRJ"/>
@@ -1384,6 +1407,7 @@
                         <outlet property="minProfitPullbackField" destination="8P2-O5-PTk" id="b2D-nB-wcc"/>
                         <outlet property="minSTPField" destination="pFZ-k0-AVu" id="qdP-K8-CLY"/>
                         <outlet property="noEntryDuringLunchCheckbox" destination="of0-Wx-S4o" id="woO-Nl-hBt"/>
+                        <outlet property="numberLosingTradesField" destination="lcT-h2-rDk" id="K3h-eS-URw"/>
                         <outlet property="profitAvoidSameDirectionField" destination="xAN-G6-93M" id="rHA-l8-2sF"/>
                         <outlet property="riskField" destination="UEB-Um-rH8" id="1wf-rq-NPN"/>
                         <outlet property="sessionEndTimePicker" destination="Nvu-lL-SDc" id="mvI-vz-xrR"/>
@@ -1396,7 +1420,7 @@
                 </viewController>
                 <customObject id="A3Q-Y4-FEE" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-679.5" y="336.5"/>
+            <point key="canvasLocation" x="-654" y="576"/>
         </scene>
         <!--Live Trader-->
         <scene sceneID="vdT-mG-0Wb">

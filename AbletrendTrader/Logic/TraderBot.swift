@@ -311,7 +311,8 @@ class TraderBot {
                 return .noAction(entryType: nil, reason: .lowQualityTrade)
             }
             
-            if let lastTrade = sessionManager.trades.last,
+            if config.profitAvoidSameDirection > 0,
+                let lastTrade = sessionManager.trades.last,
                 lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
                 lastTrade.direction == newPosition.direction,
                 lastTrade.idealProfit > config.profitAvoidSameDirection {
@@ -439,12 +440,15 @@ class TraderBot {
             return seekToOpenPosition(bar: currentBar, entryType: .all)
         }
         
+        if checkChoppyDay(bar: currentBar) {
+            return .noAction(entryType: nil, reason: .lunchHour)
+        }
+        
         if sessionManager.trades.isEmpty {
             return seekToOpenPosition(bar: currentBar, entryType: .all)
         }
         
         if let lastTrade = sessionManager.trades.last, let currentBarDirection = currentBar.oneMinSignal?.direction {
-            
             // if the last trade was stopped out in the current minute bar AND last trade's direction is opposite of current bar direction, then enter aggressively on any entry
             if lastTrade.exitTime.isInSameMinute(date: currentBar.time),
                 lastTrade.direction != currentBarDirection,
@@ -637,7 +641,7 @@ class TraderBot {
     
     // check if the low/high of the bar is too far from the 1 min S/R
     private func checkNotTooFarFromSupport(direction: TradeDirection, bar: PriceBar) -> Bool {
-        guard let stop = bar.oneMinSignal?.stop else { return false }
+        guard config.maxDistanceToSR > 0, let stop = bar.oneMinSignal?.stop else { return false }
         
         var notTooFarFromSupport = false
         switch direction {
@@ -648,6 +652,35 @@ class TraderBot {
         }
         
         return notTooFarFromSupport
+    }
+    
+    // check if the last 3 trades were losers in opposite directions(chop)
+    private func checkChoppyDay(bar: PriceBar) -> Bool {
+        guard config.numOfLosingTrades > 0,
+            let lastTrade = sessionManager.trades.last,
+            lastTrade.entryTime.isInSameDay(date: bar.time),
+            lastTrade.idealProfit < 0 else { return false }
+        
+        var numberOfLosingTrades = 0
+        var directionOfLastLosingTrade: TradeDirection = .long
+        
+        for trade in sessionManager.trades.reversed() {
+            if !trade.entryTime.isInSameDay(date: bar.time) {
+                break
+            }
+            
+            if (trade.idealProfit < 0 && numberOfLosingTrades == 0) ||
+                (trade.idealProfit < 0 && trade.direction != directionOfLastLosingTrade) {
+                numberOfLosingTrades += 1
+                directionOfLastLosingTrade = trade.direction
+            }
+            
+            if numberOfLosingTrades == config.numOfLosingTrades {
+                return true
+            }
+        }
+        
+        return false
     }
     
     // check if the current bar has a buy or sell confirmation(signal align on all 3 timeframes)

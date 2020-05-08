@@ -26,6 +26,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var highRiskTradesField: NSTextField!
     @IBOutlet private weak var maxDistanceToSRField: NSTextField!
     @IBOutlet private weak var profitAvoidSameDirectionField: NSTextField!
+    @IBOutlet private weak var numberLosingTradesField: NSTextField!
     @IBOutlet private weak var fomcTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionEndTimePicker: NSDatePicker!
@@ -53,6 +54,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         highRiskTradesField.delegate = self
         maxDistanceToSRField.delegate = self
         profitAvoidSameDirectionField.delegate = self
+        numberLosingTradesField.delegate = self
     }
     
     func loadConfig() {
@@ -94,6 +96,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         dailyLossLimitField.stringValue = String(format: "%.2f", config.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", config.maxHighRiskEntryAllowed)
+        numberLosingTradesField.stringValue = String(format: "%d", config.numOfLosingTrades)
         maxDistanceToSRField.stringValue = String(format: "%.2f", config.maxDistanceToSRBase)
         profitAvoidSameDirectionField.stringValue = String(format: "%.2f", config.profitAvoidSameDirectionBase)
         
@@ -328,6 +331,8 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try config.setMaxDistanceToSR(newValue: textField.doubleValue)
                 } else if textField == profitAvoidSameDirectionField {
                     try config.setProfitAvoidSameDirection(newValue: textField.doubleValue)
+                } else if textField == numberLosingTradesField {
+                    try config.setNumberLosingTradesField(newValue: textField.integerValue)
                 }
             } catch (let error) {
                 guard let configError = error as? ConfigError else { return }

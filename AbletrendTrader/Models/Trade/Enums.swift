@@ -203,6 +203,7 @@ enum NoActionReason {
     case exceedLoss
     case outsideTradingHours
     case lunchHour
+    case choppyDay
     case other
     
     func description() -> String {
@@ -219,6 +220,8 @@ enum NoActionReason {
             return "Outside trading hours"
         case .lunchHour:
             return "Lunch hour"
+        case .choppyDay:
+            return "Choppy day"
         case .other:
             return "Other reason"
         }
@@ -432,6 +435,7 @@ enum ConfigError: Error {
     case positionSizeError
     case maxDailyLossError
     case maxHighRiskEntryAllowedError
+    case numOfLosingTradesError
     case maxDistanceToSRError
     case profitAvoidSameDirectionError
     
@@ -479,6 +483,8 @@ enum ConfigError: Error {
             return "Max high risk entry allowed must be positive number"
         case .maxDistanceToSRError:
             return "Max distance to SR must be over 5"
+        case .numOfLosingTradesError:
+            return "Number of opposite losing trades to halt trading must be >= 3"
         case .profitAvoidSameDirectionError:
             return "Profit avoid same direction must be over 10"
         }

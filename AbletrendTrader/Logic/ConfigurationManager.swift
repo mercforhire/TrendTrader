@@ -70,6 +70,8 @@ class ConfigurationManager {
         return profitAvoidSameDirectionBase * riskMultiplier
     }
     
+    var numOfLosingTrades: Int
+    
     private(set) var highRiskStart: Date
     private(set) var highRiskEnd: Date
     private(set) var tradingStart: Date
@@ -159,6 +161,8 @@ class ConfigurationManager {
         self.maxDistanceToSRBase = defaults.object(forKey: "max_distance_to_SR") as? Double ?? 11.25
         
         self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 25.0
+        
+        self.numOfLosingTrades = defaults.object(forKey: "num_losing_trades") as? Int ?? 4
         
         self.server1MinURL = defaults.object(forKey: "server_1min_url") as? String ?? defaultSettings["default_ip"] as! String
         
@@ -289,6 +293,16 @@ class ConfigurationManager {
         }
         
         throw ConfigError.maxHighRiskEntryAllowedError
+    }
+    
+    func setNumberLosingTradesField(newValue: Int) throws {
+        if newValue >= 3 {
+            numOfLosingTrades = newValue
+            saveToDefaults(newValue: newValue, key: "num_losing_trades")
+            return
+        }
+        
+        throw ConfigError.numOfLosingTradesError
     }
     
     func setHighRiskStart(newValue: Date) throws {

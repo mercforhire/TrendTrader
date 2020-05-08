@@ -169,17 +169,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testingPerformance {
-            var start = 8.0
-            while start <= 15.0 {
-                print("Testing maxDistanceToSRBase: \(start)...")
-                config.maxDistanceToSRBase = start
+            var start = 3
+            while start <= 8 {
+                print("Testing numOfLosingTrades: \(start)...")
+                config.numOfLosingTrades = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
 
-                    start += 0.25
+                    start += 1
                     print("")
                 })
             }
@@ -281,8 +281,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             }
         }
         
-        print("Total \(sessionManager.trades.count) trades,", "Final P/L:", String(format: "%.2f", currentPL))
-        print(String(format: "Win rate: %.2f %", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
+        print("Total \(sessionManager.trades.count) trades,", "final P/L:", String(format: "%.2f", currentPL))
+        print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
         }

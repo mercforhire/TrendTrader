@@ -641,7 +641,8 @@ class TraderBot {
     
     // check if the low/high of the bar is too far from the 1 min S/R
     private func checkNotTooFarFromSupport(direction: TradeDirection, bar: PriceBar) -> Bool {
-        guard config.maxDistanceToSR > 0, let stop = bar.oneMinSignal?.stop else { return false }
+        guard config.maxDistanceToSR > 0 else { return true }
+        guard let stop = bar.oneMinSignal?.stop else { return false }
         
         var notTooFarFromSupport = false
         switch direction {

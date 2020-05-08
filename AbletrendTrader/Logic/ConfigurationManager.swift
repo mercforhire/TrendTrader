@@ -296,7 +296,7 @@ class ConfigurationManager {
     }
     
     func setNumberLosingTradesField(newValue: Int) throws {
-        if newValue >= 3 {
+        if newValue >= 3 || newValue == 0 {
             numOfLosingTrades = newValue
             saveToDefaults(newValue: newValue, key: "num_losing_trades")
             return
@@ -433,7 +433,7 @@ class ConfigurationManager {
     }
     
     func setMaxDistanceToSR(newValue: Double) throws {
-        if newValue >= 5.0 {
+        if newValue >= 5.0 || newValue == 0.0 {
             maxDistanceToSRBase = newValue
             saveToDefaults(newValue: newValue, key: "max_distance_to_SR")
             return
@@ -443,7 +443,7 @@ class ConfigurationManager {
     }
     
     func setProfitAvoidSameDirection(newValue: Double) throws {
-        if newValue >= 10.0 {
+        if newValue >= 10.0 || newValue == 0.0 {
             profitAvoidSameDirectionBase = newValue
             saveToDefaults(newValue: newValue, key: "profit_avoid_same_direction_base")
             return

@@ -10,7 +10,7 @@ import Foundation
 
 class ConfigurationManager {
     static let shared = ConfigurationManager()
-    private let defaults : UserDefaults = UserDefaults.standard
+    private let defaults: UserDefaults = UserDefaults.standard
     let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:\d{0,4}\/"#
     
     var riskMultiplier: Double
@@ -160,7 +160,7 @@ class ConfigurationManager {
         
         self.maxDistanceToSRBase = defaults.object(forKey: "max_distance_to_SR") as? Double ?? 11.25
         
-        self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 25.0
+        self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 23.5
         
         self.numOfLosingTrades = defaults.object(forKey: "num_losing_trades") as? Int ?? 4
         

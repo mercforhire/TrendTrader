@@ -60,6 +60,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     weak var delegate: DataManagerDelegate?
     
+    private let testingPerformance = false
+    
     func setupUI() {
         dateFormatter.timeStyle = .medium
         dateFormatter.timeZone = Date.DefaultTimeZone
@@ -153,8 +155,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         startButton.isEnabled = config.simulateTimePassage
         tableView.reloadData()
     }
-    
-    let testingPerformance = false
     
     @IBAction
     private func goToEndOfDay(_ sender: Any) {

@@ -142,7 +142,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-68" y="-204"/>
+            <point key="canvasLocation" x="-128" y="-193"/>
         </scene>
         <!--Main Menu-->
         <scene sceneID="vYx-i6-xdS">
@@ -705,7 +705,7 @@
                 </viewController>
                 <customObject id="4tU-8R-0ce" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="874" y="380.5"/>
+            <point key="canvasLocation" x="844" y="74"/>
         </scene>
         <!--Trade Log-->
         <scene sceneID="lRD-HA-YKQ">
@@ -718,15 +718,15 @@
                             <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LXr-xQ-Y0G">
                                 <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="vuB-Ii-YB8">
-                                    <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textView editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="VqS-kD-8Fo">
-                                            <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="textColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="minSize" width="698" height="489"/>
+                                            <size key="minSize" width="683" height="489"/>
                                             <size key="maxSize" width="698" height="10000000"/>
                                             <attributedString key="textStorage">
                                                 <fragment content="&lt;Log Start Here&gt;">
@@ -747,7 +747,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="80O-Uf-KaD">
-                                    <rect key="frame" x="682" y="0.0" width="16" height="489"/>
+                                    <rect key="frame" x="683" y="0.0" width="15" height="489"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
@@ -765,7 +765,7 @@
                 </viewController>
                 <customObject id="iK0-NM-QBz" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="568" y="1756"/>
+            <point key="canvasLocation" x="402" y="1666"/>
         </scene>
         <!--Configuration-->
         <scene sceneID="8lg-qv-ddx">
@@ -1009,8 +1009,8 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dqP-vc-0bH">
-                                <rect key="frame" x="18" y="230" width="120" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Take profit bar size" id="G1K-Vd-Udg">
+                                <rect key="frame" x="18" y="230" width="123" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Take profit bar size:" id="G1K-Vd-Udg">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1420,7 +1420,7 @@
                 </viewController>
                 <customObject id="A3Q-Y4-FEE" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-654" y="576"/>
+            <point key="canvasLocation" x="-632" y="623"/>
         </scene>
         <!--Live Trader-->
         <scene sceneID="vdT-mG-0Wb">
@@ -1953,7 +1953,7 @@
                 </viewController>
                 <customObject id="Wtg-RB-62N" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="822" y="1091"/>
+            <point key="canvasLocation" x="845" y="896"/>
         </scene>
         <!--Simulation Trader-->
         <scene sceneID="hIz-AP-VOD">
@@ -2234,14 +2234,6 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MP9-kL-ec5">
-                                <rect key="frame" x="18" y="394" width="49" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Trades" id="wlY-Df-stx">
-                                    <font key="font" metaFont="systemBold"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="W4F-4e-ItW">
                                 <rect key="frame" x="18" y="523" width="100" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="[SYSTEM TIME]" id="qJu-4b-yWS">
@@ -2389,13 +2381,11 @@
                             <constraint firstItem="qIK-7B-KMS" firstAttribute="centerY" secondItem="m7L-5x-yLl" secondAttribute="centerY" id="9uj-CB-bTP"/>
                             <constraint firstItem="W4F-4e-ItW" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="Bam-Yg-bRk"/>
                             <constraint firstAttribute="trailing" secondItem="qIK-7B-KMS" secondAttribute="trailing" constant="20" id="Bez-SS-Ghg"/>
-                            <constraint firstItem="MP9-kL-ec5" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="ENH-hB-JaC"/>
                             <constraint firstItem="PJx-NI-lOn" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="17" id="KIa-7E-4dG"/>
                             <constraint firstAttribute="trailing" secondItem="JbD-46-JoY" secondAttribute="trailing" constant="20" id="QJV-51-Og0"/>
                             <constraint firstItem="Phc-f5-Phz" firstAttribute="top" secondItem="ctB-Gg-y5p" secondAttribute="bottom" constant="8" id="Ur7-6N-y3j"/>
                             <constraint firstItem="9pF-PY-Opy" firstAttribute="leading" secondItem="m7L-5x-yLl" secondAttribute="leading" id="Wiq-MJ-180"/>
                             <constraint firstItem="3Jt-RQ-tzI" firstAttribute="top" secondItem="PJx-NI-lOn" secondAttribute="bottom" constant="8" id="Z2N-N4-rqf"/>
-                            <constraint firstItem="JbD-46-JoY" firstAttribute="top" secondItem="MP9-kL-ec5" secondAttribute="bottom" constant="8" id="aul-VT-TgT"/>
                             <constraint firstItem="W4F-4e-ItW" firstAttribute="top" secondItem="3Jt-RQ-tzI" secondAttribute="bottom" constant="15" id="cT7-Aa-TdN"/>
                             <constraint firstItem="5mW-ac-IOd" firstAttribute="top" secondItem="9pF-PY-Opy" secondAttribute="top" id="cga-CY-hs6"/>
                             <constraint firstItem="h4k-pK-kei" firstAttribute="centerY" secondItem="Yql-Nh-nK8" secondAttribute="centerY" id="d3d-IV-9xz"/>
@@ -2405,12 +2395,12 @@
                             <constraint firstItem="tlN-I7-TVp" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="hnz-VJ-B4l"/>
                             <constraint firstItem="9pF-PY-Opy" firstAttribute="top" secondItem="PJx-NI-lOn" secondAttribute="top" id="iQb-Me-OhH"/>
                             <constraint firstItem="DAg-q3-7vX" firstAttribute="centerX" secondItem="tlN-I7-TVp" secondAttribute="centerX" id="kA3-Jf-rks"/>
-                            <constraint firstItem="MP9-kL-ec5" firstAttribute="top" secondItem="DAg-q3-7vX" secondAttribute="bottom" constant="15" id="klJ-Ke-CC1"/>
                             <constraint firstItem="m7L-5x-yLl" firstAttribute="top" secondItem="3Jt-RQ-tzI" secondAttribute="top" id="m8i-S4-EWd"/>
                             <constraint firstItem="ctB-Gg-y5p" firstAttribute="trailing" secondItem="Phc-f5-Phz" secondAttribute="trailing" id="oS0-gf-geW"/>
                             <constraint firstItem="HA1-vz-Vdk" firstAttribute="trailing" secondItem="JbD-46-JoY" secondAttribute="trailing" id="onZ-FO-Jpn"/>
                             <constraint firstItem="lve-eI-CTf" firstAttribute="top" secondItem="JbD-46-JoY" secondAttribute="bottom" constant="9" id="pMW-rW-9uz"/>
                             <constraint firstItem="DAg-q3-7vX" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="qEz-bL-tWL"/>
+                            <constraint firstItem="ctB-Gg-y5p" firstAttribute="top" secondItem="HA1-vz-Vdk" secondAttribute="bottom" constant="10" id="qzk-RC-5oa"/>
                             <constraint firstItem="lve-eI-CTf" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="r6q-VD-Iek"/>
                             <constraint firstItem="JbD-46-JoY" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="y5T-Jx-26g"/>
                             <constraint firstAttribute="trailing" secondItem="HA1-vz-Vdk" secondAttribute="trailing" constant="20" id="z7Y-Le-cXb"/>
@@ -2434,7 +2424,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="72" y="954"/>
+            <point key="canvasLocation" x="83" y="896"/>
         </scene>
     </scenes>
     <resources>
@@ -2448,6 +2438,6 @@
         <image name="NSTouchBarSkipBackTemplate" width="22" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="2OK-pd-1Rj"/>
+        <segue reference="Dua-i6-PWC"/>
     </inferredMetricsTieBreakers>
 </document>

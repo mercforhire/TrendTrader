@@ -170,7 +170,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         if testingPerformance {
             var start = 3
-            while start <= 8 {
+            while start <= 7 {
                 print("Testing numOfLosingTrades: \(start)...")
                 config.numOfLosingTrades = start
                 trader?.generateSimSession(completion: { [weak self] in
@@ -281,7 +281,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             }
         }
         
-        print("Total \(sessionManager.trades.count) trades,", "final P/L:", String(format: "%.2f", currentPL))
+        print("\(sessionManager.trades.count) trades,", "P/L:", String(format: "%.2f", currentPL))
         print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
@@ -291,8 +291,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         print("Wednesday: \(String(format: "%.2f", wednesday))")
         print("Thursday: \(String(format: "%.2f", thursday))")
         print("Friday: \(String(format: "%.2f", friday))")
-        print("Morning trades: \(String(format: "%.2f", morningTrades))")
-        print("Lunch trades: \(String(format: "%.2f", lunchTrades))")
+        print("Morning P/L: \(String(format: "%.2f", morningTrades))")
+        print("Lunch P/L: \(String(format: "%.2f", lunchTrades))")
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {

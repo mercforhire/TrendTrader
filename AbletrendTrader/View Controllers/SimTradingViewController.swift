@@ -60,7 +60,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     weak var delegate: DataManagerDelegate?
     
-    private let testingPerformance = false
+    private let testing = false
     
     func setupUI() {
         dateFormatter.timeStyle = .medium
@@ -168,18 +168,18 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         chartManager?.stopMonitoring()
         trader?.chart = completedChart
         
-        if testingPerformance {
-            var start = 3
-            while start <= 7 {
-                print("Testing numOfLosingTrades: \(start)...")
-                config.numOfLosingTrades = start
+        if testing {
+            var start = 10.0
+            while start <= 20.0 {
+                print("Testing maxRiskBase: \(start)...")
+                config.maxRiskBase = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
 
-                    start += 1
+                    start += 2.5
                     print("")
                 })
             }
@@ -210,6 +210,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var totalLoss = 0.0
         var worstPLDay = 0.0
         var worstPLDayTime: Date?
+        var peak = 0.0
+        var maxDD = 0.0
         
         var lastTrade: Trade?
         var currentDayPL = 0.0
@@ -223,9 +225,11 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var lunchTrades = 0.0
         for trade in sessionManager.trades {
             currentPL += trade.idealProfit
+            peak = max(peak, currentPL)
+            maxDD = max(maxDD, peak - currentPL)
             currentDayPL += trade.idealProfit
             
-            if !testingPerformance {
+            if !testing {
                 print(String(format: "%.2f", currentPL))
             }
             
@@ -275,13 +279,13 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             lastTrade = trade
         }
         
-        if !testingPerformance {
+        if !testing {
             for trade in sessionManager.trades {
                 print(trade.exitTime.generateDate())
             }
         }
         
-        print("\(sessionManager.trades.count) trades,", "P/L:", String(format: "%.2f", currentPL))
+        print("\(sessionManager.trades.count) trades,", "P/L:", String(format: "%.2f", currentPL), "Max DD:", String(format: "%.2f", maxDD))
         print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")

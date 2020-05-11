@@ -13,7 +13,7 @@ class ConfigurationManager {
     private let defaults: UserDefaults = UserDefaults.standard
     let IPRegex = #"http:\/\/\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:\d{0,4}\/"#
     
-    var riskMultiplier: Double
+    private(set) var riskMultiplier: Double
     
     var maxRiskBase: Double
     var maxRisk: Double {

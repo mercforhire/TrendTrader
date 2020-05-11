@@ -21,7 +21,7 @@ class ChartManager {
     private let fileName3: String = "3m.txt"
     
     private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 5
+    private let delayBeforeFetchingAtNewMinute = 3
     
     var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?
@@ -105,7 +105,11 @@ class ChartManager {
         
         updateChart()
         monitoring = true
-        refreshTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerFunction), userInfo: nil, repeats: true)
+        refreshTimer = Timer.scheduledTimer(timeInterval: 1,
+                                            target: self,
+                                            selector: #selector(timerFunction),
+                                            userInfo: nil,
+                                            repeats: true)
     }
     
     func stopMonitoring() {
@@ -273,21 +277,50 @@ class ChartManager {
         print(Date().hourMinuteSecond() + ": Start fetching latest urls...")
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .oneMin, completion: { url in
+        fetchLatestAvailableUrlDuring(time: now,
+                                      startSecond: now.second(),
+                                      interval: .oneMin,
+                                      completion: { url in
             oneMinUrl = url
             urlFetchingTask.leave()
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .twoMin, completion: { url in
-            twoMinUrl = url
-            urlFetchingTask.leave()
+        fetchLatestAvailableUrlDuring(time: now,
+                                      startSecond: now.second(),
+                                      interval: .twoMin,
+                                      completion: { [weak self] url in
+            if let url = url {
+                twoMinUrl = url
+                urlFetchingTask.leave()
+            } else {
+                self?.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
+                                                    endSecond: 50,
+                                                    interval: .twoMin,
+                                                    completion: { url2 in
+                    twoMinUrl = url2
+                    urlFetchingTask.leave()
+                })
+            }
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .threeMin, completion: { url in
-            threeMinUrl = url
-            urlFetchingTask.leave()
+        fetchLatestAvailableUrlDuring(time: now,
+                                      startSecond: now.second(),
+                                      interval: .threeMin,
+                                      completion: { [weak self] url in
+            if let url = url {
+                threeMinUrl = url
+                urlFetchingTask.leave()
+            } else {
+                self?.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
+                                                    endSecond: 50,
+                                                    interval: .threeMin,
+                                                    completion: { url2 in
+                    threeMinUrl = url2
+                    urlFetchingTask.leave()
+                })
+            }
         })
         
         urlFetchingTask.notify(queue: DispatchQueue.main) {
@@ -384,6 +417,7 @@ class ChartManager {
     
     private func fetchLatestAvailableUrlDuring(time: Date,
                                                startSecond: Int = 59,
+                                               endSecond: Int = 0,
                                                interval: SignalInteval,
                                                completion: @escaping (String?) -> ()) {
         guard let serverURL = serverUrls[interval] else {

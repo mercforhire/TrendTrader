@@ -361,7 +361,7 @@ class NTManager {
         let dir2 = URL(fileURLWithPath: incomingPath)
         let fileURL = dir.appendingPathComponent("oif\(counter).txt")
         let fileURL2 = dir2.appendingPathComponent("oif\(counter).txt")
-        print(text)
+        print(String(format: "%@: %@", Date().hourMinuteSecond(), text))
         do {
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
             try FileManager.default.copyItem(at: fileURL, to: fileURL2)

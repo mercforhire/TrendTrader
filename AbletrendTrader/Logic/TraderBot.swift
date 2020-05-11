@@ -430,7 +430,8 @@ class TraderBot {
         
         // no entering trades during lunch hour
         if config.noEntryDuringLunch,
-            Date.lunchInterval(date: currentBar.time).contains(currentBar.time), !config.byPassTradingTimeRestrictions {
+            Date.lunchInterval(date: currentBar.time).contains(currentBar.time),
+            !config.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .lunchHour)
         }
         
@@ -440,6 +441,7 @@ class TraderBot {
             return seekToOpenPosition(bar: currentBar, entryType: .all)
         }
         
+        // If we lost multiple times in alternating directions, stop trading
         if checkChoppyDay(bar: currentBar) {
             return .noAction(entryType: nil, reason: .lunchHour)
         }
@@ -655,7 +657,7 @@ class TraderBot {
         return notTooFarFromSupport
     }
     
-    // check if the last 3 trades were losers in opposite directions(chop)
+    // check if the last X trades were losers in opposite directions(chop)
     private func checkChoppyDay(bar: PriceBar) -> Bool {
         guard config.numOfLosingTrades > 0,
             let lastTrade = sessionManager.trades.last,

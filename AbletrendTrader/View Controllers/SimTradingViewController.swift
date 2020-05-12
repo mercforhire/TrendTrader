@@ -248,9 +248,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 break
             }
             
-            if Date.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime) {
+            if Date.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
                 morningTrades += trade.idealProfit
-            } else if Date.lunchInterval(date: trade.entryTime).contains(trade.entryTime) {
+            } else if Date.lunchInterval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
                 lunchTrades += trade.idealProfit
             }
             

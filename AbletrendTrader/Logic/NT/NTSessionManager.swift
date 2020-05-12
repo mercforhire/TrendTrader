@@ -494,6 +494,8 @@ class NTSessionManager: BaseSessionManager {
                     completion(.positionNotClosed)
                 }
             }
+        } else {
+            completion(nil)
         }
     }
     

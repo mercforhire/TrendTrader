@@ -443,7 +443,7 @@ class TraderBot {
         
         // If we lost multiple times in alternating directions, stop trading
         if checkChoppyDay(bar: currentBar) {
-            return .noAction(entryType: nil, reason: .lunchHour)
+            return .noAction(entryType: nil, reason: .choppyDay)
         }
         
         if sessionManager.trades.isEmpty {
@@ -664,7 +664,7 @@ class TraderBot {
             lastTrade.entryTime.isInSameDay(date: bar.time),
             lastTrade.idealProfit < 0 else { return false }
         
-        var numberOfLosingTrades = 0
+        var numOfAlternatingLosingTrades = 0
         var directionOfLastLosingTrade: TradeDirection = .long
         
         for trade in sessionManager.trades.reversed() {
@@ -672,13 +672,13 @@ class TraderBot {
                 break
             }
             
-            if (trade.idealProfit < 0 && numberOfLosingTrades == 0) ||
+            if (trade.idealProfit < 0 && numOfAlternatingLosingTrades == 0) ||
                 (trade.idealProfit < 0 && trade.direction != directionOfLastLosingTrade) {
-                numberOfLosingTrades += 1
+                numOfAlternatingLosingTrades += 1
                 directionOfLastLosingTrade = trade.direction
             }
             
-            if numberOfLosingTrades == config.numOfLosingTrades {
+            if numOfAlternatingLosingTrades == config.numOfLosingTrades {
                 return true
             }
         }

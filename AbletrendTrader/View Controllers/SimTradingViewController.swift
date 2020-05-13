@@ -122,7 +122,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         chartManager?.stopMonitoring()
         sender.isEnabled = false
         
-        chartManager?.fetchChart(completion: {  [weak self] chart in
+        chartManager?.fetchChart(completion: { [weak self] chart in
             guard let self = self else { return }
             
             if let chart = chart {
@@ -132,6 +132,18 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             }
             
             sender.isEnabled = true
+        })
+    }
+    
+    @IBAction func loadFromDiskPressed(_ sender: NSButton) {
+        chartManager?.loadChart(completion: { [weak self] chart in
+            guard let self = self else { return }
+            
+            if let chart = chart {
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.endButton.isEnabled = true
+                self.startButton.isEnabled = self.config.simulateTimePassage
+            }
         })
     }
     
@@ -203,7 +215,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
         }
         
-        var currentPL = 0.0
+        var currentPL = 1712.01
         var winningTrades = 0
         var totalWin = 0.0
         var losingTrades = 0

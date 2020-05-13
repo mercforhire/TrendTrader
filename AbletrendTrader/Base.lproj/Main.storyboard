@@ -718,15 +718,15 @@
                             <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LXr-xQ-Y0G">
                                 <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="vuB-Ii-YB8">
-                                    <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textView editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="VqS-kD-8Fo">
-                                            <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="textColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="minSize" width="683" height="489"/>
+                                            <size key="minSize" width="698" height="489"/>
                                             <size key="maxSize" width="698" height="10000000"/>
                                             <attributedString key="textStorage">
                                                 <fragment content="&lt;Log Start Here&gt;">
@@ -747,7 +747,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="80O-Uf-KaD">
-                                    <rect key="frame" x="683" y="0.0" width="15" height="489"/>
+                                    <rect key="frame" x="682" y="0.0" width="16" height="489"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
@@ -1964,8 +1964,8 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Yql-Nh-nK8">
-                                <rect key="frame" x="14" y="480" width="153" height="32"/>
-                                <buttonCell key="cell" type="push" title="Refresh chart data" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bap-ku-Uoa">
+                                <rect key="frame" x="14" y="480" width="110" height="32"/>
+                                <buttonCell key="cell" type="push" title="Fetch chart" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bap-ku-Uoa">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -2366,6 +2366,16 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rO1-X1-ZH1">
+                                <rect key="frame" x="124" y="480" width="130" height="32"/>
+                                <buttonCell key="cell" type="push" title="Load from disk" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9EL-Tz-Peg">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="loadFromDiskPressed:" target="XfG-lQ-9wD" id="mxA-UP-oyT"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="HA1-vz-Vdk" firstAttribute="top" secondItem="tlN-I7-TVp" secondAttribute="bottom" constant="10" id="0PP-jg-wDE"/>
@@ -2389,6 +2399,7 @@
                             <constraint firstItem="W4F-4e-ItW" firstAttribute="top" secondItem="3Jt-RQ-tzI" secondAttribute="bottom" constant="15" id="cT7-Aa-TdN"/>
                             <constraint firstItem="5mW-ac-IOd" firstAttribute="top" secondItem="9pF-PY-Opy" secondAttribute="top" id="cga-CY-hs6"/>
                             <constraint firstItem="h4k-pK-kei" firstAttribute="centerY" secondItem="Yql-Nh-nK8" secondAttribute="centerY" id="d3d-IV-9xz"/>
+                            <constraint firstItem="rO1-X1-ZH1" firstAttribute="centerY" secondItem="Yql-Nh-nK8" secondAttribute="centerY" id="fM2-iU-Pot"/>
                             <constraint firstItem="5mW-ac-IOd" firstAttribute="leading" secondItem="qIK-7B-KMS" secondAttribute="leading" id="fdV-tz-eIu"/>
                             <constraint firstAttribute="trailing" secondItem="h4k-pK-kei" secondAttribute="trailing" constant="20" id="frI-7P-P4p"/>
                             <constraint firstItem="h4k-pK-kei" firstAttribute="trailing" secondItem="JbD-46-JoY" secondAttribute="trailing" id="gra-Qq-8K1"/>
@@ -2403,6 +2414,7 @@
                             <constraint firstItem="ctB-Gg-y5p" firstAttribute="top" secondItem="HA1-vz-Vdk" secondAttribute="bottom" constant="10" id="qzk-RC-5oa"/>
                             <constraint firstItem="lve-eI-CTf" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="r6q-VD-Iek"/>
                             <constraint firstItem="JbD-46-JoY" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="y5T-Jx-26g"/>
+                            <constraint firstItem="rO1-X1-ZH1" firstAttribute="leading" secondItem="Yql-Nh-nK8" secondAttribute="trailing" constant="12" id="z1B-E7-b8L"/>
                             <constraint firstAttribute="trailing" secondItem="HA1-vz-Vdk" secondAttribute="trailing" constant="20" id="z7Y-Le-cXb"/>
                             <constraint firstItem="cdn-R7-STd" firstAttribute="top" secondItem="tlN-I7-TVp" secondAttribute="bottom" constant="10" id="zJQ-yp-Ygn"/>
                         </constraints>
@@ -2438,6 +2450,6 @@
         <image name="NSTouchBarSkipBackTemplate" width="22" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Dua-i6-PWC"/>
+        <segue reference="2OK-pd-1Rj"/>
     </inferredMetricsTieBreakers>
 </document>

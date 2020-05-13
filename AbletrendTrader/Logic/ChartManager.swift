@@ -53,8 +53,40 @@ class ChartManager {
         self.simTime = calendar.date(from: components1)!
     }
     
+    func loadChart(completion: @escaping (_ chart: Chart?) -> Void) {
+        if let oneMinText = Parser.readFile(fileName: fileName1),
+            let twoMinText = Parser.readFile(fileName: fileName2),
+            let threeMinText = Parser.readFile(fileName: fileName3) {
+            generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
+                self.chart = chart
+                completion(self.chart)
+            }
+        } else {
+            self.delegate?.chartStatusChanged(statusText: "Chart data reading failed")
+            completion(nil)
+        }
+    }
+    
     func fetchChart(completion: @escaping (_ chart: Chart?) -> Void) {
-        if live {            
+        if config.simulateTimePassage {
+            findLatestAvailableUrls { [weak self] urls in
+                guard let self = self else {
+                    return
+                }
+                
+                if let urls = urls {
+                    self.downloadChartFromUrls(oneMinUrl: urls.0,
+                                               twoMinUrl: urls.1,
+                                               threeMinUrl: urls.2)
+                    { downloadedChart in
+                        self.chart = downloadedChart
+                        completion(downloadedChart)
+                    }
+                } else {
+                    completion(nil)
+                }
+            }
+        } else {
             self.findLatestAvaiableUrls { [weak self] urls in
                 guard let self = self,
                     let oneMinUrl = urls?.0,
@@ -64,38 +96,6 @@ class ChartManager {
                 }
                 
                 self.downloadChartFromUrls(oneMinUrl: oneMinUrl, twoMinUrl: twoMinUrl, threeMinUrl: threeMinUrl, completion: completion)
-            }
-        } else {
-            if config.simulateTimePassage {
-                findLatestAvailableUrls { [weak self] urls in
-                    guard let self = self else {
-                        return
-                    }
-                    
-                    if let urls = urls {
-                        self.downloadChartFromUrls(oneMinUrl: urls.0,
-                                                   twoMinUrl: urls.1,
-                                                   threeMinUrl: urls.2)
-                        { downloadedChart in
-                            self.chart = downloadedChart
-                            completion(downloadedChart)
-                        }
-                    } else {
-                        completion(nil)
-                    }
-                }
-            } else {
-                if let oneMinText = Parser.readFile(fileName: fileName1),
-                    let twoMinText = Parser.readFile(fileName: fileName2),
-                    let threeMinText = Parser.readFile(fileName: fileName3) {
-                    generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
-                        self.chart = chart
-                        completion(self.chart)
-                    }
-                } else {
-                    self.delegate?.chartStatusChanged(statusText: "Chart data reading failed")
-                    completion(nil)
-                }
             }
         }
     }

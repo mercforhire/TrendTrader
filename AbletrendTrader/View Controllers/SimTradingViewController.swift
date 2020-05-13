@@ -215,7 +215,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
         }
         
-        var currentPL = 1712.01
+        var currentPL = 0.0
         var winningTrades = 0
         var totalWin = 0.0
         var losingTrades = 0

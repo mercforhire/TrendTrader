@@ -70,6 +70,11 @@ class ConfigurationManager {
         return profitAvoidSameDirectionBase * riskMultiplier
     }
     
+    var stopTradingBase: Double
+    var stopTrading: Double {
+        return stopTradingBase * riskMultiplier
+    }
+    
     var numOfLosingTrades: Int
     
     private(set) var highRiskStart: Date
@@ -158,9 +163,9 @@ class ConfigurationManager {
         
         self.avoidTakingSameLosingTrade = defaults.object(forKey: "avoid_taking_same_losing_trade") as? Bool ?? false
         
-        self.maxDistanceToSRBase = defaults.object(forKey: "max_distance_to_SR") as? Double ?? 11.25
+        self.maxDistanceToSRBase = defaults.object(forKey: "max_distance_to_SR") as? Double ?? 11.75
         
-        self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 23.5
+        self.profitAvoidSameDirectionBase = defaults.object(forKey: "profit_avoid_same_direction_base") as? Double ?? 25.0
         
         self.numOfLosingTrades = defaults.object(forKey: "num_losing_trades") as? Int ?? 4
         
@@ -169,6 +174,8 @@ class ConfigurationManager {
         self.server2MinURL = defaults.object(forKey: "server_2min_url") as? String ?? defaultSettings["default_ip"] as! String
         
         self.server3MinURL = defaults.object(forKey: "server_3min_url") as? String ?? defaultSettings["default_ip"] as! String
+        
+        self.stopTradingBase = defaults.object(forKey: "stop_trading") as? Double ?? 0.0
         
         if let data = UserDefaults.standard.value(forKey:"nt_settings") as? Data {
             self.ntSettings = (try? PropertyListDecoder().decode(Array<NTSettings>.self, from: data)) ?? []
@@ -480,6 +487,16 @@ class ConfigurationManager {
     func setWaitForFinalizedSignals(newValue: Bool) {
         waitForFinalizedSignals = newValue
         saveToDefaults(newValue: newValue, key: "wait_for_finalized_signals")
+    }
+    
+    func setStopTrading(newValue: Double) throws {
+        if newValue >= 20.0 || newValue == 0.0 {
+            stopTradingBase = newValue
+            saveToDefaults(newValue: newValue, key: "stop_trading")
+            return
+        }
+        
+        throw ConfigError.stopTradingError
     }
     
     func addNTSettings(settings: NTSettings) {

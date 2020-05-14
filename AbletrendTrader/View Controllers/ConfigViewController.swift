@@ -40,6 +40,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var noEntryDuringLunchCheckbox: NSButton!
     @IBOutlet private weak var waitFinalizedSignalsCheckbox: NSButton!
     @IBOutlet private weak var fomcDayCheckbox: NSButton!
+    @IBOutlet private weak var stopTradingField: NSTextField!
     
     func setupUI() {
         riskField.delegate = self
@@ -55,6 +56,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         maxDistanceToSRField.delegate = self
         profitAvoidSameDirectionField.delegate = self
         numberLosingTradesField.delegate = self
+        stopTradingField.delegate = self
     }
     
     func loadConfig() {
@@ -66,6 +68,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         minProfitByPass.stringValue = String(format: "%.2f", config.skipGreenExitBase)
         minProfitPullbackField.stringValue = String(format: "%.2f", config.enterOnAnyPullbackBase)
         takeProfitField.stringValue = String(format: "%.2f", config.takeProfitBarLengthBase)
+        stopTradingField.stringValue = String(format: "%.2f", config.stopTradingBase)
     
         fomcTimePicker.dateValue = Date.getNewDateFromTime(hour: config.fomcTime.hour(),
                                                            min: config.fomcTime.minute())
@@ -333,6 +336,8 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try config.setProfitAvoidSameDirection(newValue: textField.doubleValue)
                 } else if textField == numberLosingTradesField {
                     try config.setNumberLosingTradesField(newValue: textField.integerValue)
+                } else if textField == stopTradingField {
+                    try config.setStopTrading(newValue: textField.doubleValue)
                 }
             } catch (let error) {
                 guard let configError = error as? ConfigError else { return }

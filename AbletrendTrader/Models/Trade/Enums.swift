@@ -204,6 +204,7 @@ enum NoActionReason {
     case outsideTradingHours
     case lunchHour
     case choppyDay
+    case profitHit
     case other
     
     func description() -> String {
@@ -222,6 +223,8 @@ enum NoActionReason {
             return "Lunch hour"
         case .choppyDay:
             return "Choppy day"
+        case .profitHit:
+            return "Profit hit for the day"
         case .other:
             return "Other reason"
         }
@@ -438,6 +441,7 @@ enum ConfigError: Error {
     case numOfLosingTradesError
     case maxDistanceToSRError
     case profitAvoidSameDirectionError
+    case stopTradingError
     
     func displayMessage() -> String {
         switch self {
@@ -487,6 +491,8 @@ enum ConfigError: Error {
             return "Number of opposite losing trades to halt trading must be >= 3"
         case .profitAvoidSameDirectionError:
             return "Profit avoid same direction must be over 10"
+        case .stopTradingError:
+            return "Stop trading must be over 20"
         }
     }
     

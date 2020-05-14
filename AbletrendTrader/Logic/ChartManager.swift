@@ -68,26 +68,8 @@ class ChartManager {
     }
     
     func fetchChart(completion: @escaping (_ chart: Chart?) -> Void) {
-        if config.simulateTimePassage {
-            findLatestAvailableUrls { [weak self] urls in
-                guard let self = self else {
-                    return
-                }
-                
-                if let urls = urls {
-                    self.downloadChartFromUrls(oneMinUrl: urls.0,
-                                               twoMinUrl: urls.1,
-                                               threeMinUrl: urls.2)
-                    { downloadedChart in
-                        self.chart = downloadedChart
-                        completion(downloadedChart)
-                    }
-                } else {
-                    completion(nil)
-                }
-            }
-        } else {
-            self.findLatestAvaiableUrls { [weak self] urls in
+        if live {
+            findMostRecentURLs { [weak self] urls in
                 guard let self = self,
                     let oneMinUrl = urls?.0,
                     let twoMinUrl = urls?.1,
@@ -96,6 +78,37 @@ class ChartManager {
                 }
                 
                 self.downloadChartFromUrls(oneMinUrl: oneMinUrl, twoMinUrl: twoMinUrl, threeMinUrl: threeMinUrl, completion: completion)
+            }
+        } else {
+            if config.simulateTimePassage {
+                findURLsAtTime { [weak self] urls in
+                    guard let self = self else {
+                        return
+                    }
+                    
+                    if let urls = urls {
+                        self.downloadChartFromUrls(oneMinUrl: urls.0,
+                                                   twoMinUrl: urls.1,
+                                                   threeMinUrl: urls.2)
+                        { downloadedChart in
+                            self.chart = downloadedChart
+                            completion(downloadedChart)
+                        }
+                    } else {
+                        completion(nil)
+                    }
+                }
+            } else {
+                findMostRecentURLs { [weak self] urls in
+                    guard let self = self,
+                        let oneMinUrl = urls?.0,
+                        let twoMinUrl = urls?.1,
+                        let threeMinUrl = urls?.2 else {
+                        return completion(nil)
+                    }
+                    
+                    self.downloadChartFromUrls(oneMinUrl: oneMinUrl, twoMinUrl: twoMinUrl, threeMinUrl: threeMinUrl, completion: completion)
+                }
             }
         }
     }
@@ -267,7 +280,7 @@ class ChartManager {
         }
     }
     
-    private func findLatestAvaiableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+    private func findMostRecentURLs(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
         var oneMinUrl: String?
         var twoMinUrl: String?
         var threeMinUrl: String?
@@ -333,7 +346,7 @@ class ChartManager {
         }
     }
     
-    private func findLatestAvailableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+    private func findURLsAtTime(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {

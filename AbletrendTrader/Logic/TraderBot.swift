@@ -292,22 +292,11 @@ class TraderBot {
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let newPosition: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
             
-            if config.avoidTakingSameTrade,
-                let newPositionStop = newPosition.stopLoss?.stop,
+            if config.stopTrading > 0,
                 let lastTrade = sessionManager.trades.last,
-                lastTrade.direction == newPosition.direction,
-                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
-                chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
-                lastTrade.exitMethod == .hitStoploss {
-                
-                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
-
-                return .noAction(entryType: nil, reason: .repeatedTrade)
-            }
-            
-            if !checkNotTooFarFromSupport(direction: newPosition.direction, bar: bar) {
-                sessionManager.delegate?.newLogAdded(log: "Ignored too far from support trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
-
+                lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
+                lastTrade.idealProfit > config.stopTrading {
+                sessionManager.delegate?.newLogAdded(log: "Stopped trading after significant profit: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
                 return .noAction(entryType: nil, reason: .lowQualityTrade)
             }
             
@@ -319,6 +308,25 @@ class TraderBot {
                 sessionManager.delegate?.newLogAdded(log: "Ignored same direction trade after significant profit: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
 
                 return .noAction(entryType: nil, reason: .lowQualityTrade)
+            }
+            
+            if !checkNotTooFarFromSupport(direction: newPosition.direction, bar: bar) {
+                sessionManager.delegate?.newLogAdded(log: "Ignored too far from support trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
+
+                return .noAction(entryType: nil, reason: .lowQualityTrade)
+            }
+            
+            if config.avoidTakingSameTrade,
+                let newPositionStop = newPosition.stopLoss?.stop,
+                let lastTrade = sessionManager.trades.last,
+                lastTrade.direction == newPosition.direction,
+                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
+                chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
+                lastTrade.exitMethod == .hitStoploss {
+                
+                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
+
+                return .noAction(entryType: nil, reason: .repeatedTrade)
             }
             
             return .openPosition(newPosition: newPosition, entryType: entryType)

@@ -718,15 +718,15 @@
                             <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LXr-xQ-Y0G">
                                 <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="vuB-Ii-YB8">
-                                    <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textView editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="VqS-kD-8Fo">
-                                            <rect key="frame" x="0.0" y="0.0" width="698" height="489"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="683" height="489"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="textColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="minSize" width="698" height="489"/>
+                                            <size key="minSize" width="683" height="489"/>
                                             <size key="maxSize" width="698" height="10000000"/>
                                             <attributedString key="textStorage">
                                                 <fragment content="&lt;Log Start Here&gt;">
@@ -747,7 +747,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="80O-Uf-KaD">
-                                    <rect key="frame" x="682" y="0.0" width="16" height="489"/>
+                                    <rect key="frame" x="683" y="0.0" width="15" height="489"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
@@ -1283,6 +1283,25 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5fY-NA-GST">
+                                <rect key="frame" x="357" y="178" width="119" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Stop trading profit:" id="OZq-Wa-Ksd">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QEP-wz-oA4">
+                                <rect key="frame" x="611" y="176" width="70" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="70" id="DAS-t7-e6U"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" drawsBackground="YES" id="G0X-3A-A7P">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
                             <constraint firstItem="Ssd-VA-eKV" firstAttribute="leading" secondItem="DnC-II-sbq" secondAttribute="leading" id="0mW-uI-5O4"/>
@@ -1301,6 +1320,7 @@
                             <constraint firstItem="UTR-to-ULY" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="8fo-1a-hEm"/>
                             <constraint firstItem="pFZ-k0-AVu" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="8mM-Y5-K4x"/>
                             <constraint firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" constant="20" id="8wo-vn-jm5"/>
+                            <constraint firstItem="5fY-NA-GST" firstAttribute="leading" secondItem="DnC-II-sbq" secondAttribute="leading" id="ARo-Qu-QBm"/>
                             <constraint firstItem="xAN-G6-93M" firstAttribute="trailing" secondItem="UEB-Um-rH8" secondAttribute="trailing" id="Aqw-O2-Mif"/>
                             <constraint firstItem="2St-i5-w4E" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="B8A-h9-a1n"/>
                             <constraint firstItem="GsN-hI-npt" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="By0-VT-0JB"/>
@@ -1354,12 +1374,14 @@
                             <constraint firstItem="kKg-dL-LnA" firstAttribute="centerY" secondItem="UTR-to-ULY" secondAttribute="centerY" id="dKg-JC-Z3T"/>
                             <constraint firstItem="9pS-oT-Qfu" firstAttribute="centerY" secondItem="dqP-vc-0bH" secondAttribute="centerY" id="dLZ-sf-jDF"/>
                             <constraint firstItem="4BI-nj-gAz" firstAttribute="centerY" secondItem="o80-kA-tzn" secondAttribute="centerY" id="dnM-Q2-bqx"/>
+                            <constraint firstItem="5fY-NA-GST" firstAttribute="centerY" secondItem="ZR3-U1-ftQ" secondAttribute="centerY" id="dnb-In-fIN"/>
                             <constraint firstItem="phy-gR-GKr" firstAttribute="centerY" secondItem="E9O-bA-Exd" secondAttribute="centerY" id="ee1-Uy-gXS"/>
                             <constraint firstItem="ZR3-U1-ftQ" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="fKI-lZ-40B"/>
                             <constraint firstItem="Nzq-6Q-h9i" firstAttribute="centerY" secondItem="GsN-hI-npt" secondAttribute="centerY" id="fWs-KM-hxH"/>
                             <constraint firstItem="OML-bs-d5P" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="ffc-7l-wAO"/>
                             <constraint firstItem="E9O-bA-Exd" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="fuV-2H-OLQ"/>
                             <constraint firstItem="qxg-8Q-OiA" firstAttribute="centerY" secondItem="ZR3-U1-ftQ" secondAttribute="centerY" id="git-cx-i8h"/>
+                            <constraint firstItem="QEP-wz-oA4" firstAttribute="trailing" secondItem="vZb-pz-ioV" secondAttribute="trailing" id="gzL-y8-2TC"/>
                             <constraint firstItem="vZb-pz-ioV" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="i1i-0X-GJd"/>
                             <constraint firstItem="iFc-4e-GUS" firstAttribute="leading" secondItem="0BP-IF-9o0" secondAttribute="leading" id="ieu-Ik-Q8r"/>
                             <constraint firstItem="MLv-fc-Lh1" firstAttribute="top" secondItem="R1i-le-7zB" secondAttribute="bottom" constant="10" id="inp-GY-DhV"/>
@@ -1382,6 +1404,7 @@
                             <constraint firstItem="R1i-le-7zB" firstAttribute="leading" secondItem="ase-WH-YaY" secondAttribute="leading" constant="20" id="xhi-2S-0AG"/>
                             <constraint firstItem="krP-SR-T3W" firstAttribute="trailing" secondItem="UEB-Um-rH8" secondAttribute="trailing" id="yHJ-Qd-Xc4"/>
                             <constraint firstAttribute="bottom" secondItem="Nns-FX-mQK" secondAttribute="bottom" constant="20" id="ydp-hY-kmj"/>
+                            <constraint firstItem="QEP-wz-oA4" firstAttribute="centerY" secondItem="5fY-NA-GST" secondAttribute="centerY" id="yyW-D3-bpw"/>
                             <constraint firstItem="NaI-Ca-x1s" firstAttribute="top" secondItem="VG4-Lk-PUU" secondAttribute="bottom" constant="10" id="zcf-tW-Kby"/>
                             <constraint firstItem="dJi-V8-XmW" firstAttribute="centerY" secondItem="VG4-Lk-PUU" secondAttribute="centerY" id="zqG-cA-DNc"/>
                         </constraints>
@@ -1413,6 +1436,7 @@
                         <outlet property="sessionEndTimePicker" destination="Nvu-lL-SDc" id="mvI-vz-xrR"/>
                         <outlet property="sessionStartTimePicker" destination="vZb-pz-ioV" id="wPc-gy-4xk"/>
                         <outlet property="simRealTimeCheckbox" destination="0BP-IF-9o0" id="WBY-bi-Igy"/>
+                        <outlet property="stopTradingField" destination="QEP-wz-oA4" id="IvQ-4d-pca"/>
                         <outlet property="sweetspotDistanceField" destination="EiV-b6-Ycz" id="lKs-53-mZD"/>
                         <outlet property="takeProfitField" destination="9pS-oT-Qfu" id="SUe-wi-BDb"/>
                         <outlet property="waitFinalizedSignalsCheckbox" destination="ToP-uD-y6Z" id="epS-3E-W9Y"/>

@@ -143,6 +143,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
                 self.endButton.isEnabled = true
                 self.startButton.isEnabled = self.config.simulateTimePassage
+                
+                if self.testing {
+                    self.goToEndOfDay(self.endButton as Any)
+                }
             }
         })
     }
@@ -181,17 +185,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 10.0
-            while start <= 20.0 {
-                print("Testing maxRiskBase: \(start)...")
-                config.maxRiskBase = start
+            var start = 20.0
+            while start <= 70.0 {
+                print("Testing stopTradingBase: \(start)...")
+                config.stopTradingBase = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
 
-                    start += 2.5
+                    start += 5.0
                     print("")
                 })
             }

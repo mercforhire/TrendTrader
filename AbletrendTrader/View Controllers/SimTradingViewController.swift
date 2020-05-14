@@ -185,8 +185,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 20.0
-            while start <= 70.0 {
+            var start = 100.0
+            while start <= 200.0 {
                 print("Testing stopTradingBase: \(start)...")
                 config.stopTradingBase = start
                 trader?.generateSimSession(completion: { [weak self] in
@@ -195,7 +195,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
 
-                    start += 5.0
+                    start += 10.0
                     print("")
                 })
             }
@@ -219,7 +219,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
         }
         
-        var currentPL = 0.0
+        var currentPL = 1820.76
         var winningTrades = 0
         var totalWin = 0.0
         var losingTrades = 0

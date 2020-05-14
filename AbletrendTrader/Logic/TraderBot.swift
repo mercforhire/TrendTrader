@@ -292,14 +292,6 @@ class TraderBot {
     private func seekToOpenPosition(bar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let newPosition: Position = checkForEntrySignal(direction: .long, bar: bar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, entryType: entryType) {
             
-            if config.stopTrading > 0,
-                let lastTrade = sessionManager.trades.last,
-                lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
-                lastTrade.idealProfit > config.stopTrading {
-                sessionManager.delegate?.newLogAdded(log: "Stopped trading after significant profit: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
-                return .noAction(entryType: nil, reason: .lowQualityTrade)
-            }
-            
             if config.profitAvoidSameDirection > 0,
                 let lastTrade = sessionManager.trades.last,
                 lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
@@ -421,6 +413,10 @@ class TraderBot {
         // stop trading if P&L <= MaxDailyLoss
         if sessionManager.getDailyPAndL(day: currentBar.time) <= config.maxDailyLoss {
             return .noAction(entryType: nil, reason: .exceedLoss)
+        }
+        
+        if config.stopTrading > 0, sessionManager.getDailyPAndL(day: currentBar.time) > config.stopTrading {
+            return .noAction(entryType: nil, reason: .profitHit)
         }
         
         // no entering trades during FOMC hour

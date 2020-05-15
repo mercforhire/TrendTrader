@@ -21,7 +21,7 @@ class ChartManager {
     private let fileName3: String = "3m.txt"
     
     private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 4
+    private let delayBeforeFetchingAtNewMinute = 3
     
     var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?

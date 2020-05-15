@@ -60,8 +60,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     weak var delegate: DataManagerDelegate?
     
-    private let testing = false
-    
     func setupUI() {
         dateFormatter.timeStyle = .medium
         dateFormatter.timeZone = Date.DefaultTimeZone
@@ -172,8 +170,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         tableView.reloadData()
     }
     
-    @IBAction
-    private func goToEndOfDay(_ sender: Any) {
+    private let testing = false
+    @IBAction private func goToEndOfDay(_ sender: Any) {
         guard trader != nil, let completedChart = chartManager?.chart, !completedChart.timeKeys.isEmpty
         else { return }
         
@@ -185,18 +183,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 100.0
-            while start <= 200.0 {
-                print("Testing stopTradingBase: \(start)...")
-                config.stopTradingBase = start
+            var start = 4
+            while start <= 6 {
+                print("Testing numOfLosingTrades: \(start)...")
+                config.numOfLosingTrades = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
-
-                    start += 10.0
                     print("")
+                    start += 1
                 })
             }
         } else {
@@ -219,7 +216,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
         }
         
-        var currentPL = 1820.76
+        var currentPL = 0.0
         var winningTrades = 0
         var totalWin = 0.0
         var losingTrades = 0

@@ -50,5 +50,11 @@
 	<integer>1</integer>
 	<key>max_high_risk_entry_allowed</key>
 	<integer>1</integer>
+	<key>max_distance_to_SR</key>
+	<real>11.75</real>
+	<key>profit_avoid_same_direction_base</key>
+	<real>25</real>
+	<key>num_losing_trades</key>
+	<integer>4</integer>
 </dict>
 </plist>

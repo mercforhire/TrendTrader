@@ -442,6 +442,7 @@ enum ConfigError: Error {
     case maxDistanceToSRError
     case profitAvoidSameDirectionError
     case stopTradingError
+    case bufferError
     
     func displayMessage() -> String {
         switch self {
@@ -454,9 +455,9 @@ enum ConfigError: Error {
         case .minStopError:
             return "Mn stop must be between 2 - 10"
         case .sweetSpotMinDistanceError:
-            return "Sweetspot minimum distance between 1 - 10"
+            return "Sweetspot minimum distance between 0.5 - 10"
         case .greenBarsExitError:
-            return "Green bars exit profit higher than 5"
+            return "Green bars exit profit higher than 3"
         case .skipGreenBarsExitError:
             return "Skip green bars exit must be higher than green bars exit"
         case .enterOnPullbackError:
@@ -486,13 +487,15 @@ enum ConfigError: Error {
         case .maxHighRiskEntryAllowedError:
             return "Max high risk entry allowed must be positive number"
         case .maxDistanceToSRError:
-            return "Max distance to SR must be over 5"
+            return "Max distance to SR must be over 3"
         case .numOfLosingTradesError:
             return "Number of opposite losing trades to halt trading must be >= 3"
         case .profitAvoidSameDirectionError:
-            return "Profit avoid same direction must be over 10"
+            return "Profit avoid same direction must be over 4"
         case .stopTradingError:
             return "Stop trading must be over 20"
+        case .bufferError:
+            return "Buffer must be over 0"
         }
     }
     

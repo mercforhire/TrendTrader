@@ -9,16 +9,14 @@
 import Foundation
 
 class TraderBot {
-    private let config = ConfigurationManager.shared
-    private let Buffer = 1.0
-    
     var sessionManager: BaseSessionManager
     var chart: Chart
+    var tradingSetting: TradingSettings
     
-    init(chart: Chart, sessionManager: BaseSessionManager) {
-
+    init(chart: Chart, sessionManager: BaseSessionManager, tradingSetting: TradingSettings) {
         self.chart = chart
         self.sessionManager = sessionManager
+        self.tradingSetting = tradingSetting
     }
     
     func generateSimSession(upToPriceBar: PriceBar? = nil, completion: @escaping () -> ()) {
@@ -47,9 +45,9 @@ class TraderBot {
                                              day: 29)
             let fomcDay: Date = calendar.date(from: components1)!
             if currentBar.time.isInSameDay(date: fomcDay) {
-                config.fomcDay = true
+                tradingSetting.fomcDay = true
             } else {
-                config.fomcDay = false
+                tradingSetting.fomcDay = false
             }
             
             let actions = self.decide(priceBar: currentBar)
@@ -119,20 +117,20 @@ class TraderBot {
             }
             
             // exit trade during FOMC hour
-            if Date.fomcInterval(date: priceBar.time).contains(priceBar.time) &&
-                config.fomcDay &&
-                !config.byPassTradingTimeRestrictions {
+            if tradingSetting.fomcInterval(date: priceBar.time).contains(priceBar.time) &&
+                tradingSetting.fomcDay &&
+                !tradingSetting.byPassTradingTimeRestrictions {
                 
                 return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .manual)]
             }
             
             // If we reached FlatPositionsTime, exit the trade immediately
-            if Date.flatPositionsTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
+            if tradingSetting.flatPositionsTime(date: priceBar.time) <= priceBar.time && !tradingSetting.byPassTradingTimeRestrictions {
                 return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .endOfDay)]
             }
             
             // If we reached ClearPositionTime, close current position on any blue/red bar in favor of the position
-            if Date.clearPositionTime(date: priceBar.time) <= priceBar.time && !config.byPassTradingTimeRestrictions {
+            if tradingSetting.clearPositionTime(date: priceBar.time) <= priceBar.time && !tradingSetting.byPassTradingTimeRestrictions {
                 switch sessionManager.pos?.direction {
                 case .long:
                     if priceBar.barColor == .blue {
@@ -171,16 +169,16 @@ class TraderBot {
             }
             
             // Exit when the bar is over 'config.takeProfitBarLength' points long
-            if !Date.highRiskEntryInteval(date: priceBar.time).contains(priceBar.time),
-                currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= config.takeProfitBarLength {
+            if !tradingSetting.highRiskEntryInteval(date: priceBar.time).contains(priceBar.time),
+                currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= tradingSetting.takeProfitBarLength {
                 
                 switch currentPosition.direction {
                 case .long:
-                    if priceBar.candleStick.close - priceBar.candleStick.open >= config.takeProfitBarLength {
+                    if priceBar.candleStick.close - priceBar.candleStick.open >= tradingSetting.takeProfitBarLength {
                         return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)]
                     }
                 case .short:
-                    if priceBar.candleStick.open - priceBar.candleStick.close >= config.takeProfitBarLength {
+                    if priceBar.candleStick.open - priceBar.candleStick.close >= tradingSetting.takeProfitBarLength {
                         return [forceExitPosition(atEndOfBar: priceBar, exitMethod: .profitTaking)]
                     }
                 }
@@ -199,31 +197,31 @@ class TraderBot {
                 let securedProfit: Double
                 switch sessionManager.pos?.direction {
                 case .long:
-                    stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - Buffer
+                    stopLossFromGreenBars = min(previousPriceBar.candleStick.low, priceBar.candleStick.low).flooring(toNearest: 0.5) - tradingSetting.buffer
                     securedProfit = stopLossFromGreenBars - currentPosition.idealEntryPrice
                 default:
-                    stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + Buffer
+                    stopLossFromGreenBars = max(previousPriceBar.candleStick.high, priceBar.candleStick.high).ceiling(toNearest: 0.5) + tradingSetting.buffer
                     securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
                 }
                 
-                if securedProfit < config.skipGreenExit, securedProfit >= config.greenExit {
+                if securedProfit < tradingSetting.skipGreenExit, securedProfit >= tradingSetting.greenExit {
                     switch sessionManager.pos?.direction {
                     case .long:
                         if stopLossFromGreenBars > currentStop {
                             // decide whether to use the bottom of the two green bars as SL or use 1 point under the 1 min stop
-                            if stopLossFromGreenBars - currentStop > config.sweetSpot {
+                            if stopLossFromGreenBars - currentStop > tradingSetting.sweetSpot {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
-                                twoGreenBarsSL = currentStop - Buffer
+                                twoGreenBarsSL = currentStop - tradingSetting.buffer
                             }
                         }
                     default:
                         if stopLossFromGreenBars < currentStop {
                             // decide whether to use the top of the two green bars as SL or use 1 point above the 1 min stop
-                            if currentStop - stopLossFromGreenBars > config.sweetSpot {
+                            if currentStop - stopLossFromGreenBars > tradingSetting.sweetSpot {
                                 twoGreenBarsSL = stopLossFromGreenBars
                             } else {
-                                twoGreenBarsSL = currentStop + Buffer
+                                twoGreenBarsSL = currentStop + tradingSetting.buffer
                             }
                         }
                     }
@@ -293,11 +291,11 @@ class TraderBot {
     private func seekToOpenPosition(bar: PriceBar, latestBar: PriceBar, entryType: EntryType) -> TradeActionType {
         if let newPosition: Position = checkForEntrySignal(direction: .long, bar: bar, latestBar: latestBar, entryType: entryType) ?? checkForEntrySignal(direction: .short, bar: bar, latestBar: latestBar, entryType: entryType) {
             
-            if config.profitAvoidSameDirection > 0,
+            if tradingSetting.profitAvoidSameDirection > 0,
                 let lastTrade = sessionManager.trades.last,
                 lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
                 lastTrade.direction == newPosition.direction,
-                lastTrade.idealProfit > config.profitAvoidSameDirection {
+                lastTrade.idealProfit > tradingSetting.profitAvoidSameDirection {
                 sessionManager.delegate?.newLogAdded(log: "Ignored same direction trade after significant profit: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
 
                 return .noAction(entryType: nil, reason: .lowQualityTrade)
@@ -309,11 +307,11 @@ class TraderBot {
                 return .noAction(entryType: nil, reason: .lowQualityTrade)
             }
             
-            if config.avoidTakingSameTrade,
+            if tradingSetting.avoidTakingSameTrade,
                 let newPositionStop = newPosition.stopLoss?.stop,
                 let lastTrade = sessionManager.trades.last,
                 lastTrade.direction == newPosition.direction,
-                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
+                abs(lastTrade.idealExitPrice - newPositionStop) <= tradingSetting.buffer / 2,
                 chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
                 lastTrade.exitMethod == .hitStoploss {
                 
@@ -372,12 +370,12 @@ class TraderBot {
             switch direction {
             case .long:
                 guard let pullbackLow = pullBack.getLowestPoint(),
-                    pullbackLow < oneMinStop || pullbackLow - oneMinStop <= config.sweetSpot else {
+                    pullbackLow < oneMinStop || pullbackLow - oneMinStop <= tradingSetting.sweetSpot else {
                     return nil
                 }
             default:
                 guard let pullbackHigh = pullBack.getHighestPoint(),
-                    pullbackHigh > oneMinStop || oneMinStop - pullbackHigh <= config.sweetSpot else {
+                    pullbackHigh > oneMinStop || oneMinStop - pullbackHigh <= tradingSetting.sweetSpot else {
                     return nil
                 }
             }
@@ -385,21 +383,21 @@ class TraderBot {
             break
         }
         
-        if risk > config.maxRisk,
-            Date.highRiskEntryInteval(date: bar.time).contains(bar.time),
-            sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
+        if risk > tradingSetting.maxRisk,
+            tradingSetting.highRiskEntryInteval(date: bar.time).contains(bar.time),
+            sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed {
             sessionManager.highRiskEntriesTaken += 1
-            stopLoss.stop = direction == .long ? bar.candleStick.close - config.maxRisk : bar.candleStick.close + config.maxRisk
+            stopLoss.stop = direction == .long ? bar.candleStick.close - tradingSetting.maxRisk : bar.candleStick.close + tradingSetting.maxRisk
             let position = Position(direction: direction,
-                                    size: config.positionSize,
+                                    size: tradingSetting.positionSize,
                                     entryTime: bar.time.getOffByMinutes(minutes: 1),
                                     idealEntryPrice: latestBar.candleStick.open,
                                     actualEntryPrice: latestBar.candleStick.open,
                                     stopLoss: stopLoss)
             return position
-        } else if risk <= config.maxRisk {
+        } else if risk <= tradingSetting.maxRisk {
             let position = Position(direction: direction,
-                                    size: config.positionSize,
+                                    size: tradingSetting.positionSize,
                                     entryTime: bar.time.getOffByMinutes(minutes: 1),
                                     idealEntryPrice: latestBar.candleStick.open,
                                     actualEntryPrice: latestBar.candleStick.open,
@@ -412,37 +410,37 @@ class TraderBot {
     
     private func handleOpeningNewTrade(currentBar: PriceBar, latestBar: PriceBar) -> TradeActionType {
         // stop trading if P&L <= MaxDailyLoss
-        if sessionManager.getDailyPAndL(day: currentBar.time) <= config.maxDailyLoss {
+        if sessionManager.getDailyPAndL(day: currentBar.time) <= tradingSetting.maxDailyLoss {
             return .noAction(entryType: nil, reason: .exceedLoss)
         }
         
-        if config.stopTrading > 0, sessionManager.getDailyPAndL(day: currentBar.time) > config.stopTrading {
+        if tradingSetting.stopTrading > 0, sessionManager.getDailyPAndL(day: currentBar.time) > tradingSetting.stopTrading {
             return .noAction(entryType: nil, reason: .profitHit)
         }
         
         // no entering trades during FOMC hour
-        if Date.fomcInterval(date: currentBar.time).contains(currentBar.time) &&
-            config.fomcDay &&
-            !config.byPassTradingTimeRestrictions {
+        if tradingSetting.fomcInterval(date: currentBar.time).contains(currentBar.time) &&
+            tradingSetting.fomcDay &&
+            !tradingSetting.byPassTradingTimeRestrictions {
             
             return .noAction(entryType: nil, reason: .outsideTradingHours)
         }
         
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
-        if !Date.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !config.byPassTradingTimeRestrictions {
+        if !tradingSetting.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !tradingSetting.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .outsideTradingHours)
         }
         
         // no entering trades during lunch hour
-        if config.noEntryDuringLunch,
-            Date.lunchInterval(date: currentBar.time).contains(currentBar.time),
-            !config.byPassTradingTimeRestrictions {
+        if tradingSetting.noEntryDuringLunch,
+            tradingSetting.lunchInterval(date: currentBar.time).contains(currentBar.time),
+            !tradingSetting.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .lunchHour)
         }
         
         // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter aggressively on any entry.
-        if Date.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
-            sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed {
+        if tradingSetting.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
+            sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed {
             return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .all)
         }
         
@@ -473,18 +471,18 @@ class TraderBot {
                 
                 // If the previous trade profit is higher than enterOnPullback,
                 // we allow to enter on any pullback if no opposite signal on any timeframe is found from last trade to now
-                if lastTrade.idealProfit > config.enterOnAnyPullback, lastTrade.exitMethod != .profitTaking {
+                if lastTrade.idealProfit > tradingSetting.enterOnAnyPullback, lastTrade.exitMethod != .profitTaking {
                     return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .pullBack)
                 } else {
                     let action = seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .sweetSpot)
                     
-                    if config.avoidTakingSameLosingTrade {
+                    if tradingSetting.avoidTakingSameLosingTrade {
                         switch action {
                         case .openPosition(let newPosition, _):
                             if let newPositionStop = newPosition.stopLoss?.stop,
                                 lastTrade.direction == newPosition.direction,
                                 lastTrade.idealProfit < 0,
-                                abs(lastTrade.idealExitPrice - newPositionStop) <= 0.50,
+                                abs(lastTrade.idealExitPrice - newPositionStop) <= tradingSetting.buffer / 2,
                                 lastTrade.exitMethod == .hitStoploss {
 
                                 sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: currentBar.time))")
@@ -533,20 +531,20 @@ class TraderBot {
             let currentStop = entryBar.oneMinSignal?.stop else { return nil }
         
         let closeRounded = entryBar.candleStick.close.roundBasedOnDirection(direction: direction)
-        let highRiskAllowed = Date.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) && sessionManager.highRiskEntriesTaken < config.maxHighRiskEntryAllowed
+        let highRiskAllowed = tradingSetting.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) && sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed
         
         switch direction {
         case .long:
-            if entryBar.candleStick.close - previousLevel <= config.maxRisk || highRiskAllowed {
-                return StopLoss(stop: min(previousLevel, closeRounded - config.minStop), source: .supportResistanceLevel)
-            } else if entryBar.candleStick.close - (currentStop - Buffer) <= config.maxRisk || highRiskAllowed {
-                return StopLoss(stop: min(currentStop - Buffer, closeRounded - config.minStop), source: .supportResistanceLevel)
+            if entryBar.candleStick.close - previousLevel <= tradingSetting.maxRisk || highRiskAllowed {
+                return StopLoss(stop: min(previousLevel, closeRounded - tradingSetting.minStop), source: .supportResistanceLevel)
+            } else if entryBar.candleStick.close - (currentStop - tradingSetting.buffer) <= tradingSetting.maxRisk || highRiskAllowed {
+                return StopLoss(stop: min(currentStop - tradingSetting.buffer, closeRounded - tradingSetting.minStop), source: .supportResistanceLevel)
             }
         default:
-            if previousLevel - entryBar.candleStick.close <= config.maxRisk || highRiskAllowed {
-                return StopLoss(stop: max(previousLevel, closeRounded + config.minStop), source: .supportResistanceLevel)
-            } else if (currentStop + Buffer) - entryBar.candleStick.close <= config.maxRisk || highRiskAllowed {
-                return StopLoss(stop: max(currentStop + Buffer, closeRounded + config.minStop), source: .supportResistanceLevel)
+            if previousLevel - entryBar.candleStick.close <= tradingSetting.maxRisk || highRiskAllowed {
+                return StopLoss(stop: max(previousLevel, closeRounded + tradingSetting.minStop), source: .supportResistanceLevel)
+            } else if (currentStop + tradingSetting.buffer) - entryBar.candleStick.close <= tradingSetting.maxRisk || highRiskAllowed {
+                return StopLoss(stop: max(currentStop + tradingSetting.buffer, closeRounded + tradingSetting.minStop), source: .supportResistanceLevel)
             }
         }
         
@@ -556,9 +554,9 @@ class TraderBot {
         
         switch direction {
         case .long:
-            return StopLoss(stop: min(lowRounded - Buffer, closeRounded - (config.maxRisk / 2)), source: .currentBar)
+            return StopLoss(stop: min(lowRounded - tradingSetting.buffer, closeRounded - (tradingSetting.maxRisk / 2)), source: .currentBar)
         default:
-            return StopLoss(stop: max(highRounded + Buffer, closeRounded + (config.maxRisk / 2)), source: .currentBar)
+            return StopLoss(stop: max(highRounded + tradingSetting.buffer, closeRounded + (tradingSetting.maxRisk / 2)), source: .currentBar)
         }
     }
     
@@ -584,12 +582,12 @@ class TraderBot {
                 
                 switch direction {
                 case .long:
-                    if previousLevel - levelRounded > Buffer {
+                    if previousLevel - levelRounded > tradingSetting.buffer {
                         previousLevel = levelRounded
                         break outerLoop
                     }
                 default:
-                    if levelRounded - previousLevel > Buffer {
+                    if levelRounded - previousLevel > tradingSetting.buffer {
                         previousLevel = levelRounded
                         break outerLoop
                     }
@@ -600,9 +598,9 @@ class TraderBot {
         if previousLevel == initialBarStopRounded {
             switch direction {
             case .long:
-                previousLevel = previousLevel - Buffer
+                previousLevel = previousLevel - tradingSetting.buffer
             default:
-                previousLevel = previousLevel + Buffer
+                previousLevel = previousLevel + tradingSetting.buffer
             }
         }
         
@@ -648,15 +646,15 @@ class TraderBot {
     
     // check if the low/high of the bar is too far from the 1 min S/R
     private func checkNotTooFarFromSupport(direction: TradeDirection, bar: PriceBar) -> Bool {
-        guard config.maxDistanceToSR > 0 else { return true }
+        guard tradingSetting.maxDistanceToSR > 0 else { return true }
         guard let stop = bar.oneMinSignal?.stop else { return false }
         
         var notTooFarFromSupport = false
         switch direction {
         case .long:
-            notTooFarFromSupport = bar.candleStick.low - stop <= config.maxDistanceToSR
+            notTooFarFromSupport = bar.candleStick.low - stop <= tradingSetting.maxDistanceToSR
         case .short:
-            notTooFarFromSupport = stop - bar.candleStick.high <= config.maxDistanceToSR
+            notTooFarFromSupport = stop - bar.candleStick.high <= tradingSetting.maxDistanceToSR
         }
         
         return notTooFarFromSupport
@@ -664,7 +662,7 @@ class TraderBot {
     
     // check if the last X trades were losers in opposite directions(chop)
     private func checkChoppyDay(bar: PriceBar) -> Bool {
-        guard config.numOfLosingTrades > 0,
+        guard tradingSetting.numOfLosingTrades > 0,
             let lastTrade = sessionManager.trades.last,
             lastTrade.entryTime.isInSameDay(date: bar.time),
             lastTrade.idealProfit < 0 else { return false }
@@ -683,7 +681,7 @@ class TraderBot {
                 directionOfLastLosingTrade = trade.direction
             }
             
-            if numOfAlternatingLosingTrades == config.numOfLosingTrades {
+            if numOfAlternatingLosingTrades == tradingSetting.numOfLosingTrades {
                 return true
             }
         }
@@ -724,7 +722,7 @@ class TraderBot {
                 } else {
                     switch signal.inteval {
                     case .twoMin:
-                        if config.waitForFinalizedSignals {
+                        if tradingSetting.waitForFinalizedSignals {
                             if !finishedScanningFor2MinConfirmation,
                                 let twoMinIndex = chart.timeKeys.firstIndex(of: priceBar.identifier),
                                 startIndex - twoMinIndex >= 1 {
@@ -740,7 +738,7 @@ class TraderBot {
                             }
                         }
                     case .threeMin:
-                        if config.waitForFinalizedSignals {
+                        if tradingSetting.waitForFinalizedSignals {
                             if !finishedScanningFor3MinConfirmation,
                                 let threeMinIndex = chart.timeKeys.firstIndex(of: priceBar.identifier),
                                 startIndex - threeMinIndex >= 2 {

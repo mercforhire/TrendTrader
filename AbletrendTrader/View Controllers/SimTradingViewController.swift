@@ -43,6 +43,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
     }
     
+    var tradingSetting: TradingSettings!
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
@@ -93,13 +94,13 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
 
         // Do any additional setup after loading the view.
         setupUI()
+        tradingSetting = config.tradingSettings[config.tradingSettingsSelection]
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                                 target: self,
                                                 selector: #selector(updateSystemTimeLabel),
                                                 userInfo: nil,
                                                 repeats: true)
-        
-        chartManager = ChartManager(live: false, serverUrls: serverUrls)
+        chartManager = ChartManager(live: false, serverUrls: serverUrls, tradingSetting: tradingSetting)
         chartManager?.delegate = self
         sessionManager.delegate = self
     }
@@ -124,9 +125,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             guard let self = self else { return }
             
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, tradingSetting: self.tradingSetting)
                 self.endButton.isEnabled = true
-                self.startButton.isEnabled = self.config.simulateTimePassage
+                self.startButton.isEnabled = self.tradingSetting.simulateTimePassage
             }
             
             sender.isEnabled = true
@@ -138,9 +139,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             guard let self = self else { return }
             
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, tradingSetting: self.tradingSetting)
                 self.endButton.isEnabled = true
-                self.startButton.isEnabled = self.config.simulateTimePassage
+                self.startButton.isEnabled = self.tradingSetting.simulateTimePassage
                 
                 if self.testing {
                     self.goToEndOfDay(self.endButton as Any)
@@ -166,7 +167,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         totalPLLabel.stringValue = "Total P/L: --"
         beginningButton.isEnabled = false
         endButton.isEnabled = true
-        startButton.isEnabled = config.simulateTimePassage
+        startButton.isEnabled = tradingSetting.simulateTimePassage
         tableView.reloadData()
     }
     
@@ -177,23 +178,23 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         beginningButton.isEnabled = true
         endButton.isEnabled = false
-        startButton.isEnabled = config.simulateTimePassage
+        startButton.isEnabled = tradingSetting.simulateTimePassage
         
         chartManager?.stopMonitoring()
         trader?.chart = completedChart
         
         if testing {
-            var start = 4
-            while start <= 6 {
-                print("Testing numOfLosingTrades: \(start)...")
-                config.numOfLosingTrades = start
+            var start = 7.0
+            while start <= 12.0 {
+                print("Testing maxRiskBase: \(start)...")
+                trader?.tradingSetting.maxRiskBase = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
                     print("")
-                    start += 1
+                    start += 0.5
                 })
             }
         } else {
@@ -261,9 +262,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 break
             }
             
-            if Date.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
+            if tradingSetting.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
                 morningTrades += trade.idealProfit
-            } else if Date.lunchInterval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
+            } else if tradingSetting.lunchInterval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
                 lunchTrades += trade.idealProfit
             }
             
@@ -336,14 +337,14 @@ extension SimTradingViewController: DataManagerDelegate {
         delegate?.chartUpdated(chart: chart)
         
         guard !chart.timeKeys.isEmpty, let lastBarTime = chart.lastBar?.time else {
-                return
+            return
         }
         
         trader?.chart = chart
         
         if let actions = trader?.decide() {
-            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions, completion: { _ in
-                self.updateTradesList()
+            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions, completion: { [weak self] _ in
+                self?.updateTradesList()
             })
         }
     }

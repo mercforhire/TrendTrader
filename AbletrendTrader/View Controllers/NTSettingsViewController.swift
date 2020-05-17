@@ -30,7 +30,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var nextButton: NSButton!
     
     private var selectedSettingsIndex: Int?
-    private var selectedSettings: NTSettings? {
+    private var selectedSettings: AccountSettings? {
         didSet {
             if let selectedSettings = selectedSettings {
                 server1MinField.stringValue = selectedSettings.server1MinURL
@@ -83,11 +83,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     func loadSettings() {
-        if config.ntSettings.isEmpty {
-            config.addNTSettings(settings: NTSettings())
+        if config.accountSettings.isEmpty {
+            config.addNTSettings(settings: AccountSettings())
         }
         
-        guard let defaultSelection = config.ntSettings.first else {
+        guard let defaultSelection = config.accountSettings.first else {
             print("ERROR: ntSettings shouldn't be empty.")
             return
         }
@@ -95,11 +95,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         selectedSettings = defaultSelection
         selectedSettingsIndex = 0
         selectionPicker.removeAllItems()
-        for i in 1...config.ntSettings.count {
+        for i in 1...config.accountSettings.count {
             selectionPicker.addItem(withTitle: "Settings - \(i)")
         }
         
-        deleteButton.isEnabled = config.ntSettings.count > 1
+        deleteButton.isEnabled = config.accountSettings.count > 1
     }
     
     override func viewDidLoad() {
@@ -268,23 +268,23 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     @IBAction func addPressed(_ sender: NSButton) {
-        config.addNTSettings(settings: NTSettings())
+        config.addNTSettings(settings: AccountSettings())
         
-        guard let newSelection = config.ntSettings.last else {
+        guard let newSelection = config.accountSettings.last else {
             print("ERROR: ntSettings shouldn't be empty.")
             return
         }
         
-        selectedSettingsIndex = config.ntSettings.count - 1
+        selectedSettingsIndex = config.accountSettings.count - 1
         selectedSettings = newSelection
-        selectionPicker.addItem(withTitle: "Settings - \(config.ntSettings.count)")
-        selectionPicker.selectItem(at: config.ntSettings.count - 1)
+        selectionPicker.addItem(withTitle: "Settings - \(config.accountSettings.count)")
+        selectionPicker.selectItem(at: config.accountSettings.count - 1)
         
-        deleteButton.isEnabled = config.ntSettings.count > 1
+        deleteButton.isEnabled = config.accountSettings.count > 1
     }
     
     @IBAction func deletePressed(_ sender: NSButton) {
-        guard config.ntSettings.count > 1, let selectedSettingsIndex = selectedSettingsIndex else { return }
+        guard config.accountSettings.count > 1, let selectedSettingsIndex = selectedSettingsIndex else { return }
         
         config.removeNTSettings(index: selectedSettingsIndex)
         loadSettings()
@@ -300,10 +300,10 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     @IBAction func selectionChanged(_ sender: NSPopUpButton) {
-        guard sender.indexOfSelectedItem < config.ntSettings.count,
-            config.ntSettings[sender.indexOfSelectedItem] != selectedSettings else { return }
+        guard sender.indexOfSelectedItem < config.accountSettings.count,
+            config.accountSettings[sender.indexOfSelectedItem] != selectedSettings else { return }
         
-        selectedSettings = config.ntSettings[sender.indexOfSelectedItem]
+        selectedSettings = config.accountSettings[sender.indexOfSelectedItem]
         selectedSettingsIndex = sender.indexOfSelectedItem
     }
     

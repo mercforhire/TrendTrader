@@ -43,6 +43,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
     }
     
+    var tradingSetting: TradingSettings!
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
@@ -81,14 +82,14 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
-        
+        tradingSetting = config.tradingSettings[config.tradingSettingsSelection]
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                                 target: self,
                                                 selector: #selector(updateSystemTimeLabel),
                                                 userInfo: nil,
                                                 repeats: true)
         
-        chartManager = ChartManager(live: true, serverUrls: serverUrls)
+        chartManager = ChartManager(live: true, serverUrls: serverUrls, tradingSetting: tradingSetting)
         chartManager?.delegate = self
         
         switch tradingMode {
@@ -146,7 +147,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             
             sender.isEnabled = true
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, tradingSetting: self.tradingSetting)
                 
                 if self.chartManager?.monitoring ?? false {
                     self.startButton.isEnabled = false
@@ -257,7 +258,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         chartManager?.stopMonitoring()
         sessionManager.stopLiveMonitoring()
         systemClockTimer.invalidate()
-        systemClockTimer =  nil
+        systemClockTimer = nil
     }
 }
 
@@ -269,9 +270,8 @@ extension LiveTradingViewController: DataManagerDelegate {
     func chartUpdated(chart: Chart) {
         delegate?.chartUpdated(chart: chart)
         
-        guard !chart.timeKeys.isEmpty,
-            let lastBarTime = chart.lastBar?.time else {
-                return
+        guard !chart.timeKeys.isEmpty, let lastBarTime = chart.lastBar?.time else {
+            return
         }
         
         trader?.chart = chart
@@ -282,7 +282,7 @@ extension LiveTradingViewController: DataManagerDelegate {
     }
     
     func requestStopMonitoring() {
-        pauseTrading(self.pauseButton)
+        pauseTrading(pauseButton)
     }
 }
 

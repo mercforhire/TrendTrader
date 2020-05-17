@@ -20,9 +20,9 @@ class ChartManager {
     private let fileName2: String = "2m.txt"
     private let fileName3: String = "3m.txt"
     
-    private let config = ConfigurationManager.shared
     private let delayBeforeFetchingAtNewMinute = 3
     
+    var tradingSetting: TradingSettings
     var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?
     var monitoring = false
@@ -35,9 +35,10 @@ class ChartManager {
     private var refreshTimer: Timer?
     private var nextFetchTime: Date?
     
-    init(live: Bool, serverUrls: [SignalInteval: String]) {
+    init(live: Bool, serverUrls: [SignalInteval: String], tradingSetting: TradingSettings) {
         self.live = live
         self.serverUrls = serverUrls
+        self.tradingSetting = tradingSetting
         resetSimTime()
     }
     
@@ -48,7 +49,7 @@ class ChartManager {
                                          month: Date().month(),
                                          day: Date().day(),
                                          hour: 9,
-                                         minute: 40,
+                                         minute: 45,
                                          second: 1)
         self.simTime = calendar.date(from: components1)!
     }
@@ -80,7 +81,7 @@ class ChartManager {
                 self.downloadChartFromUrls(oneMinUrl: oneMinUrl, twoMinUrl: twoMinUrl, threeMinUrl: threeMinUrl, completion: completion)
             }
         } else {
-            if config.simulateTimePassage {
+            if tradingSetting.simulateTimePassage {
                 findURLsAtTime { [weak self] urls in
                     guard let self = self else {
                         return
@@ -114,7 +115,7 @@ class ChartManager {
     }
     
     func startMonitoring() {
-        guard live || config.simulateTimePassage else { return }
+        guard live || tradingSetting.simulateTimePassage else { return }
         
         updateChart()
         monitoring = true
@@ -145,7 +146,7 @@ class ChartManager {
     private func updateChart() {
         let now = Date()
         if live,
-            !config.byPassTradingTimeRestrictions, now > Date.flatPositionsTime(date: now).getOffByMinutes(minutes: 2) {
+            !tradingSetting.byPassTradingTimeRestrictions, now > tradingSetting.flatPositionsTime(date: now).getOffByMinutes(minutes: 2) {
             delegate?.requestStopMonitoring()
             self.delegate?.chartStatusChanged(statusText: "Trading session is over at " + now.hourMinute())
             return
@@ -179,8 +180,8 @@ class ChartManager {
                     if self.live {
                         self.nextFetchTime = nil
                         self.updateChartNextSecond()
-                    } else if self.config.simulateTimePassage {
-                        guard self.simTime < Date.flatPositionsTime(date: self.simTime),
+                    } else if self.tradingSetting.simulateTimePassage {
+                        guard self.simTime < self.tradingSetting.flatPositionsTime(date: self.simTime),
                             self.simTime < Date() else {
                                 self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
                                 self.stopMonitoring()

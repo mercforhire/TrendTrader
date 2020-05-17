@@ -1,5 +1,5 @@
 //
-//  NTSettings.swift
+//  AccountSettings.swift
 //  AbletrendTrader
 //
 //  Created by Leon Chen on 2020-04-07.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct NTSettings: Codable, Equatable {
+struct AccountSettings: Codable, Equatable {
     var server1MinURL: String = "http://192.168.0.121:80/"
     var server2MinURL: String = "http://192.168.0.121:80/"
     var server3MinURL: String = "http://192.168.0.121:80/"
@@ -23,7 +23,7 @@ struct NTSettings: Codable, Equatable {
     var incomingPath: String = "/Users/lchen/Downloads/NinjaTrader/incoming"
     var outgoingPath: String = "/Users/lchen/Downloads/NinjaTrader/outgoing"
     
-    static func == (lhs: NTSettings, rhs: NTSettings) -> Bool {
+    static func == (lhs: AccountSettings, rhs: AccountSettings) -> Bool {
         return
             lhs.server1MinURL == rhs.server1MinURL &&
             lhs.server2MinURL == rhs.server2MinURL &&

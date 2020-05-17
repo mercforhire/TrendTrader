@@ -83,7 +83,6 @@ class ConfigurationManager {
         
         UserDefaults.standard.set(try? PropertyListEncoder().encode(tradingSettings), forKey: "trading_settings")
         UserDefaults.standard.synchronize()
-        print("Saved value:", tradingSettings, "to key", "trading_settings")
     }
     
     func removeTradingSettings(index: Int) {
@@ -93,7 +92,6 @@ class ConfigurationManager {
         
         UserDefaults.standard.set(try? PropertyListEncoder().encode(tradingSettings), forKey: "trading_settings")
         UserDefaults.standard.synchronize()
-        print("Saved value:", tradingSettings, "to key", "trading_settings")
     }
     
     func addNTSettings(settings: AccountSettings) {

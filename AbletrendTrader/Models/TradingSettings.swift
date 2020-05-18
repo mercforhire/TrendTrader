@@ -110,7 +110,7 @@ struct TradingSettings: Codable {
     init() {
         let defaultSettings: NSDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "DefaultSettings", ofType: "plist")!)!
         
-        self.buffer = 1.0
+        self.buffer = defaultSettings["buffer"] as! Double
          
         self.riskMultiplier = defaultSettings["risk_multiplier"] as! Double
          
@@ -437,7 +437,7 @@ struct TradingSettings: Codable {
             return
         }
         
-        throw ConfigError.stopTradingError
+        throw ConfigError.bufferError
     }
     
     func highRiskEntryInteval(date: Date) -> DateInterval {

@@ -184,17 +184,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 7.0
-            while start <= 12.0 {
-                print("Testing maxRiskBase: \(start)...")
-                trader?.tradingSetting.maxRiskBase = start
+            var start = 22.0
+            while start <= 30.0 {
+                print("Testing profitAvoidSameDirectionBase: \(start)...")
+                trader?.tradingSetting.profitAvoidSameDirectionBase = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
                     print("")
-                    start += 0.5
+                    start += 1.0
                 })
             }
         } else {
@@ -299,7 +299,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             }
         }
         
-        print("\(sessionManager.trades.count) trades,", "P/L:", String(format: "%.2f", currentPL), "Max DD:", String(format: "%.2f", maxDD))
+        print("\(sessionManager.trades.count) trades", "P/L:", String(format: "%.2f", currentPL), "Max DD:", String(format: "%.2f", maxDD))
         print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")

@@ -40,10 +40,8 @@ class TraderBot {
             
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = Date.DefaultTimeZone
-            let components1 = DateComponents(year: currentBar.time.year(),
-                                             month: 4,
-                                             day: 29)
-            let fomcDay: Date = calendar.date(from: components1)!
+            let components = DateComponents(year: currentBar.time.year(), month: 4, day: 29)
+            let fomcDay: Date = calendar.date(from: components)!
             if currentBar.time.isInSameDay(date: fomcDay) {
                 tradingSetting.fomcDay = true
             } else {

@@ -330,7 +330,7 @@ class TraderBot {
             bar.oneMinSignal?.direction == direction,
             let oneMinStop = bar.oneMinSignal?.stop,
             direction == .long ? bar.candleStick.close >= oneMinStop : bar.candleStick.close <= oneMinStop,
-            var stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
+            let stopLoss = calculateStopLoss(direction: direction, entryBar: bar),
             let barIndex: Int = chart.timeKeys.firstIndex(of: bar.identifier),
             barIndex < chart.timeKeys.count - 1 else {
             return nil
@@ -671,11 +671,6 @@ class TraderBot {
                 numOfAlternatingLosingTrades += 1
                 directionOfLastLosingTrade = trade.direction
             }
-//            else if trade.idealProfit < 0,
-//                numOfAlternatingLosingTrades > 0,
-//                trade.direction == directionOfLastLosingTrade {
-//                break
-//            }
             
             if numOfAlternatingLosingTrades == tradingSetting.numOfLosingTrades {
                 return true

@@ -267,8 +267,7 @@ struct TradingSettings: Codable {
     
     mutating func setHighRiskStart(newValue: Date) throws {
         let newValue = newValue.stripYearMonthAndDay()
-        if newValue >= tradingStart.stripYearMonthAndDay(),
-            newValue < clearTime.stripYearMonthAndDay(),
+        if newValue < clearTime.stripYearMonthAndDay(),
             newValue < highRiskEnd.stripYearMonthAndDay() {
             highRiskStart = newValue
             return

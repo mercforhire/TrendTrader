@@ -167,9 +167,7 @@ class TraderBot {
             }
             
             // Exit when the bar is over 'config.takeProfitBarLength' points long
-            if !tradingSetting.highRiskEntryInteval(date: priceBar.time).contains(priceBar.time),
-                currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= tradingSetting.takeProfitBarLength {
-                
+            if currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= tradingSetting.takeProfitBarLength {
                 switch currentPosition.direction {
                 case .long:
                     if priceBar.candleStick.close - priceBar.candleStick.open >= tradingSetting.takeProfitBarLength {
@@ -381,25 +379,20 @@ class TraderBot {
             break
         }
         
-        if risk > tradingSetting.maxRisk,
-            tradingSetting.highRiskEntryInteval(date: bar.time).contains(bar.time),
-            sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed {
-            sessionManager.highRiskEntriesTaken += 1
-            stopLoss.stop = direction == .long ? bar.candleStick.close - tradingSetting.maxRisk : bar.candleStick.close + tradingSetting.maxRisk
-            let position = Position(direction: direction,
-                                    size: tradingSetting.positionSize,
-                                    entryTime: bar.time.getOffByMinutes(minutes: 1),
-                                    idealEntryPrice: latestBar.candleStick.open,
-                                    actualEntryPrice: latestBar.candleStick.open,
-                                    stopLoss: stopLoss)
-            return position
-        } else if risk <= tradingSetting.maxRisk {
-            let position = Position(direction: direction,
-                                    size: tradingSetting.positionSize,
-                                    entryTime: bar.time.getOffByMinutes(minutes: 1),
-                                    idealEntryPrice: latestBar.candleStick.open,
-                                    actualEntryPrice: latestBar.candleStick.open,
-                                    stopLoss: stopLoss)
+        let position = Position(direction: direction,
+                                size: tradingSetting.positionSize,
+                                entryTime: bar.time.getOffByMinutes(minutes: 1),
+                                idealEntryPrice: latestBar.candleStick.open,
+                                actualEntryPrice: latestBar.candleStick.open,
+                                stopLoss: stopLoss)
+        
+        if risk <= tradingSetting.maxRisk {
+            
+            if tradingSetting.highRiskEntryInteval(date: bar.time).contains(bar.time),
+                sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed {
+                sessionManager.highRiskEntriesTaken += 1
+            }
+            
             return position
         }
 
@@ -424,6 +417,13 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .outsideTradingHours)
         }
         
+        // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter on sweetspot.
+        if tradingSetting.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
+            sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed,
+            !tradingSetting.byPassTradingTimeRestrictions {
+            return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .sweetSpot)
+        }
+        
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
         if !tradingSetting.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !tradingSetting.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .outsideTradingHours)
@@ -434,12 +434,6 @@ class TraderBot {
             tradingSetting.lunchInterval(date: currentBar.time).contains(currentBar.time),
             !tradingSetting.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .lunchHour)
-        }
-        
-        // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter aggressively on any entry.
-        if tradingSetting.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
-            sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed {
-            return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .all)
         }
         
         // If we lost multiple times in alternating directions, stop trading
@@ -529,19 +523,18 @@ class TraderBot {
             let currentStop = entryBar.oneMinSignal?.stop else { return nil }
         
         let closeRounded = entryBar.candleStick.close.roundBasedOnDirection(direction: direction)
-        let highRiskAllowed = tradingSetting.highRiskEntryInteval(date: entryBar.time).contains(entryBar.time) && sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed
         
         switch direction {
         case .long:
-            if entryBar.candleStick.close - previousLevel <= tradingSetting.maxRisk || highRiskAllowed {
+            if entryBar.candleStick.close - previousLevel <= tradingSetting.maxRisk {
                 return StopLoss(stop: min(previousLevel, closeRounded - tradingSetting.minStop), source: .supportResistanceLevel)
-            } else if entryBar.candleStick.close - (currentStop - tradingSetting.buffer) <= tradingSetting.maxRisk || highRiskAllowed {
+            } else if entryBar.candleStick.close - (currentStop - tradingSetting.buffer) <= tradingSetting.maxRisk {
                 return StopLoss(stop: min(currentStop - tradingSetting.buffer, closeRounded - tradingSetting.minStop), source: .supportResistanceLevel)
             }
         default:
-            if previousLevel - entryBar.candleStick.close <= tradingSetting.maxRisk || highRiskAllowed {
+            if previousLevel - entryBar.candleStick.close <= tradingSetting.maxRisk {
                 return StopLoss(stop: max(previousLevel, closeRounded + tradingSetting.minStop), source: .supportResistanceLevel)
-            } else if (currentStop + tradingSetting.buffer) - entryBar.candleStick.close <= tradingSetting.maxRisk || highRiskAllowed {
+            } else if (currentStop + tradingSetting.buffer) - entryBar.candleStick.close <= tradingSetting.maxRisk {
                 return StopLoss(stop: max(currentStop + tradingSetting.buffer, closeRounded + tradingSetting.minStop), source: .supportResistanceLevel)
             }
         }
@@ -678,6 +671,11 @@ class TraderBot {
                 numOfAlternatingLosingTrades += 1
                 directionOfLastLosingTrade = trade.direction
             }
+//            else if trade.idealProfit < 0,
+//                numOfAlternatingLosingTrades > 0,
+//                trade.direction == directionOfLastLosingTrade {
+//                break
+//            }
             
             if numOfAlternatingLosingTrades == tradingSetting.numOfLosingTrades {
                 return true

@@ -184,17 +184,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 22.0
-            while start <= 30.0 {
-                print("Testing profitAvoidSameDirectionBase: \(start)...")
-                trader?.tradingSetting.profitAvoidSameDirectionBase = start
+            var start = 3
+            while start < 7 {
+                print("Testing numOfLosingTrades: \(start)...")
+                trader?.tradingSetting.numOfLosingTrades = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
                     print("")
-                    start += 1.0
+                    start += 1
                 })
             }
         } else {

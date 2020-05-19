@@ -978,8 +978,8 @@
                                 </connections>
                             </datePicker>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nns-FX-mQK">
-                                <rect key="frame" x="18" y="18" width="224" height="18"/>
-                                <buttonCell key="cell" type="check" title="Bypass Trading Time Restrictions" bezelStyle="regularSquare" imagePosition="left" inset="2" id="4Nz-QC-Kdr">
+                                <rect key="frame" x="18" y="18" width="327" height="18"/>
+                                <buttonCell key="cell" type="check" title="Bypass trading time restrictions(sim account only)" bezelStyle="regularSquare" imagePosition="left" inset="2" id="4Nz-QC-Kdr">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -988,8 +988,8 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="of0-Wx-S4o">
-                                <rect key="frame" x="357" y="90" width="160" height="18"/>
-                                <buttonCell key="cell" type="check" title="No Entry During Lunch" bezelStyle="regularSquare" imagePosition="left" inset="2" id="9PH-bn-qbv">
+                                <rect key="frame" x="357" y="90" width="154" height="18"/>
+                                <buttonCell key="cell" type="check" title="No entry during lunch" bezelStyle="regularSquare" imagePosition="left" inset="2" id="9PH-bn-qbv">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -1059,8 +1059,8 @@
                                 </connections>
                             </datePicker>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iFc-4e-GUS">
-                                <rect key="frame" x="18" y="66" width="131" height="18"/>
-                                <buttonCell key="cell" type="check" title="Avoid Same Trade" bezelStyle="regularSquare" imagePosition="left" inset="2" id="HZd-4g-0af">
+                                <rect key="frame" x="18" y="66" width="127" height="18"/>
+                                <buttonCell key="cell" type="check" title="Avoid same trade" bezelStyle="regularSquare" imagePosition="left" inset="2" id="HZd-4g-0af">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -1069,8 +1069,8 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JY2-LQ-dpr">
-                                <rect key="frame" x="18" y="42" width="175" height="18"/>
-                                <buttonCell key="cell" type="check" title="Avoid Same Losing Trade" bezelStyle="regularSquare" imagePosition="left" inset="2" id="8fw-sR-qgl">
+                                <rect key="frame" x="18" y="42" width="167" height="18"/>
+                                <buttonCell key="cell" type="check" title="Avoid same losing trade" bezelStyle="regularSquare" imagePosition="left" inset="2" id="8fw-sR-qgl">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -1099,8 +1099,8 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sAI-QM-GBT">
-                                <rect key="frame" x="357" y="42" width="87" height="18"/>
-                                <buttonCell key="cell" type="check" title="FOMC Day" bezelStyle="regularSquare" imagePosition="left" inset="2" id="gZk-dr-dh7">
+                                <rect key="frame" x="357" y="42" width="86" height="18"/>
+                                <buttonCell key="cell" type="check" title="FOMC day" bezelStyle="regularSquare" imagePosition="left" inset="2" id="gZk-dr-dh7">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -1128,8 +1128,8 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="v7D-6w-gxx">
-                                <rect key="frame" x="18" y="152" width="129" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Max distance to S/R:" id="TKG-4I-cUU">
+                                <rect key="frame" x="18" y="152" width="222" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Max distance to support/resistance:" id="TKG-4I-cUU">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1284,8 +1284,8 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5fY-NA-GST">
-                                <rect key="frame" x="357" y="204" width="119" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Stop trading profit:" id="OZq-Wa-Ksd">
+                                <rect key="frame" x="357" y="204" width="207" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Stop trading after reaching profit:" id="OZq-Wa-Ksd">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

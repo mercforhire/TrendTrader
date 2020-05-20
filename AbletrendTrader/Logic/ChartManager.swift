@@ -146,7 +146,9 @@ class ChartManager {
     private func updateChart() {
         let now = Date()
         if live,
-            !tradingSetting.byPassTradingTimeRestrictions, now > tradingSetting.flatPositionsTime(date: now).getOffByMinutes(minutes: 2) {
+            !tradingSetting.byPassTradingTimeRestrictions,
+            now > tradingSetting.flatPositionsTime(date: now).getOffByMinutes(minutes: 2),
+            now < tradingSetting.flatPositionsTime(date: now).getOffByMinutes(minutes: 30) {
             delegate?.requestStopMonitoring()
             self.delegate?.chartStatusChanged(statusText: "Trading session is over at " + now.hourMinute())
             return

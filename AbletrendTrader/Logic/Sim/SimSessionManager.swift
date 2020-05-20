@@ -17,7 +17,7 @@ class SimSessionManager: BaseSessionManager {
             case .noAction:
                 break
             default:
-                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
+                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime, accountId: accountId))
             }
             
             switch action {

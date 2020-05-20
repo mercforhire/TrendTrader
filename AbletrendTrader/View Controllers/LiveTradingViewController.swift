@@ -104,6 +104,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                                               incomingPath: incomingPath,
                                               outgoingPath: outgoingPath)
             sessionManager.commission = commission
+            chartManager?.accountId = accountId
             self.title = "Live trader - \(accountId)"
         default:
             break

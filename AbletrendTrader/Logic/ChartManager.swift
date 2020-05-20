@@ -59,7 +59,9 @@ class ChartManager {
         if let oneMinText = Parser.readFile(fileName: fileName1),
             let twoMinText = Parser.readFile(fileName: fileName2),
             let threeMinText = Parser.readFile(fileName: fileName3) {
-            generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
+            generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { [weak self] chart in
+                guard let self = self else { return }
+                
                 self.chart = chart
                 completion(self.chart)
             }
@@ -92,7 +94,11 @@ class ChartManager {
                         self.downloadChartFromUrls(oneMinUrl: urls.0,
                                                    twoMinUrl: urls.1,
                                                    threeMinUrl: urls.2)
-                        { downloadedChart in
+                        { [weak self] downloadedChart in
+                            guard let self = self else {
+                                return
+                            }
+                            
                             self.chart = downloadedChart
                             completion(downloadedChart)
                         }
@@ -251,7 +257,11 @@ class ChartManager {
             guard let self = self else { return }
             
             if let oneMinText = oneMinText, let twoMinText = twoMinText, let threeMinText = threeMinText {
-                self.generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
+                self.generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { [weak self] chart in
+                    guard let self = self else {
+                        return
+                    }
+                    
                     self.chart = chart
                     self.delegate?.chartStatusChanged(statusText: "Latest data: " + (self.chart?.lastBar?.candleStick.time.hourMinuteSecond() ?? "--"))
                     completion(self.chart)
@@ -276,7 +286,7 @@ class ChartManager {
             let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
             
             let chart = Chart.generateChart(candleSticks: candleSticks,
-                                             indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
+                                            indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
             
             DispatchQueue.main.async {
                 completion(chart)

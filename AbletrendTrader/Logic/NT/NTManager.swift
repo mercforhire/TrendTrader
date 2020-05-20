@@ -326,7 +326,7 @@ class NTManager {
             try FileManager.default.removeItem(atPath: path)
             return true
         } catch {
-            print(path, "doesn't exist, already deleted")
+            print("\(accountName)-path doesn't exist, already deleted")
             
         }
         return false
@@ -361,7 +361,7 @@ class NTManager {
         let dir2 = URL(fileURLWithPath: incomingPath)
         let fileURL = dir.appendingPathComponent("oif\(counter).txt")
         let fileURL2 = dir2.appendingPathComponent("oif\(counter).txt")
-        print(String(format: "%@: %@", Date().hourMinuteSecond(), text))
+        print(String(format: "\(accountName)-%@: %@", Date().hourMinuteSecond(), text))
         do {
             try text.write(to: fileURL, atomically: true, encoding: .utf8)
             try FileManager.default.copyItem(at: fileURL, to: fileURL2)
@@ -382,7 +382,7 @@ class NTManager {
             }
         }
         catch {
-            print(fileURL, "doesn't exist")
+            print("\(accountName)-\(fileURL) doesn't exist")
             return nil
         }
         

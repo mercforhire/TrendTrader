@@ -39,6 +39,7 @@ class BaseSessionManager {
     var trades: [Trade] = []
     var currentPriceBarTime: Date?
     var liveMonitoring = false
+    var accountId: String = "Sim"
     weak var delegate: SessionManagerDelegate?
     
     private var timer: Timer?

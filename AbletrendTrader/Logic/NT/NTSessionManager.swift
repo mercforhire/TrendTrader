@@ -33,6 +33,7 @@ class NTSessionManager: BaseSessionManager {
                                    incomingPath: incomingPath,
                                    outgoingPath: outgoingPath)
         super.init()
+        self.accountId = accountId
         self.commission = commission
         self.pointsValue = pointsValue
         self.ntManager.initialize()
@@ -58,7 +59,7 @@ class NTSessionManager: BaseSessionManager {
         
         if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
             // Actions for this bar already processed
-            print("\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
+            print("\(accountId)-\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
             return
         }
         currentPriceBarTime = priceBarTime
@@ -72,9 +73,9 @@ class NTSessionManager: BaseSessionManager {
             
             switch action {
             case .noAction:
-                print(action.description(actionBarTime: priceBarTime))
+                print(action.description(actionBarTime: priceBarTime, accountId: self.accountId))
             default:
-                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
+                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime, accountId: self.accountId))
             }
             
             switch action {

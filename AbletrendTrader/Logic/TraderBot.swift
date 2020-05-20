@@ -292,13 +292,13 @@ class TraderBot {
                 lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
                 lastTrade.direction == newPosition.direction,
                 lastTrade.idealProfit > tradingSetting.profitAvoidSameDirection {
-                sessionManager.delegate?.newLogAdded(log: "Ignored same direction trade after significant profit: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
+                sessionManager.delegate?.newLogAdded(log: "Ignored same direction trade after significant profit: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time, accountId: sessionManager.accountId))")
 
                 return .noAction(entryType: nil, reason: .lowQualityTrade)
             }
             
             if !checkNotTooFarFromSupport(direction: newPosition.direction, bar: bar) {
-                sessionManager.delegate?.newLogAdded(log: "Ignored too far from support trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
+                sessionManager.delegate?.newLogAdded(log: "Ignored too far from support trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time, accountId: sessionManager.accountId))")
 
                 return .noAction(entryType: nil, reason: .lowQualityTrade)
             }
@@ -311,7 +311,7 @@ class TraderBot {
                 chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
                 lastTrade.exitMethod == .hitStoploss {
                 
-                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time))")
+                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time, accountId: sessionManager.accountId))")
 
                 return .noAction(entryType: nil, reason: .repeatedTrade)
             }
@@ -477,7 +477,7 @@ class TraderBot {
                                 abs(lastTrade.idealExitPrice - newPositionStop) <= tradingSetting.buffer / 2,
                                 lastTrade.exitMethod == .hitStoploss {
 
-                                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: currentBar.time))")
+                                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: currentBar.time, accountId: sessionManager.accountId))")
 
                                 return .noAction(entryType: nil, reason: .repeatedTrade)
                             }

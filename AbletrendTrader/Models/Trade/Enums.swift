@@ -40,16 +40,16 @@ enum TradeActionType {
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     
-    func description(actionBarTime: Date) -> String {
+    func description(actionBarTime: Date, accountId: String) -> String {
         switch self {
         case .noAction(let entryType, let reason):
             if let entryType = entryType {
-                return String(format: "%@: No action for %@ (enter method: %@)",
+                return String(format: "\(accountId)-%@: No action for %@ (enter method: %@)",
                               Date().hourMinuteSecond(),
                               actionBarTime.hourMinute(),
                               entryType.description())
             } else {
-                return String(format: "%@: No action for %@ (%@)",
+                return String(format: "\(accountId)-%@: No action for %@ (%@)",
                               Date().hourMinuteSecond(),
                               actionBarTime.hourMinute(),
                               reason.description())

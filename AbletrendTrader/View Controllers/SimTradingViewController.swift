@@ -184,10 +184,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 3
-            while start < 7 {
-                print("Testing numOfLosingTrades: \(start)...")
-                trader?.tradingSetting.numOfLosingTrades = start
+            var start = 0
+            while start <= 3 {
+                print("Testing maxHighRiskEntryAllowed: \(start)...")
+                trader?.tradingSetting.maxHighRiskEntryAllowed = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 

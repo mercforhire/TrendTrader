@@ -22,6 +22,7 @@ class ChartManager {
     
     private let delayBeforeFetchingAtNewMinute = 3
     
+    var accountId: String = "Sim"
     var tradingSetting: TradingSettings
     var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?
@@ -195,7 +196,7 @@ class ChartManager {
                 }
             } else if self.monitoring, self.live {
                 self.delegate?.chartStatusChanged(statusText: "Data for " + Date().hourMinuteSecond() + " yet not found")
-                print("Data for " + Date().hourMinuteSecond() + " yet not found")
+                print("\(self.accountId)-Data for " + Date().hourMinuteSecond() + " yet not found")
                 self.updateChartNextSecond()
             }
         }
@@ -290,7 +291,7 @@ class ChartManager {
         let now = Date()
         let urlFetchingTask = DispatchGroup()
         
-        print(Date().hourMinuteSecond() + ": Start fetching latest urls...")
+        print("\(accountId)-\(Date().hourMinuteSecond()): Start fetching latest urls...")
         
         urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now,
@@ -339,12 +340,12 @@ class ChartManager {
             }
         })
         
-        urlFetchingTask.notify(queue: DispatchQueue.main) {
-            guard let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl else {
+        urlFetchingTask.notify(queue: DispatchQueue.main) { [weak self] in
+            guard let self = self, let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl else {
                 return completion(nil)
             }
             
-            print(Date().hourMinuteSecond() + ": Downloading", oneMinUrl, twoMinUrl, threeMinUrl)
+            print("\(self.accountId)-\(Date().hourMinuteSecond()): Downloading", oneMinUrl, twoMinUrl, threeMinUrl)
             completion((oneMinUrl, twoMinUrl, threeMinUrl))
         }
     }

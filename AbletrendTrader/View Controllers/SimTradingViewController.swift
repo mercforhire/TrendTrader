@@ -184,17 +184,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 0
-            while start <= 3 {
-                print("Testing maxHighRiskEntryAllowed: \(start)...")
-                trader?.tradingSetting.maxHighRiskEntryAllowed = start
+            var start = 12.0
+            while start <= 18.0 {
+                print("Testing takeProfitBarLengthBase: \(start)...")
+                trader?.tradingSetting.takeProfitBarLengthBase = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
                     print("")
-                    start += 1
+                    start += 1.0
                 })
             }
         } else {
@@ -294,8 +294,34 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         if !testing {
+            print("Trade date:")
             for trade in sessionManager.trades {
                 print(trade.exitTime.generateDate())
+            }
+            print("")
+            print("Trade direction:")
+            for trade in sessionManager.trades {
+                print(trade.direction.description())
+            }
+            print("")
+            print("Trade entry time:")
+            for trade in sessionManager.trades {
+                print(trade.entryTime.hourMinute())
+            }
+            print("")
+            print("Trade entry price:")
+            for trade in sessionManager.trades {
+                print(trade.idealEntryPrice)
+            }
+            print("")
+            print("Tradee exit time:")
+            for trade in sessionManager.trades {
+                print(trade.exitTime.hourMinute())
+            }
+            print("")
+            print("Trade exit price:")
+            for trade in sessionManager.trades {
+                print(trade.idealExitPrice)
             }
         }
         

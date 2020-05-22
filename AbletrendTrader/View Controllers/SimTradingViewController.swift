@@ -294,6 +294,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         if !testing {
+            print("")
             print("Trade date:")
             for trade in sessionManager.trades {
                 print(trade.exitTime.generateDate())
@@ -323,6 +324,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             for trade in sessionManager.trades {
                 print(trade.idealExitPrice)
             }
+            print("")
         }
         
         print("\(sessionManager.trades.count) trades", "P/L:", String(format: "%.2f", currentPL), "Max DD:", String(format: "%.2f", maxDD))

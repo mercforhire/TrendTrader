@@ -32,7 +32,9 @@ class TraderBot {
                 break
             }
             
-            guard let currentBar = self.chart.priceBars[timeKey] else { continue }
+            guard let currentBar = self.chart.priceBars[timeKey]
+            //,Date().getPastOrFutureDate(days: 0, months: -1, years: 0) <= currentBar.time
+            else { continue }
             
             if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
                 sessionManager.highRiskEntriesTaken = 0
@@ -662,17 +664,17 @@ class TraderBot {
         var directionOfLastLosingTrade: TradeDirection = .long
         
         for trade in sessionManager.trades.reversed() {
-            if !trade.entryTime.isInSameDay(date: bar.time) {
+            if !trade.entryTime.isInSameDay(date: bar.time) || trade.idealProfit > 0 {
                 break
             }
             
-            if (trade.idealProfit < 0 && numOfAlternatingLosingTrades == 0) ||
-                (trade.idealProfit < 0 && trade.direction != directionOfLastLosingTrade) {
+            if numOfAlternatingLosingTrades == 0 || trade.direction != directionOfLastLosingTrade {
                 numOfAlternatingLosingTrades += 1
                 directionOfLastLosingTrade = trade.direction
             }
             
-            if numOfAlternatingLosingTrades == tradingSetting.numOfLosingTrades {
+            if numOfAlternatingLosingTrades >= tradingSetting.numOfLosingTrades,
+                bar.time.hour() - trade.exitTime.hour() <= tradingSetting.numOfHoursToForget {
                 return true
             }
         }

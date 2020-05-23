@@ -42,8 +42,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     private var serverUrls: [SignalInteval: String] {
         return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
     }
-    
-    var tradingSetting: TradingSettings!
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
@@ -59,6 +57,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
     }
     
+    var tradingSetting: TradingSettings!
     weak var delegate: DataManagerDelegate?
     
     func setupUI() {
@@ -87,21 +86,24 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         server1MinURLField.stringValue = server1minURL
         server2MinURLField.stringValue = server2minURL
         server3MinURLField.stringValue = server3minURL
+        
+        systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
+                                                target: self,
+                                                selector: #selector(updateSystemTimeLabel),
+                                                userInfo: nil,
+                                                repeats: true)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        setupUI()
         tradingSetting = config.tradingSettings[config.tradingSettingsSelection]
-        systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
-                                                target: self,
-                                                selector: #selector(updateSystemTimeLabel),
-                                                userInfo: nil,
-                                                repeats: true)
+        setupUI()
+        
         chartManager = ChartManager(live: false, serverUrls: serverUrls, tradingSetting: tradingSetting)
         chartManager?.delegate = self
+        
         sessionManager.delegate = self
     }
     
@@ -134,7 +136,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         })
     }
     
-    @IBAction func loadFromDiskPressed(_ sender: NSButton) {
+    @IBAction
+    func loadFromDiskPressed(_ sender: NSButton) {
         chartManager?.loadChart(completion: { [weak self] chart in
             guard let self = self else { return }
             
@@ -171,7 +174,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         tableView.reloadData()
     }
     
-    private let testing = false
+    private let testing = true
     @IBAction private func goToEndOfDay(_ sender: Any) {
         guard trader != nil, let completedChart = chartManager?.chart, !completedChart.timeKeys.isEmpty
         else { return }
@@ -184,17 +187,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         trader?.chart = completedChart
         
         if testing {
-            var start = 12.0
-            while start <= 18.0 {
-                print("Testing takeProfitBarLengthBase: \(start)...")
-                trader?.tradingSetting.takeProfitBarLengthBase = start
+            var start = 5
+            while start <= 7 {
+                print("Testing numOfHoursToForget: \(start)...")
+                trader?.tradingSetting.numOfHoursToForget = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
                     print("")
-                    start += 1.0
+                    start += 1
                 })
             }
         } else {
@@ -237,6 +240,12 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var friday = 0.0
         var morningTrades = 0.0
         var lunchTrades = 0.0
+        
+        if !testing {
+            print("")
+            print("P/L to date:")
+        }
+        
         for trade in sessionManager.trades {
             currentPL += trade.idealProfit
             peak = max(peak, currentPL)
@@ -371,7 +380,9 @@ extension SimTradingViewController: DataManagerDelegate {
         trader?.chart = chart
         
         if let actions = trader?.decide() {
-            sessionManager.processActions(priceBarTime: lastBarTime, actions: actions, completion: { [weak self] _ in
+            sessionManager.processActions(priceBarTime: lastBarTime,
+                                          actions: actions,
+                                          completion: { [weak self] _ in
                 self?.updateTradesList()
             })
         }

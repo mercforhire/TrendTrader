@@ -73,6 +73,7 @@ struct TradingSettings: Codable {
     }
     
     var numOfLosingTrades: Int
+    var numOfHoursToForget: Int
     
     var highRiskStart: Date
     var highRiskEnd: Date
@@ -173,6 +174,8 @@ struct TradingSettings: Codable {
         self.numOfLosingTrades = defaultSettings["num_losing_trades"] as! Int
          
         self.stopTradingBase = 0.0
+        
+        self.numOfHoursToForget = 8
     }
     
     mutating func setRiskMultiplier(newValue: Double) throws {

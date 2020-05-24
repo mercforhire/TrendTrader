@@ -25,12 +25,12 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var longNameField: NSTextField!
     @IBOutlet weak var shortNameField: NSTextField!
     
-    @IBOutlet weak var startFromSimCheckBox: NSButton!
+    @IBOutlet weak var simModeCheckBox: NSButton!
     @IBOutlet weak var modelPeakField: NSTextField!
     @IBOutlet weak var modelBalanceField: NSTextField!
-    @IBOutlet weak var modelMaxDDField: NSTextField!
     @IBOutlet weak var accPeakField: NSTextField!
     @IBOutlet weak var accBalanceField: NSTextField!
+    @IBOutlet weak var troughField: NSTextField!
     
     @IBOutlet weak var baseFolderField: NSTextField!
     @IBOutlet weak var inputFolderField: NSTextField!
@@ -71,10 +71,10 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 inputFolderField.stringValue = ""
                 outputFolderField.stringValue = ""
                 
-                startFromSimCheckBox.state = .off
+                simModeCheckBox.state = .off
                 modelPeakField.stringValue = "0.0"
                 modelBalanceField.stringValue = "0.0"
-                modelMaxDDField.stringValue = "0.0"
+                troughField.stringValue = "0.0"
                 accPeakField.stringValue = "0.0"
                 accBalanceField.stringValue = "0.0"
             }
@@ -95,7 +95,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         modelPeakField.delegate = self
         modelBalanceField.delegate = self
-        modelMaxDDField.delegate = self
+        troughField.delegate = self
         accPeakField.delegate = self
         accBalanceField.delegate = self
         
@@ -138,7 +138,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     @IBAction func lastTradeChecked(_ sender: NSButton) {
-        selectedSettings?.state.startInSimMode = sender.state == .on
+        selectedSettings?.state.simMode = sender.state == .on
     }
     
     @IBAction func selectBaseFolder(_ sender: NSButton) {
@@ -348,11 +348,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     private func refreshStateFields() {
         guard let selectedSettings = selectedSettings else { return }
         
-        startFromSimCheckBox.state = selectedSettings.state.startInSimMode ? .on : .off
-        modelPeakField.stringValue = String(format: "%.2f", selectedSettings.state.peakModelBalance)
+        simModeCheckBox.state = selectedSettings.state.simMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", selectedSettings.state.modelPeak)
         modelBalanceField.stringValue = String(format: "%.2f", selectedSettings.state.modelBalance)
-        modelMaxDDField.stringValue = String(format: "%.2f", selectedSettings.state.modelMaxDD)
-        accPeakField.stringValue = String(format: "%.2f", selectedSettings.state.peakAccBalance)
+        troughField.stringValue = String(format: "%.2f", selectedSettings.state.latestTrough)
+        accPeakField.stringValue = String(format: "%.2f", selectedSettings.state.accPeak)
         accBalanceField.stringValue = String(format: "%.2f", selectedSettings.state.accBalance)
     }
 }
@@ -391,19 +391,19 @@ extension NTSettingsViewController: NSControlTextEditingDelegate {
                 selectedSettings?.accName = textField.stringValue
             }
             else if textField == modelPeakField {
-                selectedSettings?.state.peakModelBalance = textField.doubleValue
+                selectedSettings?.state.modelPeak = textField.doubleValue
             }
             else if textField == modelBalanceField {
                 selectedSettings?.state.modelBalance = textField.doubleValue
             }
-            else if textField == modelMaxDDField {
-                selectedSettings?.state.modelMaxDD = textField.doubleValue
+            else if textField == troughField {
+                selectedSettings?.state.latestTrough = textField.doubleValue
             }
             else if textField == accBalanceField {
                 selectedSettings?.state.accBalance = textField.doubleValue
             }
             else if textField == accPeakField {
-                selectedSettings?.state.peakAccBalance = textField.doubleValue
+                selectedSettings?.state.accPeak = textField.doubleValue
             }
         }
     }

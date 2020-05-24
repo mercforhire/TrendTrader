@@ -23,12 +23,12 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var sellButton: NSButton!
     @IBOutlet weak var positionStatusLabel: NSTextField!
     
-    @IBOutlet weak var startFromSimCheckBox: NSButton!
+    @IBOutlet weak var simModeCheckBox: NSButton!
     @IBOutlet weak var modelPeakField: NSTextField!
     @IBOutlet weak var modelBalanceField: NSTextField!
-    @IBOutlet weak var modelMaxDDField: NSTextField!
     @IBOutlet weak var accPeakField: NSTextField!
     @IBOutlet weak var accBalanceField: NSTextField!
+    @IBOutlet weak var troughField: NSTextField!
     
     var server1minURL: String = "" {
         didSet {
@@ -276,11 +276,11 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     }
     
     private func refreshStateFields() {
-        startFromSimCheckBox.state = sessionManager.state.startInSimMode ? .on : .off
-        modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakModelBalance)
+        simModeCheckBox.state = sessionManager.state.simMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.modelPeak)
         modelBalanceField.stringValue = String(format: "%.2f", sessionManager.state.modelBalance)
-        modelMaxDDField.stringValue = String(format: "%.2f", sessionManager.state.modelMaxDD)
-        accPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakAccBalance)
+        troughField.stringValue = String(format: "%.2f", sessionManager.state.latestTrough)
+        accPeakField.stringValue = String(format: "%.2f", sessionManager.state.accPeak)
         accBalanceField.stringValue = String(format: "%.2f", sessionManager.state.accBalance)
     }
 }

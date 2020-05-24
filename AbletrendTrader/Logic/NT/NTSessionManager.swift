@@ -68,10 +68,10 @@ class NTSessionManager: BaseSessionManager {
         case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
             guard !closedPosition.executed else { break }
             
-            self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime, accountId: self.accountId))
+            self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime, accountId: accountId))
             
             let trade = Trade(direction: closedPosition.direction,
-                              executed: closedPosition.executed,
+                              executed: false,
                               size: closedPosition.size,
                               pointValue: pointsValue,
                               entryTime: closedPosition.entryTime,
@@ -80,7 +80,7 @@ class NTSessionManager: BaseSessionManager {
                               exitTime: closingTime,
                               idealExitPrice: closingPrice,
                               actualExitPrice: closingPrice,
-                              commission: closedPosition.executed ? commission * 2 : 0.0,
+                              commission: 0.0,
                               exitMethod: .hitStoploss)
             appendTrade(trade: trade)
             pos = nil
@@ -371,9 +371,7 @@ class NTSessionManager: BaseSessionManager {
                         completion(nil)
                     }
                 }
-            case .verifyPositionClosed(_, _, _, _):
-                break
-            case .noAction:
+            default:
                 break
             }
         }

@@ -24,8 +24,6 @@ class TraderBot {
             return
         }
         
-        sessionManager.resetSession()
-        
         var previousBar: PriceBar?
         for timeKey in self.chart.timeKeys {
             if timeKey == lastBar.identifier {
@@ -33,10 +31,10 @@ class TraderBot {
             }
             
             guard let currentBar = self.chart.priceBars[timeKey]
-            // ,currentBar.time.month() >= 5 && currentBar.time.day() >= 20
+//                , currentBar.time.month() >= 5 && currentBar.time.day() >= 19
             else { continue }
             
-//            if currentBar.time.month() >= 5 && currentBar.time.day() >= 20 {
+//            if currentBar.time.month() >= 5 && currentBar.time.day() >= 19 {
 //                break
 //            }
             
@@ -319,13 +317,13 @@ class TraderBot {
             if tradingSetting.drawdownLimit > 0 {
                 let lastTrade = sessionManager.trades.last
                 
-                if (!sessionManager.state.startInSimMode && lastTrade == nil) || (lastTrade != nil && lastTrade!.executed) {
+                if (!sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && lastTrade!.executed) {
                     if sessionManager.state.modelDrawdown >= tradingSetting.drawdownLimit {
                         newPosition.executed = false
                         sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", tradingSetting.drawdownLimit)), entering sim mode:") : nil
                     }
-                } else if (sessionManager.state.startInSimMode && lastTrade == nil) || (lastTrade != nil && !lastTrade!.executed) {
-                    if sessionManager.state.modelDrawdown >= sessionManager.state.modelMaxDD * 0.7 {
+                } else if (sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && !lastTrade!.executed) {
+                    if sessionManager.state.modelDrawdown >= sessionManager.state.latestTrough * 0.7 {
                         newPosition.executed = false
                     }
                 }

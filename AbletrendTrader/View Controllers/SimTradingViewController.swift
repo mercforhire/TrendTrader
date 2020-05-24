@@ -24,12 +24,12 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var totalPLLabel: NSTextField!
     @IBOutlet weak var tableView: NSTableView!
     
-    @IBOutlet weak var startFromSimCheckBox: NSButton!
-    @IBOutlet weak var modelPeakField: NSTextField!
+    @IBOutlet weak var simModeCheckBox: NSButton!
     @IBOutlet weak var modelBalanceField: NSTextField!
-    @IBOutlet weak var modelMaxDDField: NSTextField!
-    @IBOutlet weak var accPeakField: NSTextField!
     @IBOutlet weak var accBalanceField: NSTextField!
+    @IBOutlet weak var modelPeakField: NSTextField!
+    @IBOutlet weak var accPeakField: NSTextField!
+    @IBOutlet weak var troughField: NSTextField!
     
     private var server1minURL: String = "" {
         didSet {
@@ -90,7 +90,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         modelPeakField.delegate = self
         modelBalanceField.delegate = self
-        modelMaxDDField.delegate = self
+        troughField.delegate = self
         accPeakField.delegate = self
         accBalanceField.delegate = self
         
@@ -136,7 +136,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     @IBAction func lastTradeChecked(_ sender: NSButton) {
-        sessionManager.state.startInSimMode = sender.state == .on
+        sessionManager.state.simMode = sender.state == .on
     }
     
     @IBAction
@@ -201,7 +201,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         tableView.reloadData()
     }
     
-    private let testing = true
+    private let testing = false
     @IBAction private func goToEndOfDay(_ sender: Any) {
         guard trader != nil, let completedChart = chartManager?.chart, !completedChart.timeKeys.isEmpty
         else { return }
@@ -219,6 +219,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             while start <= 7 {
                 print("Testing numOfLosingTrades: \(start)...")
                 trader?.tradingSetting.numOfLosingTrades = start
+                sessionManager.resetSession()
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
@@ -355,6 +356,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         print("\(count) trades,", "P/L:", String(format: "%.2f", currentActualPL), ", Max DD:", String(format: "%.2f", maxDD))
+        print(sessionManager.state.description())
         print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
@@ -378,11 +380,11 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     private func refreshStateFields() {
-        startFromSimCheckBox.state = sessionManager.state.startInSimMode ? .on : .off
-        modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakModelBalance)
+        simModeCheckBox.state = sessionManager.state.simMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.modelPeak)
         modelBalanceField.stringValue = String(format: "%.2f", sessionManager.state.modelBalance)
-        modelMaxDDField.stringValue = String(format: "%.2f", sessionManager.state.modelMaxDD)
-        accPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakAccBalance)
+        troughField.stringValue = String(format: "%.2f", sessionManager.state.latestTrough)
+        accPeakField.stringValue = String(format: "%.2f", sessionManager.state.accPeak)
         accBalanceField.stringValue = String(format: "%.2f", sessionManager.state.accBalance)
     }
 }
@@ -495,19 +497,19 @@ extension SimTradingViewController: NSControlTextEditingDelegate {
                     server3minURL = textField.stringValue
                 }
                 else if textField == modelPeakField {
-                    sessionManager.state.peakModelBalance = textField.doubleValue
+                    sessionManager.state.modelPeak = textField.doubleValue
                 }
                 else if textField == modelBalanceField {
                     sessionManager.state.modelBalance = textField.doubleValue
                 }
-                else if textField == modelMaxDDField {
-                    sessionManager.state.modelMaxDD = textField.doubleValue
+                else if textField == troughField {
+                    sessionManager.state.latestTrough = textField.doubleValue
                 }
                 else if textField == accBalanceField {
                     sessionManager.state.accBalance = textField.doubleValue
                 }
                 else if textField == accPeakField {
-                    sessionManager.state.peakAccBalance = textField.doubleValue
+                    sessionManager.state.accPeak = textField.doubleValue
                 }
                 
             } catch (let error) {

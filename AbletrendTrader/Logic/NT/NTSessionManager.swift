@@ -524,15 +524,15 @@ class NTSessionManager: BaseSessionManager {
         
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
+            guard let self = self else { return }
             
             for _ in 0...2 {
                 if self.quitLoop {
                     break
                 }
-                if let closedPosition = self.pos,
+                
+                if !self.quitLoop,
+                    let closedPosition = self.pos,
                     let stopOrderId = closedPosition.stopLoss?.stopOrderId,
                     let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                     latestFilledOrderResponse.status == .filled {
@@ -557,7 +557,8 @@ class NTSessionManager: BaseSessionManager {
                         self.delegate?.positionStatusChanged()
                     }
                     self.quitLoop = true
-                } else {
+                }
+                else if !self.quitLoop {
                     print("Detected position closed but last filled order response not found. Retrying...")
                     sleep(1)
                 }
@@ -594,9 +595,7 @@ class NTSessionManager: BaseSessionManager {
             
             switch result {
             case .success:
-               
                 alert.messageText = "Demo order placed successfully, please cancel it asap."
-                
             case .failure:
                 let alert = NSAlert()
                 alert.messageText = "Demo order place error."

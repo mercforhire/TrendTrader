@@ -10,7 +10,7 @@ import Foundation
 
 struct Trade: Codable {
     var direction: TradeDirection
-    var simulated: Bool
+    var executed: Bool
     var size: Int
     var pointValue: Double
     var entryTime: Date

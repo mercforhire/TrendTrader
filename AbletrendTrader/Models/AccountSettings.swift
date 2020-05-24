@@ -22,6 +22,7 @@ struct AccountSettings: Codable, Equatable {
     var basePath: String = "/Users/lchen/Downloads/NinjaTrader/"
     var incomingPath: String = "/Users/lchen/Downloads/NinjaTrader/incoming"
     var outgoingPath: String = "/Users/lchen/Downloads/NinjaTrader/outgoing"
+    var state: AccountState = AccountState()
     
     static func == (lhs: AccountSettings, rhs: AccountSettings) -> Bool {
         return

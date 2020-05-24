@@ -11,7 +11,6 @@ import Cocoa
 class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private let config = ConfigurationManager.shared
     
-    var tradingMode: LiveTradingMode!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -23,6 +22,13 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var buyButton: NSButton!
     @IBOutlet weak var sellButton: NSButton!
     @IBOutlet weak var positionStatusLabel: NSTextField!
+    
+    @IBOutlet weak var startFromSimCheckBox: NSButton!
+    @IBOutlet weak var modelPeakField: NSTextField!
+    @IBOutlet weak var modelBalanceField: NSTextField!
+    @IBOutlet weak var modelMaxDDField: NSTextField!
+    @IBOutlet weak var accPeakField: NSTextField!
+    @IBOutlet weak var accBalanceField: NSTextField!
     
     var server1minURL: String = "" {
         didSet {
@@ -43,7 +49,10 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
     }
     
+    var accountIndex: Int!
+    var accountSetting: AccountSettings!
     var tradingSetting: TradingSettings!
+    
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
@@ -76,41 +85,41 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         tableView.delegate = self
         tableView.dataSource = self
+        
+        self.title = "Live trader - \(accountSetting.accName)"
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
-        tradingSetting = config.tradingSettings[config.tradingSettingsSelection]
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                                 target: self,
                                                 selector: #selector(updateSystemTimeLabel),
                                                 userInfo: nil,
                                                 repeats: true)
         
+        server1minURL = accountSetting.server1MinURL
+        server2minURL = accountSetting.server2MinURL
+        server3minURL = accountSetting.server3MinURL
+        
         chartManager = ChartManager(live: true, serverUrls: serverUrls, tradingSetting: tradingSetting)
+        chartManager?.accountId = accountSetting.accName
         chartManager?.delegate = self
         
-        switch tradingMode {
-        case .ninjaTrader(let accountId, let commission, let ticker, let pointValue, let exchange, let accountLongName, let basePath, let incomingPath, let outgoingPath):
-            sessionManager = NTSessionManager(accountId: accountId,
-                                              commission: commission,
-                                              ticker: ticker,
-                                              pointsValue: pointValue,
-                                              exchange: exchange,
-                                              accountLongName: accountLongName,
-                                              basePath: basePath,
-                                              incomingPath: incomingPath,
-                                              outgoingPath: outgoingPath)
-            sessionManager.commission = commission
-            chartManager?.accountId = accountId
-            self.title = "Live trader - \(accountId)"
-        default:
-            break
-        }
-        
+        sessionManager = NTSessionManager(accountId: accountSetting.accName,
+                                          commission: accountSetting.commission,
+                                          ticker: accountSetting.ticker,
+                                          pointsValue: accountSetting.pointValue,
+                                          exchange: accountSetting.exchange,
+                                          accountLongName: accountSetting.accLongName,
+                                          basePath: accountSetting.basePath,
+                                          incomingPath: accountSetting.incomingPath,
+                                          outgoingPath: accountSetting.outgoingPath,
+                                          state: accountSetting.state)
         sessionManager.delegate = self
+        
+        refreshStateFields()
     }
     
     override func viewWillAppear() {
@@ -137,6 +146,10 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
                                           sessionManager.getTotalPAndL(),
                                           sessionManager.getTotalPAndLDollar().currency(true, showPlusSign: false))
+        
+        refreshStateFields()
+        accountSetting.state = sessionManager.state
+        config.updateNTSettings(index: accountIndex, settings: accountSetting)
     }
     
     @IBAction
@@ -208,8 +221,8 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         }
     }
     
-    private func processActions(time: Date = Date(), actions: [TradeActionType], completion: Action? = nil) {
-        sessionManager.processActions(priceBarTime: time, actions: actions) { [weak self] networkError in
+    private func processAction(time: Date = Date(), action: TradeActionType, completion: Action? = nil) {
+        sessionManager.processAction(priceBarTime: time, action: action) { [weak self] networkError in
             guard let self = self else { return }
             
             if let networkError = networkError {
@@ -227,7 +240,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        processActions(actions: [action]) {
+        processAction(action: action) {
             sender.isEnabled = true
         }
     }
@@ -237,7 +250,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        processActions(actions: [action]) {
+        processAction(action: action) {
             sender.isEnabled = true
         }
     }
@@ -261,6 +274,15 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         systemClockTimer.invalidate()
         systemClockTimer = nil
     }
+    
+    private func refreshStateFields() {
+        startFromSimCheckBox.state = sessionManager.state.startInSimMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakModelBalance)
+        modelBalanceField.stringValue = String(format: "%.2f", sessionManager.state.modelBalance)
+        modelMaxDDField.stringValue = String(format: "%.2f", sessionManager.state.modelMaxDD)
+        accPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakAccBalance)
+        accBalanceField.stringValue = String(format: "%.2f", sessionManager.state.accBalance)
+    }
 }
 
 extension LiveTradingViewController: DataManagerDelegate {
@@ -277,8 +299,8 @@ extension LiveTradingViewController: DataManagerDelegate {
         
         trader?.chart = chart
         
-        if let actions = trader?.decide(), chartManager?.monitoring ?? false {
-            processActions(time: lastBarTime, actions: actions)
+        if let action = trader?.decide(), chartManager?.monitoring ?? false {
+            processAction(time: lastBarTime, action: action)
         }
     }
     

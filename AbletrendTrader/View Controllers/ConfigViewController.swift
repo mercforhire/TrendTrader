@@ -40,8 +40,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var noEntryDuringLunchCheckbox: NSButton!
     @IBOutlet private weak var waitFinalizedSignalsCheckbox: NSButton!
     @IBOutlet private weak var fomcDayCheckbox: NSButton!
-    @IBOutlet private weak var stopTradingField: NSTextField!
     @IBOutlet private weak var stoplossBufferField: NSTextField!
+    @IBOutlet private weak var maxDDField: NSTextField!
     @IBOutlet private weak var present1Button: NSButton!
     @IBOutlet private weak var present2Button: NSButton!
     @IBOutlet private weak var present3Button: NSButton!
@@ -67,8 +67,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         maxDistanceToSRField.delegate = self
         profitAvoidSameDirectionField.delegate = self
         numberLosingTradesField.delegate = self
-        stopTradingField.delegate = self
         stoplossBufferField.delegate = self
+        maxDDField.delegate = self
     }
     
     func loadConfig() {
@@ -80,7 +80,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         minProfitByPass.stringValue = String(format: "%.2f", tradingSetting.skipGreenExitBase)
         minProfitPullbackField.stringValue = String(format: "%.2f", tradingSetting.enterOnAnyPullbackBase)
         takeProfitField.stringValue = String(format: "%.2f", tradingSetting.takeProfitBarLengthBase)
-        stopTradingField.stringValue = String(format: "%.2f", tradingSetting.stopTradingBase)
+        maxDDField.stringValue = String(format: "%.2f", tradingSetting.drawdownLimit)
     
         fomcTimePicker.dateValue = Date.getNewDateFromTime(hour: tradingSetting.fomcTime.hour(),
                                                            min: tradingSetting.fomcTime.minute())
@@ -392,11 +392,12 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try tradingSetting.setProfitAvoidSameDirection(newValue: textField.doubleValue)
                 } else if textField == numberLosingTradesField {
                     try tradingSetting.setNumberLosingTradesField(newValue: textField.integerValue)
-                } else if textField == stopTradingField {
-                    try tradingSetting.setStopTrading(newValue: textField.doubleValue)
                 } else if textField == stoplossBufferField {
                     try tradingSetting.setBuffer(newValue: textField.doubleValue)
+                } else if textField == maxDDField {
+                    try tradingSetting.setDrawdownLimit(newValue: textField.doubleValue)
                 }
+                
                 config.updateTradingSettings(settings: tradingSetting)
             } catch (let error) {
                 guard let configError = error as? ConfigError else { return }

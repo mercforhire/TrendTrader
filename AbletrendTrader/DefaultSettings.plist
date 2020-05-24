@@ -58,5 +58,7 @@
 	<integer>4</integer>
 	<key>max_daily_loss</key>
 	<integer>-75</integer>
+	<key>drawdown_limit</key>
+	<integer>2000</integer>
 </dict>
 </plist>

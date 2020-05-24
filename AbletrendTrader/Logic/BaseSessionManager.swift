@@ -16,8 +16,9 @@ protocol SessionManagerDelegate: class {
 class BaseSessionManager {
     let config = ConfigurationManager.shared
     
+    var printLog: Bool = true
     var pointsValue: Double = 20.0
-    var commission: Double = 2.0
+    var commission: Double = 2.5
     var highRiskEntriesTaken: Int = 0
     var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
@@ -36,10 +37,12 @@ class BaseSessionManager {
             }
         }
     }
-    var trades: [Trade] = []
+    private(set) var trades: [Trade] = []
     var currentPriceBarTime: Date?
     var liveMonitoring = false
     var accountId: String = "Sim"
+    var state: AccountState = AccountState()
+    
     weak var delegate: SessionManagerDelegate?
     
     private var timer: Timer?
@@ -85,9 +88,9 @@ class BaseSessionManager {
         currentPriceBarTime = nil
     }
     
-    func processActions(priceBarTime: Date,
-                        actions: [TradeActionType],
-                        completion: @escaping (TradingError?) -> ()) {
+    func processAction(priceBarTime: Date,
+                       action: TradeActionType,
+                       completion: @escaping (TradingError?) -> ()) {
         // Override
     }
     
@@ -109,7 +112,7 @@ class BaseSessionManager {
     func getTotalPAndL() -> Double {
         var pAndL: Double = 0
         
-        for trade in trades {
+        for trade in trades where trade.executed == true {
             pAndL = pAndL + trade.actualProfit
         }
         
@@ -119,7 +122,7 @@ class BaseSessionManager {
     func getDailyPAndL(day: Date) -> Double {
         var pAndL: Double = 0
         
-        for trade in trades where trade.entryTime.isInSameDay(date: day) {
+        for trade in trades where trade.entryTime.isInSameDay(date: day) && trade.executed == true {
             pAndL = pAndL + trade.actualProfit
         }
         
@@ -129,7 +132,7 @@ class BaseSessionManager {
     func getTotalPAndLDollar() -> Double {
         var pAndLDollar: Double = 0
         
-        for trade in trades {
+        for trade in trades where trade.executed == true  {
             pAndLDollar = pAndLDollar + trade.actualProfitDollar
         }
         
@@ -146,7 +149,7 @@ class BaseSessionManager {
         if let currentPosition = pos {
             let currentStop: String = currentPosition.stopLoss?.stop != nil ? String(format: "%.2f", currentPosition.stopLoss!.stop) : "--"
             
-            tradesList.append(TradesTableRowItem(type: currentPosition.direction.description(),
+            tradesList.append(TradesTableRowItem(type: currentPosition.direction.description() + (currentPosition.executed ? "" : "(Sim)"),
                                                  iEntry: String(format: "%.2f", currentPosition.idealEntryPrice),
                                                  aEntry: String(format: "%.2f", currentPosition.actualEntryPrice),
                                                  stop: currentStop,
@@ -159,7 +162,7 @@ class BaseSessionManager {
         }
         
         for trade in trades.reversed() {
-            tradesList.append(TradesTableRowItem(type: trade.direction.description(),
+            tradesList.append(TradesTableRowItem(type: trade.direction.description() + (trade.executed ? "" : "(Sim)"),
                                                  iEntry: String(format: "%.2f", trade.idealEntryPrice),
                                                  aEntry: String(format: "%.2f", trade.actualEntryPrice),
                                                  stop: "--",
@@ -172,5 +175,44 @@ class BaseSessionManager {
         }
         
         return tradesList
+    }
+    
+    func appendTrade(trade: Trade) {
+        trades.append(trade)
+        
+        if trade.executed {
+            state.accBalance += trade.idealProfit * pointsValue - trade.commission
+        }
+        
+        state.startInSimMode = !trade.executed
+        state.modelBalance += trade.idealProfit * pointsValue - trade.commission
+        state.peakModelBalance = max(state.peakModelBalance, state.modelBalance)
+        state.peakAccBalance = max(state.peakAccBalance, state.modelBalance)
+        
+        if state.modelDrawdown == 0 {
+            state.modelMaxDD = 0.0
+        } else {
+            state.modelMaxDD = max(state.modelMaxDD, state.modelDrawdown)
+        }
+        
+        if state.accDrawdown == 0, state.modelBalance != state.accBalance {
+            state.modelBalance = state.accBalance
+            state.modelMaxDD = 0.0
+            printLog ? print("Account balance hit new peak, resetting model balance to account balance.") : nil
+        }
+        
+        if printLog {
+            print("Trade:", trade.exitTime.generateDateIdentifier(),
+                  trade.executed ? "live" : "simulated",
+                  "P/L:", String(format: "%.2f", trade.idealProfit),
+                  "Model DD:", String(format: "$%.2f", state.modelDrawdown),
+                  "Model max DD:", String(format: "$%.2f", state.modelMaxDD),
+                  "Model balance:", String(format: "$%.2f", state.modelBalance),
+                  "Acc balance:", String(format: "$%.2f", state.accBalance))
+            
+            if !trade.executed, state.modelDrawdown < state.modelMaxDD * 0.7 {
+                print("Current Drawdown: $\(String(format: "%.2f", state.modelDrawdown)) under $\(String(format: "%.2f", state.modelMaxDD * 0.7)), going back to live.")
+            }
+        }
     }
 }

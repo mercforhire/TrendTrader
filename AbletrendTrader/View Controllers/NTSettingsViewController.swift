@@ -24,6 +24,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var exchangeField: NSTextField!
     @IBOutlet weak var longNameField: NSTextField!
     @IBOutlet weak var shortNameField: NSTextField!
+    
+    @IBOutlet weak var startFromSimCheckBox: NSButton!
+    @IBOutlet weak var modelPeakField: NSTextField!
+    @IBOutlet weak var modelBalanceField: NSTextField!
+    @IBOutlet weak var modelMaxDDField: NSTextField!
+    @IBOutlet weak var accPeakField: NSTextField!
+    @IBOutlet weak var accBalanceField: NSTextField!
+    
     @IBOutlet weak var baseFolderField: NSTextField!
     @IBOutlet weak var inputFolderField: NSTextField!
     @IBOutlet weak var outputFolderField: NSTextField!
@@ -46,6 +54,8 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 baseFolderField.stringValue = selectedSettings.basePath
                 inputFolderField.stringValue = selectedSettings.incomingPath
                 outputFolderField.stringValue = selectedSettings.outgoingPath
+                
+                refreshStateFields()
             } else {
                 server1MinField.stringValue = ""
                 server2MinField.stringValue = ""
@@ -60,8 +70,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 baseFolderField.stringValue = ""
                 inputFolderField.stringValue = ""
                 outputFolderField.stringValue = ""
+                
+                startFromSimCheckBox.state = .off
+                modelPeakField.stringValue = "0.0"
+                modelBalanceField.stringValue = "0.0"
+                modelMaxDDField.stringValue = "0.0"
+                accPeakField.stringValue = "0.0"
+                accBalanceField.stringValue = "0.0"
             }
-            
         }
     }
     
@@ -76,6 +92,12 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         exchangeField.delegate = self
         longNameField.delegate = self
         shortNameField.delegate = self
+        
+        modelPeakField.delegate = self
+        modelBalanceField.delegate = self
+        modelMaxDDField.delegate = self
+        accPeakField.delegate = self
+        accBalanceField.delegate = self
         
         baseFolderField.isEditable = false
         inputFolderField.isEditable = false
@@ -113,6 +135,10 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         super.viewWillAppear()
         
         view.window?.delegate = self
+    }
+    
+    @IBAction func lastTradeChecked(_ sender: NSButton) {
+        selectedSettings?.state.startInSimMode = sender.state == .on
     }
     
     @IBAction func selectBaseFolder(_ sender: NSButton) {
@@ -251,19 +277,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         if let vc = segue.destinationController as? LiveTradingViewController,
+            let selectedSettingsIndex = selectedSettingsIndex,
             let selectedSettings = selectedSettings {
-            vc.server1minURL = selectedSettings.server1MinURL
-            vc.server2minURL = selectedSettings.server2MinURL
-            vc.server3minURL = selectedSettings.server3MinURL
-            vc.tradingMode = .ninjaTrader(accountId: selectedSettings.accName,
-                                          commission: selectedSettings.commission,
-                                          ticker: selectedSettings.ticker,
-                                          pointValue: selectedSettings.pointValue,
-                                          exchange: selectedSettings.exchange,
-                                          accountLongName: selectedSettings.accLongName,
-                                          basePath: selectedSettings.basePath,
-                                          incomingPath: selectedSettings.incomingPath,
-                                          outgoingPath: selectedSettings.outgoingPath)
+            vc.accountIndex = selectedSettingsIndex
+            vc.accountSetting = selectedSettings
+            vc.tradingSetting = config.tradingSettings[config.tradingSettingsSelection]
         }
     }
     
@@ -326,6 +344,17 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         return false
     }
+    
+    private func refreshStateFields() {
+        guard let selectedSettings = selectedSettings else { return }
+        
+        startFromSimCheckBox.state = selectedSettings.state.startInSimMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", selectedSettings.state.peakModelBalance)
+        modelBalanceField.stringValue = String(format: "%.2f", selectedSettings.state.modelBalance)
+        modelMaxDDField.stringValue = String(format: "%.2f", selectedSettings.state.modelMaxDD)
+        accPeakField.stringValue = String(format: "%.2f", selectedSettings.state.peakAccBalance)
+        accBalanceField.stringValue = String(format: "%.2f", selectedSettings.state.accBalance)
+    }
 }
 
 extension NTSettingsViewController: NSControlTextEditingDelegate {
@@ -333,24 +362,48 @@ extension NTSettingsViewController: NSControlTextEditingDelegate {
         if let textField = notification.object as? NSTextField {
             if textField == server1MinField {
                 selectedSettings?.server1MinURL = textField.stringValue
-            } else if textField == server2MinField {
+            }
+            else if textField == server2MinField {
                 selectedSettings?.server2MinURL = textField.stringValue
-            } else if textField == server3MinField {
+            }
+            else if textField == server3MinField {
                 selectedSettings?.server3MinURL = textField.stringValue
-            } else if textField == positionSizeField {
+            }
+            else if textField == positionSizeField {
                 selectedSettings?.positionSize = textField.integerValue
-            } else if textField == symbolField {
+            }
+            else if textField == symbolField {
                 selectedSettings?.ticker = textField.stringValue
-            } else if textField == commissionField {
+            }
+            else if textField == commissionField {
                 selectedSettings?.commission = textField.doubleValue
-            } else if textField == dollarPointField {
+            }
+            else if textField == dollarPointField {
                 selectedSettings?.pointValue = textField.doubleValue
-            } else if textField == exchangeField {
+            }
+            else if textField == exchangeField {
                 selectedSettings?.exchange = textField.stringValue
-            } else if textField == longNameField {
+            }
+            else if textField == longNameField {
                 selectedSettings?.accLongName = textField.stringValue
-            } else if textField == shortNameField {
+            }
+            else if textField == shortNameField {
                 selectedSettings?.accName = textField.stringValue
+            }
+            else if textField == modelPeakField {
+                selectedSettings?.state.peakModelBalance = textField.doubleValue
+            }
+            else if textField == modelBalanceField {
+                selectedSettings?.state.modelBalance = textField.doubleValue
+            }
+            else if textField == modelMaxDDField {
+                selectedSettings?.state.modelMaxDD = textField.doubleValue
+            }
+            else if textField == accBalanceField {
+                selectedSettings?.state.accBalance = textField.doubleValue
+            }
+            else if textField == accPeakField {
+                selectedSettings?.state.peakAccBalance = textField.doubleValue
             }
         }
     }

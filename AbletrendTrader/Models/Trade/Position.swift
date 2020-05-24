@@ -9,6 +9,7 @@
 import Foundation
 
 struct Position {
+    var executed: Bool
     var direction: TradeDirection
     var size: Int
     var entryTime: Date

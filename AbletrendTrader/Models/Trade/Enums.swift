@@ -35,7 +35,6 @@ enum EntryType {
 enum TradeActionType {
     case noAction(entryType: EntryType?, reason: NoActionReason)
     case openPosition(newPosition: Position, entryType: EntryType)
-    case reversePosition(oldPosition: Position, newPosition: Position, entryType: EntryType)
     case updateStop(stop: StopLoss)
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
@@ -58,15 +57,6 @@ enum TradeActionType {
         case .openPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Opened %@ position at %.2f with SL %.2f reason: %@ for %@",
-                          Date().hourMinuteSecond(),
-                          type, newPosition.idealEntryPrice,
-                          newPosition.stopLoss?.stop ?? -1.0,
-                          entryType.description(),
-                          actionBarTime.hourMinute())
-            
-        case .reversePosition(let oldPosition, let newPosition, let entryType):
-            let type: String = oldPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Reversed %@ position at %.2f with SL %.2f for %@",
                           Date().hourMinuteSecond(),
                           type, newPosition.idealEntryPrice,
                           newPosition.stopLoss?.stop ?? -1.0,
@@ -346,17 +336,6 @@ enum OrderType {
     }
 }
 
-enum LiveTradingMode {
-    case ninjaTrader(accountId: String, commission: Double, ticker: String, pointValue: Double, exchange: String, accountLongName: String, basePath: String, incomingPath: String, outgoingPath: String)
-    
-    func name() -> String {
-        switch self {
-        case .ninjaTrader:
-            return "NinjaTrader"
-        }
-    }
-}
-
 enum NTOrderStatus: String {
     case working = "WORKING"
     case cancelled = "CANCELLED"
@@ -441,8 +420,8 @@ enum ConfigError: Error {
     case numOfLosingTradesError
     case maxDistanceToSRError
     case profitAvoidSameDirectionError
-    case stopTradingError
     case bufferError
+    case drawdownLimitError
     
     func displayMessage() -> String {
         switch self {
@@ -492,10 +471,10 @@ enum ConfigError: Error {
             return "Number of opposite losing trades to halt trading must be >= 3"
         case .profitAvoidSameDirectionError:
             return "Profit avoid same direction must be over 4"
-        case .stopTradingError:
-            return "Stop trading must be over 20"
         case .bufferError:
             return "Buffer must be over 0"
+        case .drawdownLimitError:
+            return "Drawdown Limit must be over 500"
         }
     }
     

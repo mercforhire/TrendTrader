@@ -67,13 +67,7 @@ struct TradingSettings: Codable {
         return profitAvoidSameDirectionBase * riskMultiplier
     }
     
-    var stopTradingBase: Double
-    var stopTrading: Double {
-        return stopTradingBase * riskMultiplier
-    }
-    
     var numOfLosingTrades: Int
-    var numOfHoursToForget: Int
     
     var highRiskStart: Date
     var highRiskEnd: Date
@@ -107,6 +101,8 @@ struct TradingSettings: Codable {
     var waitForFinalizedSignals: Bool
     
     var fomcDay: Bool
+    
+    var drawdownLimit: Double
     
     init() {
         let defaultSettings: NSDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "DefaultSettings", ofType: "plist")!)!
@@ -172,10 +168,8 @@ struct TradingSettings: Codable {
         self.profitAvoidSameDirectionBase = defaultSettings["profit_avoid_same_direction_base"] as! Double
          
         self.numOfLosingTrades = defaultSettings["num_losing_trades"] as! Int
-         
-        self.stopTradingBase = 0.0
         
-        self.numOfHoursToForget = 8
+        self.drawdownLimit = defaultSettings["drawdown_limit"] as! Double
     }
     
     mutating func setRiskMultiplier(newValue: Double) throws {
@@ -424,15 +418,6 @@ struct TradingSettings: Codable {
         waitForFinalizedSignals = newValue
     }
     
-    mutating func setStopTrading(newValue: Double) throws {
-        if newValue >= 20.0 || newValue == 0.0 {
-            stopTradingBase = newValue
-            return
-        }
-        
-        throw ConfigError.stopTradingError
-    }
-    
     mutating func setBuffer(newValue: Double) throws {
         if newValue > 0 {
             buffer = newValue
@@ -440,6 +425,15 @@ struct TradingSettings: Codable {
         }
         
         throw ConfigError.bufferError
+    }
+    
+    mutating func setDrawdownLimit(newValue: Double) throws {
+        if newValue >= 500 {
+            drawdownLimit = newValue
+            return
+        }
+        
+        throw ConfigError.drawdownLimitError
     }
     
     func highRiskEntryInteval(date: Date) -> DateInterval {

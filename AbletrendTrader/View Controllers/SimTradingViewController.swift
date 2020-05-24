@@ -24,6 +24,13 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var totalPLLabel: NSTextField!
     @IBOutlet weak var tableView: NSTableView!
     
+    @IBOutlet weak var startFromSimCheckBox: NSButton!
+    @IBOutlet weak var modelPeakField: NSTextField!
+    @IBOutlet weak var modelBalanceField: NSTextField!
+    @IBOutlet weak var modelMaxDDField: NSTextField!
+    @IBOutlet weak var accPeakField: NSTextField!
+    @IBOutlet weak var accBalanceField: NSTextField!
+    
     private var server1minURL: String = "" {
         didSet {
             chartManager?.serverUrls[SignalInteval.oneMin] = server1minURL
@@ -58,6 +65,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     var tradingSetting: TradingSettings!
+    var state: AccountState = AccountState()
+    
     weak var delegate: DataManagerDelegate?
     
     func setupUI() {
@@ -78,6 +87,14 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         server1MinURLField.delegate = self
         server2MinURLField.delegate = self
         server3MinURLField.delegate = self
+        
+        modelPeakField.delegate = self
+        modelBalanceField.delegate = self
+        modelMaxDDField.delegate = self
+        accPeakField.delegate = self
+        accBalanceField.delegate = self
+        
+        refreshStateFields()
         
         server1minURL = config.server1MinURL
         server2minURL = config.server2MinURL
@@ -118,6 +135,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         systemTimeLabel.stringValue = dateFormatter.string(from: Date())
     }
     
+    @IBAction func lastTradeChecked(_ sender: NSButton) {
+        sessionManager.state.startInSimMode = sender.state == .on
+    }
+    
     @IBAction
     private func refreshChartData(_ sender: NSButton) {
         chartManager?.stopMonitoring()
@@ -138,6 +159,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     @IBAction
     func loadFromDiskPressed(_ sender: NSButton) {
+        let oldTitle = sender.title
+        sender.isEnabled = false
+        sender.title = "Loading..."
         chartManager?.loadChart(completion: { [weak self] chart in
             guard let self = self else { return }
             
@@ -150,6 +174,9 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                     self.goToEndOfDay(self.endButton as Any)
                 }
             }
+            
+            sender.isEnabled = true
+            sender.title = oldTitle
         })
     }
     
@@ -174,7 +201,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         tableView.reloadData()
     }
     
-    private let testing = true
+    private let testing = false
     @IBAction private func goToEndOfDay(_ sender: Any) {
         guard trader != nil, let completedChart = chartManager?.chart, !completedChart.timeKeys.isEmpty
         else { return }
@@ -185,19 +212,20 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         
         chartManager?.stopMonitoring()
         trader?.chart = completedChart
+        sessionManager.printLog = !testing
         
         if testing {
-            var start = 5
-            while start <= 7 {
-                print("Testing numOfHoursToForget: \(start)...")
-                trader?.tradingSetting.numOfHoursToForget = start
+            var start = 1500.0
+            while start <= 3500.0 {
+                print("Testing drawdownLimit: \(start)...")
+                trader?.tradingSetting.drawdownLimit = start
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     self.delegate?.chartUpdated(chart: completedChart)
                     print("")
-                    start += 1
+                    start += 250
                 })
             }
         } else {
@@ -214,13 +242,18 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     private func updateTradesList() {
         listOfTrades = sessionManager.listOfTrades()
         tableView.reloadData()
-        totalPLLabel.stringValue = String(format: "Total P/L: %.2f", sessionManager.getTotalPAndL())
+        totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
+                                          sessionManager.getTotalPAndL(),
+                                          sessionManager.getTotalPAndLDollar().currency(true, showPlusSign: false))
         
         if let lastSimTime = trader?.chart.lastBar?.time {
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)
         }
         
+        refreshStateFields()
+        
         var currentPL = 0.0
+        var currentActualPL = 0.0
         var winningTrades = 0
         var totalWin = 0.0
         var losingTrades = 0
@@ -233,11 +266,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var lastTrade: Trade?
         var currentDayPL = 0.0
         var count = 0
-        var monday = 0.0
-        var tuesday = 0.0
-        var wednesday = 0.0
-        var thursday = 0.0
-        var friday = 0.0
         var morningTrades = 0.0
         var lunchTrades = 0.0
         
@@ -247,59 +275,49 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         for trade in sessionManager.trades {
-            currentPL += trade.idealProfit
-            peak = max(peak, currentPL)
-            maxDD = max(maxDD, peak - currentPL)
-            currentDayPL += trade.idealProfit
+            if trade.executed {
+                currentPL += trade.idealProfit
+                currentActualPL += trade.idealProfit
+                peak = max(peak, currentActualPL)
+                maxDD = max(maxDD, peak - currentActualPL)
+                currentDayPL += trade.idealProfit
+                
+                if tradingSetting.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
+                    morningTrades += trade.idealProfit
+                } else if tradingSetting.lunchInterval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
+                    lunchTrades += trade.idealProfit
+                }
+                
+                if trade.idealProfit <= 0 {
+                    losingTrades += 1
+                    totalLoss = totalLoss + abs(trade.idealProfit)
+                } else {
+                    winningTrades += 1
+                    totalWin = totalWin + abs(trade.idealProfit)
+                }
+                
+                count += 1
+                
+                if let lastTradeTime = lastTrade?.entryTime,
+                    lastTradeTime.day() != trade.entryTime.day(),
+                    count != sessionManager.trades.count {
+                    
+                    worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
+                    worstPLDay = min(worstPLDay, currentDayPL)
+                    currentDayPL = 0.0
+                } else if count == sessionManager.trades.count {
+                    worstPLDayTime = currentDayPL < worstPLDay ? trade.entryTime : worstPLDayTime
+                    worstPLDay = min(worstPLDay, currentDayPL)
+                }
+                
+                lastTrade = trade
+            } else {
+                currentPL += trade.idealProfit
+            }
             
             if !testing {
-                print(String(format: "%.2f", currentPL))
+                print(String(format: "%.2f", currentActualPL))
             }
-            
-            switch trade.entryTime.weekDay() {
-            case 2:
-                monday += trade.idealProfit
-            case 3:
-                tuesday += trade.idealProfit
-            case 4:
-                wednesday += trade.idealProfit
-            case 5:
-                thursday += trade.idealProfit
-            case 6:
-                friday += trade.idealProfit
-            default:
-                break
-            }
-            
-            if tradingSetting.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
-                morningTrades += trade.idealProfit
-            } else if tradingSetting.lunchInterval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
-                lunchTrades += trade.idealProfit
-            }
-            
-            if trade.idealProfit <= 0 {
-                losingTrades += 1
-                totalLoss = totalLoss + abs(trade.idealProfit)
-            } else {
-                winningTrades += 1
-                totalWin = totalWin + abs(trade.idealProfit)
-            }
-            
-            count += 1
-            
-            if let lastTradeTime = lastTrade?.entryTime,
-                lastTradeTime.day() != trade.entryTime.day(),
-                count != sessionManager.trades.count {
-                
-                worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
-                worstPLDay = min(worstPLDay, currentDayPL)
-                currentDayPL = 0.0
-            } else if count == sessionManager.trades.count {
-                worstPLDayTime = currentDayPL < worstPLDay ? trade.entryTime : worstPLDayTime
-                worstPLDay = min(worstPLDay, currentDayPL)
-            }
-            
-            lastTrade = trade
         }
         
         if !testing {
@@ -321,7 +339,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             print("")
             print("Trade entry price:")
             for trade in sessionManager.trades {
-                print(trade.idealEntryPrice)
+                print(String(format: "%.2f", trade.idealEntryPrice))
             }
             print("")
             print("Tradee exit time:")
@@ -331,21 +349,21 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             print("")
             print("Trade exit price:")
             for trade in sessionManager.trades {
-                print(trade.idealExitPrice)
+                print(String(format: "%.2f", trade.idealExitPrice))
             }
             print("")
         }
         
-        print("\(sessionManager.trades.count) trades", "P/L:", String(format: "%.2f", currentPL), "Max DD:", String(format: "%.2f", maxDD))
-        print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(sessionManager.trades.count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
+        print("\(count) trades,", "P/L:", String(format: "%.2f", currentActualPL),
+              ", Max DD:", String(format: "%.2f", maxDD),
+              ", Peak balance:", String(format: "%.2f", sessionManager.state.peakModelBalance),
+              ", Current Trough:", String(format: "%.2f", sessionManager.state.modelMaxDD),
+              ", Model balance:", String(format: "$%.2f", sessionManager.state.modelBalance),
+              ", Acc balance:", String(format: "$%.2f", sessionManager.state.accBalance))
+        print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
         }
-        print("Monday: \(String(format: "%.2f", monday))")
-        print("Tuesday: \(String(format: "%.2f", tuesday))")
-        print("Wednesday: \(String(format: "%.2f", wednesday))")
-        print("Thursday: \(String(format: "%.2f", thursday))")
-        print("Friday: \(String(format: "%.2f", friday))")
         print("Morning P/L: \(String(format: "%.2f", morningTrades))")
         print("Lunch P/L: \(String(format: "%.2f", lunchTrades))")
     }
@@ -363,6 +381,15 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         systemClockTimer.invalidate()
         systemClockTimer = nil
     }
+    
+    private func refreshStateFields() {
+        startFromSimCheckBox.state = sessionManager.state.startInSimMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakModelBalance)
+        modelBalanceField.stringValue = String(format: "%.2f", sessionManager.state.modelBalance)
+        modelMaxDDField.stringValue = String(format: "%.2f", sessionManager.state.modelMaxDD)
+        accPeakField.stringValue = String(format: "%.2f", sessionManager.state.peakAccBalance)
+        accBalanceField.stringValue = String(format: "%.2f", sessionManager.state.accBalance)
+    }
 }
 
 extension SimTradingViewController: DataManagerDelegate {
@@ -379,10 +406,10 @@ extension SimTradingViewController: DataManagerDelegate {
         
         trader?.chart = chart
         
-        if let actions = trader?.decide() {
-            sessionManager.processActions(priceBarTime: lastBarTime,
-                                          actions: actions,
-                                          completion: { [weak self] _ in
+        if let action = trader?.decide() {
+            sessionManager.processAction(priceBarTime: lastBarTime,
+                                         action: action,
+                                         completion: { [weak self] _ in
                 self?.updateTradesList()
             })
         }
@@ -415,12 +442,15 @@ extension SimTradingViewController: NSTableViewDelegate {
             text = trade.iExit
             cellIdentifier = .IdealExitCell
         } else if tableColumn == tableView.tableColumns[4] {
+            text = trade.commission
+            cellIdentifier = .CommissionCell
+        } else if tableColumn == tableView.tableColumns[5] {
             text = trade.pAndL
             cellIdentifier = .PAndLCell
-        } else if tableColumn == tableView.tableColumns[5] {
+        } else if tableColumn == tableView.tableColumns[6] {
             text = trade.entryTime
             cellIdentifier = .EntryTimeCell
-        } else if tableColumn == tableView.tableColumns[6] {
+        } else if tableColumn == tableView.tableColumns[7] {
             text = trade.exitTime
             cellIdentifier = .ExitTimeCell
         }
@@ -460,13 +490,31 @@ extension SimTradingViewController: NSControlTextEditingDelegate {
                 if textField == server1MinURLField {
                     try config.setServer1MinURL(newValue: textField.stringValue)
                     server1minURL = textField.stringValue
-                } else if textField == server2MinURLField {
+                }
+                else if textField == server2MinURLField {
                     try config.setServer2MinURL(newValue: textField.stringValue)
                     server2minURL = textField.stringValue
-                } else if textField == server3MinURLField {
+                }
+                else if textField == server3MinURLField {
                     try config.setServer3MinURL(newValue: textField.stringValue)
                     server3minURL = textField.stringValue
                 }
+                else if textField == modelPeakField {
+                    sessionManager.state.peakModelBalance = textField.doubleValue
+                }
+                else if textField == modelBalanceField {
+                    sessionManager.state.modelBalance = textField.doubleValue
+                }
+                else if textField == modelMaxDDField {
+                    sessionManager.state.modelMaxDD = textField.doubleValue
+                }
+                else if textField == accBalanceField {
+                    sessionManager.state.accBalance = textField.doubleValue
+                }
+                else if textField == accPeakField {
+                    sessionManager.state.peakAccBalance = textField.doubleValue
+                }
+                
             } catch (let error) {
                 guard let configError = error as? ConfigError else { return }
                 

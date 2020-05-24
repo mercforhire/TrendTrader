@@ -428,7 +428,7 @@ struct TradingSettings: Codable {
     }
     
     mutating func setDrawdownLimit(newValue: Double) throws {
-        if newValue >= 500 {
+        if newValue >= 500 || newValue == 0 {
             drawdownLimit = newValue
             return
         }

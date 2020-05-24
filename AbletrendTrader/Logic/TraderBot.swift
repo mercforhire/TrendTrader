@@ -322,7 +322,7 @@ class TraderBot {
                 if (!sessionManager.state.startInSimMode && lastTrade == nil) || (lastTrade != nil && lastTrade!.executed) {
                     if sessionManager.state.modelDrawdown >= tradingSetting.drawdownLimit {
                         newPosition.executed = false
-                        sessionManager.printLog ? print("Current Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", tradingSetting.drawdownLimit)), entering sim mode:") : nil
+                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", tradingSetting.drawdownLimit)), entering sim mode:") : nil
                     }
                 } else if (sessionManager.state.startInSimMode && lastTrade == nil) || (lastTrade != nil && !lastTrade!.executed) {
                     if sessionManager.state.modelDrawdown >= sessionManager.state.modelMaxDD * 0.7 {

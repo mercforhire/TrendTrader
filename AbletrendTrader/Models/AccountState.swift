@@ -24,6 +24,6 @@ struct AccountState: Codable {
     }
     
     var accDrawdown: Double {
-        return peakAccBalance - modelBalance
+        return peakAccBalance - accBalance
     }
 }

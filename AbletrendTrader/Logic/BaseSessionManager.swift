@@ -82,6 +82,7 @@ class BaseSessionManager {
         status = nil
         timer?.invalidate()
         stopLiveMonitoring()
+        state = AccountState()
     }
     
     func resetCurrentlyProcessingPriceBar() {
@@ -187,7 +188,7 @@ class BaseSessionManager {
         state.startInSimMode = !trade.executed
         state.modelBalance += trade.idealProfit * pointsValue - trade.commission
         state.peakModelBalance = max(state.peakModelBalance, state.modelBalance)
-        state.peakAccBalance = max(state.peakAccBalance, state.modelBalance)
+        state.peakAccBalance = max(state.peakAccBalance, state.accBalance)
         
         if state.modelDrawdown == 0 {
             state.modelMaxDD = 0.0
@@ -197,21 +198,23 @@ class BaseSessionManager {
         
         if state.accDrawdown == 0, state.modelBalance != state.accBalance {
             state.modelBalance = state.accBalance
+            state.peakAccBalance = state.accBalance
+            state.peakModelBalance = state.accBalance
             state.modelMaxDD = 0.0
             printLog ? print("Account balance hit new peak, resetting model balance to account balance.") : nil
         }
         
         if printLog {
-            print("Trade:", trade.exitTime.generateDateIdentifier(),
-                  trade.executed ? "live" : "simulated",
-                  "P/L:", String(format: "%.2f", trade.idealProfit),
-                  "Model DD:", String(format: "$%.2f", state.modelDrawdown),
-                  "Model max DD:", String(format: "$%.2f", state.modelMaxDD),
-                  "Model balance:", String(format: "$%.2f", state.modelBalance),
-                  "Acc balance:", String(format: "$%.2f", state.accBalance))
+            print(trade.executed ? "Live" : "Simulated",
+                  "trade:", trade.exitTime.generateDateIdentifier(),
+                  "  P/L:", String(format: "%.2f", trade.idealProfit),
+                  "  Model DD:", String(format: "$%.2f", state.modelDrawdown),
+                  "  Model max DD:", String(format: "$%.2f", state.modelMaxDD),
+                  "  Model balance:", String(format: "$%.2f", state.modelBalance),
+                  "  Acc balance:", String(format: "$%.2f", state.accBalance))
             
             if !trade.executed, state.modelDrawdown < state.modelMaxDD * 0.7 {
-                print("Current Drawdown: $\(String(format: "%.2f", state.modelDrawdown)) under $\(String(format: "%.2f", state.modelMaxDD * 0.7)), going back to live.")
+                print("Drawdown: $\(String(format: "%.2f", state.modelDrawdown)) under $\(String(format: "%.2f", state.modelMaxDD * 0.7)), going back to live.")
             }
         }
     }

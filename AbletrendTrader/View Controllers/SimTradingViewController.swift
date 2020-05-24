@@ -201,7 +201,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         tableView.reloadData()
     }
     
-    private let testing = false
+    private let testing = true
     @IBAction private func goToEndOfDay(_ sender: Any) {
         guard trader != nil, let completedChart = chartManager?.chart, !completedChart.timeKeys.isEmpty
         else { return }
@@ -354,12 +354,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             print("")
         }
         
-        print("\(count) trades,", "P/L:", String(format: "%.2f", currentActualPL),
-              ", Max DD:", String(format: "%.2f", maxDD),
-              ", Peak balance:", String(format: "%.2f", sessionManager.state.peakModelBalance),
-              ", Current Trough:", String(format: "%.2f", sessionManager.state.modelMaxDD),
-              ", Model balance:", String(format: "$%.2f", sessionManager.state.modelBalance),
-              ", Acc balance:", String(format: "$%.2f", sessionManager.state.accBalance))
+        print("\(count) trades,", "P/L:", String(format: "%.2f", currentActualPL), ", Max DD:", String(format: "%.2f", maxDD))
         print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")

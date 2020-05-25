@@ -70,7 +70,6 @@ class NTSessionManager: BaseSessionManager {
                               exitMethod: reason)
             appendTrade(trade: trade)
             pos = nil
-            
             completion(nil)
             return
         case .refresh:
@@ -278,7 +277,7 @@ class NTSessionManager: BaseSessionManager {
                         completion(nil)
                     }
                 }
-            case .forceClosePosition(let closedPosition, let closingPrice, _, let exitMethod):
+            case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let exitMethod):
                 if closedPosition.executed {
                     if self.status?.position == 0 {
                         if let stopOrderId = self.pos?.stopLoss?.stopOrderId,
@@ -362,7 +361,7 @@ class NTSessionManager: BaseSessionManager {
                                       entryTime: closedPosition.entryTime,
                                       idealEntryPrice: closedPosition.idealEntryPrice,
                                       actualEntryPrice: closedPosition.idealEntryPrice,
-                                      exitTime: Date(),
+                                      exitTime: closingTime,
                                       idealExitPrice: closingPrice,
                                       actualExitPrice: closingPrice,
                                       commission: 0.0,
@@ -531,8 +530,7 @@ class NTSessionManager: BaseSessionManager {
                     break
                 }
                 
-                if !self.quitLoop,
-                    let closedPosition = self.pos,
+                if let closedPosition = self.pos,
                     let stopOrderId = closedPosition.stopLoss?.stopOrderId,
                     let latestFilledOrderResponse = self.ntManager.getOrderResponse(orderId: stopOrderId),
                     latestFilledOrderResponse.status == .filled {
@@ -558,10 +556,10 @@ class NTSessionManager: BaseSessionManager {
                     }
                     self.quitLoop = true
                 }
-                else if !self.quitLoop {
+                else {
                     print("Detected position closed but last filled order response not found. Retrying...")
-                    sleep(1)
                 }
+                sleep(1)
             }
         }
     }

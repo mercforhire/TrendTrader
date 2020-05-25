@@ -31,13 +31,9 @@ struct AccountState: Codable {
         var output = "In sim mode: \(simMode ? "true" : "false")"
         
         output.append(", Model balance: \(String(format: "%.2f", modelBalance))")
-        
         output.append(", Acc balance: \(String(format: "%.2f", accBalance))")
-        
         output.append(", Model peak: \(String(format: "%.2f", modelPeak))")
-        
         output.append(", Acc peak: \(String(format: "%.2f", accPeak))")
-        
         output.append(", Latest trough: \(String(format: "%.2f", latestTrough))")
      
         return output

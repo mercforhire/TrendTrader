@@ -152,7 +152,7 @@ class BaseSessionManager {
             
             tradesList.append(TradesTableRowItem(type: currentPosition.direction.description() + (currentPosition.executed ? "" : "(Sim)"),
                                                  iEntry: String(format: "%.2f", currentPosition.idealEntryPrice),
-                                                 aEntry: String(format: "%.2f", currentPosition.actualEntryPrice),
+                                                 aEntry: currentPosition.executed ? String(format: "%.2f", currentPosition.actualEntryPrice) : "--",
                                                  stop: currentStop,
                                                  iExit: "--",
                                                  aExit: "--",
@@ -165,10 +165,10 @@ class BaseSessionManager {
         for trade in trades.reversed() {
             tradesList.append(TradesTableRowItem(type: trade.direction.description() + (trade.executed ? "" : "(Sim)"),
                                                  iEntry: String(format: "%.2f", trade.idealEntryPrice),
-                                                 aEntry: String(format: "%.2f", trade.actualEntryPrice),
+                                                 aEntry: trade.executed ? String(format: "%.2f", trade.actualEntryPrice) : "--",
                                                  stop: "--",
                                                  iExit: String(format: "%.2f", trade.idealExitPrice),
-                                                 aExit: String(format: "%.2f", trade.actualExitPrice),
+                                                 aExit: trade.executed ? String(format: "%.2f", trade.actualExitPrice) : "--",
                                                  pAndL: String(format: "%.2f", trade.actualProfit),
                                                  entryTime: dateFormatter.string(from: trade.entryTime),
                                                  exitTime: dateFormatter.string(from: trade.exitTime),
@@ -207,11 +207,11 @@ class BaseSessionManager {
         if printLog {
             print(trade.executed ? "Live" : "Simulated",
                   "trade:", trade.exitTime.generateDateIdentifier(),
-                  "  P/L:", String(format: "%.2f", trade.idealProfit),
-                  "  Model DD:", String(format: "$%.2f", state.modelDrawdown),
-                  "  Model max DD:", String(format: "$%.2f", state.latestTrough),
-                  "  Model balance:", String(format: "$%.2f", state.modelBalance),
-                  "  Acc balance:", String(format: "$%.2f", state.accBalance))
+                  " P/L:", String(format: "%.2f", trade.idealProfit),
+                  " Model DD:", String(format: "$%.2f", state.modelDrawdown),
+                  " Model max DD:", String(format: "$%.2f", state.latestTrough),
+                  " Model balance:", String(format: "$%.2f", state.modelBalance),
+                  " Acc balance:", String(format: "$%.2f", state.accBalance))
             
             if !trade.executed, state.modelDrawdown < state.latestTrough * 0.7 {
                 print("Drawdown: $\(String(format: "%.2f", state.modelDrawdown)) under $\(String(format: "%.2f", state.latestTrough * 0.7)), going back to live.")

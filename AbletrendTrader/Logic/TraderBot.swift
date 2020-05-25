@@ -31,12 +31,17 @@ class TraderBot {
             }
             
             guard let currentBar = self.chart.priceBars[timeKey]
-//                , currentBar.time.month() >= 5 && currentBar.time.day() >= 19
+//            , currentBar.time.month() >= 5 && currentBar.time.day() >= 19
             else { continue }
             
 //            if currentBar.time.month() >= 5 && currentBar.time.day() >= 19 {
 //                break
 //            }
+            
+            // US Holiday
+            if currentBar.time.month() == 5, currentBar.time.day() == 25 {
+                continue
+            }
             
             if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
                 sessionManager.highRiskEntriesTaken = 0

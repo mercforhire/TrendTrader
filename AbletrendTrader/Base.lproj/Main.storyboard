@@ -2337,8 +2337,8 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yK3-D2-QD1">
-                                <rect key="frame" x="511" y="374" width="148" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Peak model balance($):" id="3Pn-OD-pew">
+                                <rect key="frame" x="542" y="374" width="97" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Model peak($):" id="3Pn-OD-pew">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2385,16 +2385,16 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5n6-ef-d8Y">
-                                <rect key="frame" x="511" y="348" width="136" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Peak acc. balance($):" id="Mv6-8r-WBK">
+                                <rect key="frame" x="542" y="348" width="109" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Account peak($):" id="Mv6-8r-WBK">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="b1n-Tb-aa0">
-                                <rect key="frame" x="18" y="348" width="104" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Acc. balance($):" id="4QG-zo-RoG">
+                                <rect key="frame" x="18" y="348" width="127" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Account balance($):" id="4QG-zo-RoG">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2468,7 +2468,7 @@
                             <constraint firstAttribute="trailing" secondItem="i66-Zv-rsj" secondAttribute="trailing" constant="20" id="BZw-Oi-XOU"/>
                             <constraint firstAttribute="trailing" secondItem="ucq-Vb-N7V" secondAttribute="trailing" constant="20" id="Bgf-mm-8Hf"/>
                             <constraint firstItem="jdZ-WN-2Ok" firstAttribute="centerY" secondItem="qPe-gd-HwE" secondAttribute="centerY" id="CeX-Yq-LVx"/>
-                            <constraint firstItem="OQU-gS-dwM" firstAttribute="leading" secondItem="yK3-D2-QD1" secondAttribute="trailing" constant="10" id="D5W-or-RNR"/>
+                            <constraint firstItem="OQU-gS-dwM" firstAttribute="leading" secondItem="yK3-D2-QD1" secondAttribute="trailing" constant="30" id="D5W-or-RNR"/>
                             <constraint firstItem="tb1-f5-ekN" firstAttribute="centerY" secondItem="jwv-nJ-CuY" secondAttribute="centerY" id="Fd0-7B-thP"/>
                             <constraint firstItem="SNh-du-SVV" firstAttribute="centerY" secondItem="2we-AD-cbr" secondAttribute="centerY" id="HmI-Vh-l7b"/>
                             <constraint firstItem="pCK-sw-8YW" firstAttribute="trailing" secondItem="SNh-du-SVV" secondAttribute="trailing" id="IBA-B9-CQD"/>
@@ -2538,8 +2538,8 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Yql-Nh-nK8">
-                                <rect key="frame" x="14" y="449" width="110" height="32"/>
-                                <buttonCell key="cell" type="push" title="Fetch chart" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bap-ku-Uoa">
+                                <rect key="frame" x="14" y="449" width="148" height="32"/>
+                                <buttonCell key="cell" type="push" title="Fetch from server" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bap-ku-Uoa">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -2974,7 +2974,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rO1-X1-ZH1">
-                                <rect key="frame" x="124" y="449" width="130" height="32"/>
+                                <rect key="frame" x="162" y="449" width="130" height="32"/>
                                 <buttonCell key="cell" type="push" title="Load from disk" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9EL-Tz-Peg">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -3190,6 +3190,6 @@
         <image name="NSTouchBarSkipBackTemplate" width="22" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Dua-i6-PWC"/>
+        <segue reference="2OK-pd-1Rj"/>
     </inferredMetricsTieBreakers>
 </document>

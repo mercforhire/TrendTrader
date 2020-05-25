@@ -43,7 +43,7 @@ class SimSessionManager: BaseSessionManager {
             appendTrade(trade: trade)
             pos = nil
             
-        case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
+        case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason):
             let trade = Trade(direction: closedPosition.direction,
                               executed: closedPosition.executed,
                               size: closedPosition.size,
@@ -55,11 +55,11 @@ class SimSessionManager: BaseSessionManager {
                               idealExitPrice: closingPrice,
                               actualExitPrice: closingPrice,
                               commission: closedPosition.executed ? commission * 2 : 0.0,
-                              exitMethod: .hitStoploss)
+                              exitMethod: reason)
             appendTrade(trade: trade)
             pos = nil
             
-        case .noAction(_):
+        default:
             break
         }
         

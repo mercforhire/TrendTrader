@@ -67,8 +67,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     var tradingSetting: TradingSettings!
     var state: AccountState = AccountState()
     
-    weak var delegate: DataManagerDelegate?
-    
     func setupUI() {
         dateFormatter.timeStyle = .medium
         dateFormatter.timeZone = Date.DefaultTimeZone
@@ -224,7 +222,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                     guard let self = self else { return }
 
                     self.updateTradesList()
-                    self.delegate?.chartUpdated(chart: completedChart)
                     print("")
                     start += 1
                 })
@@ -234,7 +231,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 guard let self = self else { return }
 
                 self.updateTradesList()
-                self.delegate?.chartUpdated(chart: completedChart)
                 print("")
             })
         }
@@ -395,8 +391,6 @@ extension SimTradingViewController: DataManagerDelegate {
     }
     
     func chartUpdated(chart: Chart) {
-        delegate?.chartUpdated(chart: chart)
-        
         guard !chart.timeKeys.isEmpty, let lastBarTime = chart.lastBar?.time else {
             return
         }

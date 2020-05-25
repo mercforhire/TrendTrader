@@ -52,22 +52,8 @@ class NTSessionManager: BaseSessionManager {
     override func processAction(priceBarTime: Date,
                                 action: TradeActionType,
                                 completion: @escaping (TradingError?) -> ()) {
-        if !connected {
-            completion(.brokerNotConnected)
-            return
-        }
-        
-        if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
-            // Actions for this bar already processed
-            print("\(accountId)-\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
-            return
-        }
-        currentPriceBarTime = priceBarTime
-        
         switch action {
-        case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
-            guard !closedPosition.executed else { break }
-            
+        case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason):
             self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime, accountId: accountId))
             
             let trade = Trade(direction: closedPosition.direction,
@@ -81,14 +67,30 @@ class NTSessionManager: BaseSessionManager {
                               idealExitPrice: closingPrice,
                               actualExitPrice: closingPrice,
                               commission: 0.0,
-                              exitMethod: .hitStoploss)
+                              exitMethod: reason)
             appendTrade(trade: trade)
             pos = nil
+            
+            completion(nil)
+            return
+        case .refresh:
             completion(nil)
             return
         default:
             break
         }
+        
+        if !connected {
+            completion(.brokerNotConnected)
+            return
+        }
+        
+        if currentPriceBarTime?.isInSameMinute(date: priceBarTime) ?? false {
+            // Actions for this bar already processed
+            print("\(accountId)-\(Date().hourMinuteSecond()): Actions for \(priceBarTime.hourMinuteSecond()) already processed")
+            return
+        }
+        currentPriceBarTime = priceBarTime
         
         let queue = DispatchQueue.global()
         queue.async { [weak self] in

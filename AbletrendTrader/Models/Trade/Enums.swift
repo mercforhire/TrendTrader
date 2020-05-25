@@ -38,6 +38,7 @@ enum TradeActionType {
     case updateStop(stop: StopLoss)
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
+    case refresh
     
     func description(actionBarTime: Date, accountId: String) -> String {
         switch self {
@@ -85,6 +86,8 @@ enum TradeActionType {
                           stopLoss.stop,
                           stopLoss.source.reason(),
                           actionBarTime.hourMinute())
+        default:
+            return ""
         }
     }
 }

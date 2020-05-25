@@ -30,25 +30,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var accBalanceField: NSTextField!
     @IBOutlet weak var troughField: NSTextField!
     
-    var server1minURL: String = "" {
-        didSet {
-            chartManager?.serverUrls[SignalInteval.oneMin] = server1minURL
-        }
-    }
-    var server2minURL: String = "" {
-        didSet {
-            chartManager?.serverUrls[SignalInteval.twoMin] = server2minURL
-        }
-    }
-    var server3minURL: String = "" {
-        didSet {
-            chartManager?.serverUrls[SignalInteval.threeMin] = server3minURL
-        }
-    }
-    private var serverUrls: [SignalInteval: String] {
-        return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
-    }
-    
     var accountIndex: Int!
     var accountSetting: AccountSettings!
     var tradingSetting: TradingSettings!
@@ -67,8 +48,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             }
         }
     }
-    
-    weak var delegate: DataManagerDelegate?
     
     func setupUI() {
         dateFormatter.timeStyle = .medium
@@ -99,9 +78,9 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
                                                 userInfo: nil,
                                                 repeats: true)
         
-        server1minURL = accountSetting.server1MinURL
-        server2minURL = accountSetting.server2MinURL
-        server3minURL = accountSetting.server3MinURL
+        let serverUrls = [SignalInteval.oneMin: accountSetting.server1MinURL,
+                          SignalInteval.twoMin: accountSetting.server2MinURL,
+                          SignalInteval.threeMin: accountSetting.server3MinURL]
         
         chartManager = ChartManager(live: true, serverUrls: serverUrls, tradingSetting: tradingSetting)
         chartManager?.accountId = accountSetting.accName
@@ -141,7 +120,9 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     }
     
     private func updateTradesList() {
-        listOfTrades = sessionManager.listOfTrades()
+        let newTrades = sessionManager.listOfTrades()
+        listOfTrades = newTrades
+        
         tableView.reloadData()
         totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
                                           sessionManager.getTotalPAndL(),
@@ -291,8 +272,6 @@ extension LiveTradingViewController: DataManagerDelegate {
     }
     
     func chartUpdated(chart: Chart) {
-        delegate?.chartUpdated(chart: chart)
-        
         guard !chart.timeKeys.isEmpty, let lastBarTime = chart.lastBar?.time else {
             return
         }

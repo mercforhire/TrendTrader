@@ -95,7 +95,7 @@ class TraderBot {
                         case .openPosition(let position, let entryType):
                             return .openPosition(newPosition: position, entryType: entryType)
                         default:
-                            return .noAction(entryType: nil, reason: .noTradingAction)
+                            return .refresh
                         }
                     }
                 default:
@@ -112,7 +112,7 @@ class TraderBot {
                         case .openPosition(let position, let entryType):
                             return .openPosition(newPosition: position, entryType: entryType)
                         default:
-                            return .noAction(entryType: nil, reason: .noTradingAction)
+                            return .refresh
                         }
                     }
                 }

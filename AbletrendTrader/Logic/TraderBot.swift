@@ -330,6 +330,7 @@ class TraderBot {
                 } else if (sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && !lastTrade!.executed) {
                     if sessionManager.state.modelDrawdown >= sessionManager.state.latestTrough * 0.7 {
                         newPosition.executed = false
+                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) still over $\(String(format: "%.2f", sessionManager.state.latestTrough * 0.7)), remain in sim mode.") : nil
                     }
                 }
             }

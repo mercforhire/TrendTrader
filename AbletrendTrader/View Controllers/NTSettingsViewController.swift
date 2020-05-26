@@ -26,6 +26,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var shortNameField: NSTextField!
     
     @IBOutlet weak var simModeCheckBox: NSButton!
+    @IBOutlet weak var probationCheckBox: NSButton!
     @IBOutlet weak var modelPeakField: NSTextField!
     @IBOutlet weak var modelBalanceField: NSTextField!
     @IBOutlet weak var accPeakField: NSTextField!
@@ -139,6 +140,10 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     @IBAction func lastTradeChecked(_ sender: NSButton) {
         selectedSettings?.state.simMode = sender.state == .on
+    }
+    
+    @IBAction func probationModeChecked(_ sender: NSButton) {
+        selectedSettings?.state.probationMode = sender.state == .on
     }
     
     @IBAction func selectBaseFolder(_ sender: NSButton) {
@@ -349,6 +354,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         guard let selectedSettings = selectedSettings else { return }
         
         simModeCheckBox.state = selectedSettings.state.simMode ? .on : .off
+        probationCheckBox.state = selectedSettings.state.probationMode ? .on : .off
         modelPeakField.stringValue = String(format: "%.2f", selectedSettings.state.modelPeak)
         modelBalanceField.stringValue = String(format: "%.2f", selectedSettings.state.modelBalance)
         troughField.stringValue = String(format: "%.2f", selectedSettings.state.latestTrough)

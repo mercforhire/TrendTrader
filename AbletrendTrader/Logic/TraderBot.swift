@@ -319,13 +319,18 @@ class TraderBot {
                 return .noAction(entryType: nil, reason: .repeatedTrade)
             }
             
-            if tradingSetting.drawdownLimit > 0 {
+            if tradingSetting.drawdownLimit > 0, sessionManager.state.modelDrawdown > 0 {
                 let lastTrade = sessionManager.trades.last
                 
                 if (!sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && lastTrade!.executed) {
-                    if sessionManager.state.modelDrawdown >= tradingSetting.drawdownLimit {
+                    if !sessionManager.state.probationMode && sessionManager.state.modelDrawdown >= tradingSetting.drawdownLimit {
                         newPosition.executed = false
                         sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", tradingSetting.drawdownLimit)), entering sim mode:") : nil
+                    }
+                    else if sessionManager.state.probationMode &&
+                        sessionManager.state.modelDrawdown >= max(tradingSetting.drawdownLimit, sessionManager.state.latestTrough) {
+                        newPosition.executed = false
+                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", max(tradingSetting.drawdownLimit, sessionManager.state.latestTrough))), entering sim mode:") : nil
                     }
                 } else if (sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && !lastTrade!.executed) {
                     if sessionManager.state.modelDrawdown >= sessionManager.state.latestTrough * 0.7 {

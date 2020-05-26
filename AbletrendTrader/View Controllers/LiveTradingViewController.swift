@@ -24,6 +24,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var positionStatusLabel: NSTextField!
     
     @IBOutlet weak var simModeCheckBox: NSButton!
+    @IBOutlet weak var probationCheckBox: NSButton!
     @IBOutlet weak var modelPeakField: NSTextField!
     @IBOutlet weak var modelBalanceField: NSTextField!
     @IBOutlet weak var accPeakField: NSTextField!
@@ -258,6 +259,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     
     private func refreshStateFields() {
         simModeCheckBox.state = sessionManager.state.simMode ? .on : .off
+        probationCheckBox.state = sessionManager.state.probationMode ? .on : .off
         modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.modelPeak)
         modelBalanceField.stringValue = String(format: "%.2f", sessionManager.state.modelBalance)
         troughField.stringValue = String(format: "%.2f", sessionManager.state.latestTrough)

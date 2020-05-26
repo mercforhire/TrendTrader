@@ -183,6 +183,8 @@ class BaseSessionManager {
         
         if trade.executed {
             state.accBalance += trade.idealProfit * pointsValue - trade.commission
+        } else {
+            state.probationMode = false
         }
 
         state.simMode = !trade.executed
@@ -196,14 +198,6 @@ class BaseSessionManager {
             state.latestTrough = max(state.latestTrough, state.modelDrawdown)
         }
         
-        if state.accDrawdown <= 0, state.modelBalance != state.accBalance {
-            state.modelBalance = state.accBalance
-            state.accPeak = state.accBalance
-            state.modelPeak = state.accBalance
-            state.latestTrough = 0.0
-            printLog ? print("Account balance hit new peak, resetting model balance and peak.") : nil
-        }
-        
         if printLog {
             print(trade.executed ? "Live" : "Simulated",
                   "trade:", trade.exitTime.generateDateIdentifier(),
@@ -211,11 +205,22 @@ class BaseSessionManager {
                   " Model DD:", String(format: "$%.2f", state.modelDrawdown),
                   " Model max DD:", String(format: "$%.2f", state.latestTrough),
                   " Model balance:", String(format: "$%.2f", state.modelBalance),
-                  " Acc balance:", String(format: "$%.2f", state.accBalance))
-            
-            if !trade.executed, state.modelDrawdown < state.latestTrough * 0.7 {
-                print("Drawdown: $\(String(format: "%.2f", state.modelDrawdown)) under $\(String(format: "%.2f", state.latestTrough * 0.7)), going back to live.")
-            }
+                  " Acc balance:", String(format: "$%.2f", state.accBalance),
+                  " Probation:", state.probationMode ? "true" : "false")
+        }
+        
+        if !trade.executed, state.modelDrawdown < state.latestTrough * 0.7 {
+            printLog ? print("Drawdown: $\(String(format: "%.2f", state.modelDrawdown)) under $\(String(format: "%.2f", state.latestTrough * 0.7)), going back to live.") : nil
+            printLog ? print("Back to live mode, entering probation state.") : nil
+            state.probationMode = true
+        }
+        else if trade.executed, state.accDrawdown <= 0, state.modelBalance != state.accBalance {
+            state.modelBalance = state.accBalance
+            state.accPeak = state.accBalance
+            state.modelPeak = state.accBalance
+            state.latestTrough = 0.0
+            state.probationMode = false
+            printLog ? print("Account balance hit new peak, resetting account state.") : nil
         }
     }
 }

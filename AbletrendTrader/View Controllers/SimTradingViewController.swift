@@ -25,6 +25,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var tableView: NSTableView!
     
     @IBOutlet weak var simModeCheckBox: NSButton!
+    @IBOutlet weak var probationCheckBox: NSButton!
     @IBOutlet weak var modelBalanceField: NSTextField!
     @IBOutlet weak var accBalanceField: NSTextField!
     @IBOutlet weak var modelPeakField: NSTextField!
@@ -135,6 +136,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     @IBAction func lastTradeChecked(_ sender: NSButton) {
         sessionManager.state.simMode = sender.state == .on
+    }
+    
+    @IBAction func probationChecked(_ sender: NSButton) {
+        sessionManager.state.probationMode = sender.state == .on
     }
     
     @IBAction
@@ -377,6 +382,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     private func refreshStateFields() {
         simModeCheckBox.state = sessionManager.state.simMode ? .on : .off
+        probationCheckBox.state = sessionManager.state.probationMode ? .on : .off
         modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.modelPeak)
         modelBalanceField.stringValue = String(format: "%.2f", sessionManager.state.modelBalance)
         troughField.stringValue = String(format: "%.2f", sessionManager.state.latestTrough)

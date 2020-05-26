@@ -18,6 +18,8 @@ struct AccountState: Codable {
     var accPeak: Double = 0.0
     
     var latestTrough: Double = 0.0
+    // probationMode true when account just come out of sim mode and have not yet set a new high in account balance
+    var probationMode = false
     
     var modelDrawdown: Double {
         return modelPeak - modelBalance
@@ -35,7 +37,8 @@ struct AccountState: Codable {
         output.append(", Model peak: \(String(format: "%.2f", modelPeak))")
         output.append(", Acc peak: \(String(format: "%.2f", accPeak))")
         output.append(", Latest trough: \(String(format: "%.2f", latestTrough))")
-     
+        output.append(", Probation mode: \(probationMode ? "true" : "false")")
+        
         return output
     }
 }

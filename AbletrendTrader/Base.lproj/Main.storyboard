@@ -902,6 +902,16 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FwC-cG-a2J">
+                                <rect key="frame" x="212" y="384" width="96" height="18"/>
+                                <buttonCell key="cell" type="check" title="Probabation" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="qH9-4y-4sG">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="probationModeChecked:" target="DI5-WX-nEg" id="0AZ-sh-B0J"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="zlx-4Y-R82" secondAttribute="trailing" constant="20" id="17u-sP-sZV"/>
@@ -946,6 +956,7 @@
                             <constraint firstItem="dPL-Wu-tsx" firstAttribute="centerY" secondItem="m7P-7B-Pjz" secondAttribute="centerY" id="NJe-my-587"/>
                             <constraint firstItem="9kI-Dh-nmX" firstAttribute="trailing" secondItem="BSd-8K-9r8" secondAttribute="trailing" id="OYY-sj-h3u"/>
                             <constraint firstItem="OOb-Sv-Fdf" firstAttribute="top" secondItem="1FS-c7-l5f" secondAttribute="bottom" constant="10" id="PBG-VH-MMD"/>
+                            <constraint firstItem="FwC-cG-a2J" firstAttribute="centerY" secondItem="GJ1-23-YbJ" secondAttribute="centerY" id="PNP-Kl-RYa"/>
                             <constraint firstItem="YVz-1L-84v" firstAttribute="trailing" secondItem="vh9-aL-20X" secondAttribute="trailing" id="PWh-E9-qM2"/>
                             <constraint firstItem="mo0-Vs-wFp" firstAttribute="centerY" secondItem="6a3-ZV-zj8" secondAttribute="centerY" id="QkG-80-pbx"/>
                             <constraint firstItem="m7P-7B-Pjz" firstAttribute="leading" secondItem="ACx-OX-4Vd" secondAttribute="leading" id="RUf-ol-GQl"/>
@@ -1010,6 +1021,7 @@
                             <constraint firstItem="x6j-IH-xmd" firstAttribute="leading" secondItem="oGq-UD-zfa" secondAttribute="trailing" constant="10" id="wPx-6S-o8B"/>
                             <constraint firstItem="6a3-ZV-zj8" firstAttribute="top" secondItem="m7P-7B-Pjz" secondAttribute="bottom" constant="10" id="wdk-bN-jUp"/>
                             <constraint firstItem="C5Z-uf-9gO" firstAttribute="leading" secondItem="Vd4-7j-a7J" secondAttribute="leading" id="wh6-MH-OwZ"/>
+                            <constraint firstItem="FwC-cG-a2J" firstAttribute="leading" secondItem="GJ1-23-YbJ" secondAttribute="trailing" constant="40" id="wzj-7c-33L"/>
                             <constraint firstAttribute="bottom" secondItem="Vwa-LA-MNm" secondAttribute="bottom" constant="20" id="xbO-N9-Ne4"/>
                             <constraint firstItem="mo0-Vs-wFp" firstAttribute="trailing" secondItem="hfX-UY-8Od" secondAttribute="trailing" id="yWf-bg-O9I"/>
                             <constraint firstItem="m7P-7B-Pjz" firstAttribute="leading" secondItem="GJ1-23-YbJ" secondAttribute="leading" id="ytl-XU-P7P"/>
@@ -1033,6 +1045,7 @@
                         <outlet property="nextButton" destination="Vwa-LA-MNm" id="Kjs-63-yDb"/>
                         <outlet property="outputFolderField" destination="x8J-G1-uQL" id="pxM-ll-35o"/>
                         <outlet property="positionSizeField" destination="wtp-2O-mMF" id="SAT-vR-UpZ"/>
+                        <outlet property="probationCheckBox" destination="FwC-cG-a2J" id="O5g-rv-r38"/>
                         <outlet property="selectionPicker" destination="3TE-48-Sze" id="ZOG-Pl-Xco"/>
                         <outlet property="server1MinField" destination="Vd4-7j-a7J" id="vbH-3W-Vkx"/>
                         <outlet property="server2MinField" destination="C5Z-uf-9gO" id="hI9-yd-ifq"/>
@@ -1887,6 +1900,39 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="i66-Zv-rsj">
+                                <rect key="frame" x="615" y="289" width="158" height="32"/>
+                                <buttonCell key="cell" type="push" title="Exit all positions" bezelStyle="rounded" image="NSStopProgressFreestandingTemplate" imagePosition="leading" alignment="center" borderStyle="border" inset="2" id="UzP-gg-GPs">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="exitAllPosition:" target="cVa-8a-a9U" id="gLD-Q4-Nh0"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qBw-zu-FaF">
+                                <rect key="frame" x="14" y="289" width="137" height="32"/>
+                                <buttonCell key="cell" type="push" title="Start trading" bezelStyle="rounded" image="NSTouchBarPlayTemplate" imagePosition="left" alignment="center" borderStyle="border" inset="2" id="inQ-jx-0N6">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="startTrading:" target="cVa-8a-a9U" id="fER-sO-YS3"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YrC-Ec-i9K">
+                                <rect key="frame" x="323" y="289" width="142" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="130" id="ggN-CL-HOM"/>
+                                </constraints>
+                                <buttonCell key="cell" type="push" title="Pause trading" bezelStyle="rounded" image="NSTouchBarPauseTemplate" imagePosition="left" alignment="center" borderStyle="border" inset="2" id="Tdd-ao-6qh">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="pauseTrading:" target="cVa-8a-a9U" id="iAd-C2-dLz"/>
+                                </connections>
+                            </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Cwt-3G-1lk">
                                 <rect key="frame" x="18" y="392" width="100" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="[SYSTEM TIME]" id="IBW-YY-w3Q">
@@ -2342,8 +2388,8 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NDa-5Y-iSb">
-                                <rect key="frame" x="18" y="361" width="155" height="18"/>
-                                <buttonCell key="cell" type="check" title="Currently in sim mode" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="Kis-TV-Doh">
+                                <rect key="frame" x="18" y="361" width="83" height="18"/>
+                                <buttonCell key="cell" type="check" title="Sim mode" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="Kis-TV-Doh">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -2418,37 +2464,14 @@
                                     <segue destination="mfU-Xh-Ar2" kind="show" identifier="ShowLogSegue" id="Dua-i6-PWC"/>
                                 </connections>
                             </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="i66-Zv-rsj">
-                                <rect key="frame" x="615" y="289" width="158" height="32"/>
-                                <buttonCell key="cell" type="push" title="Exit all positions" bezelStyle="rounded" image="NSStopProgressFreestandingTemplate" imagePosition="leading" alignment="center" borderStyle="border" inset="2" id="UzP-gg-GPs">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Yw8-Wr-xFi">
+                                <rect key="frame" x="125" y="361" width="96" height="18"/>
+                                <buttonCell key="cell" type="check" title="Probabation" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="Kfv-dU-CYV">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="exitAllPosition:" target="cVa-8a-a9U" id="gLD-Q4-Nh0"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qBw-zu-FaF">
-                                <rect key="frame" x="14" y="289" width="137" height="32"/>
-                                <buttonCell key="cell" type="push" title="Start trading" bezelStyle="rounded" image="NSTouchBarPlayTemplate" imagePosition="left" alignment="center" borderStyle="border" inset="2" id="inQ-jx-0N6">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="startTrading:" target="cVa-8a-a9U" id="fER-sO-YS3"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YrC-Ec-i9K">
-                                <rect key="frame" x="323" y="289" width="142" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="130" id="ggN-CL-HOM"/>
-                                </constraints>
-                                <buttonCell key="cell" type="push" title="Pause trading" bezelStyle="rounded" image="NSTouchBarPauseTemplate" imagePosition="left" alignment="center" borderStyle="border" inset="2" id="Tdd-ao-6qh">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="pauseTrading:" target="cVa-8a-a9U" id="iAd-C2-dLz"/>
+                                    <action selector="lastTradeChecked:" target="XfG-lQ-9wD" id="ilL-Xw-OUH"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -2484,6 +2507,7 @@
                             <constraint firstItem="qtM-KX-Hzj" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="Sqn-tM-GzO"/>
                             <constraint firstItem="ZZj-eu-XZ3" firstAttribute="centerY" secondItem="5n6-ef-d8Y" secondAttribute="centerY" id="Vmk-eQ-xH0"/>
                             <constraint firstItem="YHY-kb-BJS" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="YHI-jy-byq"/>
+                            <constraint firstItem="Yw8-Wr-xFi" firstAttribute="centerY" secondItem="NDa-5Y-iSb" secondAttribute="centerY" id="Z2w-pq-TSc"/>
                             <constraint firstItem="YrC-Ec-i9K" firstAttribute="top" secondItem="qBw-zu-FaF" secondAttribute="top" id="Zkb-za-1yV"/>
                             <constraint firstAttribute="trailing" secondItem="qtM-KX-Hzj" secondAttribute="trailing" constant="20" id="a5v-cj-HDE"/>
                             <constraint firstItem="QE7-S2-60t" firstAttribute="top" secondItem="ucq-Vb-N7V" secondAttribute="bottom" constant="5" id="aDl-9e-8Hq"/>
@@ -2493,6 +2517,7 @@
                             <constraint firstItem="NDa-5Y-iSb" firstAttribute="top" secondItem="Cwt-3G-1lk" secondAttribute="bottom" constant="15" id="dk8-mI-WAc"/>
                             <constraint firstItem="jdZ-WN-2Ok" firstAttribute="top" secondItem="Cwt-3G-1lk" secondAttribute="bottom" constant="-16" id="gO5-Kx-b14"/>
                             <constraint firstItem="5n6-ef-d8Y" firstAttribute="centerY" secondItem="phz-iC-2jv" secondAttribute="centerY" id="gXD-67-Hrk"/>
+                            <constraint firstItem="Yw8-Wr-xFi" firstAttribute="leading" secondItem="NDa-5Y-iSb" secondAttribute="trailing" constant="28" id="jgb-Sa-sJC"/>
                             <constraint firstItem="Cwt-3G-1lk" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="ls4-ju-cD9"/>
                             <constraint firstItem="pCK-sw-8YW" firstAttribute="centerY" secondItem="NDa-5Y-iSb" secondAttribute="centerY" id="n6e-dx-80K"/>
                             <constraint firstItem="jdZ-WN-2Ok" firstAttribute="leading" secondItem="qPe-gd-HwE" secondAttribute="trailing" constant="21" id="nqD-p4-3qH"/>
@@ -2515,6 +2540,7 @@
                         <outlet property="modelPeakField" destination="OQU-gS-dwM" id="Rx5-gm-s8I"/>
                         <outlet property="pauseButton" destination="YrC-Ec-i9K" id="VDD-It-D3P"/>
                         <outlet property="positionStatusLabel" destination="YHY-kb-BJS" id="LUj-er-2H1"/>
+                        <outlet property="probationCheckBox" destination="Yw8-Wr-xFi" id="x5R-8T-1Ne"/>
                         <outlet property="refreshDataButton" destination="qPe-gd-HwE" id="X5o-kT-cUN"/>
                         <outlet property="sellButton" destination="ucq-Vb-N7V" id="ZKg-zn-Hok"/>
                         <outlet property="simModeCheckBox" destination="NDa-5Y-iSb" id="hwm-F8-WKA"/>
@@ -3022,8 +3048,8 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ihe-3U-Q1S">
-                                <rect key="frame" x="18" y="373" width="155" height="18"/>
-                                <buttonCell key="cell" type="check" title="Currently in sim mode" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="QJc-fu-V42">
+                                <rect key="frame" x="18" y="373" width="83" height="18"/>
+                                <buttonCell key="cell" type="check" title="Sim mode" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="QJc-fu-V42">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -3031,25 +3057,6 @@
                                     <action selector="lastTradeChecked:" target="XfG-lQ-9wD" id="3NB-jC-Y4N"/>
                                 </connections>
                             </button>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="T7X-zq-j2p">
-                                <rect key="frame" x="18" y="344" width="108" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Latest trough($):" id="GVv-Tt-oD2">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tFo-yV-K9h">
-                                <rect key="frame" x="359" y="342" width="80" height="21"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="80" id="Syq-jj-NaO"/>
-                                </constraints>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" title="100000.00" drawsBackground="YES" id="jSf-2c-5vg">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HYy-YG-Z9V">
                                 <rect key="frame" x="476" y="344" width="109" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Account peak($):" id="o9N-cB-ONP">
@@ -3088,6 +3095,35 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="T7X-zq-j2p">
+                                <rect key="frame" x="18" y="344" width="108" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Latest trough($):" id="GVv-Tt-oD2">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tFo-yV-K9h">
+                                <rect key="frame" x="359" y="342" width="80" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="80" id="Syq-jj-NaO"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" title="100000.00" drawsBackground="YES" id="jSf-2c-5vg">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="URi-Ep-99d">
+                                <rect key="frame" x="112" y="373" width="81" height="18"/>
+                                <buttonCell key="cell" type="check" title="Probation" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="oGF-Cc-rpO">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="probationChecked:" target="XfG-lQ-9wD" id="jlf-zx-r7f"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="HA1-vz-Vdk" firstAttribute="top" secondItem="tlN-I7-TVp" secondAttribute="bottom" constant="10" id="0PP-jg-wDE"/>
@@ -3119,6 +3155,7 @@
                             <constraint firstAttribute="trailing" secondItem="JbD-46-JoY" secondAttribute="trailing" constant="20" id="QJV-51-Og0"/>
                             <constraint firstItem="PQd-Vo-bqo" firstAttribute="leading" secondItem="T7X-zq-j2p" secondAttribute="trailing" constant="15" id="QhA-cK-0an"/>
                             <constraint firstItem="HYy-YG-Z9V" firstAttribute="trailing" secondItem="5Y8-96-2ky" secondAttribute="trailing" id="T0U-2b-WvF"/>
+                            <constraint firstItem="URi-Ep-99d" firstAttribute="centerY" secondItem="ihe-3U-Q1S" secondAttribute="centerY" id="WhA-xa-b4N"/>
                             <constraint firstItem="9pF-PY-Opy" firstAttribute="leading" secondItem="m7L-5x-yLl" secondAttribute="leading" id="Wiq-MJ-180"/>
                             <constraint firstItem="Qkn-1B-2QR" firstAttribute="centerY" secondItem="HYy-YG-Z9V" secondAttribute="centerY" id="XRy-C5-jRn"/>
                             <constraint firstItem="3Jt-RQ-tzI" firstAttribute="top" secondItem="PJx-NI-lOn" secondAttribute="bottom" constant="8" id="Z2N-N4-rqf"/>
@@ -3145,6 +3182,7 @@
                             <constraint firstItem="lve-eI-CTf" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="r6q-VD-Iek"/>
                             <constraint firstItem="y2f-3f-r9w" firstAttribute="leading" secondItem="1SL-ao-QiD" secondAttribute="trailing" constant="15" id="tMh-pb-9eR"/>
                             <constraint firstItem="Soc-uA-OtG" firstAttribute="leading" secondItem="5Y8-96-2ky" secondAttribute="trailing" constant="15" id="uzd-xc-tzw"/>
+                            <constraint firstItem="URi-Ep-99d" firstAttribute="leading" secondItem="ihe-3U-Q1S" secondAttribute="trailing" constant="15" id="vZz-Zp-0aX"/>
                             <constraint firstItem="y2f-3f-r9w" firstAttribute="centerY" secondItem="1SL-ao-QiD" secondAttribute="centerY" id="vao-H1-QGS"/>
                             <constraint firstItem="JbD-46-JoY" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="y5T-Jx-26g"/>
                             <constraint firstItem="PQd-Vo-bqo" firstAttribute="centerY" secondItem="T7X-zq-j2p" secondAttribute="centerY" id="ygG-tt-L93"/>
@@ -3161,6 +3199,7 @@
                         <outlet property="latestDataTimeLabel" destination="h4k-pK-kei" id="rwd-TM-E4w"/>
                         <outlet property="modelBalanceField" destination="y2f-3f-r9w" id="JBd-2Y-GsL"/>
                         <outlet property="modelPeakField" destination="tFo-yV-K9h" id="eJK-QH-Ky1"/>
+                        <outlet property="probationCheckBox" destination="URi-Ep-99d" id="ffA-2N-bfC"/>
                         <outlet property="refreshDataButton" destination="Yql-Nh-nK8" id="52R-wx-5ec"/>
                         <outlet property="server1MinURLField" destination="3Jt-RQ-tzI" id="GZC-ta-DqJ"/>
                         <outlet property="server2MinURLField" destination="m7L-5x-yLl" id="EJz-VF-FZu"/>
@@ -3190,6 +3229,6 @@
         <image name="NSTouchBarSkipBackTemplate" width="22" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="2OK-pd-1Rj"/>
+        <segue reference="Dua-i6-PWC"/>
     </inferredMetricsTieBreakers>
 </document>

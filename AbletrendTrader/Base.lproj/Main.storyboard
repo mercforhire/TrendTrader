@@ -2304,7 +2304,7 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yK3-D2-QD1">
-                                <rect key="frame" x="269" y="332" width="97" height="16"/>
+                                <rect key="frame" x="284" y="332" width="97" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Model peak($):" id="3Pn-OD-pew">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -2312,7 +2312,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2we-AD-cbr">
-                                <rect key="frame" x="250" y="362" width="115" height="16"/>
+                                <rect key="frame" x="266" y="362" width="115" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Model balance($):" id="odZ-lF-5ja">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -2459,7 +2459,7 @@
                             <constraint firstItem="5n6-ef-d8Y" firstAttribute="trailing" secondItem="b1n-Tb-aa0" secondAttribute="trailing" id="53z-i7-9SU"/>
                             <constraint firstItem="qtM-KX-Hzj" firstAttribute="top" secondItem="YHY-kb-BJS" secondAttribute="bottom" constant="8" id="6nE-kA-TqE"/>
                             <constraint firstItem="QE7-S2-60t" firstAttribute="top" secondItem="5dO-j7-eHc" secondAttribute="bottom" constant="5" id="7dj-3S-KP3"/>
-                            <constraint firstItem="SNh-du-SVV" firstAttribute="leading" secondItem="2we-AD-cbr" secondAttribute="trailing" constant="31" id="7rJ-fH-XCE"/>
+                            <constraint firstItem="SNh-du-SVV" firstAttribute="leading" secondItem="2we-AD-cbr" secondAttribute="trailing" constant="15" id="7rJ-fH-XCE"/>
                             <constraint firstAttribute="trailing" secondItem="tb1-f5-ekN" secondAttribute="trailing" constant="20" id="80f-Mo-30n"/>
                             <constraint firstAttribute="trailing" secondItem="jdZ-WN-2Ok" secondAttribute="trailing" constant="20" id="AEn-2x-cqH"/>
                             <constraint firstItem="qBw-zu-FaF" firstAttribute="leading" secondItem="mB6-MV-HSJ" secondAttribute="leading" constant="20" id="Akz-cE-aZc"/>
@@ -2467,7 +2467,7 @@
                             <constraint firstAttribute="trailing" secondItem="i66-Zv-rsj" secondAttribute="trailing" constant="20" id="BZw-Oi-XOU"/>
                             <constraint firstAttribute="trailing" secondItem="ucq-Vb-N7V" secondAttribute="trailing" constant="20" id="Bgf-mm-8Hf"/>
                             <constraint firstItem="jdZ-WN-2Ok" firstAttribute="centerY" secondItem="qPe-gd-HwE" secondAttribute="centerY" id="CeX-Yq-LVx"/>
-                            <constraint firstItem="OQU-gS-dwM" firstAttribute="leading" secondItem="yK3-D2-QD1" secondAttribute="trailing" constant="30" id="D5W-or-RNR"/>
+                            <constraint firstItem="OQU-gS-dwM" firstAttribute="leading" secondItem="yK3-D2-QD1" secondAttribute="trailing" constant="15" id="D5W-or-RNR"/>
                             <constraint firstItem="tb1-f5-ekN" firstAttribute="centerY" secondItem="jwv-nJ-CuY" secondAttribute="centerY" id="Fd0-7B-thP"/>
                             <constraint firstItem="SNh-du-SVV" firstAttribute="centerY" secondItem="2we-AD-cbr" secondAttribute="centerY" id="HmI-Vh-l7b"/>
                             <constraint firstItem="phz-iC-2jv" firstAttribute="top" secondItem="NDa-5Y-iSb" secondAttribute="bottom" constant="15" id="JO7-Yt-3Xr"/>

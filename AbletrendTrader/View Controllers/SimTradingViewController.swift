@@ -213,17 +213,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         sessionManager.printLog = !testing
         
         if testing {
-            var start = 3
-            while start <= 7 {
-                print("Testing numOfLosingTrades: \(start)...")
-                trader?.tradingSetting.numOfLosingTrades = start
+            var start = 1500.0
+            while start <= 2500.0 {
+                print("Testing drawdownLimit: \(start)...")
+                trader?.tradingSetting.drawdownLimit = start
                 sessionManager.resetSession()
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     print("")
-                    start += 1
+                    start += 100.0
                 })
             }
         } else {

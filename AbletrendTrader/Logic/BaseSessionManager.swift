@@ -184,19 +184,19 @@ class BaseSessionManager {
         if trade.executed {
             state.accBalance += trade.idealProfit * pointsValue - trade.commission
         }
-        
+
         state.simMode = !trade.executed
         state.modelBalance += trade.idealProfit * pointsValue - trade.commission
         state.modelPeak = max(state.modelPeak, state.modelBalance)
         state.accPeak = max(state.accPeak, state.accBalance)
         
-        if state.modelDrawdown == 0 {
+        if state.modelDrawdown <= 0 {
             state.latestTrough = 0.0
         } else {
             state.latestTrough = max(state.latestTrough, state.modelDrawdown)
         }
         
-        if state.accDrawdown == 0, state.modelBalance != state.accBalance {
+        if state.accDrawdown <= 0, state.modelBalance != state.accBalance {
             state.modelBalance = state.accBalance
             state.accPeak = state.accBalance
             state.modelPeak = state.accBalance

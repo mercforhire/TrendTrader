@@ -17,7 +17,6 @@ struct Trade: Codable {
     var idealEntryPrice: Double
     var actualEntryPrice: Double
     var entryOrderRef: String?
-    
     var exitTime: Date
     var idealExitPrice: Double
     var actualExitPrice: Double

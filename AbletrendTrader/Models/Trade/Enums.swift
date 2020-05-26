@@ -87,7 +87,7 @@ enum TradeActionType {
                           stopLoss.source.reason(),
                           actionBarTime.hourMinute())
         default:
-            return ""
+            return String(format: "%@: Refresh trades.", Date().hourMinuteSecond())
         }
     }
 }

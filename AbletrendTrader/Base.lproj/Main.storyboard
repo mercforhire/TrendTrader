@@ -2465,8 +2465,8 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Yw8-Wr-xFi">
-                                <rect key="frame" x="125" y="361" width="96" height="18"/>
-                                <buttonCell key="cell" type="check" title="Probabation" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="Kfv-dU-CYV">
+                                <rect key="frame" x="125" y="361" width="81" height="18"/>
+                                <buttonCell key="cell" type="check" title="Probation" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="Kfv-dU-CYV">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -3229,6 +3229,6 @@
         <image name="NSTouchBarSkipBackTemplate" width="22" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="2OK-pd-1Rj"/>
+        <segue reference="Dua-i6-PWC"/>
     </inferredMetricsTieBreakers>
 </document>

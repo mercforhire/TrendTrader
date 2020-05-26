@@ -126,7 +126,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         tableView.reloadData()
         totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
                                           sessionManager.getTotalPAndL(),
-                                          sessionManager.getTotalPAndLDollar().currency(true, showPlusSign: false))
+                                          sessionManager.getTotalPAndLDollar().currency())
         
         refreshStateFields()
         accountSetting.state = sessionManager.state

@@ -159,7 +159,7 @@ class BaseSessionManager {
                                                  pAndL: "--",
                                                  entryTime: dateFormatter.string(from: currentPosition.entryTime),
                                                  exitTime: "--",
-                                                 commission: (commission * Double(currentPosition.size)).currency(true, showPlusSign: false)))
+                                                 commission: (currentPosition.executed ? commission * Double(currentPosition.size) : 0.0).currency()))
         }
         
         for trade in trades.reversed() {
@@ -172,7 +172,7 @@ class BaseSessionManager {
                                                  pAndL: String(format: "%.2f", trade.actualProfit),
                                                  entryTime: dateFormatter.string(from: trade.entryTime),
                                                  exitTime: dateFormatter.string(from: trade.exitTime),
-                                                 commission: trade.commission.currency(true)))
+                                                 commission: trade.commission.currency()))
         }
         
         return tradesList

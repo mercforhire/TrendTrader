@@ -241,7 +241,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         tableView.reloadData()
         totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
                                           sessionManager.getTotalPAndL(),
-                                          sessionManager.getTotalPAndLDollar().currency(true, showPlusSign: false))
+                                          sessionManager.getTotalPAndLDollar().currency())
         
         if let lastSimTime = trader?.chart.lastBar?.time {
             simTimeLabel.stringValue = dateFormatter.string(from: lastSimTime)

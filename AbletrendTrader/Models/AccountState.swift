@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct AccountState: Codable {
+struct AccountState: Codable, Equatable {
     var simMode = false
     
     var modelBalance: Double = 0.0
@@ -40,5 +40,16 @@ struct AccountState: Codable {
         output.append(", Probation mode: \(probationMode ? "true" : "false")")
         
         return output
+    }
+    
+    static func == (lhs: AccountState, rhs: AccountState) -> Bool {
+        return
+            lhs.simMode == rhs.simMode &&
+            lhs.modelBalance == rhs.modelBalance &&
+            lhs.accBalance == rhs.accBalance &&
+            lhs.modelPeak == rhs.modelPeak &&
+            lhs.accPeak == rhs.accPeak &&
+            lhs.latestTrough == rhs.latestTrough &&
+            lhs.probationMode == rhs.probationMode
     }
 }

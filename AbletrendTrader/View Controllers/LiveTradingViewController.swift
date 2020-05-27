@@ -40,7 +40,20 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
     private var sessionManager: BaseSessionManager!
-    private var listOfTrades: [TradesTableRowItem]?
+    private var listOfTrades: [TradesTableRowItem]? {
+        didSet {
+            tableView.reloadData()
+            totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
+                                              sessionManager.getTotalPAndL(),
+                                              sessionManager.getTotalPAndLDollar().currency())
+            
+            if accountSetting.state != sessionManager.state {
+                accountSetting.state = sessionManager.state
+                config.updateNTSettings(index: accountIndex, settings: accountSetting)
+                refreshStateFields()
+            }
+        }
+    }
     private var logViewController: TradingLogViewController?
     private var log: String = "" {
         didSet {
@@ -121,17 +134,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     }
     
     private func updateTradesList() {
-        let newTrades = sessionManager.listOfTrades()
-        listOfTrades = newTrades
-        
-        tableView.reloadData()
-        totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
-                                          sessionManager.getTotalPAndL(),
-                                          sessionManager.getTotalPAndLDollar().currency())
-        
-        refreshStateFields()
-        accountSetting.state = sessionManager.state
-        config.updateNTSettings(index: accountIndex, settings: accountSetting)
+        listOfTrades = sessionManager.listOfTrades()
     }
     
     @IBAction

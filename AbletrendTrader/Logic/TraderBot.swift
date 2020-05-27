@@ -31,29 +31,35 @@ class TraderBot {
             }
             
             guard let currentBar = self.chart.priceBars[timeKey]
-//            , currentBar.time.month() >= 5 && currentBar.time.day() >= 19
+//                , currentBar.time > Date().getPastOrFutureDate(days: 0, months: -1, years: 0)
             else { continue }
-            
-//            if currentBar.time.month() >= 5 && currentBar.time.day() >= 19 {
-//                break
-//            }
-            
-            // US Holiday
-            if currentBar.time.month() == 5, currentBar.time.day() == 25 {
-                continue
-            }
             
             if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
                 sessionManager.highRiskEntriesTaken = 0
             }
             
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.timeZone = Date.DefaultTimeZone
-            let components = DateComponents(year: currentBar.time.year(), month: 4, day: 29)
-            let fomcDay: Date = calendar.date(from: components)!
-            if currentBar.time.isInSameDay(date: fomcDay) {
+            // US Holidays
+            if currentBar.time.year() == 2019, currentBar.time.month() == 11, currentBar.time.day() == 22 {
+                continue
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 5, currentBar.time.day() == 25 {
+                continue
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 2 {
+                continue
+            }
+            
+            // FOMC days
+            if currentBar.time.year() == 2019, currentBar.time.month() == 12, currentBar.time.day() == 11 {
                 tradingSetting.fomcDay = true
-            } else {
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 1, currentBar.time.day() == 29 {
+                tradingSetting.fomcDay = true
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 4, currentBar.time.day() == 29 {
+                tradingSetting.fomcDay = true
+            }
+            else {
                 tradingSetting.fomcDay = false
             }
             

@@ -67,7 +67,8 @@ struct TradingSettings: Codable {
         return profitAvoidSameDirectionBase * riskMultiplier
     }
     
-    var numOfLosingTrades: Int
+    var oppositeLosingTradesToHalt: Int
+    var losingTradesToHalt: Int
     
     var highRiskStart: Date
     var highRiskEnd: Date
@@ -167,7 +168,9 @@ struct TradingSettings: Codable {
          
         self.profitAvoidSameDirectionBase = defaultSettings["profit_avoid_same_direction_base"] as! Double
          
-        self.numOfLosingTrades = defaultSettings["num_losing_trades"] as! Int
+        self.oppositeLosingTradesToHalt = defaultSettings["opposite_losing_trades_to_halt"] as! Int
+        
+        self.losingTradesToHalt = defaultSettings["losing_trades_to_halt"] as! Int
         
         self.drawdownLimit = defaultSettings["drawdown_limit"] as! Double
     }
@@ -253,9 +256,18 @@ struct TradingSettings: Codable {
         throw ConfigError.maxHighRiskEntryAllowedError
     }
     
-    mutating func setNumberLosingTradesField(newValue: Int) throws {
+    mutating func setOppositeLosingTradesToHalt(newValue: Int) throws {
         if newValue >= 3 || newValue == 0 {
-            numOfLosingTrades = newValue
+            oppositeLosingTradesToHalt = newValue
+            return
+        }
+        
+        throw ConfigError.numOfLosingTradesError
+    }
+    
+    mutating func setLosingTradesToHalt(newValue: Int) throws {
+        if newValue >= 3 || newValue == 0 {
+            losingTradesToHalt = newValue
             return
         }
         

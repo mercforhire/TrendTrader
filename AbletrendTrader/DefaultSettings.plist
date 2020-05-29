@@ -54,8 +54,10 @@
 	<real>11.75</real>
 	<key>profit_avoid_same_direction_base</key>
 	<real>25</real>
-	<key>num_losing_trades</key>
+	<key>opposite_losing_trades_to_halt</key>
 	<integer>4</integer>
+	<key>losing_trades_to_halt</key>
+	<integer>5</integer>
 	<key>max_daily_loss</key>
 	<integer>-75</integer>
 	<key>drawdown_limit</key>

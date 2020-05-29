@@ -680,12 +680,13 @@ class TraderBot {
     
     // check if the last X trades were losers in opposite directions(chop)
     private func checkChoppyDay(bar: PriceBar) -> Bool {
-        guard tradingSetting.numOfLosingTrades > 0,
+        guard tradingSetting.oppositeLosingTradesToHalt > 0 || tradingSetting.losingTradesToHalt > 0,
             let lastTrade = sessionManager.trades.last,
             lastTrade.entryTime.isInSameDay(date: bar.time),
             lastTrade.idealProfit < 0 else { return false }
         
         var numOfAlternatingLosingTrades = 0
+        var numOfLosingTrades = 0
         var directionOfLastLosingTrade: TradeDirection = .long
         
         for trade in sessionManager.trades.reversed() {
@@ -693,12 +694,15 @@ class TraderBot {
                 break
             }
             
+            numOfLosingTrades += 1
+            
             if numOfAlternatingLosingTrades == 0 || trade.direction != directionOfLastLosingTrade {
                 numOfAlternatingLosingTrades += 1
                 directionOfLastLosingTrade = trade.direction
             }
             
-            if numOfAlternatingLosingTrades >= tradingSetting.numOfLosingTrades {
+            if (tradingSetting.oppositeLosingTradesToHalt > 0 && numOfAlternatingLosingTrades >= tradingSetting.oppositeLosingTradesToHalt) ||
+                (tradingSetting.losingTradesToHalt > 0 && numOfLosingTrades >= tradingSetting.losingTradesToHalt) {
                 return true
             }
         }

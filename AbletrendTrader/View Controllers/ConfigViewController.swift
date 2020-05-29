@@ -26,7 +26,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var highRiskTradesField: NSTextField!
     @IBOutlet private weak var maxDistanceToSRField: NSTextField!
     @IBOutlet private weak var profitAvoidSameDirectionField: NSTextField!
-    @IBOutlet private weak var numberLosingTradesField: NSTextField!
+    @IBOutlet private weak var losingTradesField: NSTextField!
+    @IBOutlet private weak var oppositeLosingTradesField: NSTextField!
     @IBOutlet private weak var fomcTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionStartTimePicker: NSDatePicker!
     @IBOutlet private weak var sessionEndTimePicker: NSDatePicker!
@@ -66,7 +67,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         highRiskTradesField.delegate = self
         maxDistanceToSRField.delegate = self
         profitAvoidSameDirectionField.delegate = self
-        numberLosingTradesField.delegate = self
+        losingTradesField.delegate = self
+        oppositeLosingTradesField.delegate = self
         stoplossBufferField.delegate = self
         maxDDField.delegate = self
     }
@@ -111,7 +113,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         dailyLossLimitField.stringValue = String(format: "%.2f", tradingSetting.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", tradingSetting.maxHighRiskEntryAllowed)
-        numberLosingTradesField.stringValue = String(format: "%d", tradingSetting.numOfLosingTrades)
+        losingTradesField.stringValue = String(format: "%d", tradingSetting.losingTradesToHalt)
+        oppositeLosingTradesField.stringValue = String(format: "%d", tradingSetting.oppositeLosingTradesToHalt)
         maxDistanceToSRField.stringValue = String(format: "%.2f", tradingSetting.maxDistanceToSRBase)
         profitAvoidSameDirectionField.stringValue = String(format: "%.2f", tradingSetting.profitAvoidSameDirectionBase)
         
@@ -390,8 +393,10 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try tradingSetting.setMaxDistanceToSR(newValue: textField.doubleValue)
                 } else if textField == profitAvoidSameDirectionField {
                     try tradingSetting.setProfitAvoidSameDirection(newValue: textField.doubleValue)
-                } else if textField == numberLosingTradesField {
-                    try tradingSetting.setNumberLosingTradesField(newValue: textField.integerValue)
+                } else if textField == losingTradesField {
+                    try tradingSetting.setLosingTradesToHalt(newValue: textField.integerValue)
+                } else if textField == oppositeLosingTradesField {
+                    try tradingSetting.setOppositeLosingTradesToHalt(newValue: textField.integerValue)
                 } else if textField == stoplossBufferField {
                     try tradingSetting.setBuffer(newValue: textField.doubleValue)
                 } else if textField == maxDDField {

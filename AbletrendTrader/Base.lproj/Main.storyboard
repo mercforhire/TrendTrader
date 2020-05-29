@@ -359,8 +359,8 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uG7-TN-V8u">
-                                <rect key="frame" x="284" y="246" width="163" height="23"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Abletrend Trader" id="XJY-9k-utM">
+                                <rect key="frame" x="283" y="246" width="165" height="23"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="AbleTrend Trader" id="XJY-9k-utM">
                                     <font key="font" metaFont="systemBold" size="20"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1619,8 +1619,8 @@
                                 </connections>
                             </datePicker>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ssd-VA-eKV">
-                                <rect key="frame" x="357" y="128" width="167" height="32"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="# alternating losing trades  to halt trading: " id="URZ-Ur-N4h">
+                                <rect key="frame" x="357" y="128" width="211" height="32"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="# opposite direction losing trades  to halt trading: " id="URZ-Ur-N4h">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1678,7 +1678,7 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="s82-3S-b5b">
-                                <rect key="frame" x="357" y="167" width="101" height="16"/>
+                                <rect key="frame" x="357" y="193" width="101" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Stoploss buffer:" id="gJ6-PN-A8g">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1686,7 +1686,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="T8B-KG-ilv">
-                                <rect key="frame" x="611" y="165" width="70" height="21"/>
+                                <rect key="frame" x="611" y="191" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="VaJ-qD-Ydb"/>
                                 </constraints>
@@ -1697,7 +1697,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2kQ-Mz-WEw">
-                                <rect key="frame" x="357" y="193" width="99" height="16"/>
+                                <rect key="frame" x="357" y="219" width="99" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Max drawdown:" id="nKD-kk-P6v">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1705,11 +1705,30 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zpr-C1-6OA">
-                                <rect key="frame" x="611" y="191" width="70" height="21"/>
+                                <rect key="frame" x="611" y="217" width="70" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="70" id="W4g-3x-v5f"/>
                                 </constraints>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" drawsBackground="YES" id="GQ0-Ja-vWs">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wR7-J1-7S1">
+                                <rect key="frame" x="357" y="167" width="190" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="# losing trades to halt trading: " id="QyV-eN-0RG">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sf8-KJ-D7z">
+                                <rect key="frame" x="611" y="165" width="70" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="70" id="NiQ-1k-vP3"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="right" drawsBackground="YES" id="a5G-Qf-4qe">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1749,6 +1768,7 @@
                             <constraint firstItem="Nns-FX-mQK" firstAttribute="leading" secondItem="0BP-IF-9o0" secondAttribute="leading" id="Den-bO-XkL"/>
                             <constraint firstItem="Q38-EC-OOe" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="EiJ-j4-BX1"/>
                             <constraint firstItem="1HZ-zE-mtD" firstAttribute="centerY" secondItem="MLv-fc-Lh1" secondAttribute="centerY" id="FnJ-Ke-gEp"/>
+                            <constraint firstItem="sf8-KJ-D7z" firstAttribute="centerY" secondItem="wR7-J1-7S1" secondAttribute="centerY" id="GzB-es-tQK"/>
                             <constraint firstItem="VG4-Lk-PUU" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="Hjo-zq-r8S"/>
                             <constraint firstItem="MKP-Wc-VSw" firstAttribute="leading" secondItem="UEB-Um-rH8" secondAttribute="trailing" constant="17" id="ITq-IN-yJM"/>
                             <constraint firstItem="pFZ-k0-AVu" firstAttribute="centerY" secondItem="o80-kA-tzn" secondAttribute="centerY" id="JTk-tz-8mH"/>
@@ -1757,6 +1777,7 @@
                             <constraint firstItem="NaI-Ca-x1s" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="N0y-Uk-sAA"/>
                             <constraint firstItem="4BI-nj-gAz" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="Nna-Z7-RaQ"/>
                             <constraint firstItem="krP-SR-T3W" firstAttribute="centerY" secondItem="v7D-6w-gxx" secondAttribute="centerY" id="Nsy-3r-jIl"/>
+                            <constraint firstItem="s82-3S-b5b" firstAttribute="centerY" secondItem="ZR3-U1-ftQ" secondAttribute="centerY" id="Nv1-FE-gS7"/>
                             <constraint firstItem="MLv-fc-Lh1" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="P3R-Ja-4Zi"/>
                             <constraint firstItem="DnC-II-sbq" firstAttribute="centerY" secondItem="R1i-le-7zB" secondAttribute="centerY" id="PaK-aJ-uFQ"/>
                             <constraint firstItem="UEB-Um-rH8" firstAttribute="centerY" secondItem="R1i-le-7zB" secondAttribute="centerY" id="QRl-qW-XCn"/>
@@ -1782,6 +1803,7 @@
                             <constraint firstItem="Ssd-VA-eKV" firstAttribute="centerY" secondItem="OML-bs-d5P" secondAttribute="centerY" id="Y8f-Ld-RLM"/>
                             <constraint firstItem="iFc-4e-GUS" firstAttribute="top" secondItem="0BP-IF-9o0" secondAttribute="bottom" constant="10" id="YGZ-Jh-aXg"/>
                             <constraint firstItem="o80-kA-tzn" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="YNt-XD-AI5"/>
+                            <constraint firstItem="wR7-J1-7S1" firstAttribute="centerY" secondItem="v7D-6w-gxx" secondAttribute="centerY" id="ZTj-Nm-EkS"/>
                             <constraint firstItem="Nvu-lL-SDc" firstAttribute="centerY" secondItem="xdS-82-ol5" secondAttribute="centerY" id="Zke-p1-DRJ"/>
                             <constraint firstItem="sAI-QM-GBT" firstAttribute="centerY" secondItem="JY2-LQ-dpr" secondAttribute="centerY" id="aVh-N2-SPR"/>
                             <constraint firstItem="Qip-aw-AeW" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="ahu-kW-7KC"/>
@@ -1792,7 +1814,6 @@
                             <constraint firstItem="BDP-TA-sSx" firstAttribute="leading" secondItem="fot-Mz-n0A" secondAttribute="trailing" constant="120" id="bgj-6u-jFh"/>
                             <constraint firstItem="8Lj-ko-wO7" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="c21-xq-yOV"/>
                             <constraint firstItem="bNd-Lf-5A5" firstAttribute="centerY" secondItem="rWn-H4-dBC" secondAttribute="centerY" id="cK8-Yt-y0n"/>
-                            <constraint firstItem="s82-3S-b5b" firstAttribute="centerY" secondItem="v7D-6w-gxx" secondAttribute="centerY" id="cLb-p2-XxC"/>
                             <constraint firstItem="rWn-H4-dBC" firstAttribute="top" secondItem="dqP-vc-0bH" secondAttribute="bottom" constant="10" id="ccR-dO-Mxa"/>
                             <constraint firstItem="pJU-sM-jE5" firstAttribute="leading" secondItem="ase-WH-YaY" secondAttribute="leading" constant="20" id="cpU-48-0ux"/>
                             <constraint firstItem="kKg-dL-LnA" firstAttribute="centerY" secondItem="UTR-to-ULY" secondAttribute="centerY" id="dKg-JC-Z3T"/>
@@ -1805,7 +1826,6 @@
                             <constraint firstItem="OML-bs-d5P" firstAttribute="leading" secondItem="R1i-le-7zB" secondAttribute="leading" id="ffc-7l-wAO"/>
                             <constraint firstItem="E9O-bA-Exd" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="fuV-2H-OLQ"/>
                             <constraint firstItem="qxg-8Q-OiA" firstAttribute="centerY" secondItem="ZR3-U1-ftQ" secondAttribute="centerY" id="git-cx-i8h"/>
-                            <constraint firstItem="2kQ-Mz-WEw" firstAttribute="centerY" secondItem="ZR3-U1-ftQ" secondAttribute="centerY" id="h35-4V-HYA"/>
                             <constraint firstItem="vZb-pz-ioV" firstAttribute="trailing" secondItem="yKM-MQ-aHS" secondAttribute="trailing" id="i1i-0X-GJd"/>
                             <constraint firstItem="iFc-4e-GUS" firstAttribute="leading" secondItem="0BP-IF-9o0" secondAttribute="leading" id="ieu-Ik-Q8r"/>
                             <constraint firstItem="MLv-fc-Lh1" firstAttribute="top" secondItem="R1i-le-7zB" secondAttribute="bottom" constant="10" id="inp-GY-DhV"/>
@@ -1813,6 +1833,7 @@
                             <constraint firstItem="xAN-G6-93M" firstAttribute="centerY" secondItem="OML-bs-d5P" secondAttribute="centerY" id="mfa-89-syq"/>
                             <constraint firstItem="yKM-MQ-aHS" firstAttribute="leading" secondItem="5Mr-ny-T6D" secondAttribute="trailing" constant="10" id="mo7-aD-HAB"/>
                             <constraint firstItem="JY2-LQ-dpr" firstAttribute="leading" secondItem="0BP-IF-9o0" secondAttribute="leading" id="nH3-O0-VmZ"/>
+                            <constraint firstItem="sf8-KJ-D7z" firstAttribute="trailing" secondItem="zpr-C1-6OA" secondAttribute="trailing" id="nz2-g1-oam"/>
                             <constraint firstItem="Qip-aw-AeW" firstAttribute="centerY" secondItem="Q38-EC-OOe" secondAttribute="centerY" id="obE-o5-K6o"/>
                             <constraint firstItem="T8B-KG-ilv" firstAttribute="trailing" secondItem="vZb-pz-ioV" secondAttribute="trailing" id="qec-3z-J0F"/>
                             <constraint firstItem="s82-3S-b5b" firstAttribute="leading" secondItem="DnC-II-sbq" secondAttribute="leading" id="qoR-f1-RLi"/>
@@ -1820,6 +1841,7 @@
                             <constraint firstItem="ToP-uD-y6Z" firstAttribute="centerY" secondItem="iFc-4e-GUS" secondAttribute="centerY" id="ryd-PX-67G"/>
                             <constraint firstItem="UEB-Um-rH8" firstAttribute="trailing" secondItem="ke3-Te-DsJ" secondAttribute="trailing" id="sRY-md-bxT"/>
                             <constraint firstItem="kKg-dL-LnA" firstAttribute="leading" secondItem="MKP-Wc-VSw" secondAttribute="leading" id="sUo-NJ-EXs"/>
+                            <constraint firstItem="2kQ-Mz-WEw" firstAttribute="centerY" secondItem="rWn-H4-dBC" secondAttribute="centerY" id="tab-E6-Frq"/>
                             <constraint firstItem="v7D-6w-gxx" firstAttribute="top" secondItem="ZR3-U1-ftQ" secondAttribute="bottom" constant="10" id="u9s-d8-PdL"/>
                             <constraint firstItem="of0-Wx-S4o" firstAttribute="centerY" secondItem="0BP-IF-9o0" secondAttribute="centerY" id="uaj-9A-Wou"/>
                             <constraint firstItem="sAI-QM-GBT" firstAttribute="leading" secondItem="of0-Wx-S4o" secondAttribute="leading" id="vRh-eO-rvc"/>
@@ -1846,6 +1868,7 @@
                         <outlet property="highRiskEntryStartPicker" destination="5Mr-ny-T6D" id="CLJ-3K-ZlS"/>
                         <outlet property="highRiskTradesField" destination="qxg-8Q-OiA" id="yoD-hc-iI2"/>
                         <outlet property="liquidateTimePicker" destination="2St-i5-w4E" id="kmO-0J-20G"/>
+                        <outlet property="losingTradesField" destination="sf8-KJ-D7z" id="4VW-aU-7nX"/>
                         <outlet property="lunchEndPicker" destination="GsN-hI-npt" id="Ajv-mv-I4E"/>
                         <outlet property="lunchStartPicker" destination="Nzq-6Q-h9i" id="F3Y-eX-pj0"/>
                         <outlet property="maxDDField" destination="zpr-C1-6OA" id="EPM-vs-5Yg"/>
@@ -1856,7 +1879,7 @@
                         <outlet property="minProfitPullbackField" destination="8P2-O5-PTk" id="b2D-nB-wcc"/>
                         <outlet property="minSTPField" destination="pFZ-k0-AVu" id="qdP-K8-CLY"/>
                         <outlet property="noEntryDuringLunchCheckbox" destination="of0-Wx-S4o" id="woO-Nl-hBt"/>
-                        <outlet property="numberLosingTradesField" destination="lcT-h2-rDk" id="K3h-eS-URw"/>
+                        <outlet property="oppositeLosingTradesField" destination="lcT-h2-rDk" id="K3h-eS-URw"/>
                         <outlet property="present1Button" destination="pJU-sM-jE5" id="DkY-zA-fmR"/>
                         <outlet property="present2Button" destination="nx1-Nb-OpN" id="mxo-dJ-Cek"/>
                         <outlet property="present3Button" destination="fot-Mz-n0A" id="3WS-xC-1Jt"/>

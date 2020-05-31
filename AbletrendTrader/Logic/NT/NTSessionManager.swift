@@ -593,7 +593,7 @@ class NTSessionManager: BaseSessionManager {
             
             switch result {
             case .success:
-                alert.messageText = "Demo order placed successfully, please cancel it asap."
+                alert.messageText = "Demo order placed successfully, please cancel it ASAP."
             case .failure:
                 let alert = NSAlert()
                 alert.messageText = "Demo order place error."

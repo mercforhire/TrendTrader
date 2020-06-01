@@ -66,7 +66,6 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     var tradingSetting: TradingSettings!
-    var state: AccountState = AccountState()
     
     func setupUI() {
         dateFormatter.timeStyle = .medium

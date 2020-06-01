@@ -325,6 +325,20 @@ class TraderBot {
                 return .noAction(entryType: nil, reason: .repeatedTrade)
             }
             
+            if tradingSetting.avoidTakingSameLosingTrade {
+                if let newPositionStop = newPosition.stopLoss?.stop,
+                    let lastTrade = sessionManager.trades.last,
+                    lastTrade.direction == newPosition.direction,
+                    lastTrade.idealProfit < 0,
+                    abs(lastTrade.idealExitPrice - newPositionStop) <= tradingSetting.buffer / 2,
+                    lastTrade.exitMethod == .hitStoploss {
+
+                    sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: bar.time, accountId: sessionManager.accountId))")
+
+                    return .noAction(entryType: nil, reason: .repeatedTrade)
+                }
+            }
+            
             if tradingSetting.drawdownLimit > 0, sessionManager.state.modelDrawdown > 0 {
                 let lastTrade = sessionManager.trades.last
                 
@@ -493,27 +507,7 @@ class TraderBot {
                 if lastTrade.idealProfit > tradingSetting.enterOnAnyPullback, lastTrade.exitMethod != .profitTaking {
                     return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .pullBack)
                 } else {
-                    let action = seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .sweetSpot)
-                    
-                    if tradingSetting.avoidTakingSameLosingTrade {
-                        switch action {
-                        case .openPosition(let newPosition, _):
-                            if let newPositionStop = newPosition.stopLoss?.stop,
-                                lastTrade.direction == newPosition.direction,
-                                lastTrade.idealProfit < 0,
-                                abs(lastTrade.idealExitPrice - newPositionStop) <= tradingSetting.buffer / 2,
-                                lastTrade.exitMethod == .hitStoploss {
-
-                                sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: currentBar.time, accountId: sessionManager.accountId))")
-
-                                return .noAction(entryType: nil, reason: .repeatedTrade)
-                            }
-                        default:
-                            break
-                        }
-                    }
-                    
-                    return action
+                    return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .sweetSpot)
                 }
             } else {
                 return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .all)
@@ -678,7 +672,7 @@ class TraderBot {
         return notTooFarFromSupport
     }
     
-    // check if the last X trades were losers in opposite directions(chop)
+    // check if the last X trades were losers(chop)
     private func checkChoppyDay(bar: PriceBar) -> Bool {
         guard tradingSetting.oppositeLosingTradesToHalt > 0 || tradingSetting.losingTradesToHalt > 0,
             let lastTrade = sessionManager.trades.last,

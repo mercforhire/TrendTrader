@@ -26,6 +26,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var highRiskTradesField: NSTextField!
     @IBOutlet private weak var maxDistanceToSRField: NSTextField!
     @IBOutlet private weak var profitAvoidSameDirectionField: NSTextField!
+    @IBOutlet private weak var losingConsecutiveTradesField: NSTextField!
     @IBOutlet private weak var losingTradesField: NSTextField!
     @IBOutlet private weak var oppositeLosingTradesField: NSTextField!
     @IBOutlet private weak var fomcTimePicker: NSDatePicker!
@@ -67,6 +68,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         highRiskTradesField.delegate = self
         maxDistanceToSRField.delegate = self
         profitAvoidSameDirectionField.delegate = self
+        losingConsecutiveTradesField.delegate = self
         losingTradesField.delegate = self
         oppositeLosingTradesField.delegate = self
         stoplossBufferField.delegate = self
@@ -113,6 +115,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         
         dailyLossLimitField.stringValue = String(format: "%.2f", tradingSetting.maxDailyLossBase)
         highRiskTradesField.stringValue = String(format: "%d", tradingSetting.maxHighRiskEntryAllowed)
+        losingConsecutiveTradesField.stringValue = String(format: "%d", tradingSetting.losingConsecutiveTradesToHalt)
         losingTradesField.stringValue = String(format: "%d", tradingSetting.losingTradesToHalt)
         oppositeLosingTradesField.stringValue = String(format: "%d", tradingSetting.oppositeLosingTradesToHalt)
         maxDistanceToSRField.stringValue = String(format: "%.2f", tradingSetting.maxDistanceToSRBase)
@@ -393,6 +396,8 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try tradingSetting.setMaxDistanceToSR(newValue: textField.doubleValue)
                 } else if textField == profitAvoidSameDirectionField {
                     try tradingSetting.setProfitAvoidSameDirection(newValue: textField.doubleValue)
+                } else if textField == losingConsecutiveTradesField {
+                    try tradingSetting.setLosingConsecutiveTradesToHalt(newValue: textField.integerValue)
                 } else if textField == losingTradesField {
                     try tradingSetting.setLosingTradesToHalt(newValue: textField.integerValue)
                 } else if textField == oppositeLosingTradesField {

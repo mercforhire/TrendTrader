@@ -68,6 +68,9 @@ struct TradingSettings: Codable {
     }
     
     var oppositeLosingTradesToHalt: Int
+    
+    var losingConsecutiveTradesToHalt: Int
+    
     var losingTradesToHalt: Int
     
     var highRiskStart: Date
@@ -156,7 +159,7 @@ struct TradingSettings: Codable {
          
         self.noEntryDuringLunch = defaultSettings["no_entry_during_lunch"] as! Bool
          
-        self.waitForFinalizedSignals = false
+        self.waitForFinalizedSignals = true
         
         self.simulateTimePassage = false
          
@@ -169,6 +172,8 @@ struct TradingSettings: Codable {
         self.profitAvoidSameDirectionBase = defaultSettings["profit_avoid_same_direction_base"] as! Double
          
         self.oppositeLosingTradesToHalt = defaultSettings["opposite_losing_trades_to_halt"] as! Int
+        
+        self.losingConsecutiveTradesToHalt = defaultSettings["losing_trades_to_halt"] as! Int
         
         self.losingTradesToHalt = defaultSettings["losing_trades_to_halt"] as! Int
         
@@ -268,6 +273,15 @@ struct TradingSettings: Codable {
     mutating func setLosingTradesToHalt(newValue: Int) throws {
         if newValue >= 3 || newValue == 0 {
             losingTradesToHalt = newValue
+            return
+        }
+        
+        throw ConfigError.numOfLosingTradesError
+    }
+    
+    mutating func setLosingConsecutiveTradesToHalt(newValue: Int) throws {
+        if newValue >= 3 || newValue == 0 {
+            losingConsecutiveTradesToHalt = newValue
             return
         }
         

@@ -217,17 +217,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         sessionManager.printLog = !testing
         
         if testing {
-            var start = 1500.0
-            while start <= 2500.0 {
-                print("Testing drawdownLimit: \(start)...")
-                trader?.tradingSetting.drawdownLimit = start
+            var start = 3
+            while start <= 8 {
+                print("Testing losingTradesToHalt: \(start)...")
+                trader?.tradingSetting.losingTradesToHalt = start
                 sessionManager.resetSession()
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     print("")
-                    start += 100.0
+                    start += 1
                 })
             }
         } else {
@@ -265,10 +265,12 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var maxDD = 0.0
         
         var lastTrade: Trade?
+        var lastLiveTrade: Trade?
         var currentDayPL = 0.0
         var count = 0
         var morningTrades = 0.0
         var lunchTrades = 0.0
+        var numTimeWentSim = 0
         
         if !testing {
             print("")
@@ -276,6 +278,10 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         
         for trade in sessionManager.trades {
+            if let lastTrade = lastTrade, !lastTrade.executed && trade.executed {
+                numTimeWentSim += 1
+            }
+            
             if trade.executed {
                 currentPL += trade.idealProfit
                 currentActualPL += trade.idealProfit
@@ -299,7 +305,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 
                 count += 1
                 
-                if let lastTradeTime = lastTrade?.entryTime,
+                if let lastTradeTime = lastLiveTrade?.entryTime,
                     lastTradeTime.day() != trade.entryTime.day(),
                     count != sessionManager.trades.count {
                     
@@ -311,10 +317,12 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                     worstPLDay = min(worstPLDay, currentDayPL)
                 }
                 
-                lastTrade = trade
+                lastLiveTrade = trade
             } else {
                 currentPL += trade.idealProfit
             }
+            
+            lastTrade = trade
             
             if !testing {
                 print(String(format: "%.2f", currentActualPL))
@@ -355,7 +363,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             print("")
         }
         
-        print("\(count) trades,", "P/L:", String(format: "%.2f", currentActualPL), ", Max DD:", String(format: "%.2f", maxDD))
+        print("\(count) trades,", "P/L:", String(format: "%.2f", currentActualPL), ", Max DD:", String(format: "%.2f", maxDD), ", Number of times went into Sim mode: \(numTimeWentSim)")
         print(sessionManager.state.description())
         print(String(format: "Win rate: %.2f", Double(winningTrades) / Double(count) * 100), String(format: "Average win: %.2f", winningTrades == 0 ? 0 : totalWin / Double(winningTrades)), String(format: "Average loss: %.2f", losingTrades == 0 ? 0 : totalLoss / Double(losingTrades)))
         if let worstPLDayTime = worstPLDayTime {

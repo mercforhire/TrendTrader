@@ -83,6 +83,7 @@ class BaseSessionManager {
         timer?.invalidate()
         stopLiveMonitoring()
         state = AccountState()
+        highRiskEntriesTaken = 0
     }
     
     func resetCurrentlyProcessingPriceBar() {
@@ -213,8 +214,8 @@ class BaseSessionManager {
             printLog ? print("Drawdown: $\(String(format: "%.2f", state.modelDrawdown)) under $\(String(format: "%.2f", state.latestTrough * 0.7)), going back to live.") : nil
             printLog ? print("Back to live mode, entering probation state.") : nil
             state.probationMode = true
-        }
-        else if trade.executed, state.accDrawdown <= 0, state.modelBalance != state.accBalance {
+            state.modelBalance = state.modelPeak - state.latestTrough * 0.7
+        } else if trade.executed, state.accDrawdown <= 0, state.modelBalance != state.accBalance {
             state.modelBalance = state.accBalance
             state.accPeak = state.accBalance
             state.modelPeak = state.accBalance

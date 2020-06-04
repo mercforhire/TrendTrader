@@ -350,10 +350,10 @@ class TraderBot {
                     else if sessionManager.state.probationMode &&
                         sessionManager.state.modelDrawdown >= max(tradingSetting.drawdownLimit, sessionManager.state.latestTrough) {
                         newPosition.executed = false
-                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", max(tradingSetting.drawdownLimit, sessionManager.state.latestTrough))), entering sim mode:") : nil
+                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", max(tradingSetting.drawdownLimit, sessionManager.state.latestTrough))), back to sim mode:") : nil
                     }
                 } else if (sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && !lastTrade!.executed) {
-                    if sessionManager.state.modelDrawdown >= sessionManager.state.latestTrough * 0.7 {
+                    if !sessionManager.state.probationMode, sessionManager.state.modelDrawdown >= sessionManager.state.latestTrough * 0.7 {
                         newPosition.executed = false
                         sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) still over $\(String(format: "%.2f", sessionManager.state.latestTrough * 0.7)), remain in sim mode.") : nil
                     }
@@ -674,29 +674,56 @@ class TraderBot {
     
     // check if the last X trades were losers(chop)
     private func checkChoppyDay(bar: PriceBar) -> Bool {
-        guard tradingSetting.oppositeLosingTradesToHalt > 0 || tradingSetting.losingTradesToHalt > 0,
+        guard tradingSetting.oppositeLosingTradesToHalt > 0 || tradingSetting.losingTradesToHalt > 0 || tradingSetting.losingConsecutiveTradesToHalt > 0,
             let lastTrade = sessionManager.trades.last,
             lastTrade.entryTime.isInSameDay(date: bar.time),
             lastTrade.idealProfit < 0 else { return false }
         
         var numOfAlternatingLosingTrades = 0
+        var numOfConsecutiveLosingTrades = 0
         var numOfLosingTrades = 0
         var directionOfLastLosingTrade: TradeDirection = .long
         
         for trade in sessionManager.trades.reversed() {
-            if !trade.entryTime.isInSameDay(date: bar.time) || trade.idealProfit > 0 {
+            if tradingSetting.oppositeLosingTradesToHalt == 0 ||
+                !trade.entryTime.isInSameDay(date: bar.time) ||
+                trade.idealProfit > 0  {
                 break
             }
-            
-            numOfLosingTrades += 1
             
             if numOfAlternatingLosingTrades == 0 || trade.direction != directionOfLastLosingTrade {
                 numOfAlternatingLosingTrades += 1
                 directionOfLastLosingTrade = trade.direction
             }
             
-            if (tradingSetting.oppositeLosingTradesToHalt > 0 && numOfAlternatingLosingTrades >= tradingSetting.oppositeLosingTradesToHalt) ||
-                (tradingSetting.losingTradesToHalt > 0 && numOfLosingTrades >= tradingSetting.losingTradesToHalt) {
+            if numOfAlternatingLosingTrades >= tradingSetting.oppositeLosingTradesToHalt {
+                return true
+            }
+        }
+        
+        for trade in sessionManager.trades.reversed() {
+            if tradingSetting.losingTradesToHalt == 0 || !trade.entryTime.isInSameDay(date: bar.time) {
+                break
+            } else if trade.idealProfit > 0 {
+                continue
+            }
+            
+            numOfLosingTrades += 1
+            
+            if tradingSetting.losingTradesToHalt > 0,
+                numOfLosingTrades >= tradingSetting.losingTradesToHalt {
+                return true
+            }
+        }
+        
+        for trade in sessionManager.trades.reversed() {
+            if tradingSetting.losingConsecutiveTradesToHalt == 0 || !trade.entryTime.isInSameDay(date: bar.time) || trade.idealProfit > 0 {
+                break
+            }
+            
+            numOfConsecutiveLosingTrades += 1
+            
+            if numOfConsecutiveLosingTrades >= tradingSetting.losingConsecutiveTradesToHalt {
                 return true
             }
         }

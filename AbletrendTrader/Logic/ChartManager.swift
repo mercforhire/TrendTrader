@@ -305,7 +305,7 @@ class ChartManager {
         
         urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now,
-                                      startSecond: now.second(),
+                                      startSecond: now.second() - 1,
                                       interval: .oneMin,
                                       completion: { url in
             oneMinUrl = url
@@ -314,7 +314,7 @@ class ChartManager {
         
         urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now,
-                                      startSecond: now.second(),
+                                      startSecond: now.second() - 1,
                                       interval: .twoMin,
                                       completion: { [weak self] url in
             if let url = url {
@@ -333,7 +333,7 @@ class ChartManager {
         
         urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now,
-                                      startSecond: now.second(),
+                                      startSecond: now.second() - 1,
                                       interval: .threeMin,
                                       completion: { [weak self] url in
             if let url = url {

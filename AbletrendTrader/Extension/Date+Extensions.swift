@@ -94,11 +94,8 @@ extension Date {
         return response
     }
     
-    func generateOrderIdentifier(prefix: String, linkedToTradeRef: String? = nil) -> String {
-        if let linkedToTradeRef = linkedToTradeRef {
-            return prefix + "-" + generateDateAndTimeIdentifier() + "-" + linkedToTradeRef
-        }
-        return prefix + "-" + generateDateAndTimeIdentifier()
+    func generateOrderIdentifier(prefix: String, accountId: String) -> String {
+        return prefix + "-" + accountId + "-" + generateDateAndTimeIdentifier()
     }
     
     func isInSameDay(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {

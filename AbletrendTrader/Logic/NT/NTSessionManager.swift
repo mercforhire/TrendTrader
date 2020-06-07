@@ -248,7 +248,7 @@ class NTSessionManager: BaseSessionManager {
                         })
                         semaphore.wait()
                     } else {
-                        let stopOrderId = priceBarTime.generateOrderIdentifier(prefix: currentPosition.direction.reverse().description(short: true))
+                        let stopOrderId = priceBarTime.generateOrderIdentifier(prefix: currentPosition.direction.reverse().description(short: true), accountId: self.accountId)
                         self.ntManager.generatePlaceOrder(direction: currentPosition.direction.reverse(),
                                                           size: currentPosition.size,
                                                           orderType: .stop(price: newStop.stop),
@@ -397,7 +397,7 @@ class NTSessionManager: BaseSessionManager {
             
             // Stop order:
             if let stop = stop {
-                let stopOrderId = priceBarTime.generateOrderIdentifier(prefix: direction.reverse().description(short: true))
+                let stopOrderId = priceBarTime.generateOrderIdentifier(prefix: direction.reverse().description(short: true), accountId: self.accountId)
                 self.ntManager.generatePlaceOrder(direction: direction.reverse(),
                                                   size: size,
                                                   orderType: .stop(price: stop),
@@ -424,7 +424,7 @@ class NTSessionManager: BaseSessionManager {
             
             // Buy/sell order:
             if reverseOrder {
-                let orderRef = priceBarTime.generateOrderIdentifier(prefix: direction.description(short: true))
+                let orderRef = priceBarTime.generateOrderIdentifier(prefix: direction.description(short: true), accountId: self.accountId)
                 self.ntManager.reversePositionAndPlaceOrder(direction: direction,
                                                             size: size,
                                                             orderType: .market,
@@ -441,7 +441,7 @@ class NTSessionManager: BaseSessionManager {
                 })
                 semaphore.wait()
             } else {
-                let orderRef = priceBarTime.generateOrderIdentifier(prefix: direction.description(short: true))
+                let orderRef = priceBarTime.generateOrderIdentifier(prefix: direction.description(short: true), accountId: self.accountId)
                 self.ntManager.generatePlaceOrder(direction: direction,
                                                   size: size,
                                                   orderType: .market,
@@ -587,7 +587,7 @@ class NTSessionManager: BaseSessionManager {
         ntManager.generatePlaceOrder(direction: .long,
                                      size: 1,
                                      orderType: .limit(price: latestPriceBar.candleStick.close - 300),
-                                     orderRef: latestPriceBar.time.generateOrderIdentifier(prefix: "DEMO"))
+                                     orderRef: latestPriceBar.time.generateOrderIdentifier(prefix: "DEMO", accountId: self.accountId))
         { result in
             let alert = NSAlert()
             

@@ -301,14 +301,9 @@ class NTManager {
             }
         }
     }
-    
-    func cancelAllOrders() {
-        let orderString = "CANCELALLORDERS;;;;;;;;;;;;"
-        writeTextToFile(text: orderString)
-    }
-    
-    func flatEverything() {
-        let orderString = "FLATTENEVERYTHING;;;;;;;;;;;;"
+
+    func closePosition() {
+        let orderString = "CLOSEPOSITION;\(accountName);\(ticker);;;;;;;;;;"
         writeTextToFile(text: orderString)
     }
     

@@ -152,7 +152,7 @@ class NTSessionManager: BaseSessionManager {
                                 completion(nil)
                             }
                         case .failure(let ntError):
-                            self.ntManager.flatEverything()
+                            self.ntManager.closePosition()
                             DispatchQueue.main.async {
                                 completion(ntError)
                             }
@@ -320,7 +320,7 @@ class NTSessionManager: BaseSessionManager {
                             completion(nil)
                         }
                     } else {
-                        self.ntManager.cancelAllOrders()
+                        self.ntManager.closePosition()
                         self.enterAtMarket(priceBarTime: priceBarTime,
                                            direction: closedPosition.direction.reverse(),
                                            size: closedPosition.size)
@@ -480,7 +480,7 @@ class NTSessionManager: BaseSessionManager {
                                 idealExitPrice: Double,
                                 exitReason: ExitMethod,
                                 completion: @escaping (TradingError?) -> Void) {
-        ntManager.cancelAllOrders()
+        ntManager.closePosition()
         if let status = status, status.position != 0 {
             enterAtMarket(priceBarTime: priceBarTime,
                           direction: status.position > 0 ? .short : .long,

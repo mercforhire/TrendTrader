@@ -320,7 +320,7 @@ class NTSessionManager: BaseSessionManager {
                             completion(nil)
                         }
                     } else {
-                        if let stopOrderId = self.pos?.stopLoss?.stopOrderId {
+                        if let stopOrderId = closedPosition.stopLoss?.stopOrderId {
                             self.ntManager.cancelOrders(orderId: stopOrderId)
                         }
                         self.enterAtMarket(priceBarTime: priceBarTime,
@@ -485,6 +485,8 @@ class NTSessionManager: BaseSessionManager {
         
         if let stopOrderId = pos?.stopLoss?.stopOrderId {
             ntManager.cancelOrders(orderId: stopOrderId)
+        } else {
+            ntManager.cancelAllOrders()
         }
         if let status = status, status.position != 0 {
             enterAtMarket(priceBarTime: priceBarTime,

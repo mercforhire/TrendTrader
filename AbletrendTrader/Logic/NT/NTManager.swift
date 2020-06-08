@@ -307,6 +307,11 @@ class NTManager {
         writeTextToFile(text: orderString)
     }
     
+    func cancelAllOrders() {
+        let orderString = "CANCELALLORDERS;;;;;;;;;;;;"
+        writeTextToFile(text: orderString)
+    }
+    
     func closePosition() {
         let orderString = "CLOSEPOSITION;\(accountName);\(ticker);;;;;;;;;;"
         writeTextToFile(text: orderString)

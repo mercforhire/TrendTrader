@@ -320,7 +320,9 @@ class NTSessionManager: BaseSessionManager {
                             completion(nil)
                         }
                     } else {
-                        self.ntManager.closePosition()
+                        if let stopOrderId = self.pos?.stopLoss?.stopOrderId {
+                            self.ntManager.cancelOrders(orderId: stopOrderId)
+                        }
                         self.enterAtMarket(priceBarTime: priceBarTime,
                                            direction: closedPosition.direction.reverse(),
                                            size: closedPosition.size)
@@ -480,7 +482,10 @@ class NTSessionManager: BaseSessionManager {
                                 idealExitPrice: Double,
                                 exitReason: ExitMethod,
                                 completion: @escaping (TradingError?) -> Void) {
-        ntManager.closePosition()
+        
+        if let stopOrderId = pos?.stopLoss?.stopOrderId {
+            ntManager.cancelOrders(orderId: stopOrderId)
+        }
         if let status = status, status.position != 0 {
             enterAtMarket(priceBarTime: priceBarTime,
                           direction: status.position > 0 ? .short : .long,

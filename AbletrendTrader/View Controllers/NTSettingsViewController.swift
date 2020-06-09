@@ -24,13 +24,22 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     @IBOutlet weak var exchangeField: NSTextField!
     @IBOutlet weak var longNameField: NSTextField!
     @IBOutlet weak var shortNameField: NSTextField!
+    
+    @IBOutlet weak var simModeCheckBox: NSButton!
+    @IBOutlet weak var probationCheckBox: NSButton!
+    @IBOutlet weak var modelPeakField: NSTextField!
+    @IBOutlet weak var modelBalanceField: NSTextField!
+    @IBOutlet weak var accPeakField: NSTextField!
+    @IBOutlet weak var accBalanceField: NSTextField!
+    @IBOutlet weak var troughField: NSTextField!
+    
     @IBOutlet weak var baseFolderField: NSTextField!
     @IBOutlet weak var inputFolderField: NSTextField!
     @IBOutlet weak var outputFolderField: NSTextField!
     @IBOutlet weak var nextButton: NSButton!
     
     private var selectedSettingsIndex: Int?
-    private var selectedSettings: NTSettings? {
+    private var selectedSettings: AccountSettings? {
         didSet {
             if let selectedSettings = selectedSettings {
                 server1MinField.stringValue = selectedSettings.server1MinURL
@@ -46,6 +55,8 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 baseFolderField.stringValue = selectedSettings.basePath
                 inputFolderField.stringValue = selectedSettings.incomingPath
                 outputFolderField.stringValue = selectedSettings.outgoingPath
+                
+                refreshStateFields()
             } else {
                 server1MinField.stringValue = ""
                 server2MinField.stringValue = ""
@@ -60,8 +71,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 baseFolderField.stringValue = ""
                 inputFolderField.stringValue = ""
                 outputFolderField.stringValue = ""
+                
+                simModeCheckBox.state = .off
+                modelPeakField.stringValue = "0.0"
+                modelBalanceField.stringValue = "0.0"
+                troughField.stringValue = "0.0"
+                accPeakField.stringValue = "0.0"
+                accBalanceField.stringValue = "0.0"
             }
-            
         }
     }
     
@@ -77,17 +94,23 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         longNameField.delegate = self
         shortNameField.delegate = self
         
+        modelPeakField.delegate = self
+        modelBalanceField.delegate = self
+        troughField.delegate = self
+        accPeakField.delegate = self
+        accBalanceField.delegate = self
+        
         baseFolderField.isEditable = false
         inputFolderField.isEditable = false
         outputFolderField.isEditable = false
     }
     
     func loadSettings() {
-        if config.ntSettings.isEmpty {
-            config.addNTSettings(settings: NTSettings())
+        if config.accountSettings.isEmpty {
+            config.addNTSettings(settings: AccountSettings())
         }
         
-        guard let defaultSelection = config.ntSettings.first else {
+        guard let defaultSelection = config.accountSettings.first else {
             print("ERROR: ntSettings shouldn't be empty.")
             return
         }
@@ -95,11 +118,11 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         selectedSettings = defaultSelection
         selectedSettingsIndex = 0
         selectionPicker.removeAllItems()
-        for i in 1...config.ntSettings.count {
+        for i in 1...config.accountSettings.count {
             selectionPicker.addItem(withTitle: "Settings - \(i)")
         }
         
-        deleteButton.isEnabled = config.ntSettings.count > 1
+        deleteButton.isEnabled = config.accountSettings.count > 1
     }
     
     override func viewDidLoad() {
@@ -113,6 +136,14 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         super.viewWillAppear()
         
         view.window?.delegate = self
+    }
+    
+    @IBAction func lastTradeChecked(_ sender: NSButton) {
+        selectedSettings?.state.simMode = sender.state == .on
+    }
+    
+    @IBAction func probationModeChecked(_ sender: NSButton) {
+        selectedSettings?.state.probationMode = sender.state == .on
     }
     
     @IBAction func selectBaseFolder(_ sender: NSButton) {
@@ -251,40 +282,32 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         if let vc = segue.destinationController as? LiveTradingViewController,
+            let selectedSettingsIndex = selectedSettingsIndex,
             let selectedSettings = selectedSettings {
-            vc.server1minURL = selectedSettings.server1MinURL
-            vc.server2minURL = selectedSettings.server2MinURL
-            vc.server3minURL = selectedSettings.server3MinURL
-            vc.tradingMode = .ninjaTrader(accountId: selectedSettings.accName,
-                                          commission: selectedSettings.commission,
-                                          ticker: selectedSettings.ticker,
-                                          pointValue: selectedSettings.pointValue,
-                                          exchange: selectedSettings.exchange,
-                                          accountLongName: selectedSettings.accLongName,
-                                          basePath: selectedSettings.basePath,
-                                          incomingPath: selectedSettings.incomingPath,
-                                          outgoingPath: selectedSettings.outgoingPath)
+            vc.accountIndex = selectedSettingsIndex
+            vc.accountSetting = selectedSettings
+            vc.tradingSetting = config.tradingSettings[config.tradingSettingsSelection]
         }
     }
     
     @IBAction func addPressed(_ sender: NSButton) {
-        config.addNTSettings(settings: NTSettings())
+        config.addNTSettings(settings: AccountSettings())
         
-        guard let newSelection = config.ntSettings.last else {
+        guard let newSelection = config.accountSettings.last else {
             print("ERROR: ntSettings shouldn't be empty.")
             return
         }
         
-        selectedSettingsIndex = config.ntSettings.count - 1
+        selectedSettingsIndex = config.accountSettings.count - 1
         selectedSettings = newSelection
-        selectionPicker.addItem(withTitle: "Settings - \(config.ntSettings.count)")
-        selectionPicker.selectItem(at: config.ntSettings.count - 1)
+        selectionPicker.addItem(withTitle: "Settings - \(config.accountSettings.count)")
+        selectionPicker.selectItem(at: config.accountSettings.count - 1)
         
-        deleteButton.isEnabled = config.ntSettings.count > 1
+        deleteButton.isEnabled = config.accountSettings.count > 1
     }
     
     @IBAction func deletePressed(_ sender: NSButton) {
-        guard config.ntSettings.count > 1, let selectedSettingsIndex = selectedSettingsIndex else { return }
+        guard config.accountSettings.count > 1, let selectedSettingsIndex = selectedSettingsIndex else { return }
         
         config.removeNTSettings(index: selectedSettingsIndex)
         loadSettings()
@@ -300,10 +323,10 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
     
     @IBAction func selectionChanged(_ sender: NSPopUpButton) {
-        guard sender.indexOfSelectedItem < config.ntSettings.count,
-            config.ntSettings[sender.indexOfSelectedItem] != selectedSettings else { return }
+        guard sender.indexOfSelectedItem < config.accountSettings.count,
+            config.accountSettings[sender.indexOfSelectedItem] != selectedSettings else { return }
         
-        selectedSettings = config.ntSettings[sender.indexOfSelectedItem]
+        selectedSettings = config.accountSettings[sender.indexOfSelectedItem]
         selectedSettingsIndex = sender.indexOfSelectedItem
     }
     
@@ -326,6 +349,18 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         }
         return false
     }
+    
+    private func refreshStateFields() {
+        guard let selectedSettings = selectedSettings else { return }
+        
+        simModeCheckBox.state = selectedSettings.state.simMode ? .on : .off
+        probationCheckBox.state = selectedSettings.state.probationMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", selectedSettings.state.modelPeak)
+        modelBalanceField.stringValue = String(format: "%.2f", selectedSettings.state.modelBalance)
+        troughField.stringValue = String(format: "%.2f", selectedSettings.state.latestTrough)
+        accPeakField.stringValue = String(format: "%.2f", selectedSettings.state.accPeak)
+        accBalanceField.stringValue = String(format: "%.2f", selectedSettings.state.accBalance)
+    }
 }
 
 extension NTSettingsViewController: NSControlTextEditingDelegate {
@@ -333,24 +368,48 @@ extension NTSettingsViewController: NSControlTextEditingDelegate {
         if let textField = notification.object as? NSTextField {
             if textField == server1MinField {
                 selectedSettings?.server1MinURL = textField.stringValue
-            } else if textField == server2MinField {
+            }
+            else if textField == server2MinField {
                 selectedSettings?.server2MinURL = textField.stringValue
-            } else if textField == server3MinField {
+            }
+            else if textField == server3MinField {
                 selectedSettings?.server3MinURL = textField.stringValue
-            } else if textField == positionSizeField {
+            }
+            else if textField == positionSizeField {
                 selectedSettings?.positionSize = textField.integerValue
-            } else if textField == symbolField {
+            }
+            else if textField == symbolField {
                 selectedSettings?.ticker = textField.stringValue
-            } else if textField == commissionField {
+            }
+            else if textField == commissionField {
                 selectedSettings?.commission = textField.doubleValue
-            } else if textField == dollarPointField {
+            }
+            else if textField == dollarPointField {
                 selectedSettings?.pointValue = textField.doubleValue
-            } else if textField == exchangeField {
+            }
+            else if textField == exchangeField {
                 selectedSettings?.exchange = textField.stringValue
-            } else if textField == longNameField {
+            }
+            else if textField == longNameField {
                 selectedSettings?.accLongName = textField.stringValue
-            } else if textField == shortNameField {
+            }
+            else if textField == shortNameField {
                 selectedSettings?.accName = textField.stringValue
+            }
+            else if textField == modelPeakField {
+                selectedSettings?.state.modelPeak = textField.doubleValue
+            }
+            else if textField == modelBalanceField {
+                selectedSettings?.state.modelBalance = textField.doubleValue
+            }
+            else if textField == troughField {
+                selectedSettings?.state.latestTrough = textField.doubleValue
+            }
+            else if textField == accBalanceField {
+                selectedSettings?.state.accBalance = textField.doubleValue
+            }
+            else if textField == accPeakField {
+                selectedSettings?.state.accPeak = textField.doubleValue
             }
         }
     }

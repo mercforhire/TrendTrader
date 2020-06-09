@@ -11,7 +11,6 @@ import Cocoa
 class LiveTradingViewController: NSViewController, NSWindowDelegate {
     private let config = ConfigurationManager.shared
     
-    var tradingMode: LiveTradingMode!
     @IBOutlet weak var systemTimeLabel: NSTextField!
     @IBOutlet weak var refreshDataButton: NSButton!
     @IBOutlet weak var latestDataTimeLabel: NSTextField!
@@ -24,31 +23,37 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     @IBOutlet weak var sellButton: NSButton!
     @IBOutlet weak var positionStatusLabel: NSTextField!
     
-    var server1minURL: String = "" {
-        didSet {
-            chartManager?.serverUrls[SignalInteval.oneMin] = server1minURL
-        }
-    }
-    var server2minURL: String = "" {
-        didSet {
-            chartManager?.serverUrls[SignalInteval.twoMin] = server2minURL
-        }
-    }
-    var server3minURL: String = "" {
-        didSet {
-            chartManager?.serverUrls[SignalInteval.threeMin] = server3minURL
-        }
-    }
-    private var serverUrls: [SignalInteval: String] {
-        return [SignalInteval.oneMin: server1minURL, SignalInteval.twoMin: server2minURL, SignalInteval.threeMin: server3minURL]
-    }
+    @IBOutlet weak var simModeCheckBox: NSButton!
+    @IBOutlet weak var probationCheckBox: NSButton!
+    @IBOutlet weak var modelPeakField: NSTextField!
+    @IBOutlet weak var modelBalanceField: NSTextField!
+    @IBOutlet weak var accPeakField: NSTextField!
+    @IBOutlet weak var accBalanceField: NSTextField!
+    @IBOutlet weak var troughField: NSTextField!
+    
+    var accountIndex: Int!
+    var accountSetting: AccountSettings!
+    var tradingSetting: TradingSettings!
     
     private var chartManager: ChartManager?
     private let dateFormatter = DateFormatter()
     private var systemClockTimer: Timer!
     private var trader: TraderBot?
     private var sessionManager: BaseSessionManager!
-    private var listOfTrades: [TradesTableRowItem]?
+    private var listOfTrades: [TradesTableRowItem]? {
+        didSet {
+            tableView.reloadData()
+            totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
+                                              sessionManager.getTotalPAndL(),
+                                              sessionManager.getTotalPAndLDollar().currency())
+            
+            if accountSetting.state != sessionManager.state {
+                accountSetting.state = sessionManager.state
+                config.updateNTSettings(index: accountIndex, settings: accountSetting)
+                refreshStateFields()
+            }
+        }
+    }
     private var logViewController: TradingLogViewController?
     private var log: String = "" {
         didSet {
@@ -57,8 +62,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             }
         }
     }
-    
-    weak var delegate: DataManagerDelegate?
     
     func setupUI() {
         dateFormatter.timeStyle = .medium
@@ -75,40 +78,41 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         tableView.delegate = self
         tableView.dataSource = self
+        
+        self.title = "Live trader - \(accountSetting.accName)"
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
         setupUI()
-        
         systemClockTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1.0),
                                                 target: self,
                                                 selector: #selector(updateSystemTimeLabel),
                                                 userInfo: nil,
                                                 repeats: true)
         
-        chartManager = ChartManager(live: true, serverUrls: serverUrls)
+        let serverUrls = [SignalInteval.oneMin: accountSetting.server1MinURL,
+                          SignalInteval.twoMin: accountSetting.server2MinURL,
+                          SignalInteval.threeMin: accountSetting.server3MinURL]
+        
+        chartManager = ChartManager(live: true, serverUrls: serverUrls, tradingSetting: tradingSetting)
+        chartManager?.accountId = accountSetting.accName
         chartManager?.delegate = self
         
-        switch tradingMode {
-        case .ninjaTrader(let accountId, let commission, let ticker, let pointValue, let exchange, let accountLongName, let basePath, let incomingPath, let outgoingPath):
-            sessionManager = NTSessionManager(accountId: accountId,
-                                              commission: commission,
-                                              ticker: ticker,
-                                              pointsValue: pointValue,
-                                              exchange: exchange,
-                                              accountLongName: accountLongName,
-                                              basePath: basePath,
-                                              incomingPath: incomingPath,
-                                              outgoingPath: outgoingPath)
-            sessionManager.commission = commission
-            self.title = "Live trader - \(accountId)"
-        default:
-            break
-        }
-        
+        sessionManager = NTSessionManager(accountId: accountSetting.accName,
+                                          commission: accountSetting.commission,
+                                          ticker: accountSetting.ticker,
+                                          pointsValue: accountSetting.pointValue,
+                                          exchange: accountSetting.exchange,
+                                          accountLongName: accountSetting.accLongName,
+                                          basePath: accountSetting.basePath,
+                                          incomingPath: accountSetting.incomingPath,
+                                          outgoingPath: accountSetting.outgoingPath,
+                                          state: accountSetting.state)
         sessionManager.delegate = self
+        
+        refreshStateFields()
     }
     
     override func viewWillAppear() {
@@ -131,10 +135,6 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
     
     private func updateTradesList() {
         listOfTrades = sessionManager.listOfTrades()
-        tableView.reloadData()
-        totalPLLabel.stringValue = String(format: "Total P/L: %.2f, %@",
-                                          sessionManager.getTotalPAndL(),
-                                          sessionManager.getTotalPAndLDollar().currency(true, showPlusSign: false))
     }
     
     @IBAction
@@ -146,7 +146,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
             
             sender.isEnabled = true
             if let chart = chart {
-                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager)
+                self.trader = TraderBot(chart: chart, sessionManager: self.sessionManager, tradingSetting: self.tradingSetting)
                 
                 if self.chartManager?.monitoring ?? false {
                     self.startButton.isEnabled = false
@@ -206,8 +206,8 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         }
     }
     
-    private func processActions(time: Date = Date(), actions: [TradeActionType], completion: Action? = nil) {
-        sessionManager.processActions(priceBarTime: time, actions: actions) { [weak self] networkError in
+    private func processAction(time: Date = Date(), action: TradeActionType, completion: Action? = nil) {
+        sessionManager.processAction(priceBarTime: time, action: action) { [weak self] networkError in
             guard let self = self else { return }
             
             if let networkError = networkError {
@@ -225,7 +225,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        processActions(actions: [action]) {
+        processAction(action: action) {
             sender.isEnabled = true
         }
     }
@@ -235,7 +235,7 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         
         sender.isEnabled = false
         sessionManager.resetCurrentlyProcessingPriceBar()
-        processActions(actions: [action]) {
+        processAction(action: action) {
             sender.isEnabled = true
         }
     }
@@ -257,7 +257,17 @@ class LiveTradingViewController: NSViewController, NSWindowDelegate {
         chartManager?.stopMonitoring()
         sessionManager.stopLiveMonitoring()
         systemClockTimer.invalidate()
-        systemClockTimer =  nil
+        systemClockTimer = nil
+    }
+    
+    private func refreshStateFields() {
+        simModeCheckBox.state = sessionManager.state.simMode ? .on : .off
+        probationCheckBox.state = sessionManager.state.probationMode ? .on : .off
+        modelPeakField.stringValue = String(format: "%.2f", sessionManager.state.modelPeak)
+        modelBalanceField.stringValue = String(format: "%.2f", sessionManager.state.modelBalance)
+        troughField.stringValue = String(format: "%.2f", sessionManager.state.latestTrough)
+        accPeakField.stringValue = String(format: "%.2f", sessionManager.state.accPeak)
+        accBalanceField.stringValue = String(format: "%.2f", sessionManager.state.accBalance)
     }
 }
 
@@ -267,22 +277,19 @@ extension LiveTradingViewController: DataManagerDelegate {
     }
     
     func chartUpdated(chart: Chart) {
-        delegate?.chartUpdated(chart: chart)
-        
-        guard !chart.timeKeys.isEmpty,
-            let lastBarTime = chart.lastBar?.time else {
-                return
+        guard !chart.timeKeys.isEmpty, let lastBarTime = chart.lastBar?.time else {
+            return
         }
         
         trader?.chart = chart
         
-        if let actions = trader?.decide(), chartManager?.monitoring ?? false {
-            processActions(time: lastBarTime, actions: actions)
+        if let action = trader?.decide(), chartManager?.monitoring ?? false {
+            processAction(time: lastBarTime, action: action)
         }
     }
     
     func requestStopMonitoring() {
-        pauseTrading(self.pauseButton)
+        pauseTrading(pauseButton)
     }
 }
 

@@ -20,9 +20,10 @@ class ChartManager {
     private let fileName2: String = "2m.txt"
     private let fileName3: String = "3m.txt"
     
-    private let config = ConfigurationManager.shared
-    private let delayBeforeFetchingAtNewMinute = 5
+    private let delayBeforeFetchingAtNewMinute = 2
     
+    var accountId: String = "Sim"
+    var tradingSetting: TradingSettings
     var serverUrls: [SignalInteval: String] = [:]
     var chart: Chart?
     var monitoring = false
@@ -35,9 +36,10 @@ class ChartManager {
     private var refreshTimer: Timer?
     private var nextFetchTime: Date?
     
-    init(live: Bool, serverUrls: [SignalInteval: String]) {
+    init(live: Bool, serverUrls: [SignalInteval: String], tradingSetting: TradingSettings) {
         self.live = live
         self.serverUrls = serverUrls
+        self.tradingSetting = tradingSetting
         resetSimTime()
     }
     
@@ -48,14 +50,30 @@ class ChartManager {
                                          month: Date().month(),
                                          day: Date().day(),
                                          hour: 9,
-                                         minute: 40,
+                                         minute: 45,
                                          second: 1)
         self.simTime = calendar.date(from: components1)!
     }
     
+    func loadChart(completion: @escaping (_ chart: Chart?) -> Void) {
+        if let oneMinText = Parser.readFile(fileName: fileName1),
+            let twoMinText = Parser.readFile(fileName: fileName2),
+            let threeMinText = Parser.readFile(fileName: fileName3) {
+            generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { [weak self] chart in
+                guard let self = self else { return }
+                
+                self.chart = chart
+                completion(self.chart)
+            }
+        } else {
+            self.delegate?.chartStatusChanged(statusText: "Chart data reading failed")
+            completion(nil)
+        }
+    }
+    
     func fetchChart(completion: @escaping (_ chart: Chart?) -> Void) {
-        if live {            
-            self.findLatestAvaiableUrls { [weak self] urls in
+        if live {
+            findMostRecentURLs { [weak self] urls in
                 guard let self = self,
                     let oneMinUrl = urls?.0,
                     let twoMinUrl = urls?.1,
@@ -66,8 +84,8 @@ class ChartManager {
                 self.downloadChartFromUrls(oneMinUrl: oneMinUrl, twoMinUrl: twoMinUrl, threeMinUrl: threeMinUrl, completion: completion)
             }
         } else {
-            if config.simulateTimePassage {
-                findLatestAvailableUrls { [weak self] urls in
+            if tradingSetting.simulateTimePassage {
+                findURLsAtTime { [weak self] urls in
                     guard let self = self else {
                         return
                     }
@@ -76,7 +94,11 @@ class ChartManager {
                         self.downloadChartFromUrls(oneMinUrl: urls.0,
                                                    twoMinUrl: urls.1,
                                                    threeMinUrl: urls.2)
-                        { downloadedChart in
+                        { [weak self] downloadedChart in
+                            guard let self = self else {
+                                return
+                            }
+                            
                             self.chart = downloadedChart
                             completion(downloadedChart)
                         }
@@ -85,27 +107,30 @@ class ChartManager {
                     }
                 }
             } else {
-                if let oneMinText = Parser.readFile(fileName: fileName1),
-                    let twoMinText = Parser.readFile(fileName: fileName2),
-                    let threeMinText = Parser.readFile(fileName: fileName3) {
-                    generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
-                        self.chart = chart
-                        completion(self.chart)
+                findMostRecentURLs { [weak self] urls in
+                    guard let self = self,
+                        let oneMinUrl = urls?.0,
+                        let twoMinUrl = urls?.1,
+                        let threeMinUrl = urls?.2 else {
+                        return completion(nil)
                     }
-                } else {
-                    self.delegate?.chartStatusChanged(statusText: "Chart data reading failed")
-                    completion(nil)
+                    
+                    self.downloadChartFromUrls(oneMinUrl: oneMinUrl, twoMinUrl: twoMinUrl, threeMinUrl: threeMinUrl, completion: completion)
                 }
             }
         }
     }
     
     func startMonitoring() {
-        guard live || config.simulateTimePassage else { return }
+        guard live || tradingSetting.simulateTimePassage else { return }
         
         updateChart()
         monitoring = true
-        refreshTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerFunction), userInfo: nil, repeats: true)
+        refreshTimer = Timer.scheduledTimer(timeInterval: 1,
+                                            target: self,
+                                            selector: #selector(timerFunction),
+                                            userInfo: nil,
+                                            repeats: true)
     }
     
     func stopMonitoring() {
@@ -128,7 +153,9 @@ class ChartManager {
     private func updateChart() {
         let now = Date()
         if live,
-            !config.byPassTradingTimeRestrictions, now > Date.flatPositionsTime(date: now).getOffByMinutes(minutes: 2) {
+            !tradingSetting.byPassTradingTimeRestrictions,
+            now > tradingSetting.flatPositionsTime(date: now).getOffByMinutes(minutes: 2),
+            now < tradingSetting.flatPositionsTime(date: now).getOffByMinutes(minutes: 30) {
             delegate?.requestStopMonitoring()
             self.delegate?.chartStatusChanged(statusText: "Trading session is over at " + now.hourMinute())
             return
@@ -162,8 +189,8 @@ class ChartManager {
                     if self.live {
                         self.nextFetchTime = nil
                         self.updateChartNextSecond()
-                    } else if self.config.simulateTimePassage {
-                        guard self.simTime < Date.flatPositionsTime(date: self.simTime),
+                    } else if self.tradingSetting.simulateTimePassage {
+                        guard self.simTime < self.tradingSetting.flatPositionsTime(date: self.simTime),
                             self.simTime < Date() else {
                                 self.delegate?.chartStatusChanged(statusText: "Simulate time is up to date")
                                 self.stopMonitoring()
@@ -175,7 +202,7 @@ class ChartManager {
                 }
             } else if self.monitoring, self.live {
                 self.delegate?.chartStatusChanged(statusText: "Data for " + Date().hourMinuteSecond() + " yet not found")
-                print("Data for " + Date().hourMinuteSecond() + " yet not found")
+                print("\(self.accountId)-Data for " + Date().hourMinuteSecond() + " yet not found")
                 self.updateChartNextSecond()
             }
         }
@@ -230,7 +257,11 @@ class ChartManager {
             guard let self = self else { return }
             
             if let oneMinText = oneMinText, let twoMinText = twoMinText, let threeMinText = threeMinText {
-                self.generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { chart in
+                self.generateChart(oneMinText: oneMinText, twoMinText: twoMinText, threeMinText: threeMinText) { [weak self] chart in
+                    guard let self = self else {
+                        return
+                    }
+                    
                     self.chart = chart
                     self.delegate?.chartStatusChanged(statusText: "Latest data: " + (self.chart?.lastBar?.candleStick.time.hourMinuteSecond() ?? "--"))
                     completion(self.chart)
@@ -255,7 +286,7 @@ class ChartManager {
             let threeMinIndicators = Indicators(interval: .threeMin, signals: threeMinSignals)
             
             let chart = Chart.generateChart(candleSticks: candleSticks,
-                                             indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
+                                            indicatorsSet: [oneMinIndicators, twoMinIndicators, threeMinIndicators])
             
             DispatchQueue.main.async {
                 completion(chart)
@@ -263,44 +294,73 @@ class ChartManager {
         }
     }
     
-    private func findLatestAvaiableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+    private func findMostRecentURLs(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
         var oneMinUrl: String?
         var twoMinUrl: String?
         var threeMinUrl: String?
         let now = Date()
         let urlFetchingTask = DispatchGroup()
         
-        print(Date().hourMinuteSecond() + ": Start fetching latest urls...")
+        print("\(accountId)-\(Date().hourMinuteSecond()): Start fetching latest urls...")
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .oneMin, completion: { url in
+        fetchLatestAvailableUrlDuring(time: now,
+                                      startSecond: now.second() - 1,
+                                      interval: .oneMin,
+                                      completion: { url in
             oneMinUrl = url
             urlFetchingTask.leave()
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .twoMin, completion: { url in
-            twoMinUrl = url
-            urlFetchingTask.leave()
+        fetchLatestAvailableUrlDuring(time: now,
+                                      startSecond: now.second() - 1,
+                                      interval: .twoMin,
+                                      completion: { [weak self] url in
+            if let url = url {
+                twoMinUrl = url
+                urlFetchingTask.leave()
+            } else {
+                self?.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
+                                                    endSecond: 50,
+                                                    interval: .twoMin,
+                                                    completion: { url2 in
+                    twoMinUrl = url2
+                    urlFetchingTask.leave()
+                })
+            }
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now, startSecond: now.second() - 1, interval: .threeMin, completion: { url in
-            threeMinUrl = url
-            urlFetchingTask.leave()
+        fetchLatestAvailableUrlDuring(time: now,
+                                      startSecond: now.second() - 1,
+                                      interval: .threeMin,
+                                      completion: { [weak self] url in
+            if let url = url {
+                threeMinUrl = url
+                urlFetchingTask.leave()
+            } else {
+                self?.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
+                                                    endSecond: 50,
+                                                    interval: .threeMin,
+                                                    completion: { url2 in
+                    threeMinUrl = url2
+                    urlFetchingTask.leave()
+                })
+            }
         })
         
-        urlFetchingTask.notify(queue: DispatchQueue.main) {
-            guard let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl else {
+        urlFetchingTask.notify(queue: DispatchQueue.main) { [weak self] in
+            guard let self = self, let oneMinUrl = oneMinUrl, let twoMinUrl = twoMinUrl, let threeMinUrl = threeMinUrl else {
                 return completion(nil)
             }
             
-            print(Date().hourMinuteSecond() + ": Downloading", oneMinUrl, twoMinUrl, threeMinUrl)
+            print("\(self.accountId)-\(Date().hourMinuteSecond()): Downloading", oneMinUrl, twoMinUrl, threeMinUrl)
             completion((oneMinUrl, twoMinUrl, threeMinUrl))
         }
     }
     
-    private func findLatestAvailableUrls(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+    private func findURLsAtTime(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {
@@ -384,6 +444,7 @@ class ChartManager {
     
     private func fetchLatestAvailableUrlDuring(time: Date,
                                                startSecond: Int = 59,
+                                               endSecond: Int = 0,
                                                interval: SignalInteval,
                                                completion: @escaping (String?) -> ()) {
         guard let serverURL = serverUrls[interval] else {

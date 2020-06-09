@@ -9,77 +9,58 @@
 import Foundation
 
 class SimSessionManager: BaseSessionManager {
-    override func processActions(priceBarTime: Date,
-                                 actions: [TradeActionType],
-                                 completion: @escaping (TradingError?) -> ()) {
-        for action in actions {
-            switch action {
-            case .noAction:
-                break
-            default:
-                self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime))
-            }
+    override func processAction(priceBarTime: Date,
+                                action: TradeActionType,
+                                completion: @escaping (TradingError?) -> ()) {
+        switch action {
+        case .noAction:
+            break
+        default:
+            self.delegate?.newLogAdded(log: action.description(actionBarTime: priceBarTime, accountId: accountId))
+        }
+        
+        switch action {
+        case .openPosition(let newPosition, _):
+            pos = newPosition
+            pos?.actualEntryPrice = newPosition.idealEntryPrice
             
-            switch action {
-            case .openPosition(let newPosition, _):
-                pos = newPosition
-                pos?.actualEntryPrice = newPosition.idealEntryPrice
-                
-            case .reversePosition(let oldPosition, let newPosition, _):
-                let trade = Trade(direction: oldPosition.direction,
-                                  simulated: true,
-                                  size: newPosition.size,
-                                  pointValue: pointsValue,
-                                  entryTime: oldPosition.entryTime,
-                                  idealEntryPrice: oldPosition.idealEntryPrice,
-                                  actualEntryPrice: oldPosition.idealEntryPrice,
-                                  exitTime: newPosition.entryTime,
-                                  idealExitPrice: newPosition.idealEntryPrice,
-                                  actualExitPrice: newPosition.idealEntryPrice,
-                                  commission: commission * 2,
-                                  exitMethod: .signalReversed)
-                trades.append(trade)
-                pos = newPosition
-                pos?.actualEntryPrice = newPosition.idealEntryPrice
-                
-            case .updateStop(let newStop):
-                pos?.stopLoss = newStop
-                
-            case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let method):
-                let trade = Trade(direction: closedPosition.direction,
-                                  simulated: true,
-                                  size: closedPosition.size,
-                                  pointValue: pointsValue,
-                                  entryTime: closedPosition.entryTime,
-                                  idealEntryPrice: closedPosition.idealEntryPrice,
-                                  actualEntryPrice: closedPosition.idealEntryPrice,
-                                  exitTime: closingTime,
-                                  idealExitPrice: closingPrice,
-                                  actualExitPrice: closingPrice,
-                                  commission: commission * 2,
-                                  exitMethod: method)
-                trades.append(trade)
-                pos = nil
-                
-            case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, _):
-                let trade = Trade(direction: closedPosition.direction,
-                                  simulated: true,
-                                  size: closedPosition.size,
-                                  pointValue: pointsValue,
-                                  entryTime: closedPosition.entryTime,
-                                  idealEntryPrice: closedPosition.idealEntryPrice,
-                                  actualEntryPrice: closedPosition.idealEntryPrice,
-                                  exitTime: closingTime,
-                                  idealExitPrice: closingPrice,
-                                  actualExitPrice: closingPrice,
-                                  commission: commission * 2,
-                                  exitMethod: .hitStoploss)
-                trades.append(trade)
-                pos = nil
-                
-            case .noAction(_):
-                break
-            }
+        case .updateStop(let newStop):
+            pos?.stopLoss = newStop
+            
+        case .forceClosePosition(let closedPosition, let closingPrice, let closingTime, let method):
+            let trade = Trade(direction: closedPosition.direction,
+                              executed: closedPosition.executed,
+                              size: closedPosition.size,
+                              pointValue: pointsValue,
+                              entryTime: closedPosition.entryTime,
+                              idealEntryPrice: closedPosition.idealEntryPrice,
+                              actualEntryPrice: closedPosition.idealEntryPrice,
+                              exitTime: closingTime,
+                              idealExitPrice: closingPrice,
+                              actualExitPrice: closingPrice,
+                              commission: closedPosition.executed ? commission * 2 : 0.0,
+                              exitMethod: method)
+            appendTrade(trade: trade)
+            pos = nil
+            
+        case .verifyPositionClosed(let closedPosition, let closingPrice, let closingTime, let reason):
+            let trade = Trade(direction: closedPosition.direction,
+                              executed: closedPosition.executed,
+                              size: closedPosition.size,
+                              pointValue: pointsValue,
+                              entryTime: closedPosition.entryTime,
+                              idealEntryPrice: closedPosition.idealEntryPrice,
+                              actualEntryPrice: closedPosition.idealEntryPrice,
+                              exitTime: closingTime,
+                              idealExitPrice: closingPrice,
+                              actualExitPrice: closingPrice,
+                              commission: closedPosition.executed ? commission * 2 : 0.0,
+                              exitMethod: reason)
+            appendTrade(trade: trade)
+            pos = nil
+            
+        default:
+            break
         }
         
         completion(nil)

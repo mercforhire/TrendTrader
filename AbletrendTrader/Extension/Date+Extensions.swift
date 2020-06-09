@@ -94,11 +94,8 @@ extension Date {
         return response
     }
     
-    func generateOrderIdentifier(prefix: String, linkedToTradeRef: String? = nil) -> String {
-        if let linkedToTradeRef = linkedToTradeRef {
-            return prefix + "-" + generateDateAndTimeIdentifier() + "-" + linkedToTradeRef
-        }
-        return prefix + "-" + generateDateAndTimeIdentifier()
+    func generateOrderIdentifier(prefix: String, accountId: String) -> String {
+        return prefix + "-" + accountId + "-" + generateDateAndTimeIdentifier()
     }
     
     func isInSameDay(date: Date, timeZone: TimeZone = Date.DefaultTimeZone) -> Bool {
@@ -183,108 +180,5 @@ extension Date {
         components.year = years
         let offsetDate = Calendar.current.date(byAdding: components, to: self)!
         return offsetDate
-    }
-    
-    static func highRiskEntryInteval(date: Date) -> DateInterval {
-        let config = ConfigurationManager.shared
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.highRiskStart.hour(),
-                                         minute: config.highRiskStart.minute())
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.highRiskEnd.hour(),
-                                         minute: config.highRiskEnd.minute())
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
-    }
-    
-    static func tradingTimeInterval(date: Date) -> DateInterval {
-        let config = ConfigurationManager.shared
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.tradingStart.hour(),
-                                         minute: config.tradingStart.minute())
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.tradingEnd.hour(),
-                                         minute: config.tradingEnd.minute())
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
-    }
-    
-    static func lunchInterval(date: Date) -> DateInterval {
-        let config = ConfigurationManager.shared
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.lunchStart.hour(),
-                                         minute: config.lunchStart.minute())
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.lunchEnd.hour(),
-                                         minute: config.lunchEnd.minute())
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
-    }
-    
-    static func fomcInterval(date: Date) -> DateInterval {
-        let config = ConfigurationManager.shared
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.fomcTime.hour(),
-                                         minute: config.fomcTime.minute() - 30)
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: config.fomcTime.hour(),
-                                         minute: config.fomcTime.minute() + 30)
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
-    }
-    
-    static func clearPositionTime(date: Date) -> Date {
-        let config = ConfigurationManager.shared
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: date.year(),
-                                        month: date.month(),
-                                        day: date.day(),
-                                        hour: config.clearTime.hour(),
-                                        minute: config.clearTime.minute())
-        let date: Date = calendar.date(from: components)!
-        return date
-    }
-    
-
-    static func flatPositionsTime(date: Date) -> Date {
-        let config = ConfigurationManager.shared
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components = DateComponents(year: date.year(),
-                                        month: date.month(),
-                                        day: date.day(),
-                                        hour: config.flatTime.hour(),
-                                        minute: config.flatTime.minute())
-        let date: Date = calendar.date(from: components)!
-        return date
     }
 }

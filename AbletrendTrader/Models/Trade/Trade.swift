@@ -10,14 +10,13 @@ import Foundation
 
 struct Trade: Codable {
     var direction: TradeDirection
-    var simulated: Bool
+    var executed: Bool
     var size: Int
     var pointValue: Double
     var entryTime: Date
     var idealEntryPrice: Double
     var actualEntryPrice: Double
     var entryOrderRef: String?
-    
     var exitTime: Date
     var idealExitPrice: Double
     var actualExitPrice: Double

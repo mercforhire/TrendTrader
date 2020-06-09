@@ -35,21 +35,21 @@ enum EntryType {
 enum TradeActionType {
     case noAction(entryType: EntryType?, reason: NoActionReason)
     case openPosition(newPosition: Position, entryType: EntryType)
-    case reversePosition(oldPosition: Position, newPosition: Position, entryType: EntryType)
     case updateStop(stop: StopLoss)
     case verifyPositionClosed(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
     case forceClosePosition(closedPosition: Position, closingPrice: Double, closingTime: Date, reason: ExitMethod)
+    case refresh
     
-    func description(actionBarTime: Date) -> String {
+    func description(actionBarTime: Date, accountId: String) -> String {
         switch self {
         case .noAction(let entryType, let reason):
             if let entryType = entryType {
-                return String(format: "%@: No action for %@ (enter method: %@)",
+                return String(format: "\(accountId)-%@: No action for %@ (enter method: %@)",
                               Date().hourMinuteSecond(),
                               actionBarTime.hourMinute(),
                               entryType.description())
             } else {
-                return String(format: "%@: No action for %@ (%@)",
+                return String(format: "\(accountId)-%@: No action for %@ (%@)",
                               Date().hourMinuteSecond(),
                               actionBarTime.hourMinute(),
                               reason.description())
@@ -58,15 +58,6 @@ enum TradeActionType {
         case .openPosition(let newPosition, let entryType):
             let type: String = newPosition.direction == .long ? "Long" : "Short"
             return String(format: "%@: Opened %@ position at %.2f with SL %.2f reason: %@ for %@",
-                          Date().hourMinuteSecond(),
-                          type, newPosition.idealEntryPrice,
-                          newPosition.stopLoss?.stop ?? -1.0,
-                          entryType.description(),
-                          actionBarTime.hourMinute())
-            
-        case .reversePosition(let oldPosition, let newPosition, let entryType):
-            let type: String = oldPosition.direction == .long ? "Long" : "Short"
-            return String(format: "%@: Reversed %@ position at %.2f with SL %.2f for %@",
                           Date().hourMinuteSecond(),
                           type, newPosition.idealEntryPrice,
                           newPosition.stopLoss?.stop ?? -1.0,
@@ -95,6 +86,8 @@ enum TradeActionType {
                           stopLoss.stop,
                           stopLoss.source.reason(),
                           actionBarTime.hourMinute())
+        default:
+            return String(format: "%@: Refresh trades.", Date().hourMinuteSecond())
         }
     }
 }
@@ -204,6 +197,7 @@ enum NoActionReason {
     case outsideTradingHours
     case lunchHour
     case choppyDay
+    case profitHit
     case other
     
     func description() -> String {
@@ -222,6 +216,8 @@ enum NoActionReason {
             return "Lunch hour"
         case .choppyDay:
             return "Choppy day"
+        case .profitHit:
+            return "Profit hit for the day"
         case .other:
             return "Other reason"
         }
@@ -343,17 +339,6 @@ enum OrderType {
     }
 }
 
-enum LiveTradingMode {
-    case ninjaTrader(accountId: String, commission: Double, ticker: String, pointValue: Double, exchange: String, accountLongName: String, basePath: String, incomingPath: String, outgoingPath: String)
-    
-    func name() -> String {
-        switch self {
-        case .ninjaTrader:
-            return "NinjaTrader"
-        }
-    }
-}
-
 enum NTOrderStatus: String {
     case working = "WORKING"
     case cancelled = "CANCELLED"
@@ -438,6 +423,8 @@ enum ConfigError: Error {
     case numOfLosingTradesError
     case maxDistanceToSRError
     case profitAvoidSameDirectionError
+    case bufferError
+    case drawdownLimitError
     
     func displayMessage() -> String {
         switch self {
@@ -450,9 +437,9 @@ enum ConfigError: Error {
         case .minStopError:
             return "Mn stop must be between 2 - 10"
         case .sweetSpotMinDistanceError:
-            return "Sweetspot minimum distance between 1 - 10"
+            return "Sweetspot minimum distance between 0.5 - 10"
         case .greenBarsExitError:
-            return "Green bars exit profit higher than 5"
+            return "Green bars exit profit higher than 3"
         case .skipGreenBarsExitError:
             return "Skip green bars exit must be higher than green bars exit"
         case .enterOnPullbackError:
@@ -482,11 +469,15 @@ enum ConfigError: Error {
         case .maxHighRiskEntryAllowedError:
             return "Max high risk entry allowed must be positive number"
         case .maxDistanceToSRError:
-            return "Max distance to SR must be over 5"
+            return "Max distance to SR must be over 3"
         case .numOfLosingTradesError:
             return "Number of opposite losing trades to halt trading must be >= 3"
         case .profitAvoidSameDirectionError:
-            return "Profit avoid same direction must be over 10"
+            return "Profit avoid same direction must be over 4"
+        case .bufferError:
+            return "Buffer must be over 0"
+        case .drawdownLimitError:
+            return "Drawdown Limit must be over 500"
         }
     }
     

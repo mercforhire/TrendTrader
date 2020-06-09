@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		711AC8F5D49C3C0C53B19B09 /* Pods_AbletrendTrader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */; };
 		851BAB7323D92788000BC720 /* TradingLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851BAB7223D92788000BC720 /* TradingLogViewController.swift */; };
+		854082A3247004E0000DE241 /* TradingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854082A2247004E0000DE241 /* TradingSettings.swift */; };
 		854A56A023CFD8D800904F11 /* DisplayNumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */; };
 		854A56A423D17F7E00904F11 /* TradesTableRowItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A323D17F7E00904F11 /* TradesTableRowItem.swift */; };
 		854A56A523D183FD00904F11 /* OrderResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854A56A123D1745400904F11 /* OrderResponse.swift */; };
@@ -17,6 +18,7 @@
 		85582AB323B5E97800DC16AC /* ChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85582AB223B5E97800DC16AC /* ChartManager.swift */; };
 		856D95A023BA8152004A4385 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D959F23BA8152004A4385 /* Enums.swift */; };
 		856D95A423BA8525004A4385 /* LiveTradingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D95A323BA8524004A4385 /* LiveTradingViewController.swift */; };
+		8576031F247A8731003BDF2A /* AccountState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8576031E247A8731003BDF2A /* AccountState.swift */; };
 		8592432A23AC3EAF004CE61F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432923AC3EAF004CE61F /* AppDelegate.swift */; };
 		8592432C23AC3EAF004CE61F /* SimTradingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */; };
 		8592432E23AC3EB0004CE61F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8592432D23AC3EB0004CE61F /* Assets.xcassets */; };
@@ -43,13 +45,14 @@
 		85FE90D923D3EA9A00B99568 /* NTSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90D823D3EA9900B99568 /* NTSessionManager.swift */; };
 		85FE90DC23D3EC1200B99568 /* SimSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90DB23D3EC1200B99568 /* SimSessionManager.swift */; };
 		85FE90DE23D404CF00B99568 /* BaseSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FE90DD23D404CF00B99568 /* BaseSessionManager.swift */; };
-		85FF9C08243CA9040050666F /* NTSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FF9C07243CA9040050666F /* NTSettings.swift */; };
+		85FF9C08243CA9040050666F /* AccountSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FF9C07243CA9040050666F /* AccountSettings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0C659A7266945B724F5A6D61 /* Pods_AbletrendTrader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AbletrendTrader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7987637B8B2780B3C1E7F8FD /* Pods-AbletrendTrader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.debug.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.debug.xcconfig"; sourceTree = "<group>"; };
 		851BAB7223D92788000BC720 /* TradingLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingLogViewController.swift; sourceTree = "<group>"; };
+		854082A2247004E0000DE241 /* TradingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingSettings.swift; sourceTree = "<group>"; };
 		854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayNumberFormatter.swift; sourceTree = "<group>"; };
 		854A56A123D1745400904F11 /* OrderResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderResponse.swift; sourceTree = "<group>"; };
 		854A56A323D17F7E00904F11 /* TradesTableRowItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradesTableRowItem.swift; sourceTree = "<group>"; };
@@ -58,6 +61,7 @@
 		85582AB223B5E97800DC16AC /* ChartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartManager.swift; sourceTree = "<group>"; };
 		856D959F23BA8152004A4385 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		856D95A323BA8524004A4385 /* LiveTradingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTradingViewController.swift; sourceTree = "<group>"; };
+		8576031E247A8731003BDF2A /* AccountState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountState.swift; sourceTree = "<group>"; };
 		8592432623AC3EAF004CE61F /* AbletrendTrader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AbletrendTrader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8592432923AC3EAF004CE61F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8592432B23AC3EAF004CE61F /* SimTradingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimTradingViewController.swift; sourceTree = "<group>"; };
@@ -87,7 +91,7 @@
 		85FE90D823D3EA9900B99568 /* NTSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTSessionManager.swift; sourceTree = "<group>"; };
 		85FE90DB23D3EC1200B99568 /* SimSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimSessionManager.swift; sourceTree = "<group>"; };
 		85FE90DD23D404CF00B99568 /* BaseSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSessionManager.swift; sourceTree = "<group>"; };
-		85FF9C07243CA9040050666F /* NTSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTSettings.swift; sourceTree = "<group>"; };
+		85FF9C07243CA9040050666F /* AccountSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettings.swift; sourceTree = "<group>"; };
 		E5A4543CD303759A7D95F956 /* Pods-AbletrendTrader.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AbletrendTrader.release.xcconfig"; path = "Target Support Files/Pods-AbletrendTrader/Pods-AbletrendTrader.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -163,7 +167,9 @@
 			children = (
 				854A569F23CFD8D800904F11 /* DisplayNumberFormatter.swift */,
 				8592433923AC41C8004CE61F /* Parser.swift */,
-				85FF9C07243CA9040050666F /* NTSettings.swift */,
+				854082A2247004E0000DE241 /* TradingSettings.swift */,
+				85FF9C07243CA9040050666F /* AccountSettings.swift */,
+				8576031E247A8731003BDF2A /* AccountState.swift */,
 				8592435A23B1559E004CE61F /* Trade */,
 				8592435923B15571004CE61F /* Chart */,
 			);
@@ -364,7 +370,7 @@
 			files = (
 				8592435823B14DD5004CE61F /* StopLoss.swift in Sources */,
 				854A56A523D183FD00904F11 /* OrderResponse.swift in Sources */,
-				85FF9C08243CA9040050666F /* NTSettings.swift in Sources */,
+				85FF9C08243CA9040050666F /* AccountSettings.swift in Sources */,
 				85FE90DE23D404CF00B99568 /* BaseSessionManager.swift in Sources */,
 				854B14FB23C7A7D50098A4E5 /* OrderConfirmation.swift in Sources */,
 				8592434623AD9CBB004CE61F /* Chart.swift in Sources */,
@@ -373,6 +379,7 @@
 				8592434F23ADE06E004CE61F /* Trade.swift in Sources */,
 				8592434823AD9DA0004CE61F /* Date+Extensions.swift in Sources */,
 				859820562415E7BA00C5A317 /* NTSettingsViewController.swift in Sources */,
+				8576031F247A8731003BDF2A /* AccountState.swift in Sources */,
 				8592434223AD403E004CE61F /* Signal.swift in Sources */,
 				854A56A023CFD8D800904F11 /* DisplayNumberFormatter.swift in Sources */,
 				8592434423AD9A97004CE61F /* PriceBar.swift in Sources */,
@@ -394,6 +401,7 @@
 				85C193B823CA6B6F00F7CE68 /* NTManager.swift in Sources */,
 				854A56A423D17F7E00904F11 /* TradesTableRowItem.swift in Sources */,
 				85C8CED823B7130B00E75F76 /* ConfigViewController.swift in Sources */,
+				854082A3247004E0000DE241 /* TradingSettings.swift in Sources */,
 				8592433A23AC41C8004CE61F /* Parser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

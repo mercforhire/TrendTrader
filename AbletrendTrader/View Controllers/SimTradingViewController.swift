@@ -201,6 +201,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         endButton.isEnabled = true
         startButton.isEnabled = tradingSetting.simulateTimePassage
         tableView.reloadData()
+        refreshStateFields()
     }
     
     private let testing = false
@@ -217,17 +218,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         sessionManager.printLog = !testing
         
         if testing {
-            var start = 3
-            while start <= 8 {
-                print("Testing losingTradesToHalt: \(start)...")
-                trader?.tradingSetting.losingTradesToHalt = start
+            var start = 15.0
+            while start <= 40.0 {
+                print("Testing greenExitBase: \(start)...")
+                trader?.tradingSetting.greenExitBase = start
                 sessionManager.resetSession()
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     print("")
-                    start += 1
+                    start += 5.0
                 })
             }
         } else {
@@ -271,6 +272,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         var morningTrades = 0.0
         var lunchTrades = 0.0
         var numTimeWentSim = 0
+        var winningDays: [Double] = []
+        var losingDays: [Double] = []
         
         if !testing {
             print("")
@@ -311,6 +314,13 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                     
                     worstPLDayTime = currentDayPL < worstPLDay ? lastTradeTime : worstPLDayTime
                     worstPLDay = min(worstPLDay, currentDayPL)
+                    
+                    if currentDayPL < 0 {
+                        losingDays.append(currentDayPL)
+                    } else {
+                        winningDays.append(currentDayPL)
+                    }
+                    
                     currentDayPL = 0.0
                 } else if count == sessionManager.trades.count {
                     worstPLDayTime = currentDayPL < worstPLDay ? trade.entryTime : worstPLDayTime
@@ -369,6 +379,12 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         if let worstPLDayTime = worstPLDayTime {
             print("Worst day: \(String(format: "%.2f", worstPLDay)) on \(worstPLDayTime.generateDate())")
         }
+        
+        let winningDayPercentage: Double = Double(winningDays.count) / Double(winningDays.count + losingDays.count) * 100
+        let averageWinDay: Double = (winningDays as NSArray).value(forKeyPath: "@avg.floatValue") as? Double ?? 0.0
+        let averageLoseDay: Double = (losingDays as NSArray).value(forKeyPath: "@avg.floatValue") as? Double ?? 0.0
+        
+        winningDays.isEmpty ? nil : print("Winning day \(String(format: "%.2f", winningDayPercentage))%, Avg win: \(String(format: "%.2f", averageWinDay)), Avg lose: \(String(format: "%.2f", averageLoseDay))")
         print("Morning P/L: \(String(format: "%.2f", morningTrades))")
         print("Lunch P/L: \(String(format: "%.2f", lunchTrades))")
     }

@@ -32,6 +32,8 @@ class TraderBot {
             
             guard let currentBar = self.chart.priceBars[timeKey]
 //                , currentBar.time > Date().getPastOrFutureDate(days: 0, months: -1, years: 0)
+//                , currentBar.time.weekDay() != 6
+//                , (currentBar.time.month() == 2 && currentBar.time.day() >= 24) || currentBar.time.month() == 3
             else { continue }
             
             if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
@@ -57,6 +59,9 @@ class TraderBot {
                 tradingSetting.fomcDay = true
             }
             else if currentBar.time.year() == 2020, currentBar.time.month() == 4, currentBar.time.day() == 29 {
+                tradingSetting.fomcDay = true
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 6, currentBar.time.day() == 10 {
                 tradingSetting.fomcDay = true
             }
             else {
@@ -317,7 +322,9 @@ class TraderBot {
                 let lastTrade = sessionManager.trades.last,
                 lastTrade.direction == newPosition.direction,
                 abs(lastTrade.idealExitPrice - newPositionStop) <= tradingSetting.buffer / 2,
-                chart.checkAllSameDirection(direction: lastTrade.direction, fromKey: lastTrade.exitTime.generateDateIdentifier(), toKey: bar.time.generateDateIdentifier()),
+                chart.checkAllSameDirection(direction: lastTrade.direction,
+                                            fromKey: lastTrade.exitTime.generateDateIdentifier(),
+                                            toKey: bar.time.generateDateIdentifier()),
                 lastTrade.exitMethod == .hitStoploss {
                 
                 sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: entryType).description(actionBarTime: bar.time, accountId: sessionManager.accountId))")
@@ -331,6 +338,9 @@ class TraderBot {
                     lastTrade.direction == newPosition.direction,
                     lastTrade.idealProfit < 0,
                     abs(lastTrade.idealExitPrice - newPositionStop) <= tradingSetting.buffer / 2,
+                    chart.checkAllSameDirection(direction: lastTrade.direction,
+                                                fromKey: lastTrade.exitTime.generateDateIdentifier(),
+                                                toKey: bar.time.generateDateIdentifier()),
                     lastTrade.exitMethod == .hitStoploss {
 
                     sessionManager.delegate?.newLogAdded(log: "Ignored repeated trade: \(TradeActionType.openPosition(newPosition: newPosition, entryType: .all).description(actionBarTime: bar.time, accountId: sessionManager.accountId))")

@@ -349,18 +349,18 @@ class TraderBot {
                 }
             }
             
-            if tradingSetting.drawdownLimit > 0, sessionManager.state.modelDrawdown > 0 {
+            if getDrawdownLimit() > 0, sessionManager.state.modelDrawdown > 0 {
                 let lastTrade = sessionManager.trades.last
                 
                 if (!sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && lastTrade!.executed) {
-                    if !sessionManager.state.probationMode && sessionManager.state.modelDrawdown >= tradingSetting.drawdownLimit {
+                    if !sessionManager.state.probationMode && sessionManager.state.modelDrawdown >= getDrawdownLimit() {
                         newPosition.executed = false
-                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", tradingSetting.drawdownLimit)), entering sim mode:") : nil
+                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", getDrawdownLimit())), entering sim mode:") : nil
                     }
                     else if sessionManager.state.probationMode &&
-                        sessionManager.state.modelDrawdown >= max(tradingSetting.drawdownLimit, sessionManager.state.latestTrough) {
+                        sessionManager.state.modelDrawdown >= max(getDrawdownLimit(), sessionManager.state.latestTrough) {
                         newPosition.executed = false
-                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", max(tradingSetting.drawdownLimit, sessionManager.state.latestTrough))), back to sim mode:") : nil
+                        sessionManager.printLog ? print("Drawdown: $\(String(format: "%.2f", sessionManager.state.modelDrawdown)) over $\(String(format: "%.2f", max(getDrawdownLimit(), sessionManager.state.latestTrough))), back to sim mode:") : nil
                     }
                 } else if (sessionManager.state.simMode && lastTrade == nil) || (lastTrade != nil && !lastTrade!.executed) {
                     if !sessionManager.state.probationMode, sessionManager.state.modelDrawdown >= sessionManager.state.latestTrough * 0.7 {
@@ -818,5 +818,9 @@ class TraderBot {
         }
         
         return earliest2MinConfirmationBar != nil && earliest3MinConfirmationBar != nil
+    }
+    
+    private func getDrawdownLimit() -> Double {
+        return tradingSetting.drawdownLimit * (sessionManager.pointsValue / 20.0)
     }
 }

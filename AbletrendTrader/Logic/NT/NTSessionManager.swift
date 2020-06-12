@@ -532,7 +532,7 @@ class NTSessionManager: BaseSessionManager {
         queue.async { [weak self] in
             guard let self = self else { return }
             
-            for _ in 0...2 {
+            for let retry in 0...2 {
                 if self.quitLoop {
                     break
                 }
@@ -565,6 +565,26 @@ class NTSessionManager: BaseSessionManager {
                 }
                 else {
                     print("Detected position closed but last filled order response not found. Retrying...")
+                    if retry == 2, let closedPosition = self.pos {
+                        let trade = Trade(direction: closedPosition.direction,
+                                          executed: true,
+                                          size: closedPosition.size,
+                                          pointValue: self.pointsValue,
+                                          entryTime: closedPosition.entryTime,
+                                          idealEntryPrice: closedPosition.idealEntryPrice,
+                                          actualEntryPrice: closedPosition.actualEntryPrice,
+                                          exitTime: Date(),
+                                          idealExitPrice: closedPosition.stopLoss?.stop ?? 0.0,
+                                          actualExitPrice: closedPosition.stopLoss?.stop ?? 0.0,
+                                          commission: self.commission * Double(closedPosition.size) * 2,
+                                          exitMethod: .hitStoploss)
+                        self.appendTrade(trade: trade)
+                        self.pos = nil
+                        DispatchQueue.main.async {
+                            self.delegate?.newLogAdded(log: "Detected position closed without last filled order response.")
+                            self.delegate?.positionStatusChanged()
+                        }
+                    }
                 }
                 sleep(1)
             }

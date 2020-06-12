@@ -532,7 +532,7 @@ class NTSessionManager: BaseSessionManager {
         queue.async { [weak self] in
             guard let self = self else { return }
             
-            for let retry in 0...2 {
+            for retry in 0...2 {
                 if self.quitLoop {
                     break
                 }

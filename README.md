@@ -2,9 +2,13 @@
 Automated trading bot based off AbleTrend signals and operates on NinjaTrader
 
 ▪ Desktop Mac OS application written in Swift controlling NinjaTrader platform
+
 ▪ Developed a fully automated algorithmic trading system for Futures
+
 ▪ Systematic trend-following intraday trading strategy
+
 ▪ Delivers market-neutral, crash-resistant returns
+
 ▪ Fixed income, no overnight risk, great for hedging against buy-and-hold
 
 Backtest results:

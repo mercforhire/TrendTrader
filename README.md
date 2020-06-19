@@ -1,5 +1,5 @@
 # TrendTrader
-Automated trading bot based off AbleTrend signals and operates on NinjaTrader
+Automated trading bot based off AbleTrend signals and operates on NinjaTrader. Requires charting server to function.
 
 ▪ Desktop Mac OS application written in Swift controlling NinjaTrader platform
 

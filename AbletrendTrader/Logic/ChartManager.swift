@@ -313,41 +313,22 @@ class ChartManager {
         })
         
         urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now,
-                                      startSecond: now.second() - 1,
-                                      interval: .twoMin,
-                                      completion: { [weak self] url in
-            if let url = url {
-                twoMinUrl = url
-                urlFetchingTask.leave()
-            } else {
-                self?.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
-                                                    endSecond: 50,
-                                                    interval: .twoMin,
-                                                    completion: { url2 in
-                    twoMinUrl = url2
-                    urlFetchingTask.leave()
-                })
-            }
+        fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
+                                            startSecond: 59,
+                                            endSecond: 50,
+                                            interval: .twoMin,
+                                            completion: { url2 in
+            twoMinUrl = url2
+            urlFetchingTask.leave()
         })
         
-        urlFetchingTask.enter()
-        fetchLatestAvailableUrlDuring(time: now,
-                                      startSecond: now.second() - 1,
-                                      interval: .threeMin,
-                                      completion: { [weak self] url in
-            if let url = url {
-                threeMinUrl = url
-                urlFetchingTask.leave()
-            } else {
-                self?.fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
-                                                    endSecond: 50,
-                                                    interval: .threeMin,
-                                                    completion: { url2 in
-                    threeMinUrl = url2
-                    urlFetchingTask.leave()
-                })
-            }
+        fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
+                                            startSecond: 49,
+                                            endSecond: 40,
+                                            interval: .threeMin,
+                                            completion: { url2 in
+            threeMinUrl = url2
+            urlFetchingTask.leave()
         })
         
         urlFetchingTask.notify(queue: DispatchQueue.main) { [weak self] in

@@ -218,17 +218,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         sessionManager.printLog = !testing
         
         if testing {
-            var start = 15.0
-            while start <= 40.0 {
-                print("Testing greenExitBase: \(start)...")
-                trader?.tradingSetting.greenExitBase = start
+            var start = 50.0
+            while start <= 20.0 {
+                print("Testing profitAvoidSameDirectionBase: \(start)...")
+                trader?.tradingSetting.profitAvoidSameDirectionBase = start
                 sessionManager.resetSession()
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     print("")
-                    start += 5.0
+                    start -= 5.0
                 })
             }
         } else {
@@ -355,21 +355,21 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             for trade in sessionManager.trades {
                 print(trade.entryTime.hourMinute())
             }
-            print("")
-            print("Trade entry price:")
-            for trade in sessionManager.trades {
-                print(String(format: "%.2f", trade.idealEntryPrice))
-            }
+//            print("")
+//            print("Trade entry price:")
+//            for trade in sessionManager.trades {
+//                print(String(format: "%.2f", trade.idealEntryPrice))
+//            }
             print("")
             print("Tradee exit time:")
             for trade in sessionManager.trades {
                 print(trade.exitTime.hourMinute())
             }
-            print("")
-            print("Trade exit price:")
-            for trade in sessionManager.trades {
-                print(String(format: "%.2f", trade.idealExitPrice))
-            }
+//            print("")
+//            print("Trade exit price:")
+//            for trade in sessionManager.trades {
+//                print(String(format: "%.2f", trade.idealExitPrice))
+//            }
             print("")
         }
         

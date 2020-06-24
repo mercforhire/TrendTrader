@@ -322,6 +322,7 @@ class ChartManager {
             urlFetchingTask.leave()
         })
         
+        urlFetchingTask.enter()
         fetchLatestAvailableUrlDuring(time: now.addingTimeInterval(-60),
                                             startSecond: 49,
                                             endSecond: 40,
@@ -443,7 +444,7 @@ class ChartManager {
                     break
                 }
                 
-                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d-%02d.txt",
+                let urlString: String = String(format: "%@%@_%02d-%02d-%02d-%02d--%02d.txt",
                                                serverURL,
                                                interval.text(),
                                                time.month(),

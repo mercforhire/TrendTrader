@@ -20,7 +20,7 @@ class ChartManager {
     private let fileName2: String = "2m.txt"
     private let fileName3: String = "3m.txt"
     
-    private let delayBeforeFetchingAtNewMinute = 3
+    private let delayBeforeFetchingAtNewMinute = 2
     
     var accountId: String = "Sim"
     var tradingSetting: TradingSettings

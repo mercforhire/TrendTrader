@@ -361,7 +361,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
 //                print(String(format: "%.2f", trade.idealEntryPrice))
 //            }
             print("")
-            print("Tradee exit time:")
+            print("Trade exit time:")
             for trade in sessionManager.trades {
                 print(trade.exitTime.hourMinute())
             }

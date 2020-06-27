@@ -19,11 +19,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var minProfitByPass: NSTextField!
     @IBOutlet private weak var minProfitPullbackField: NSTextField!
     @IBOutlet private weak var takeProfitField: NSTextField!
-    @IBOutlet private weak var highRiskEntryStartPicker: NSDatePicker!
-    @IBOutlet private weak var highRiskEntryEndPicker: NSDatePicker!
     @IBOutlet private weak var lunchStartPicker: NSDatePicker!
     @IBOutlet private weak var lunchEndPicker: NSDatePicker!
-    @IBOutlet private weak var highRiskTradesField: NSTextField!
     @IBOutlet private weak var maxDistanceToSRField: NSTextField!
     @IBOutlet private weak var profitAvoidSameDirectionField: NSTextField!
     @IBOutlet private weak var losingConsecutiveTradesField: NSTextField!
@@ -44,6 +41,8 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
     @IBOutlet private weak var fomcDayCheckbox: NSButton!
     @IBOutlet private weak var stoplossBufferField: NSTextField!
     @IBOutlet private weak var maxDDField: NSTextField!
+    @IBOutlet private weak var profitToHaltField: NSTextField!
+    
     @IBOutlet private weak var present1Button: NSButton!
     @IBOutlet private weak var present2Button: NSButton!
     @IBOutlet private weak var present3Button: NSButton!
@@ -64,8 +63,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         minProfitByPass.delegate = self
         minProfitPullbackField.delegate = self
         takeProfitField.delegate = self
-        dailyLossLimitField.delegate = self
-        highRiskTradesField.delegate = self
+        profitToHaltField.delegate = self
         maxDistanceToSRField.delegate = self
         profitAvoidSameDirectionField.delegate = self
         losingConsecutiveTradesField.delegate = self
@@ -89,11 +87,7 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         fomcTimePicker.dateValue = Date.getNewDateFromTime(hour: tradingSetting.fomcTime.hour(),
                                                            min: tradingSetting.fomcTime.minute())
         
-        highRiskEntryStartPicker.dateValue = Date.getNewDateFromTime(hour: tradingSetting.highRiskStart.hour(),
-                                                                     min: tradingSetting.highRiskStart.minute())
-        
-        highRiskEntryEndPicker.dateValue = Date.getNewDateFromTime(hour: tradingSetting.highRiskEnd.hour(),
-                                                                   min: tradingSetting.highRiskEnd.minute())
+        profitToHaltField.stringValue = String(format: "%.2f", tradingSetting.profitToHaltBase)
         
         lunchStartPicker.dateValue = Date.getNewDateFromTime(hour: tradingSetting.lunchStart.hour(),
                                                              min: tradingSetting.lunchStart.minute())
@@ -114,7 +108,6 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
                                                            min: tradingSetting.flatTime.minute())
         
         dailyLossLimitField.stringValue = String(format: "%.2f", tradingSetting.maxDailyLossBase)
-        highRiskTradesField.stringValue = String(format: "%d", tradingSetting.maxHighRiskEntryAllowed)
         losingConsecutiveTradesField.stringValue = String(format: "%d", tradingSetting.losingConsecutiveTradesToHalt)
         losingTradesField.stringValue = String(format: "%d", tradingSetting.losingTradesToHalt)
         oppositeLosingTradesField.stringValue = String(format: "%d", tradingSetting.oppositeLosingTradesToHalt)
@@ -249,32 +242,6 @@ class ConfigViewController: NSViewController, NSTextFieldDelegate {
         config.updateTradingSettings(settings: tradingSetting)
     }
     
-    @IBAction func highRiskStartChanged(_ sender: NSDatePicker) {
-        do {
-            try tradingSetting.setHighRiskStart(newValue: sender.dateValue)
-            config.updateTradingSettings(settings: tradingSetting)
-        } catch (let error) {
-            guard let configError = error as? ConfigError else { return }
-            
-            configError.displayErrorDialog()
-            
-            sender.dateValue = tradingSetting.highRiskStart
-        }
-    }
-    
-    @IBAction func highRiskEndChanged(_ sender: NSDatePicker) {
-        do {
-            try tradingSetting.setHighRiskEnd(newValue: sender.dateValue)
-            config.updateTradingSettings(settings: tradingSetting)
-        } catch (let error) {
-            guard let configError = error as? ConfigError else { return }
-            
-            configError.displayErrorDialog()
-            
-            sender.dateValue = tradingSetting.highRiskEnd
-        }
-    }
-    
     @IBAction func lunchStartChanged(_ sender: NSDatePicker) {
         do {
             try tradingSetting.setLunchStart(newValue: sender.dateValue)
@@ -390,8 +357,6 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try tradingSetting.setTakeProfitBarLength(newValue: textField.doubleValue)
                 } else if textField == dailyLossLimitField {
                     try tradingSetting.setMaxDailyLoss(newValue: textField.doubleValue)
-                } else if textField == highRiskTradesField {
-                    try tradingSetting.setMaxHighRiskEntryAllowed(newValue: textField.integerValue)
                 } else if textField == maxDistanceToSRField {
                     try tradingSetting.setMaxDistanceToSR(newValue: textField.doubleValue)
                 } else if textField == profitAvoidSameDirectionField {
@@ -406,6 +371,8 @@ extension ConfigViewController: NSControlTextEditingDelegate {
                     try tradingSetting.setBuffer(newValue: textField.doubleValue)
                 } else if textField == maxDDField {
                     try tradingSetting.setDrawdownLimit(newValue: textField.doubleValue)
+                } else if textField == profitToHaltField {
+                    try tradingSetting.setProfitToHalt(newValue: textField.doubleValue)
                 }
                 
                 config.updateTradingSettings(settings: tradingSetting)

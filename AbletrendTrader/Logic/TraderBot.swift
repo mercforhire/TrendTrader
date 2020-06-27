@@ -31,14 +31,11 @@ class TraderBot {
             }
             
             guard let currentBar = self.chart.priceBars[timeKey]
+//                , currentBar.time.isInSameDay(date: Date())
 //                , currentBar.time > Date().getPastOrFutureDate(days: 0, months: -1, years: 0)
 //                , currentBar.time.weekDay() != 6
 //                , (currentBar.time.month() == 2 && currentBar.time.day() >= 24) || currentBar.time.month() == 3
             else { continue }
-            
-            if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
-                sessionManager.highRiskEntriesTaken = 0
-            }
             
             // US Holidays
             if currentBar.time.year() == 2019, currentBar.time.month() == 11, currentBar.time.day() == 22 {
@@ -349,6 +346,15 @@ class TraderBot {
                 }
             }
             
+            if let lastTrade = sessionManager.trades.last,
+                lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
+                lastTrade.idealProfit >= tradingSetting.profitToHalt {
+
+                sessionManager.delegate?.newLogAdded(log: "Stop trading after big win.")
+
+                return .noAction(entryType: nil, reason: .profitHit)
+            }
+            
             if getDrawdownLimit() > 0, sessionManager.state.modelDrawdown > 0 {
                 let lastTrade = sessionManager.trades.last
                 
@@ -443,11 +449,6 @@ class TraderBot {
         
         if risk <= tradingSetting.maxRisk {
             
-            if tradingSetting.highRiskEntryInteval(date: bar.time).contains(bar.time),
-                sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed {
-                sessionManager.highRiskEntriesTaken += 1
-            }
-            
             return position
         }
 
@@ -466,13 +467,6 @@ class TraderBot {
             !tradingSetting.byPassTradingTimeRestrictions {
             
             return .noAction(entryType: nil, reason: .outsideTradingHours)
-        }
-        
-        // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter on sweetspot.
-        if tradingSetting.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
-            sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed,
-            !tradingSetting.byPassTradingTimeRestrictions {
-            return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .sweetSpot)
         }
         
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position

@@ -19,7 +19,6 @@ class BaseSessionManager {
     var printLog: Bool = true
     var pointsValue: Double = 20.0
     var commission: Double = 2.04
-    var highRiskEntriesTaken: Int = 0
     var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
     var status: PositionStatus? {
@@ -83,7 +82,6 @@ class BaseSessionManager {
         timer?.invalidate()
         stopLiveMonitoring()
         state = AccountState()
-        highRiskEntriesTaken = 0
     }
     
     func resetCurrentlyProcessingPriceBar() {

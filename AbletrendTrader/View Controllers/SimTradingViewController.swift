@@ -218,17 +218,17 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         sessionManager.printLog = !testing
         
         if testing {
-            var start = 50.0
-            while start <= 20.0 {
-                print("Testing profitAvoidSameDirectionBase: \(start)...")
-                trader?.tradingSetting.profitAvoidSameDirectionBase = start
+            var start = 14.0
+            while start >= 11.0 {
+                print("Testing maxDistanceToSRBase: \(start)...")
+                trader?.tradingSetting.maxDistanceToSRBase = start
                 sessionManager.resetSession()
                 trader?.generateSimSession(completion: { [weak self] in
                     guard let self = self else { return }
 
                     self.updateTradesList()
                     print("")
-                    start -= 5.0
+                    start -= 0.5
                 })
             }
         } else {
@@ -292,7 +292,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
                 maxDD = max(maxDD, peak - currentActualPL)
                 currentDayPL += trade.idealProfit
                 
-                if tradingSetting.highRiskEntryInteval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
+                if trade.entryTime.hour() < 10 {
                     morningTrades += trade.idealProfit
                 } else if tradingSetting.lunchInterval(date: trade.entryTime).contains(trade.entryTime.addingTimeInterval(-60)) {
                     lunchTrades += trade.idealProfit
@@ -361,7 +361,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
 //                print(String(format: "%.2f", trade.idealEntryPrice))
 //            }
             print("")
-            print("Tradee exit time:")
+            print("Trade exit time:")
             for trade in sessionManager.trades {
                 print(trade.exitTime.hourMinute())
             }

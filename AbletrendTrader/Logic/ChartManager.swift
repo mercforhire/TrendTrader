@@ -20,7 +20,7 @@ class ChartManager {
     private let fileName2: String = "2m.txt"
     private let fileName3: String = "3m.txt"
     
-    private let delayBeforeFetchingAtNewMinute = 3
+    private let secondsBeforeFetchingAtNewMinute = 2
     
     var accountId: String = "Sim"
     var tradingSetting: TradingSettings
@@ -85,7 +85,7 @@ class ChartManager {
             }
         } else {
             if tradingSetting.simulateTimePassage {
-                findURLsAtTime { [weak self] urls in
+                findURLsAtSimTimeAndIncrement { [weak self] urls in
                     guard let self = self else {
                         return
                     }
@@ -163,7 +163,7 @@ class ChartManager {
         
         if monitoring, live, currentPriceBarTime?.isInSameMinute(date: now) ?? false {
             // call this again X seconds after the next minute
-            nextFetchTime = now.addingTimeInterval(TimeInterval(60 + delayBeforeFetchingAtNewMinute - now.second()))
+            nextFetchTime = now.addingTimeInterval(TimeInterval(60 + secondsBeforeFetchingAtNewMinute - now.second()))
             let statusText: String = "Latest data: \((currentPriceBarTime?.hourMinute() ?? "--")), will fetch again at \(nextFetchTime!.hourMinuteSecond())"
             self.delegate?.chartStatusChanged(statusText: statusText)
             
@@ -342,7 +342,7 @@ class ChartManager {
         }
     }
     
-    private func findURLsAtTime(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
+    private func findURLsAtSimTimeAndIncrement(completion: @escaping (_ urls: (String, String, String)?) -> Void) {
         let queue = DispatchQueue.global()
         queue.async { [weak self] in
             guard let self = self else {
@@ -370,7 +370,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   startSecond: self.secondsBeforeFetchingAtNewMinute,
                                                    interval: .oneMin, completion: { url in
                     oneMinUrl = url
                     urlFetchingTask.leave()
@@ -378,7 +378,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   startSecond: self.secondsBeforeFetchingAtNewMinute,
                                                    interval: .twoMin, completion: { url in
                     twoMinUrl = url
                     urlFetchingTask.leave()
@@ -386,7 +386,7 @@ class ChartManager {
                 
                 urlFetchingTask.enter()
                 self.fetchLatestAvailableUrlDuring(time: self.simTime,
-                                                   startSecond: self.delayBeforeFetchingAtNewMinute,
+                                                   startSecond: self.secondsBeforeFetchingAtNewMinute,
                                                    interval: .threeMin, completion: { url in
                     threeMinUrl = url
                     urlFetchingTask.leave()

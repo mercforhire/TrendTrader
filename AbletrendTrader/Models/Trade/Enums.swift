@@ -409,8 +409,6 @@ enum ConfigError: Error {
     case skipGreenBarsExitError
     case enterOnPullbackError
     case takeProfitBarLengthError
-    case highRiskStartError
-    case highRiskEndError
     case tradingStartError
     case lunchStartError
     case lunchEndError
@@ -419,12 +417,12 @@ enum ConfigError: Error {
     case fomcTimeError
     case positionSizeError
     case maxDailyLossError
-    case maxHighRiskEntryAllowedError
     case numOfLosingTradesError
     case maxDistanceToSRError
     case profitAvoidSameDirectionError
     case bufferError
     case drawdownLimitError
+    case profitToHaltError
     
     func displayMessage() -> String {
         switch self {
@@ -446,10 +444,6 @@ enum ConfigError: Error {
             return "Enter on pullback must be higher than 10"
         case .takeProfitBarLengthError:
             return "Take profit bar length must be higher than 10"
-        case .highRiskStartError:
-            return "High risk start time error"
-        case .highRiskEndError:
-            return "High risk end time error"
         case .tradingStartError:
             return "Trading time start error"
         case .lunchStartError:
@@ -466,8 +460,6 @@ enum ConfigError: Error {
             return "Position size error"
         case .maxDailyLossError:
             return "Max daily loss must be -20 or lower"
-        case .maxHighRiskEntryAllowedError:
-            return "Max high risk entry allowed must be positive number"
         case .maxDistanceToSRError:
             return "Max distance to SR must be over 3"
         case .numOfLosingTradesError:
@@ -478,6 +470,8 @@ enum ConfigError: Error {
             return "Buffer must be over 0"
         case .drawdownLimitError:
             return "Drawdown Limit must be over 500"
+        case .profitToHaltError:
+            return "Profit to halt must be over 20"
         }
     }
     

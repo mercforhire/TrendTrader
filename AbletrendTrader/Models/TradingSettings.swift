@@ -73,8 +73,10 @@ struct TradingSettings: Codable {
     
     var losingTradesToHalt: Int
     
-    var highRiskStart: Date
-    var highRiskEnd: Date
+    var profitToHaltBase: Double
+    var profitToHalt: Double {
+        return profitToHaltBase * riskMultiplier
+    }
     
     var tradingStart: Date
     var tradingEnd: Date
@@ -87,8 +89,6 @@ struct TradingSettings: Codable {
     var flatTime: Date
     
     var fomcTime: Date
-    
-    var maxHighRiskEntryAllowed: Int
     
     var positionSize: Int
     
@@ -129,11 +129,7 @@ struct TradingSettings: Codable {
          
         self.takeProfitBarLengthBase = defaultSettings["take_profit_bar_length"] as! Double
          
-        self.maxHighRiskEntryAllowed = defaultSettings["max_high_risk_entry_allowed"] as! Int
-         
-        self.highRiskStart = (defaultSettings["high_risk_start"] as! Date).stripYearMonthAndDay()
-         
-        self.highRiskEnd = (defaultSettings[ "high_risk_end"] as! Date).stripYearMonthAndDay()
+        self.profitToHaltBase = defaultSettings["profit_to_halt"] as! Double
          
         self.tradingStart = (defaultSettings["trading_start"] as! Date).stripYearMonthAndDay()
          
@@ -252,13 +248,13 @@ struct TradingSettings: Codable {
         throw ConfigError.takeProfitBarLengthError
     }
     
-    mutating func setMaxHighRiskEntryAllowed(newValue: Int) throws {
-        if newValue >= 0 {
-            maxHighRiskEntryAllowed = newValue
+    mutating func setProfitToHalt(newValue: Double) throws {
+        if newValue >= 20 || newValue == 0 {
+            profitToHaltBase = newValue
             return
         }
         
-        throw ConfigError.maxHighRiskEntryAllowedError
+        throw ConfigError.profitToHaltError
     }
     
     mutating func setOppositeLosingTradesToHalt(newValue: Int) throws {
@@ -286,27 +282,6 @@ struct TradingSettings: Codable {
         }
         
         throw ConfigError.numOfLosingTradesError
-    }
-    
-    mutating func setHighRiskStart(newValue: Date) throws {
-        let newValue = newValue.stripYearMonthAndDay()
-        if newValue < clearTime.stripYearMonthAndDay(),
-            newValue < highRiskEnd.stripYearMonthAndDay() {
-            highRiskStart = newValue
-            return
-        }
-        
-        throw ConfigError.highRiskStartError
-    }
-    
-    mutating func setHighRiskEnd(newValue: Date) throws {
-        let newValue = newValue.stripYearMonthAndDay()
-        if newValue > highRiskStart.stripYearMonthAndDay(), newValue < clearTime.stripYearMonthAndDay() {
-            highRiskEnd = newValue
-            return
-        }
-        
-        throw ConfigError.highRiskEndError
     }
     
     mutating func setTradingStart(newValue: Date) throws {
@@ -460,24 +435,6 @@ struct TradingSettings: Codable {
         }
         
         throw ConfigError.drawdownLimitError
-    }
-    
-    func highRiskEntryInteval(date: Date) -> DateInterval {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Date.DefaultTimeZone
-        let components1 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: highRiskStart.hour(),
-                                         minute: highRiskStart.minute())
-        let startDate: Date = calendar.date(from: components1)!
-        let components2 = DateComponents(year: date.year(),
-                                         month: date.month(),
-                                         day: date.day(),
-                                         hour: highRiskEnd.hour(),
-                                         minute: highRiskEnd.minute())
-        let endDate: Date = calendar.date(from: components2)!
-        return DateInterval(start: startDate, end: endDate)
     }
     
     func tradingTimeInterval(date: Date) -> DateInterval {

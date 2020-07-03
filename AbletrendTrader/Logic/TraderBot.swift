@@ -24,27 +24,26 @@ class TraderBot {
             return
         }
         
-        var previousBar: PriceBar?
         for timeKey in self.chart.timeKeys {
             if timeKey == lastBar.identifier {
                 break
             }
             
             guard let currentBar = self.chart.priceBars[timeKey]
+//                , currentBar.time.isInSameDay(date: Date())
 //                , currentBar.time > Date().getPastOrFutureDate(days: 0, months: -1, years: 0)
 //                , currentBar.time.weekDay() != 6
 //                , (currentBar.time.month() == 2 && currentBar.time.day() >= 24) || currentBar.time.month() == 3
             else { continue }
-            
-            if let previousBar = previousBar, previousBar.time.day() != currentBar.time.day() {
-                sessionManager.highRiskEntriesTaken = 0
-            }
             
             // US Holidays
             if currentBar.time.year() == 2019, currentBar.time.month() == 11, currentBar.time.day() == 22 {
                 continue
             }
             else if currentBar.time.year() == 2020, currentBar.time.month() == 5, currentBar.time.day() == 25 {
+                continue
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 7, currentBar.time.day() == 3 {
                 continue
             }
             else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 2 {
@@ -71,8 +70,6 @@ class TraderBot {
             let action = self.decide(priceBar: currentBar)
             self.sessionManager.processAction(priceBarTime: currentBar.time, action: action, completion: { _ in
             })
-            
-            previousBar = currentBar
         }
         
         completion()
@@ -349,6 +346,16 @@ class TraderBot {
                 }
             }
             
+            if let lastTrade = sessionManager.trades.last,
+                tradingSetting.profitToHalt > 0,
+                lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
+                lastTrade.idealProfit >= tradingSetting.profitToHalt {
+
+                sessionManager.delegate?.newLogAdded(log: "Stop trading after big win.")
+
+                return .noAction(entryType: nil, reason: .profitHit)
+            }
+            
             if getDrawdownLimit() > 0, sessionManager.state.modelDrawdown > 0 {
                 let lastTrade = sessionManager.trades.last
                 
@@ -443,11 +450,6 @@ class TraderBot {
         
         if risk <= tradingSetting.maxRisk {
             
-            if tradingSetting.highRiskEntryInteval(date: bar.time).contains(bar.time),
-                sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed {
-                sessionManager.highRiskEntriesTaken += 1
-            }
-            
             return position
         }
 
@@ -468,13 +470,6 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .outsideTradingHours)
         }
         
-        // If we are in TimeIntervalForHighRiskEntry and highRiskEntriesTaken < config.maxHighRiskEntryAllowed, we want to enter on sweetspot.
-        if tradingSetting.highRiskEntryInteval(date: currentBar.time).contains(currentBar.time),
-            sessionManager.highRiskEntriesTaken < tradingSetting.maxHighRiskEntryAllowed,
-            !tradingSetting.byPassTradingTimeRestrictions {
-            return seekToOpenPosition(bar: currentBar, latestBar: latestBar, entryType: .sweetSpot)
-        }
-        
         // time has pass outside the TradingTimeInterval, no more opening new positions, but still allow to close off existing position
         if !tradingSetting.tradingTimeInterval(date: currentBar.time).contains(currentBar.time) && !tradingSetting.byPassTradingTimeRestrictions {
             return .noAction(entryType: nil, reason: .outsideTradingHours)
@@ -487,7 +482,7 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .lunchHour)
         }
         
-        // If we lost multiple times in alternating directions, stop trading
+        // If we lost too many times, stop trading
         if checkChoppyDay(bar: currentBar) {
             return .noAction(entryType: nil, reason: .choppyDay)
         }

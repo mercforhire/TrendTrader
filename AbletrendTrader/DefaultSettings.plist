@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>profit_to_halt</key>
+	<integer>40</integer>
 	<key>buffer</key>
-	<real>1</real>
+	<integer>1</integer>
 	<key>default_ip</key>
 	<string>http://192.168.0.121:80/</string>
 	<key>simulate_time_passage</key>
@@ -18,10 +20,6 @@
 	<date>2020-03-09T13:40:00Z</date>
 	<key>trading_end</key>
 	<date>2020-03-09T19:54:00Z</date>
-	<key>high_risk_start</key>
-	<date>2020-03-09T13:40:00Z</date>
-	<key>high_risk_end</key>
-	<date>2020-03-09T13:59:00Z</date>
 	<key>lunch_start</key>
 	<date>2020-03-09T16:00:00Z</date>
 	<key>lunch_end</key>
@@ -48,19 +46,17 @@
 	<integer>45</integer>
 	<key>enter_on_pullback</key>
 	<integer>50</integer>
-	<key>max_high_risk_entry_allowed</key>
-	<integer>0</integer>
 	<key>max_distance_to_SR</key>
-	<real>11.75</real>
+	<integer>12</integer>
 	<key>profit_avoid_same_direction_base</key>
-	<real>25</real>
+	<integer>20</integer>
 	<key>opposite_losing_trades_to_halt</key>
 	<integer>4</integer>
 	<key>losing_trades_to_halt</key>
-	<integer>5</integer>
+	<integer>0</integer>
 	<key>max_daily_loss</key>
 	<integer>-75</integer>
 	<key>drawdown_limit</key>
-	<integer>2000</integer>
+	<integer>2500</integer>
 </dict>
 </plist>

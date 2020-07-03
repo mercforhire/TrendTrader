@@ -24,7 +24,6 @@ class TraderBot {
             return
         }
         
-        var previousBar: PriceBar?
         for timeKey in self.chart.timeKeys {
             if timeKey == lastBar.identifier {
                 break
@@ -42,6 +41,9 @@ class TraderBot {
                 continue
             }
             else if currentBar.time.year() == 2020, currentBar.time.month() == 5, currentBar.time.day() == 25 {
+                continue
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 7, currentBar.time.day() == 3 {
                 continue
             }
             else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 2 {
@@ -68,8 +70,6 @@ class TraderBot {
             let action = self.decide(priceBar: currentBar)
             self.sessionManager.processAction(priceBarTime: currentBar.time, action: action, completion: { _ in
             })
-            
-            previousBar = currentBar
         }
         
         completion()
@@ -347,6 +347,7 @@ class TraderBot {
             }
             
             if let lastTrade = sessionManager.trades.last,
+                tradingSetting.profitToHalt > 0,
                 lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
                 lastTrade.idealProfit >= tradingSetting.profitToHalt {
 
@@ -481,7 +482,7 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .lunchHour)
         }
         
-        // If we lost multiple times in alternating directions, stop trading
+        // If we lost too many times, stop trading
         if checkChoppyDay(bar: currentBar) {
             return .noAction(entryType: nil, reason: .choppyDay)
         }

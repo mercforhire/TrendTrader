@@ -477,7 +477,7 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .choppyDay)
         }
         
-        if sessionManager.getDailyPAndL(day: currentBar.time) >= tradingSetting.profitToHalt {
+        if tradingSetting.profitToHalt > 0, sessionManager.getDailyPAndL(day: currentBar.time) >= tradingSetting.profitToHalt {
             return .noAction(entryType: nil, reason: .profitHit)
         }
         

@@ -477,10 +477,7 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .choppyDay)
         }
         
-        if let lastTrade = sessionManager.trades.last,
-            tradingSetting.profitToHalt > 0,
-            lastTrade.exitTime.isInSameDay(date: currentBar.time),
-            lastTrade.idealProfit >= tradingSetting.profitToHalt {
+        if sessionManager.getDailyPAndL(day: currentBar.time) >= tradingSetting.profitToHalt {
             return .noAction(entryType: nil, reason: .profitHit)
         }
         

@@ -33,7 +33,7 @@ class TraderBot {
 //                , currentBar.time.isInSameDay(date: Date())
 //                , currentBar.time > Date().getPastOrFutureDate(days: 0, months: -1, years: 0)
 //                , currentBar.time.weekDay() != 6
-//                , (currentBar.time.month() == 2 && currentBar.time.day() >= 24) || currentBar.time.month() == 3
+//                , currentBar.time.month() >= 6
             else { continue }
             
             // US Holidays
@@ -346,16 +346,6 @@ class TraderBot {
                 }
             }
             
-            if let lastTrade = sessionManager.trades.last,
-                tradingSetting.profitToHalt > 0,
-                lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
-                lastTrade.idealProfit >= tradingSetting.profitToHalt {
-
-                sessionManager.delegate?.newLogAdded(log: "Stop trading after big win.")
-
-                return .noAction(entryType: nil, reason: .profitHit)
-            }
-            
             if getDrawdownLimit() > 0, sessionManager.state.modelDrawdown > 0 {
                 let lastTrade = sessionManager.trades.last
                 
@@ -485,6 +475,13 @@ class TraderBot {
         // If we lost too many times, stop trading
         if checkChoppyDay(bar: currentBar) {
             return .noAction(entryType: nil, reason: .choppyDay)
+        }
+        
+        if let lastTrade = sessionManager.trades.last,
+            tradingSetting.profitToHalt > 0,
+            lastTrade.exitTime.isInSameDay(date: currentBar.time),
+            lastTrade.idealProfit >= tradingSetting.profitToHalt {
+            return .noAction(entryType: nil, reason: .profitHit)
         }
         
         if sessionManager.trades.isEmpty {

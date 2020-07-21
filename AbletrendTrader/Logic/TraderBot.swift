@@ -31,9 +31,9 @@ class TraderBot {
             
             guard let currentBar = self.chart.priceBars[timeKey]
 //                , currentBar.time.isInSameDay(date: Date())
-//                , currentBar.time > Date().getPastOrFutureDate(days: 0, months: -1, years: 0)
+//                , currentBar.time > Date().getPastOrFutureDate(days: -1, months: 0, years: 0)
 //                , currentBar.time.weekDay() != 6
-//                , (currentBar.time.month() == 2 && currentBar.time.day() >= 24) || currentBar.time.month() == 3
+//                , currentBar.time.month() >= 6
             else { continue }
             
             // US Holidays
@@ -131,7 +131,7 @@ class TraderBot {
                 }
             }
             
-            // exit trade during FOMC hour
+            // Exit trade during FOMC hour(30 min before FOMC meeting)
             if tradingSetting.fomcInterval(date: priceBar.time).contains(priceBar.time) &&
                 tradingSetting.fomcDay &&
                 !tradingSetting.byPassTradingTimeRestrictions {
@@ -172,7 +172,7 @@ class TraderBot {
                 }
             }
             
-            // Exit when the bar is over 'config.takeProfitBarLength' points long
+            // Exit when the bar is over TakeProfitBarLength points long
             if currentPosition.calulateProfit(currentPrice: priceBar.candleStick.close) >= tradingSetting.takeProfitBarLength {
                 switch currentPosition.direction {
                 case .long:
@@ -346,16 +346,6 @@ class TraderBot {
                 }
             }
             
-            if let lastTrade = sessionManager.trades.last,
-                tradingSetting.profitToHalt > 0,
-                lastTrade.exitTime.isInSameDay(date: newPosition.entryTime),
-                lastTrade.idealProfit >= tradingSetting.profitToHalt {
-
-                sessionManager.delegate?.newLogAdded(log: "Stop trading after big win.")
-
-                return .noAction(entryType: nil, reason: .profitHit)
-            }
-            
             if getDrawdownLimit() > 0, sessionManager.state.modelDrawdown > 0 {
                 let lastTrade = sessionManager.trades.last
                 
@@ -383,7 +373,11 @@ class TraderBot {
     }
     
     // return a Position object if the given bar presents a entry signal
-    private func checkForEntrySignal(direction: TradeDirection, bar: PriceBar, latestBar: PriceBar, entryType: EntryType = .pullBack) -> Position? {
+    private func checkForEntrySignal(direction: TradeDirection,
+                                     bar: PriceBar,
+                                     latestBar: PriceBar,
+                                     entryType: EntryType) -> Position? {
+        
         let color: SignalColor = direction == .long ? .blue : .red
         
         guard bar.barColor == color,
@@ -485,6 +479,10 @@ class TraderBot {
         // If we lost too many times, stop trading
         if checkChoppyDay(bar: currentBar) {
             return .noAction(entryType: nil, reason: .choppyDay)
+        }
+        
+        if tradingSetting.profitToHalt > 0, sessionManager.getDailyPAndL(day: currentBar.time) >= tradingSetting.profitToHalt {
+            return .noAction(entryType: nil, reason: .profitHit)
         }
         
         if sessionManager.trades.isEmpty {

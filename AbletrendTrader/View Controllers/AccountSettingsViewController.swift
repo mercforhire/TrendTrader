@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
+class AccountSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowDelegate {
     let config = ConfigurationManager.shared
     
     @IBOutlet weak var server1MinField: NSTextField!
@@ -363,7 +363,7 @@ class NTSettingsViewController: NSViewController, NSTextFieldDelegate, NSWindowD
     }
 }
 
-extension NTSettingsViewController: NSControlTextEditingDelegate {
+extension AccountSettingsViewController: NSControlTextEditingDelegate {
     func controlTextDidEndEditing(_ notification: Notification) {
         if let textField = notification.object as? NSTextField {
             if textField == server1MinField {

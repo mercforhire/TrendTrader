@@ -46,7 +46,7 @@ class TraderBot {
             else if currentBar.time.year() == 2020, currentBar.time.month() == 7, currentBar.time.day() == 3 {
                 continue
             }
-            else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 2 {
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 7 {
                 continue
             }
             

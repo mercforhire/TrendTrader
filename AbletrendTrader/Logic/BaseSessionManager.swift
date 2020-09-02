@@ -123,7 +123,7 @@ class BaseSessionManager {
         var pAndL: Double = 0
         
         for trade in trades where trade.entryTime.isInSameDay(date: day) && trade.executed == true {
-            pAndL = pAndL + trade.actualProfit
+            pAndL = pAndL + trade.idealProfit
         }
         
         return pAndL

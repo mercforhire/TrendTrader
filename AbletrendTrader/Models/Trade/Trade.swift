@@ -42,6 +42,15 @@ struct Trade: Codable {
         }
     }
     
+    var idealProfitDollar: Double {
+        switch direction {
+        case .long:
+            return (idealExitPrice - idealEntryPrice) * pointValue * Double(size) - commission
+        default:
+            return (idealEntryPrice - idealExitPrice) * pointValue * Double(size) - commission
+        }
+    }
+    
     var actualProfitDollar: Double {
         switch direction {
         case .long:

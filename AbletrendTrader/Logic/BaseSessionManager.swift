@@ -109,31 +109,31 @@ class BaseSessionManager {
         // Override
     }
     
-    func getTotalPAndL() -> Double {
+    func getTotalPAndL(actualProfit: Bool = true) -> Double {
         var pAndL: Double = 0
         
         for trade in trades where trade.executed == true {
-            pAndL = pAndL + trade.actualProfit
+            pAndL = pAndL + (actualProfit ? trade.actualProfit : trade.idealProfit)
         }
         
         return pAndL
     }
     
-    func getDailyPAndL(day: Date) -> Double {
+    func getDailyPAndL(day: Date, actualProfit: Bool = true) -> Double {
         var pAndL: Double = 0
         
         for trade in trades where trade.entryTime.isInSameDay(date: day) && trade.executed == true {
-            pAndL = pAndL + trade.idealProfit
+            pAndL = pAndL + (actualProfit ? trade.actualProfit : trade.idealProfit)
         }
         
         return pAndL
     }
     
-    func getTotalPAndLDollar() -> Double {
+    func getTotalPAndLDollar(actualProfit: Bool = true) -> Double {
         var pAndLDollar: Double = 0
         
         for trade in trades where trade.executed == true  {
-            pAndLDollar = pAndLDollar + trade.actualProfitDollar
+            pAndLDollar = pAndLDollar + (actualProfit ? trade.actualProfitDollar : trade.idealProfitDollar)
         }
         
         return pAndLDollar

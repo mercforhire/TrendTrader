@@ -455,7 +455,7 @@ class TraderBot {
     
     private func handleOpeningNewTrade(currentBar: PriceBar, latestBar: PriceBar) -> TradeActionType {
         // stop trading if P&L <= MaxDailyLoss
-        if sessionManager.getDailyPAndL(day: currentBar.time) <= tradingSetting.maxDailyLoss {
+        if sessionManager.getDailyPAndL(day: currentBar.time, actualProfit: false) <= tradingSetting.maxDailyLoss {
             return .noAction(entryType: nil, reason: .exceedLoss)
         }
         
@@ -484,7 +484,7 @@ class TraderBot {
             return .noAction(entryType: nil, reason: .choppyDay)
         }
         
-        if tradingSetting.profitToHalt > 0, sessionManager.getDailyPAndL(day: currentBar.time) >= tradingSetting.profitToHalt {
+        if tradingSetting.profitToHalt > 0, sessionManager.getDailyPAndL(day: currentBar.time, actualProfit: false) >= tradingSetting.profitToHalt {
             return .noAction(entryType: nil, reason: .profitHit)
         }
         

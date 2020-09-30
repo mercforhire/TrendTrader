@@ -222,7 +222,7 @@ struct TradingSettings: Codable {
     }
     
     mutating func setSkipGreenBarsExit(newValue: Double) throws {
-        if newValue > greenExitBase {
+        if newValue > greenExitBase || newValue == 0 {
             skipGreenExitBase = newValue
             return
         }

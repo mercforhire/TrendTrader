@@ -66,6 +66,9 @@ class TraderBot {
             else if currentBar.time.year() == 2020, currentBar.time.month() == 7, currentBar.time.day() == 29 {
                 tradingSetting.fomcDay = true
             }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 16 {
+                tradingSetting.fomcDay = true
+            }
             else {
                 tradingSetting.fomcDay = false
             }
@@ -209,7 +212,8 @@ class TraderBot {
                     securedProfit = currentPosition.idealEntryPrice - stopLossFromGreenBars
                 }
                 
-                if securedProfit < tradingSetting.skipGreenExit, securedProfit >= tradingSetting.greenExit {
+                if tradingSetting.skipGreenExit == 0 || securedProfit < tradingSetting.skipGreenExit,
+                    securedProfit >= tradingSetting.greenExit {
                     switch sessionManager.pos?.direction {
                     case .long:
                         if stopLossFromGreenBars > currentStop {

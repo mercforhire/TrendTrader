@@ -33,7 +33,7 @@ class TraderBot {
 //                , currentBar.time.isInSameDay(date: Date())
 //                , currentBar.time > Date().getPastOrFutureDate(days: -1, months: 0, years: 0)
 //                , currentBar.time.weekDay() != 6
-//                , currentBar.time.month() >= 6
+//                , currentBar.time.month() == 10 && currentBar.time.day() >= 26
             else { continue }
             
             // US Holidays
@@ -67,6 +67,9 @@ class TraderBot {
                 tradingSetting.fomcDay = true
             }
             else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 16 {
+                tradingSetting.fomcDay = true
+            }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 11, currentBar.time.day() == 4 {
                 tradingSetting.fomcDay = true
             }
             else {

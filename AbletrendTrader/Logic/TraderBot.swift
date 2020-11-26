@@ -49,6 +49,9 @@ class TraderBot {
             else if currentBar.time.year() == 2020, currentBar.time.month() == 9, currentBar.time.day() == 7 {
                 continue
             }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 11, currentBar.time.day() == 26 {
+                continue
+            }
             
             // FOMC days
             if currentBar.time.year() == 2019, currentBar.time.month() == 12, currentBar.time.day() == 11 {

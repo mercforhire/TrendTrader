@@ -218,8 +218,8 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
         sessionManager.printLog = !testing
         
         if testing {
-            var start = 14.0
-            while start >= 11.0 {
+            var start = 11.5
+            while start <= 12.5 {
                 print("Testing maxDistanceToSRBase: \(start)...")
                 trader?.tradingSetting.maxDistanceToSRBase = start
                 sessionManager.resetSession()
@@ -228,7 +228,7 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
 
                     self.updateTradesList()
                     print("")
-                    start -= 0.5
+                    start += 1.0
                 })
             }
         } else {
@@ -350,21 +350,21 @@ class SimTradingViewController: NSViewController, NSTextFieldDelegate, NSWindowD
             for trade in sessionManager.trades {
                 print(trade.direction.description())
             }
-            print("")
-            print("Trade entry time:")
-            for trade in sessionManager.trades {
-                print(trade.entryTime.hourMinute())
-            }
+//            print("")
+//            print("Trade entry time:")
+//            for trade in sessionManager.trades {
+//                print(trade.entryTime.hourMinute())
+//            }
 //            print("")
 //            print("Trade entry price:")
 //            for trade in sessionManager.trades {
 //                print(String(format: "%.2f", trade.idealEntryPrice))
 //            }
-            print("")
-            print("Trade exit time:")
-            for trade in sessionManager.trades {
-                print(trade.exitTime.hourMinute())
-            }
+//            print("")
+//            print("Trade exit time:")
+//            for trade in sessionManager.trades {
+//                print(trade.exitTime.hourMinute())
+//            }
 //            print("")
 //            print("Trade exit price:")
 //            for trade in sessionManager.trades {

@@ -830,6 +830,6 @@ class TraderBot {
     }
     
     private func getDrawdownLimit() -> Double {
-        return tradingSetting.drawdownLimit * (sessionManager.pointsValue / 20.0)
+        return tradingSetting.drawdownLimit
     }
 }

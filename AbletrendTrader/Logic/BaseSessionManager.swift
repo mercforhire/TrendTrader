@@ -17,8 +17,8 @@ class BaseSessionManager {
     let config = ConfigurationManager.shared
     
     var printLog: Bool = true
-    var pointsValue: Double = 20.0
-    var commission: Double = 2.2
+    var pointsValue: Double = 2.0
+    var commission: Double = 0.47
     var liveUpdateFrequency: TimeInterval { 10 }
     var pos: Position?
     var status: PositionStatus? {

@@ -55,6 +55,12 @@ class TraderBot {
             else if currentBar.time.year() == 2020, currentBar.time.month() == 11, currentBar.time.day() == 27 {
                 continue
             }
+            else if currentBar.time.year() == 2020, currentBar.time.month() == 12, currentBar.time.day() == 24 {
+                continue
+            }
+            else if currentBar.time.year() == 2021, currentBar.time.month() == 1, currentBar.time.day() == 18 {
+                continue
+            }
             
             // FOMC days
             if currentBar.time.year() == 2019, currentBar.time.month() == 12, currentBar.time.day() == 11 {
@@ -76,6 +82,9 @@ class TraderBot {
                 tradingSetting.fomcDay = true
             }
             else if currentBar.time.year() == 2020, currentBar.time.month() == 11, currentBar.time.day() == 4 {
+                tradingSetting.fomcDay = true
+            }
+            else if currentBar.time.year() == 2021, currentBar.time.month() == 1, currentBar.time.day() == 27 {
                 tradingSetting.fomcDay = true
             }
             else {
